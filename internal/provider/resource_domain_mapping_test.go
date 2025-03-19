@@ -1,7 +1,9 @@
 package provider
 
 import (
+	"crypto/tls"
 	"fmt"
+	"net/http"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -13,6 +15,11 @@ func TestResourceDomainMapping(t *testing.T) {
 
 	t.Run("happy path", func(t *testing.T) {
 		rec, user := setupVCR(t, "fixtures/resource_domain_mapping")
+		rec.SetRealTransport(&http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		})
 		defer stopQuietly(rec)
 
 		resource.Test(t, resource.TestCase{
@@ -20,9 +27,9 @@ func TestResourceDomainMapping(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(rec.GetDefaultClient()),
 			Steps: []resource.TestStep{
 				{
-					Config: providerConfig("", user) + ResourceDomainMapping("test", "cf.us10.hana.ondemand.com", "7e8b3cba-d0af-4989-9407-bcad93929ae7", "testtfvirtualdomain", "testtfinternaldomain"),
+					Config: providerConfig("", user) + ResourceDomainMapping("test", "cf.eu12.hana.ondemand.com", "d3bbbcd7-d5e0-483b-a524-6dee7205f8e8", "testtfvirtualdomain", "testtfinternaldomain"),
 					Check: resource.ComposeAggregateTestCheckFunc(
-						resource.TestCheckResourceAttr("cloudconnector_domain_mapping.test", "credentials.region_host", "cf.us10.hana.ondemand.com"),
+						resource.TestCheckResourceAttr("cloudconnector_domain_mapping.test", "credentials.region_host", "cf.eu12.hana.ondemand.com"),
 						resource.TestMatchResourceAttr("cloudconnector_domain_mapping.test", "credentials.subaccount", regexpValidUUID),
 						resource.TestCheckResourceAttr("cloudconnector_domain_mapping.test", "domain_mapping.virtual_domain", "testtfvirtualdomain"),
 						resource.TestCheckResourceAttr("cloudconnector_domain_mapping.test", "domain_mapping.internal_domain", "testtfinternaldomain"),

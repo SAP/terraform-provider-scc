@@ -1,7 +1,9 @@
 package provider
 
 import (
+	"crypto/tls"
 	"fmt"
+	"net/http"
 	"regexp"
 	"testing"
 
@@ -14,6 +16,11 @@ func TestDataSourceSubaccount(t *testing.T) {
 
 	t.Run("happy path", func(t *testing.T) {
 		rec, user := setupVCR(t, "fixtures/datasource_subaccount")
+		rec.SetRealTransport(&http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		})
 		defer stopQuietly(rec)
 
 		resource.Test(t, resource.TestCase{
@@ -21,13 +28,13 @@ func TestDataSourceSubaccount(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(rec.GetDefaultClient()),
 			Steps: []resource.TestStep{
 				{
-					Config: providerConfig("", user) + DataSourceSubaccount("test", "cf.us10.hana.ondemand.com", "7e8b3cba-d0af-4989-9407-bcad93929ae7"),
+					Config: providerConfig("", user) + DataSourceSubaccount("test", "cf.eu12.hana.ondemand.com", "0bcb0012-a982-42f9-bda4-0a5cb15f88c8"),
 					Check: resource.ComposeAggregateTestCheckFunc(
-						resource.TestCheckResourceAttr("data.cloudconnector_subaccount.test", "region_host", "cf.us10.hana.ondemand.com"),
+						resource.TestCheckResourceAttr("data.cloudconnector_subaccount.test", "region_host", "cf.eu12.hana.ondemand.com"),
 						resource.TestMatchResourceAttr("data.cloudconnector_subaccount.test", "subaccount", regexpValidUUID),
-						resource.TestCheckResourceAttr("data.cloudconnector_subaccount.test", "display_name", "7e8b3cba-d0af-4989-9407-bcad93929ae7"),
-						resource.TestCheckResourceAttr("data.cloudconnector_subaccount.test", "description", "Subaccount for Data Source..DO NOT DELETE!!!"),
-						resource.TestCheckResourceAttr("data.cloudconnector_subaccount.test", "tunnel.user", "sarthak.goyal01@sap.com"),
+						resource.TestCheckResourceAttr("data.cloudconnector_subaccount.test", "display_name", "Terraform Subaccount Datasource"),
+						resource.TestCheckResourceAttr("data.cloudconnector_subaccount.test", "description", "This subaccount has all the configurations for data source."),
+						resource.TestCheckResourceAttr("data.cloudconnector_subaccount.test", "tunnel.user", "DL_65DDA8EBA97EAA0134EEB5DC@global.corp.sap"),
 						resource.TestCheckResourceAttr("data.cloudconnector_subaccount.test", "tunnel.state", "Connected"),
 						resource.TestMatchResourceAttr("data.cloudconnector_subaccount.test", "tunnel.connected_since_time_stamp", regexValidTimeStamp),
 						resource.TestCheckResourceAttr("data.cloudconnector_subaccount.test", "tunnel.connections", "0"),

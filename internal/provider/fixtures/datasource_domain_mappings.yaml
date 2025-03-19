@@ -1,3 +1,150 @@
 ---
 version: 2
-interactions: []
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: 10.52.109.11:8443
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/json
+        url: https://10.52.109.11:8443/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/0bcb0012-a982-42f9-bda4-0a5cb15f88c8/domainMappings
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 289
+        uncompressed: false
+        body: '[{"virtualDomain":"testterraformvirtualdomain","internalDomain":"testterraforminternaldomain","_links":"redacted"}}]'
+        headers:
+            Cache-Control:
+                - no-store
+            Content-Length:
+                - "289"
+            Content-Type:
+                - application/json
+            Date:
+                - Wed, 19 Mar 2025 06:25:46 GMT
+            Server:
+                - Cloud Connector
+            Set-Cookie:
+                - redacted
+            X-Csrf-Token:
+                - redacted
+        status: '200 '
+        code: 200
+        duration: 18.437333ms
+    - id: 1
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: 10.52.109.11:8443
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/json
+        url: https://10.52.109.11:8443/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/0bcb0012-a982-42f9-bda4-0a5cb15f88c8/domainMappings
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 289
+        uncompressed: false
+        body: '[{"virtualDomain":"testterraformvirtualdomain","internalDomain":"testterraforminternaldomain","_links":"redacted"}}]'
+        headers:
+            Cache-Control:
+                - no-store
+            Content-Length:
+                - "289"
+            Content-Type:
+                - application/json
+            Date:
+                - Wed, 19 Mar 2025 06:25:46 GMT
+            Server:
+                - Cloud Connector
+            Set-Cookie:
+                - redacted
+            X-Csrf-Token:
+                - redacted
+        status: '200 '
+        code: 200
+        duration: 1.301833ms
+    - id: 2
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: 10.52.109.11:8443
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/json
+        url: https://10.52.109.11:8443/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/0bcb0012-a982-42f9-bda4-0a5cb15f88c8/domainMappings
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 289
+        uncompressed: false
+        body: '[{"virtualDomain":"testterraformvirtualdomain","internalDomain":"testterraforminternaldomain","_links":"redacted"}}]'
+        headers:
+            Cache-Control:
+                - no-store
+            Content-Length:
+                - "289"
+            Content-Type:
+                - application/json
+            Date:
+                - Wed, 19 Mar 2025 06:25:46 GMT
+            Server:
+                - Cloud Connector
+            Set-Cookie:
+                - redacted
+            X-Csrf-Token:
+                - redacted
+        status: '200 '
+        code: 200
+        duration: 1.04775ms

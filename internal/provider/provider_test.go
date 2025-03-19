@@ -2,6 +2,8 @@ package provider
 
 import (
 	"context"
+	"strings"
+
 	// "crypto/tls"
 	"fmt"
 	"io"
@@ -9,7 +11,8 @@ import (
 	"os"
 	"regexp"
 	"strconv"
-	"strings"
+
+	// "strings"
 	"testing"
 
 	"github.com/SAP/terraform-provider-cloudconnector/validation/uuidvalidator"
@@ -50,9 +53,6 @@ func providerConfig(_ string, testUser User) string {
 }
 
 func getTestProviders(httpClient *http.Client) map[string]func() (tfprotov6.ProviderServer, error) {
-	// httpClient.Transport = &http.Transport{
-	// 	TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	// }
 	cloudconnectorProvider := NewWithClient(httpClient).(*cloudConnectorProvider)
 
 	return map[string]func() (tfprotov6.ProviderServer, error){
@@ -92,30 +92,35 @@ func setupVCR(t *testing.T, cassetteName string) (*recorder.Recorder, User) {
 	}
 
 	rec.SetMatcher(requestMatcher(t))
-	rec.AddHook(redactAuthorizationToken(), recorder.BeforeSaveHook)
+	rec.AddHook(hookRedactSensitiveHeaders(), recorder.BeforeSaveHook)
+	rec.AddHook(hookRedactBodyLinks(), recorder.BeforeSaveHook)
+	rec.AddHook(hookRedactSensitiveBody(), recorder.BeforeSaveHook)
 
 	return rec, user
 }
 
 func requestMatcher(t *testing.T) cassette.MatcherFunc {
 	return func(r *http.Request, i cassette.Request) bool {
-		t.Logf("Request: %s %s", r.Method, r.URL.String())
-		bytes, err := io.ReadAll(r.Body)
-		if err != nil {
-			t.Logf("Error reading request body: %v", err)
+		if r.Method != i.Method || r.URL.String() != i.URL {
 			return false
 		}
-		t.Logf("Request Body: %s", string(bytes))
-		return r.Method == i.Method && r.URL.String() == i.URL
+
+		bytes, err := io.ReadAll(r.Body)
+		if err != nil {
+			t.Fatal("Unable to read body from request")
+		}
+		requestBody := string(bytes)
+		return requestBody == i.Body
 	}
 }
 
-func redactAuthorizationToken() recorder.HookFunc {
+func hookRedactSensitiveHeaders() func(i *cassette.Interaction) error {
 	return func(i *cassette.Interaction) error {
-
 		redact := func(headers map[string][]string) {
 			for key := range headers {
-				if strings.Contains(strings.ToLower(key), "authorization") {
+				if strings.Contains(strings.ToLower(key), "x-csrf-token") ||
+					strings.Contains(strings.ToLower(key), "set-cookie") ||
+					strings.Contains(strings.ToLower(key), "authorization") {
 					headers[key] = []string{"redacted"}
 				}
 			}
@@ -123,6 +128,83 @@ func redactAuthorizationToken() recorder.HookFunc {
 
 		redact(i.Request.Headers)
 		redact(i.Response.Headers)
+
+		return nil
+	}
+}
+
+func hookRedactSensitiveBody() func(i *cassette.Interaction) error {
+	return func(i *cassette.Interaction) error {
+		if strings.Contains(i.Request.Body, "cloudPassword") {
+			reBindingSecret := regexp.MustCompile(`cloudPassword":"(.*?)"`)
+			i.Request.Body = reBindingSecret.ReplaceAllString(i.Request.Body, `cloudPassword":"redacted"`)
+		}
+
+		if strings.Contains(i.Request.Body, "cloudUser") {
+			reBindingSecret := regexp.MustCompile(`cloudUser":"(.*?)"`)
+			i.Request.Body = reBindingSecret.ReplaceAllString(i.Request.Body, `cloudUser":"redacted"`)
+		}
+
+		if strings.Contains(i.Response.Body, "subaccountCertificate") {
+			reBindingSecret := regexp.MustCompile(`subaccountCertificate":{"(.*?)"}`)
+			i.Response.Body = reBindingSecret.ReplaceAllString(i.Response.Body, `subaccountCertificate":"redacted"`)
+		}
+
+		if strings.Contains(i.Response.Body, "user") {
+			reBindingSecret := regexp.MustCompile(`user":"(.*?)"`)
+			i.Response.Body = reBindingSecret.ReplaceAllString(i.Response.Body, `user":"redacted"`)
+		}
+
+		return nil
+	}
+}
+
+func hookRedactBodyLinks() func(i *cassette.Interaction) error {
+	return func(i *cassette.Interaction) error {
+		if strings.Contains(i.Response.Body, "_links") {
+			reBindingSecret := regexp.MustCompile(`_links":{"(.*?)"}`)
+			i.Response.Body = reBindingSecret.ReplaceAllString(i.Response.Body, `_links":"redacted"`)
+		}
+
+		if strings.Contains(i.Response.Body, "Kyma-channels") {
+			reBindingSecret := regexp.MustCompile(`Kyma-channels":{"(.*?)"}`)
+			i.Response.Body = reBindingSecret.ReplaceAllString(i.Response.Body, `Kyma-channels":"redacted"`)
+		}
+
+		if strings.Contains(i.Response.Body, "HANA-channels") {
+			reBindingSecret := regexp.MustCompile(`HANA-channels":{"(.*?)"}`)
+			i.Response.Body = reBindingSecret.ReplaceAllString(i.Response.Body, `HANA-channels":"redacted"`)
+		}
+
+		if strings.Contains(i.Response.Body, "systemMappings") {
+			reBindingSecret := regexp.MustCompile(`systemMappings":{"(.*?)"}`)
+			i.Response.Body = reBindingSecret.ReplaceAllString(i.Response.Body, `systemMappings":"redacted"`)
+		}
+
+		if strings.Contains(i.Response.Body, "VirtualMachine-channels") {
+			reBindingSecret := regexp.MustCompile(`VirtualMachine-channels":{"(.*?)"}`)
+			i.Response.Body = reBindingSecret.ReplaceAllString(i.Response.Body, `VirtualMachine-channels":"redacted"`)
+		}
+
+		if strings.Contains(i.Response.Body, "domainMappings") {
+			reBindingSecret := regexp.MustCompile(`domainMappings":{"(.*?)"}`)
+			i.Response.Body = reBindingSecret.ReplaceAllString(i.Response.Body, `domainMappings":"redacted"`)
+		}
+
+		if strings.Contains(i.Response.Body, "self") {
+			reBindingSecret := regexp.MustCompile(`self":{"(.*?)"}`)
+			i.Response.Body = reBindingSecret.ReplaceAllString(i.Response.Body, `self":"redacted"`)
+		}
+
+		if strings.Contains(i.Response.Body, "state") {
+			reBindingSecret := regexp.MustCompile(`state":{"(.*?)"}`)
+			i.Response.Body = reBindingSecret.ReplaceAllString(i.Response.Body, `state":"redacted"`)
+		}
+
+		if strings.Contains(i.Response.Body, "validity") {
+			reBindingSecret := regexp.MustCompile(`validity":{"(.*?)"}`)
+			i.Response.Body = reBindingSecret.ReplaceAllString(i.Response.Body, `validity":"redacted"`)
+		}
 
 		return nil
 	}

@@ -1,7 +1,9 @@
 package provider
 
 import (
+	"crypto/tls"
 	"fmt"
+	"net/http"
 	"regexp"
 	"testing"
 
@@ -14,6 +16,11 @@ func TestResourceSubaccount(t *testing.T) {
 
 	t.Run("happy path", func(t *testing.T) {
 		rec, user := setupVCR(t, "fixtures/resource_subaccount")
+		rec.SetRealTransport(&http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		})
 		defer stopQuietly(rec)
 
 		resource.Test(t, resource.TestCase{
@@ -21,19 +28,19 @@ func TestResourceSubaccount(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(rec.GetDefaultClient()),
 			Steps: []resource.TestStep{
 				{
-					Config: providerConfig("", user) + ResourceSubaccount("test", "cf.us10.hana.ondemand.com", "6d4250ed-bd75-4a54-a329-46221823c74b", "sarthak.goyal01@sap.com", "9896Sg@20196829", "subaccount added via terraform"),
+					Config: providerConfig("", user) + ResourceSubaccount("test", "cf.eu12.hana.ondemand.com", "7480ee65-e039-41cf-ba72-6aaf56c312df", "DL_65DDA8EBA97EAA0134EEB5DC@global.corp.sap", "Terraform@1234", "subaccount added via terraform tests"),
 					Check: resource.ComposeAggregateTestCheckFunc(
-						resource.TestCheckResourceAttr("cloudconnector_subaccount.test", "region_host", "cf.us10.hana.ondemand.com"),
+						resource.TestCheckResourceAttr("cloudconnector_subaccount.test", "region_host", "cf.eu12.hana.ondemand.com"),
 						resource.TestMatchResourceAttr("cloudconnector_subaccount.test", "subaccount", regexpValidUUID),
-						resource.TestCheckResourceAttr("cloudconnector_subaccount.test", "cloud_user", "sarthak.goyal01@sap.com"),
-						resource.TestCheckResourceAttr("cloudconnector_subaccount.test", "cloud_password", "9896Sg@20196829"),
-						resource.TestCheckResourceAttr("cloudconnector_subaccount.test", "description", "subaccount added via terraform"),
+						resource.TestCheckResourceAttr("cloudconnector_subaccount.test", "cloud_user", "DL_65DDA8EBA97EAA0134EEB5DC@global.corp.sap"),
+						resource.TestCheckResourceAttr("cloudconnector_subaccount.test", "cloud_password", "Terraform@1234"),
+						resource.TestCheckResourceAttr("cloudconnector_subaccount.test", "description", "subaccount added via terraform tests"),
 						resource.TestCheckResourceAttr("cloudconnector_subaccount.test", "location_id", ""),
 
 						resource.TestMatchResourceAttr("cloudconnector_subaccount.test", "tunnel.connected_since_time_stamp", regexValidTimeStamp),
 						resource.TestCheckResourceAttr("cloudconnector_subaccount.test", "tunnel.connections", "0"),
 						resource.TestCheckResourceAttr("cloudconnector_subaccount.test", "tunnel.state", "Connected"),
-						resource.TestCheckResourceAttr("cloudconnector_subaccount.test", "tunnel.user", "sarthak.goyal01@sap.com"),
+						resource.TestCheckResourceAttr("cloudconnector_subaccount.test", "tunnel.user", "DL_65DDA8EBA97EAA0134EEB5DC@global.corp.sap"),
 
 						resource.TestMatchResourceAttr("cloudconnector_subaccount.test", "tunnel.subaccount_certificate.issuer", regexp.MustCompile(`CN=.*?,OU=S.*?,O=.*?,L=.*?,C=.*?`)),
 						resource.TestMatchResourceAttr("cloudconnector_subaccount.test", "tunnel.subaccount_certificate.not_after_time_stamp", regexValidTimeStamp),

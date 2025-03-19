@@ -1,3 +1,153 @@
 ---
 version: 2
-interactions: []
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: 10.52.109.11:8443
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/json
+        url: https://10.52.109.11:8443/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/0bcb0012-a982-42f9-bda4-0a5cb15f88c8
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding:
+            - chunked
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"description":"This subaccount has all the configurations for data source.","displayName":"Terraform Subaccount Datasource","tunnel":{"state":"Connected","connectedSinceTimeStamp":1742359485328,"connections":0,"applicationConnections":[],"serviceChannels":[],"subaccountCertificate":"redacted","user":"redacted"},"_links":"redacted","Kyma-channels":"redacted","HANA-channels":"redacted","systemMappings":"redacted","self":"redacted","validity":"redacted","state":"redacted","VirtualMachine-channels":"redacted","domainMappings":"redacted"},"regionHost":"cf.eu12.hana.ondemand.com","subaccount":"0bcb0012-a982-42f9-bda4-0a5cb15f88c8","locationID":""}'
+        headers:
+            Cache-Control:
+                - no-store
+            Content-Type:
+                - application/json
+            Date:
+                - Wed, 19 Mar 2025 06:25:46 GMT
+            Server:
+                - Cloud Connector
+            Set-Cookie:
+                - redacted
+            Vary:
+                - accept-encoding
+            X-Csrf-Token:
+                - redacted
+        status: '200 '
+        code: 200
+        duration: 20.937791ms
+    - id: 1
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: 10.52.109.11:8443
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/json
+        url: https://10.52.109.11:8443/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/0bcb0012-a982-42f9-bda4-0a5cb15f88c8
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding:
+            - chunked
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"description":"This subaccount has all the configurations for data source.","displayName":"Terraform Subaccount Datasource","tunnel":{"state":"Connected","connectedSinceTimeStamp":1742359485328,"connections":0,"applicationConnections":[],"serviceChannels":[],"subaccountCertificate":"redacted","user":"redacted"},"_links":"redacted","Kyma-channels":"redacted","HANA-channels":"redacted","systemMappings":"redacted","self":"redacted","validity":"redacted","state":"redacted","VirtualMachine-channels":"redacted","domainMappings":"redacted"},"regionHost":"cf.eu12.hana.ondemand.com","subaccount":"0bcb0012-a982-42f9-bda4-0a5cb15f88c8","locationID":""}'
+        headers:
+            Cache-Control:
+                - no-store
+            Content-Type:
+                - application/json
+            Date:
+                - Wed, 19 Mar 2025 06:25:46 GMT
+            Server:
+                - Cloud Connector
+            Set-Cookie:
+                - redacted
+            Vary:
+                - accept-encoding
+            X-Csrf-Token:
+                - redacted
+        status: '200 '
+        code: 200
+        duration: 5.842083ms
+    - id: 2
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: 10.52.109.11:8443
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/json
+        url: https://10.52.109.11:8443/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/0bcb0012-a982-42f9-bda4-0a5cb15f88c8
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding:
+            - chunked
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"description":"This subaccount has all the configurations for data source.","displayName":"Terraform Subaccount Datasource","tunnel":{"state":"Connected","connectedSinceTimeStamp":1742359485328,"connections":0,"applicationConnections":[],"serviceChannels":[],"subaccountCertificate":"redacted","user":"redacted"},"_links":"redacted","Kyma-channels":"redacted","HANA-channels":"redacted","systemMappings":"redacted","self":"redacted","validity":"redacted","state":"redacted","VirtualMachine-channels":"redacted","domainMappings":"redacted"},"regionHost":"cf.eu12.hana.ondemand.com","subaccount":"0bcb0012-a982-42f9-bda4-0a5cb15f88c8","locationID":""}'
+        headers:
+            Cache-Control:
+                - no-store
+            Content-Type:
+                - application/json
+            Date:
+                - Wed, 19 Mar 2025 06:25:46 GMT
+            Server:
+                - Cloud Connector
+            Set-Cookie:
+                - redacted
+            Vary:
+                - accept-encoding
+            X-Csrf-Token:
+                - redacted
+        status: '200 '
+        code: 200
+        duration: 5.047084ms

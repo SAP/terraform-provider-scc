@@ -1,7 +1,9 @@
 package provider
 
 import (
+	"crypto/tls"
 	"fmt"
+	"net/http"
 	"regexp"
 	"testing"
 
@@ -14,6 +16,11 @@ func TestResourceSubaccountServiceChannelK8S(t *testing.T) {
 
 	t.Run("happy path", func(t *testing.T) {
 		rec, user := setupVCR(t, "fixtures/resource_subaccount_service_channel_k8s")
+		rec.SetRealTransport(&http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		})
 		defer stopQuietly(rec)
 
 		resource.Test(t, resource.TestCase{
@@ -21,9 +28,9 @@ func TestResourceSubaccountServiceChannelK8S(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(rec.GetDefaultClient()),
 			Steps: []resource.TestStep{
 				{
-					Config: providerConfig("", user) + ResourceSubaccountServiceChannelK8S("test", "cf.us10.hana.ondemand.com", "7e8b3cba-d0af-4989-9407-bcad93929ae7", "cp.c-15e4ac4.kyma.ondemand.com:443", "676969a3-096e-4ab1-adde-c9400fccc7ab", 9999, 1),
+					Config: providerConfig("", user) + ResourceSubaccountServiceChannelK8S("test", "cf.eu12.hana.ondemand.com", "d3bbbcd7-d5e0-483b-a524-6dee7205f8e8", "cp.c-15e4ac4.kyma.ondemand.com:443", "676969a3-096e-4ab1-adde-c9400fccc7ab", 9999, 1),
 					Check: resource.ComposeAggregateTestCheckFunc(
-						resource.TestCheckResourceAttr("cloudconnector_subaccount_service_channel_k8s.test", "credentials.region_host", "cf.us10.hana.ondemand.com"),
+						resource.TestCheckResourceAttr("cloudconnector_subaccount_service_channel_k8s.test", "credentials.region_host", "cf.eu12.hana.ondemand.com"),
 						resource.TestMatchResourceAttr("cloudconnector_subaccount_service_channel_k8s.test", "credentials.subaccount", regexpValidUUID),
 						resource.TestCheckResourceAttr("cloudconnector_subaccount_service_channel_k8s.test", "subaccount_service_channel_k8s.k8s_cluster", "cp.c-15e4ac4.kyma.ondemand.com:443"),
 						resource.TestCheckResourceAttr("cloudconnector_subaccount_service_channel_k8s.test", "subaccount_service_channel_k8s.k8s_service", "676969a3-096e-4ab1-adde-c9400fccc7ab"),

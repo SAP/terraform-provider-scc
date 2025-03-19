@@ -1,3 +1,150 @@
 ---
 version: 2
-interactions: []
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 271
+        transfer_encoding: []
+        trailer: {}
+        host: 10.52.109.11:8443
+        remote_addr: ""
+        request_uri: ""
+        body: '{"cloudPassword":"redacted","cloudUser":"redacted","description":"subaccount added via terraform tests","displayName":"","locationID":"","regionHost":"cf.eu12.hana.ondemand.com","subaccount":"7480ee65-e039-41cf-ba72-6aaf56c312df"}'
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/json
+        url: https://10.52.109.11:8443/api/v1/configuration/subaccounts
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding:
+            - chunked
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"description":"subaccount added via terraform tests","displayName":"7480ee65-e039-41cf-ba72-6aaf56c312df","tunnel":{"state":"Connected","connectedSinceTimeStamp":1742365556642,"connections":0,"applicationConnections":[],"serviceChannels":[],"subaccountCertificate":"redacted","user":"redacted"},"_links":"redacted","Kyma-channels":"redacted","HANA-channels":"redacted","systemMappings":"redacted","self":"redacted","validity":"redacted","state":"redacted","VirtualMachine-channels":"redacted","domainMappings":"redacted"},"regionHost":"cf.eu12.hana.ondemand.com","subaccount":"7480ee65-e039-41cf-ba72-6aaf56c312df","locationID":""}'
+        headers:
+            Cache-Control:
+                - no-store
+            Content-Type:
+                - application/json
+            Date:
+                - Wed, 19 Mar 2025 06:25:56 GMT
+            Location:
+                - https://10.52.109.11:8443/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/7480ee65-e039-41cf-ba72-6aaf56c312df
+            Server:
+                - Cloud Connector
+            Set-Cookie:
+                - redacted
+            Vary:
+                - accept-encoding
+            X-Csrf-Token:
+                - redacted
+        status: '201 '
+        code: 201
+        duration: 7.56948317s
+    - id: 1
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: 10.52.109.11:8443
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/json
+        url: https://10.52.109.11:8443/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/7480ee65-e039-41cf-ba72-6aaf56c312df
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding:
+            - chunked
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"description":"subaccount added via terraform tests","displayName":"7480ee65-e039-41cf-ba72-6aaf56c312df","tunnel":{"state":"Connected","connectedSinceTimeStamp":1742365556642,"connections":0,"applicationConnections":[],"serviceChannels":[],"subaccountCertificate":"redacted","user":"redacted"},"_links":"redacted","Kyma-channels":"redacted","HANA-channels":"redacted","systemMappings":"redacted","self":"redacted","validity":"redacted","state":"redacted","VirtualMachine-channels":"redacted","domainMappings":"redacted"},"regionHost":"cf.eu12.hana.ondemand.com","subaccount":"7480ee65-e039-41cf-ba72-6aaf56c312df","locationID":""}'
+        headers:
+            Cache-Control:
+                - no-store
+            Content-Type:
+                - application/json
+            Date:
+                - Wed, 19 Mar 2025 06:25:56 GMT
+            Server:
+                - Cloud Connector
+            Set-Cookie:
+                - redacted
+            Vary:
+                - accept-encoding
+            X-Csrf-Token:
+                - redacted
+        status: '200 '
+        code: 200
+        duration: 14.468125ms
+    - id: 2
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: 10.52.109.11:8443
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/json
+        url: https://10.52.109.11:8443/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/7480ee65-e039-41cf-ba72-6aaf56c312df
+        method: DELETE
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 0
+        uncompressed: false
+        body: ""
+        headers:
+            Cache-Control:
+                - no-store
+            Date:
+                - Wed, 19 Mar 2025 06:25:56 GMT
+            Server:
+                - Cloud Connector
+            Set-Cookie:
+                - redacted
+            X-Csrf-Token:
+                - redacted
+        status: '204 '
+        code: 204
+        duration: 94.579166ms
