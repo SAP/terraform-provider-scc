@@ -1,0 +1,104 @@
+package provider
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/SAP/terraform-provider-cloudconnector/internal/api"
+	apiobjects "github.com/SAP/terraform-provider-cloudconnector/internal/api/apiObjects"
+	"github.com/SAP/terraform-provider-cloudconnector/internal/api/endpoints"
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+)
+
+var _ datasource.DataSource = &SubaccountsDataSource{}
+
+func NewSubaccountsDataSource() datasource.DataSource {
+	return &SubaccountsDataSource{}
+}
+
+type SubaccountsDataSource struct {
+	client *api.RestApiClient
+}
+
+func (d *SubaccountsDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_subaccounts"
+}
+
+func (d *SubaccountsDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = schema.Schema{
+		MarkdownDescription: "Cloud Connector Subaccounts Data Source",
+		Attributes: map[string]schema.Attribute{
+			"subaccounts": schema.ListNestedAttribute{
+				MarkdownDescription: "A list of subaccounts associated with the cloud connector. Each entry in the list contains details about a specific subaccount.",
+				Computed:            true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"region_host": schema.StringAttribute{
+							MarkdownDescription: "Region Host Name.",
+							Computed:            true,
+						},
+						"subaccount": schema.StringAttribute{
+							MarkdownDescription: "The ID of the subaccount.",
+							Computed:            true,
+						},
+						"location_id": schema.StringAttribute{
+							MarkdownDescription: "Location identifier for the Cloud Connector instance. This property is not available if the default location ID is in use.",
+							Computed:            true,
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
+func (d *SubaccountsDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+	if req.ProviderData == nil {
+		return
+	}
+
+	client, ok := req.ProviderData.(*api.RestApiClient)
+
+	if !ok {
+		resp.Diagnostics.AddError(
+			"Unexpected Data Source Configure Type",
+			fmt.Sprintf("Expected *api.RestApiClient, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+		)
+
+		return
+	}
+
+	d.client = client
+}
+
+func (d *SubaccountsDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var data SubaccountsConfig
+	var respObj apiobjects.SubaccountsDataSource
+	diags := req.Config.Get(ctx, &data)
+
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	endpoint := endpoints.GetSubaccountBaseEndpoint()
+
+	err := requestAndUnmarshal(d.client, &respObj.Subaccounts, "GET", endpoint, nil, true)
+	if err != nil {
+		resp.Diagnostics.AddError("error fetching the cloud connector subaccounts", err.Error())
+		return
+	}
+
+	responseModel, err := SubaccountsDataSourceValueFrom(respObj)
+	if err != nil {
+		resp.Diagnostics.AddError("error mapping subaccounts value", fmt.Sprintf("%s", err))
+		return
+	}
+
+	diags = resp.State.Set(ctx, &responseModel)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+}
