@@ -1,0 +1,289 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 148
+        transfer_encoding: []
+        trailer: {}
+        host: 10.52.109.11:8443
+        remote_addr: ""
+        request_uri: ""
+        body: '{"comment":"","connections":"1","k8sCluster":"cp.c-15e4ac4.kyma.ondemand.com:443","k8sService":"676969a3-096e-4ab1-adde-c9400fccc7ab","port":"9999"}'
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/json
+        url: https://10.52.109.11:8443/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/channels/K8S
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 0
+        uncompressed: false
+        body: ""
+        headers:
+            Cache-Control:
+                - no-store
+            Content-Length:
+                - "0"
+            Date:
+                - Wed, 19 Mar 2025 06:38:36 GMT
+            Location:
+                - https://10.52.109.11:8443/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/channels/K8S/163
+            Server:
+                - Cloud Connector
+            Set-Cookie:
+                - redacted
+            X-Csrf-Token:
+                - redacted
+        status: '201 '
+        code: 201
+        duration: 18.250625ms
+    - id: 1
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: 10.52.109.11:8443
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/json
+        url: https://10.52.109.11:8443/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/channels/K8S
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 516
+        uncompressed: false
+        body: '[{"k8sCluster":"cp.c-15e4ac4.kyma.ondemand.com:443","k8sService":"676969a3-096e-4ab1-adde-c9400fccc7ab","id":163,"type":"K8S","port":9999,"enabled":false,"connections":1,"comment":"","_links":"redacted","state":"redacted"}}]'
+        headers:
+            Cache-Control:
+                - no-store
+            Content-Length:
+                - "516"
+            Content-Type:
+                - application/json
+            Date:
+                - Wed, 19 Mar 2025 06:38:36 GMT
+            Server:
+                - Cloud Connector
+            Set-Cookie:
+                - redacted
+            X-Csrf-Token:
+                - redacted
+        status: '200 '
+        code: 200
+        duration: 1.394416ms
+    - id: 2
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 19
+        transfer_encoding: []
+        trailer: {}
+        host: 10.52.109.11:8443
+        remote_addr: ""
+        request_uri: ""
+        body: '{"enabled":"false"}'
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/json
+        url: https://10.52.109.11:8443/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/channels/K8S/163/state
+        method: PUT
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 0
+        uncompressed: false
+        body: ""
+        headers:
+            Cache-Control:
+                - no-store
+            Date:
+                - Wed, 19 Mar 2025 06:38:36 GMT
+            Server:
+                - Cloud Connector
+            Set-Cookie:
+                - redacted
+            X-Csrf-Token:
+                - redacted
+        status: '204 '
+        code: 204
+        duration: 1.392292ms
+    - id: 3
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: 10.52.109.11:8443
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/json
+        url: https://10.52.109.11:8443/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/channels/K8S/163
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 514
+        uncompressed: false
+        body: '{"k8sCluster":"cp.c-15e4ac4.kyma.ondemand.com:443","k8sService":"676969a3-096e-4ab1-adde-c9400fccc7ab","id":163,"type":"K8S","port":9999,"enabled":false,"connections":1,"comment":"","_links":"redacted","state":"redacted"}}'
+        headers:
+            Cache-Control:
+                - no-store
+            Content-Length:
+                - "514"
+            Content-Type:
+                - application/json
+            Date:
+                - Wed, 19 Mar 2025 06:38:36 GMT
+            Server:
+                - Cloud Connector
+            Set-Cookie:
+                - redacted
+            X-Csrf-Token:
+                - redacted
+        status: '200 '
+        code: 200
+        duration: 14.256125ms
+    - id: 4
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: 10.52.109.11:8443
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/json
+        url: https://10.52.109.11:8443/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/channels/K8S/163
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 514
+        uncompressed: false
+        body: '{"k8sCluster":"cp.c-15e4ac4.kyma.ondemand.com:443","k8sService":"676969a3-096e-4ab1-adde-c9400fccc7ab","id":163,"type":"K8S","port":9999,"enabled":false,"connections":1,"comment":"","_links":"redacted","state":"redacted"}}'
+        headers:
+            Cache-Control:
+                - no-store
+            Content-Length:
+                - "514"
+            Content-Type:
+                - application/json
+            Date:
+                - Wed, 19 Mar 2025 06:38:36 GMT
+            Server:
+                - Cloud Connector
+            Set-Cookie:
+                - redacted
+            X-Csrf-Token:
+                - redacted
+        status: '200 '
+        code: 200
+        duration: 1.691ms
+    - id: 5
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: 10.52.109.11:8443
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/json
+        url: https://10.52.109.11:8443/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/channels/K8S/163
+        method: DELETE
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 0
+        uncompressed: false
+        body: ""
+        headers:
+            Cache-Control:
+                - no-store
+            Date:
+                - Wed, 19 Mar 2025 06:38:36 GMT
+            Server:
+                - Cloud Connector
+            Set-Cookie:
+                - redacted
+            X-Csrf-Token:
+                - redacted
+        status: '204 '
+        code: 204
+        duration: 14.817083ms
