@@ -1,0 +1,153 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: 10.52.109.11:8443
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/json
+        url: https://10.52.109.11:8443/api/v1/configuration/subaccounts
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding:
+            - chunked
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '[{"_links":"redacted","Kyma-channels":"redacted","HANA-channels":"redacted","systemMappings":"redacted","self":"redacted","validity":"redacted","state":"redacted","VirtualMachine-channels":"redacted","domainMappings":"redacted"},"regionHost":"cf.eu12.hana.ondemand.com","subaccount":"0bcb0012-a982-42f9-bda4-0a5cb15f88c8","locationID":""},{"_links":"redacted","Kyma-channels":"redacted","HANA-channels":"redacted","systemMappings":"redacted","self":"redacted","validity":"redacted","state":"redacted","VirtualMachine-channels":"redacted","domainMappings":"redacted"},"regionHost":"cf.eu12.hana.ondemand.com","subaccount":"7480ee65-e039-41cf-ba72-6aaf56c312df","locationID":""},{"_links":"redacted","Kyma-channels":"redacted","HANA-channels":"redacted","systemMappings":"redacted","self":"redacted","validity":"redacted","state":"redacted","VirtualMachine-channels":"redacted","domainMappings":"redacted"},"regionHost":"cf.eu12.hana.ondemand.com","subaccount":"d3bbbcd7-d5e0-483b-a524-6dee7205f8e8","locationID":""}]'
+        headers:
+            Cache-Control:
+                - no-store
+            Content-Type:
+                - application/json
+            Date:
+                - Wed, 19 Mar 2025 06:38:36 GMT
+            Server:
+                - Cloud Connector
+            Set-Cookie:
+                - redacted
+            Vary:
+                - accept-encoding
+            X-Csrf-Token:
+                - redacted
+        status: '200 '
+        code: 200
+        duration: 7.864375ms
+    - id: 1
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: 10.52.109.11:8443
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/json
+        url: https://10.52.109.11:8443/api/v1/configuration/subaccounts
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding:
+            - chunked
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '[{"_links":"redacted","Kyma-channels":"redacted","HANA-channels":"redacted","systemMappings":"redacted","self":"redacted","validity":"redacted","state":"redacted","VirtualMachine-channels":"redacted","domainMappings":"redacted"},"regionHost":"cf.eu12.hana.ondemand.com","subaccount":"0bcb0012-a982-42f9-bda4-0a5cb15f88c8","locationID":""},{"_links":"redacted","Kyma-channels":"redacted","HANA-channels":"redacted","systemMappings":"redacted","self":"redacted","validity":"redacted","state":"redacted","VirtualMachine-channels":"redacted","domainMappings":"redacted"},"regionHost":"cf.eu12.hana.ondemand.com","subaccount":"7480ee65-e039-41cf-ba72-6aaf56c312df","locationID":""},{"_links":"redacted","Kyma-channels":"redacted","HANA-channels":"redacted","systemMappings":"redacted","self":"redacted","validity":"redacted","state":"redacted","VirtualMachine-channels":"redacted","domainMappings":"redacted"},"regionHost":"cf.eu12.hana.ondemand.com","subaccount":"d3bbbcd7-d5e0-483b-a524-6dee7205f8e8","locationID":""}]'
+        headers:
+            Cache-Control:
+                - no-store
+            Content-Type:
+                - application/json
+            Date:
+                - Wed, 19 Mar 2025 06:38:36 GMT
+            Server:
+                - Cloud Connector
+            Set-Cookie:
+                - redacted
+            Vary:
+                - accept-encoding
+            X-Csrf-Token:
+                - redacted
+        status: '200 '
+        code: 200
+        duration: 2.298375ms
+    - id: 2
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: 10.52.109.11:8443
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/json
+        url: https://10.52.109.11:8443/api/v1/configuration/subaccounts
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding:
+            - chunked
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '[{"_links":"redacted","Kyma-channels":"redacted","HANA-channels":"redacted","systemMappings":"redacted","self":"redacted","validity":"redacted","state":"redacted","VirtualMachine-channels":"redacted","domainMappings":"redacted"},"regionHost":"cf.eu12.hana.ondemand.com","subaccount":"0bcb0012-a982-42f9-bda4-0a5cb15f88c8","locationID":""},{"_links":"redacted","Kyma-channels":"redacted","HANA-channels":"redacted","systemMappings":"redacted","self":"redacted","validity":"redacted","state":"redacted","VirtualMachine-channels":"redacted","domainMappings":"redacted"},"regionHost":"cf.eu12.hana.ondemand.com","subaccount":"7480ee65-e039-41cf-ba72-6aaf56c312df","locationID":""},{"_links":"redacted","Kyma-channels":"redacted","HANA-channels":"redacted","systemMappings":"redacted","self":"redacted","validity":"redacted","state":"redacted","VirtualMachine-channels":"redacted","domainMappings":"redacted"},"regionHost":"cf.eu12.hana.ondemand.com","subaccount":"d3bbbcd7-d5e0-483b-a524-6dee7205f8e8","locationID":""}]'
+        headers:
+            Cache-Control:
+                - no-store
+            Content-Type:
+                - application/json
+            Date:
+                - Wed, 19 Mar 2025 06:38:36 GMT
+            Server:
+                - Cloud Connector
+            Set-Cookie:
+                - redacted
+            Vary:
+                - accept-encoding
+            X-Csrf-Token:
+                - redacted
+        status: '200 '
+        code: 200
+        duration: 1.687084ms
