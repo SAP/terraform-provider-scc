@@ -26,8 +26,8 @@
 	"remoteUser": "vscode",
 	// This devcontainer expects a file named .devcontainer/devcontainer.env to exist.
 	// you should place the following environment variables in that file:
-	// - ias_username
-	// - ias_password
+	// - CC_USERNAME
+	// - CC_PASSWORD
 	"runArgs": [
 		"--env-file",
 		".devcontainer/devcontainer.env"
