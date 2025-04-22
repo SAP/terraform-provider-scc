@@ -38,9 +38,9 @@ interactions:
             Content-Length:
                 - "0"
             Date:
-                - Wed, 16 Apr 2025 08:13:49 GMT
+                - Tue, 22 Apr 2025 06:44:00 GMT
             Location:
-                - https://10.52.101.149:8443/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/channels/K8S/3
+                - redacted
             Server:
                 - Cloud Connector
             Set-Cookie:
@@ -49,7 +49,7 @@ interactions:
                 - redacted
         status: '201 '
         code: 201
-        duration: 38.397833ms
+        duration: 40.670458ms
     - id: 1
       request:
         proto: HTTP/1.1
@@ -78,18 +78,18 @@ interactions:
         proto_minor: 1
         transfer_encoding: []
         trailer: {}
-        content_length: 516
+        content_length: 514
         uncompressed: false
-        body: '[{"k8sCluster":"cp.ace9fb5.stage.kyma.ondemand.com:443","k8sService":"29d4e6f6-8e7f-4882-b434-21a52bb75e0f","id":3,"type":"K8S","port":3000,"enabled":false,"connections":1,"comment":"","_links":{"self":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"}}}]'
+        body: '[{"k8sCluster":"cp.ace9fb5.stage.kyma.ondemand.com:443","k8sService":"29d4e6f6-8e7f-4882-b434-21a52bb75e0f","id":4,"type":"K8S","port":3000,"enabled":false,"connections":1,"comment":"","_links":{"self":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"}}}]'
         headers:
             Cache-Control:
                 - no-store
             Content-Length:
-                - "516"
+                - "514"
             Content-Type:
                 - application/json
             Date:
-                - Wed, 16 Apr 2025 08:13:49 GMT
+                - Tue, 22 Apr 2025 06:44:00 GMT
             Server:
                 - Cloud Connector
             Set-Cookie:
@@ -98,7 +98,7 @@ interactions:
                 - redacted
         status: '200 '
         code: 200
-        duration: 1.384625ms
+        duration: 1.633667ms
     - id: 2
       request:
         proto: HTTP/1.1
@@ -119,7 +119,7 @@ interactions:
                 - redacted
             Content-Type:
                 - application/json
-        url: https://127.0.0.1:8443/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/channels/K8S/3/state
+        url: https://127.0.0.1:8443/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/channels/K8S/4/state
         method: PUT
       response:
         proto: HTTP/1.1
@@ -134,7 +134,7 @@ interactions:
             Cache-Control:
                 - no-store
             Date:
-                - Wed, 16 Apr 2025 08:13:50 GMT
+                - Tue, 22 Apr 2025 06:44:00 GMT
             Server:
                 - Cloud Connector
             Set-Cookie:
@@ -143,7 +143,7 @@ interactions:
                 - redacted
         status: '204 '
         code: 204
-        duration: 1.236779917s
+        duration: 957.757042ms
     - id: 3
       request:
         proto: HTTP/1.1
@@ -164,7 +164,7 @@ interactions:
                 - redacted
             Content-Type:
                 - application/json
-        url: https://127.0.0.1:8443/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/channels/K8S/3
+        url: https://127.0.0.1:8443/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/channels/K8S/4
         method: GET
       response:
         proto: HTTP/1.1
@@ -172,18 +172,18 @@ interactions:
         proto_minor: 1
         transfer_encoding: []
         trailer: {}
-        content_length: 602
+        content_length: 600
         uncompressed: false
-        body: '{"k8sCluster":"cp.ace9fb5.stage.kyma.ondemand.com:443","k8sService":"29d4e6f6-8e7f-4882-b434-21a52bb75e0f","id":3,"type":"K8S","port":3000,"enabled":true,"connections":1,"comment":"","state":{"connected":true,"openedConnections":1,"connectedSinceTimeStamp":1744791230359},"_links":{"self":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"}}}'
+        body: '{"k8sCluster":"cp.ace9fb5.stage.kyma.ondemand.com:443","k8sService":"29d4e6f6-8e7f-4882-b434-21a52bb75e0f","id":4,"type":"K8S","port":3000,"enabled":true,"connections":1,"comment":"","state":{"connected":true,"openedConnections":1,"connectedSinceTimeStamp":1745304241575},"_links":{"self":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"}}}'
         headers:
             Cache-Control:
                 - no-store
             Content-Length:
-                - "602"
+                - "600"
             Content-Type:
                 - application/json
             Date:
-                - Wed, 16 Apr 2025 08:13:50 GMT
+                - Tue, 22 Apr 2025 06:44:00 GMT
             Server:
                 - Cloud Connector
             Set-Cookie:
@@ -192,7 +192,7 @@ interactions:
                 - redacted
         status: '200 '
         code: 200
-        duration: 3.851875ms
+        duration: 5.600041ms
     - id: 4
       request:
         proto: HTTP/1.1
@@ -213,7 +213,7 @@ interactions:
                 - redacted
             Content-Type:
                 - application/json
-        url: https://127.0.0.1:8443/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/channels/K8S/3
+        url: https://127.0.0.1:8443/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/channels/K8S/4
         method: GET
       response:
         proto: HTTP/1.1
@@ -221,18 +221,18 @@ interactions:
         proto_minor: 1
         transfer_encoding: []
         trailer: {}
-        content_length: 602
+        content_length: 600
         uncompressed: false
-        body: '{"k8sCluster":"cp.ace9fb5.stage.kyma.ondemand.com:443","k8sService":"29d4e6f6-8e7f-4882-b434-21a52bb75e0f","id":3,"type":"K8S","port":3000,"enabled":true,"connections":1,"comment":"","state":{"connected":true,"openedConnections":1,"connectedSinceTimeStamp":1744791230359},"_links":{"self":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"}}}'
+        body: '{"k8sCluster":"cp.ace9fb5.stage.kyma.ondemand.com:443","k8sService":"29d4e6f6-8e7f-4882-b434-21a52bb75e0f","id":4,"type":"K8S","port":3000,"enabled":true,"connections":1,"comment":"","state":{"connected":true,"openedConnections":1,"connectedSinceTimeStamp":1745304241575},"_links":{"self":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"}}}'
         headers:
             Cache-Control:
                 - no-store
             Content-Length:
-                - "602"
+                - "600"
             Content-Type:
                 - application/json
             Date:
-                - Wed, 16 Apr 2025 08:13:50 GMT
+                - Tue, 22 Apr 2025 06:44:01 GMT
             Server:
                 - Cloud Connector
             Set-Cookie:
@@ -241,7 +241,7 @@ interactions:
                 - redacted
         status: '200 '
         code: 200
-        duration: 5.329916ms
+        duration: 5.186292ms
     - id: 5
       request:
         proto: HTTP/1.1
@@ -262,7 +262,56 @@ interactions:
                 - redacted
             Content-Type:
                 - application/json
-        url: https://127.0.0.1:8443/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/channels/K8S/3
+        url: https://127.0.0.1:8443/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/channels/K8S/4
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 600
+        uncompressed: false
+        body: '{"k8sCluster":"cp.ace9fb5.stage.kyma.ondemand.com:443","k8sService":"29d4e6f6-8e7f-4882-b434-21a52bb75e0f","id":4,"type":"K8S","port":3000,"enabled":true,"connections":1,"comment":"","state":{"connected":true,"openedConnections":1,"connectedSinceTimeStamp":1745304241575},"_links":{"self":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"}}}'
+        headers:
+            Cache-Control:
+                - no-store
+            Content-Length:
+                - "600"
+            Content-Type:
+                - application/json
+            Date:
+                - Tue, 22 Apr 2025 06:44:01 GMT
+            Server:
+                - Cloud Connector
+            Set-Cookie:
+                - redacted
+            X-Csrf-Token:
+                - redacted
+        status: '200 '
+        code: 200
+        duration: 4.458333ms
+    - id: 6
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: https://127.0.0.1:8443
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/json
+        url: https://127.0.0.1:8443/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/channels/K8S/4
         method: DELETE
       response:
         proto: HTTP/1.1
@@ -277,7 +326,7 @@ interactions:
             Cache-Control:
                 - no-store
             Date:
-                - Wed, 16 Apr 2025 08:13:50 GMT
+                - Tue, 22 Apr 2025 06:44:01 GMT
             Server:
                 - Cloud Connector
             Set-Cookie:
@@ -286,4 +335,4 @@ interactions:
                 - redacted
         status: '204 '
         code: 204
-        duration: 30.249792ms
+        duration: 32.617083ms

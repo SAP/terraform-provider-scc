@@ -38,9 +38,9 @@ interactions:
             Content-Length:
                 - "0"
             Date:
-                - Wed, 16 Apr 2025 08:16:06 GMT
+                - Tue, 22 Apr 2025 06:44:34 GMT
             Location:
-                - https://10.52.101.149:8443/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/systemMappings/testtfvirtual:900
+                - redacted
             Server:
                 - Cloud Connector
             Set-Cookie:
@@ -49,7 +49,7 @@ interactions:
                 - redacted
         status: '201 '
         code: 201
-        duration: 44.067ms
+        duration: 30.426458ms
     - id: 1
       request:
         proto: HTTP/1.1
@@ -78,18 +78,18 @@ interactions:
         proto_minor: 1
         transfer_encoding: []
         trailer: {}
-        content_length: 720
+        content_length: 718
         uncompressed: false
-        body: '{"virtualHost":"testtfvirtual","virtualPort":"900","localHost":"testtfinternal","localPort":"900","creationDate":"1744791366565","protocol":"HTTP","backendType":"abapSys","hostInHeader":"VIRTUAL","sid":"","totalResourcesCount":0,"enabledResourcesCount":0,"authenticationMode":"KERBEROS","description":"","allowedClients":[],"blacklistedUsers":[],"_links":{"self":{"href": "https://redacted.url/path"},"resources":{"href": "https://redacted.url/path"}}}'
+        body: '{"virtualHost":"testtfvirtual","virtualPort":"900","localHost":"testtfinternal","localPort":"900","creationDate":"1745304274342","protocol":"HTTP","backendType":"abapSys","hostInHeader":"VIRTUAL","sid":"","totalResourcesCount":0,"enabledResourcesCount":0,"authenticationMode":"KERBEROS","description":"","allowedClients":[],"blacklistedUsers":[],"_links":{"self":{"href": "https://redacted.url/path"},"resources":{"href": "https://redacted.url/path"}}}'
         headers:
             Cache-Control:
                 - no-store
             Content-Length:
-                - "720"
+                - "718"
             Content-Type:
                 - application/json
             Date:
-                - Wed, 16 Apr 2025 08:16:06 GMT
+                - Tue, 22 Apr 2025 06:44:34 GMT
             Server:
                 - Cloud Connector
             Set-Cookie:
@@ -98,7 +98,7 @@ interactions:
                 - redacted
         status: '200 '
         code: 200
-        duration: 2.026417ms
+        duration: 2.255708ms
     - id: 2
       request:
         proto: HTTP/1.1
@@ -127,18 +127,18 @@ interactions:
         proto_minor: 1
         transfer_encoding: []
         trailer: {}
-        content_length: 720
+        content_length: 718
         uncompressed: false
-        body: '{"virtualHost":"testtfvirtual","virtualPort":"900","localHost":"testtfinternal","localPort":"900","creationDate":"1744791366565","protocol":"HTTP","backendType":"abapSys","hostInHeader":"VIRTUAL","sid":"","totalResourcesCount":0,"enabledResourcesCount":0,"authenticationMode":"KERBEROS","description":"","allowedClients":[],"blacklistedUsers":[],"_links":{"self":{"href": "https://redacted.url/path"},"resources":{"href": "https://redacted.url/path"}}}'
+        body: '{"virtualHost":"testtfvirtual","virtualPort":"900","localHost":"testtfinternal","localPort":"900","creationDate":"1745304274342","protocol":"HTTP","backendType":"abapSys","hostInHeader":"VIRTUAL","sid":"","totalResourcesCount":0,"enabledResourcesCount":0,"authenticationMode":"KERBEROS","description":"","allowedClients":[],"blacklistedUsers":[],"_links":{"self":{"href": "https://redacted.url/path"},"resources":{"href": "https://redacted.url/path"}}}'
         headers:
             Cache-Control:
                 - no-store
             Content-Length:
-                - "720"
+                - "718"
             Content-Type:
                 - application/json
             Date:
-                - Wed, 16 Apr 2025 08:16:06 GMT
+                - Tue, 22 Apr 2025 06:44:34 GMT
             Server:
                 - Cloud Connector
             Set-Cookie:
@@ -147,8 +147,57 @@ interactions:
                 - redacted
         status: '200 '
         code: 200
-        duration: 4.63125ms
+        duration: 4.734208ms
     - id: 3
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: https://127.0.0.1:8443
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/json
+        url: https://127.0.0.1:8443/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/systemMappings/testtfvirtual:900
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 718
+        uncompressed: false
+        body: '{"virtualHost":"testtfvirtual","virtualPort":"900","localHost":"testtfinternal","localPort":"900","creationDate":"1745304274342","protocol":"HTTP","backendType":"abapSys","hostInHeader":"VIRTUAL","sid":"","totalResourcesCount":0,"enabledResourcesCount":0,"authenticationMode":"KERBEROS","description":"","allowedClients":[],"blacklistedUsers":[],"_links":{"self":{"href": "https://redacted.url/path"},"resources":{"href": "https://redacted.url/path"}}}'
+        headers:
+            Cache-Control:
+                - no-store
+            Content-Length:
+                - "718"
+            Content-Type:
+                - application/json
+            Date:
+                - Tue, 22 Apr 2025 06:44:34 GMT
+            Server:
+                - Cloud Connector
+            Set-Cookie:
+                - redacted
+            X-Csrf-Token:
+                - redacted
+        status: '200 '
+        code: 200
+        duration: 3.42675ms
+    - id: 4
       request:
         proto: HTTP/1.1
         proto_major: 1
@@ -183,7 +232,7 @@ interactions:
             Cache-Control:
                 - no-store
             Date:
-                - Wed, 16 Apr 2025 08:16:06 GMT
+                - Tue, 22 Apr 2025 06:44:34 GMT
             Server:
                 - Cloud Connector
             Set-Cookie:
@@ -192,4 +241,4 @@ interactions:
                 - redacted
         status: '204 '
         code: 204
-        duration: 22.210292ms
+        duration: 17.799042ms

@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestResourceDomainMapping(t *testing.T) {
@@ -35,6 +36,13 @@ func TestResourceDomainMapping(t *testing.T) {
 						resource.TestCheckResourceAttr("cloudconnector_domain_mapping.test", "internal_domain", "testtfinternaldomain"),
 					),
 				},
+				{
+					ResourceName:                         "cloudconnector_domain_mapping.test",
+					ImportState:                          true,
+					ImportStateVerify:                    true,
+					ImportStateIdFunc:                    getImportStateForSubaccountEntitlement("cloudconnector_domain_mapping.test"),
+					ImportStateVerifyIdentifierAttribute: "internal_domain",
+				},
 			},
 		})
 
@@ -51,4 +59,18 @@ func ResourceDomainMapping(datasourceName string, regionHost string, subaccount 
     internal_domain = "%s"
 	}
 	`, datasourceName, regionHost, subaccount, virtualDomain, internalDomain)
+}
+
+func getImportStateForSubaccountEntitlement(resourceName string) resource.ImportStateIdFunc {
+	return func(state *terraform.State) (string, error) {
+		rs, ok := state.RootModule().Resources[resourceName]
+		if !ok {
+			return "", fmt.Errorf("not found: %s", resourceName)
+		}
+		return fmt.Sprintf("%s,%s,%s",
+			rs.Primary.Attributes["region_host"],
+			rs.Primary.Attributes["subaccount"],
+			rs.Primary.Attributes["internal_domain"],
+		), nil
+	}
 }

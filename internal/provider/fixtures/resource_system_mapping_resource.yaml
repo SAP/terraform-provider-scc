@@ -38,9 +38,9 @@ interactions:
             Content-Length:
                 - "0"
             Date:
-                - Wed, 16 Apr 2025 08:16:03 GMT
+                - Tue, 22 Apr 2025 06:44:30 GMT
             Location:
-                - https://10.52.101.149:8443/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/systemMappings/testtfvirtualtesting:90/resources/-google.com
+                - redacted
             Server:
                 - Cloud Connector
             Set-Cookie:
@@ -49,7 +49,7 @@ interactions:
                 - redacted
         status: '201 '
         code: 201
-        duration: 36.714125ms
+        duration: 42.965792ms
     - id: 1
       request:
         proto: HTTP/1.1
@@ -78,18 +78,18 @@ interactions:
         proto_minor: 1
         transfer_encoding: []
         trailer: {}
-        content_length: 366
+        content_length: 365
         uncompressed: false
-        body: '{"id":"/google.com","enabled":true,"exactMatchOnly":false,"websocketUpgradeAllowed":false,"creationDate":"1744791363188","description":"create resource","_links":{"self":{"href": "https://redacted.url/path"}}}'
+        body: '{"id":"/google.com","enabled":true,"exactMatchOnly":false,"websocketUpgradeAllowed":false,"creationDate":"1745304270725","description":"create resource","_links":{"self":{"href": "https://redacted.url/path"}}}'
         headers:
             Cache-Control:
                 - no-store
             Content-Length:
-                - "366"
+                - "365"
             Content-Type:
                 - application/json
             Date:
-                - Wed, 16 Apr 2025 08:16:03 GMT
+                - Tue, 22 Apr 2025 06:44:30 GMT
             Server:
                 - Cloud Connector
             Set-Cookie:
@@ -98,7 +98,7 @@ interactions:
                 - redacted
         status: '200 '
         code: 200
-        duration: 1.447709ms
+        duration: 2.716083ms
     - id: 2
       request:
         proto: HTTP/1.1
@@ -127,18 +127,18 @@ interactions:
         proto_minor: 1
         transfer_encoding: []
         trailer: {}
-        content_length: 366
+        content_length: 365
         uncompressed: false
-        body: '{"id":"/google.com","enabled":true,"exactMatchOnly":false,"websocketUpgradeAllowed":false,"creationDate":"1744791363188","description":"create resource","_links":{"self":{"href": "https://redacted.url/path"}}}'
+        body: '{"id":"/google.com","enabled":true,"exactMatchOnly":false,"websocketUpgradeAllowed":false,"creationDate":"1745304270725","description":"create resource","_links":{"self":{"href": "https://redacted.url/path"}}}'
         headers:
             Cache-Control:
                 - no-store
             Content-Length:
-                - "366"
+                - "365"
             Content-Type:
                 - application/json
             Date:
-                - Wed, 16 Apr 2025 08:16:03 GMT
+                - Tue, 22 Apr 2025 06:44:30 GMT
             Server:
                 - Cloud Connector
             Set-Cookie:
@@ -147,8 +147,57 @@ interactions:
                 - redacted
         status: '200 '
         code: 200
-        duration: 1.719459ms
+        duration: 4.278583ms
     - id: 3
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: https://127.0.0.1:8443
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/json
+        url: https://127.0.0.1:8443/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/systemMappings/testtfvirtualtesting:90/resources/-google.com
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 365
+        uncompressed: false
+        body: '{"id":"/google.com","enabled":true,"exactMatchOnly":false,"websocketUpgradeAllowed":false,"creationDate":"1745304270725","description":"create resource","_links":{"self":{"href": "https://redacted.url/path"}}}'
+        headers:
+            Cache-Control:
+                - no-store
+            Content-Length:
+                - "365"
+            Content-Type:
+                - application/json
+            Date:
+                - Tue, 22 Apr 2025 06:44:30 GMT
+            Server:
+                - Cloud Connector
+            Set-Cookie:
+                - redacted
+            X-Csrf-Token:
+                - redacted
+        status: '200 '
+        code: 200
+        duration: 4.190334ms
+    - id: 4
       request:
         proto: HTTP/1.1
         proto_major: 1
@@ -183,7 +232,7 @@ interactions:
             Cache-Control:
                 - no-store
             Date:
-                - Wed, 16 Apr 2025 08:16:03 GMT
+                - Tue, 22 Apr 2025 06:44:30 GMT
             Server:
                 - Cloud Connector
             Set-Cookie:
@@ -192,4 +241,4 @@ interactions:
                 - redacted
         status: '204 '
         code: 204
-        duration: 10.506375ms
+        duration: 15.297ms

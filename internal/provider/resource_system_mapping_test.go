@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestResourceSystemMapping(t *testing.T) {
@@ -42,6 +43,13 @@ func TestResourceSystemMapping(t *testing.T) {
 						resource.TestCheckResourceAttr("cloudconnector_system_mapping.test", "authentication_mode", "KERBEROS"),
 					),
 				},
+				{
+					ResourceName:      "cloudconnector_system_mapping.test",
+					ImportState:       true,
+					ImportStateVerify: true,
+					ImportStateIdFunc: getImportStateForSystemMapping("cloudconnector_system_mapping.test"),
+					ImportStateVerifyIdentifierAttribute: "virtual_host",
+				},
 			},
 		})
 
@@ -65,4 +73,19 @@ func ResourceSystemMapping(datasourceName string, regionHost string, subaccount 
 	authentication_mode= "%s"
 	}
 	`, datasourceName, regionHost, subaccount, virtualHost, virtualPort, localHost, localPort, protocol, backendType, hostInHeader, authenticationMode)
+}
+
+func getImportStateForSystemMapping(resourceName string) resource.ImportStateIdFunc {
+	return func(state *terraform.State) (string, error) {
+		rs, ok := state.RootModule().Resources[resourceName]
+		if !ok {
+			return "", fmt.Errorf("not found: %s", resourceName)
+		}
+		return fmt.Sprintf("%s,%s,%s,%s",
+			rs.Primary.Attributes["region_host"],
+			rs.Primary.Attributes["subaccount"],
+			rs.Primary.Attributes["virtual_host"],
+			rs.Primary.Attributes["virtual_port"],
+		), nil
+	}
 }

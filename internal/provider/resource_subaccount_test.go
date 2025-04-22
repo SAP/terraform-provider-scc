@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestResourceSubaccount(t *testing.T) {
@@ -52,6 +53,17 @@ func TestResourceSubaccount(t *testing.T) {
 						resource.TestMatchResourceAttr("cloudconnector_subaccount.test", "tunnel.subaccount_certificate.subject_dn", regexp.MustCompile(`CN=.*?,L=.*?,OU=.*?,OU=.*?,O=.*?,C=.*?`)),
 					),
 				},
+				{
+					ResourceName:      "cloudconnector_subaccount.test",
+					ImportState:       true,
+					ImportStateVerify: true,
+					ImportStateIdFunc: getImportStateForSubaccount("cloudconnector_subaccount.test"),
+					ImportStateVerifyIdentifierAttribute: "subaccount",
+					ImportStateVerifyIgnore: []string{
+						"cloud_user",
+						"cloud_password",
+					},
+				},
 			},
 		})
 
@@ -69,4 +81,17 @@ func ResourceSubaccount(datasourceName string, regionHost string, subaccount str
     description= "%s"
 	}
 	`, datasourceName, regionHost, subaccount, cloudUser, cloudPassword, description)
+}
+
+func getImportStateForSubaccount(resourceName string) resource.ImportStateIdFunc {
+	return func(state *terraform.State) (string, error) {
+		rs, ok := state.RootModule().Resources[resourceName]
+		if !ok {
+			return "", fmt.Errorf("not found: %s", resourceName)
+		}
+		return fmt.Sprintf("%s,%s",
+			rs.Primary.Attributes["region_host"],
+			rs.Primary.Attributes["subaccount"],
+		), nil
+	}
 }

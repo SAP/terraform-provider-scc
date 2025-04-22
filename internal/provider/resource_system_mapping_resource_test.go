@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestResourceSystemMappingResource(t *testing.T) {
@@ -39,6 +40,12 @@ func TestResourceSystemMappingResource(t *testing.T) {
 						resource.TestCheckResourceAttr("cloudconnector_system_mapping_resource.test", "enabled", "true"),
 					),
 				},
+				{
+					ResourceName:      "cloudconnector_system_mapping_resource.test",
+					ImportState:       true,
+					ImportStateVerify: true,
+					ImportStateIdFunc: getImportStateForSystemMappingResource("cloudconnector_system_mapping_resource.test"),
+				},
 			},
 		})
 
@@ -59,4 +66,20 @@ func ResourceSystemMappingResource(datasourceName string, regionHost string, sub
 	enabled = "%t"
 	}
 	`, datasourceName, regionHost, subaccount, virtualHost, virtualPort, id, description, enabled)
+}
+
+func getImportStateForSystemMappingResource(resourceName string) resource.ImportStateIdFunc {
+	return func(state *terraform.State) (string, error) {
+		rs, ok := state.RootModule().Resources[resourceName]
+		if !ok {
+			return "", fmt.Errorf("not found: %s", resourceName)
+		}
+		return fmt.Sprintf("%s,%s,%s,%s,%s",
+			rs.Primary.Attributes["region_host"],
+			rs.Primary.Attributes["subaccount"],
+			rs.Primary.Attributes["virtual_host"],
+			rs.Primary.Attributes["virtual_port"],
+			rs.Primary.Attributes["id"],
+		), nil
+	}
 }

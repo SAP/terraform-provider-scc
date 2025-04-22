@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestResourceSubaccountK8SServiceChannel(t *testing.T) {
@@ -44,6 +45,12 @@ func TestResourceSubaccountK8SServiceChannel(t *testing.T) {
 						resource.TestCheckResourceAttr("cloudconnector_subaccount_k8s_service_channel.test", "state.opened_connections", "1"),
 					),
 				},
+				{
+					ResourceName:      "cloudconnector_subaccount_k8s_service_channel.test",
+					ImportState:       true,
+					ImportStateVerify: true,
+					ImportStateIdFunc: getImportStateForSubaccountK8SServiceChannel("cloudconnector_subaccount_k8s_service_channel.test"),
+				},
 			},
 		})
 
@@ -63,4 +70,18 @@ func ResourceSubaccountK8SServiceChannel(datasourceName string, regionHost strin
 	enabled= "%t"
 	}
 	`, datasourceName, regionHost, subaccount, k8sCluster, k8sService, port, connections, enabled)
+}
+
+func getImportStateForSubaccountK8SServiceChannel(resourceName string) resource.ImportStateIdFunc {
+	return func(state *terraform.State) (string, error) {
+		rs, ok := state.RootModule().Resources[resourceName]
+		if !ok {
+			return "", fmt.Errorf("not found: %s", resourceName)
+		}
+		return fmt.Sprintf("%s,%s,%s",
+			rs.Primary.Attributes["region_host"],
+			rs.Primary.Attributes["subaccount"],
+			rs.Primary.Attributes["id"],
+		), nil
+	}
 }
