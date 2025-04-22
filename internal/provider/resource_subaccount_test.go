@@ -54,10 +54,10 @@ func TestResourceSubaccount(t *testing.T) {
 					),
 				},
 				{
-					ResourceName:      "cloudconnector_subaccount.test",
-					ImportState:       true,
-					ImportStateVerify: true,
-					ImportStateIdFunc: getImportStateForSubaccount("cloudconnector_subaccount.test"),
+					ResourceName:                         "cloudconnector_subaccount.test",
+					ImportState:                          true,
+					ImportStateVerify:                    true,
+					ImportStateIdFunc:                    getImportStateForSubaccount("cloudconnector_subaccount.test"),
 					ImportStateVerifyIdentifierAttribute: "subaccount",
 					ImportStateVerifyIgnore: []string{
 						"cloud_user",

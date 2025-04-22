@@ -133,8 +133,8 @@ func hookRedactSensitiveCredentials() func(i *cassette.Interaction) error {
 			for key := range headers {
 				if strings.Contains(strings.ToLower(key), "x-csrf-token") ||
 					strings.Contains(strings.ToLower(key), "set-cookie") ||
-					strings.Contains(strings.ToLower(key), "authorization") || 
-					strings.Contains(strings.ToLower(key), "location"){
+					strings.Contains(strings.ToLower(key), "authorization") ||
+					strings.Contains(strings.ToLower(key), "location") {
 					headers[key] = []string{"redacted"}
 				}
 			}
