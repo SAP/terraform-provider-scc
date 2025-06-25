@@ -36,7 +36,7 @@ func TestDataSourceSubaccountK8SServiceChannels(t *testing.T) {
 						resource.TestCheckResourceAttr("data.scc_subaccount_k8s_service_channels.scc_scs", "subaccount_k8s_service_channels.#", "1"),
 						resource.TestCheckResourceAttr("data.scc_subaccount_k8s_service_channels.scc_scs", "subaccount_k8s_service_channels.0.k8s_cluster", "cp.da2b3e1.stage.kyma.ondemand.com:443"),
 						resource.TestCheckResourceAttr("data.scc_subaccount_k8s_service_channels.scc_scs", "subaccount_k8s_service_channels.0.k8s_service", "bd64665f-060a-47b6-8aba-f406703f0acf"),
-						resource.TestCheckResourceAttr("data.scc_subaccount_k8s_service_channels.scc_scs", "subaccount_k8s_service_channels.0.port", "8080"),
+						resource.TestCheckResourceAttr("data.scc_subaccount_k8s_service_channels.scc_scs", "subaccount_k8s_service_channels.0.port", "8000"),
 						resource.TestCheckResourceAttr("data.scc_subaccount_k8s_service_channels.scc_scs", "subaccount_k8s_service_channels.0.connections", "1"),
 						resource.TestCheckResourceAttr("data.scc_subaccount_k8s_service_channels.scc_scs", "subaccount_k8s_service_channels.0.type", "K8S"),
 						resource.TestCheckResourceAttr("data.scc_subaccount_k8s_service_channels.scc_scs", "subaccount_k8s_service_channels.0.enabled", "true"),

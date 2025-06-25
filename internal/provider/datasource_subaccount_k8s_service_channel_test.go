@@ -28,14 +28,14 @@ func TestDataSourceSubaccountK8SServiceChannel(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(rec.GetDefaultClient()),
 			Steps: []resource.TestStep{
 				{
-					Config: providerConfig(user) + DataSourceSubaccountK8SServiceChannel("scc_sc", "cf.eu12.hana.ondemand.com", "0bcb0012-a982-42f9-bda4-0a5cb15f88c8", 2),
+					Config: providerConfig(user) + DataSourceSubaccountK8SServiceChannel("scc_sc", "cf.eu12.hana.ondemand.com", "0bcb0012-a982-42f9-bda4-0a5cb15f88c8", 1),
 					Check: resource.ComposeAggregateTestCheckFunc(
 						resource.TestCheckResourceAttr("data.scc_subaccount_k8s_service_channel.scc_sc", "region_host", "cf.eu12.hana.ondemand.com"),
 						resource.TestMatchResourceAttr("data.scc_subaccount_k8s_service_channel.scc_sc", "subaccount", regexpValidUUID),
 
 						resource.TestCheckResourceAttr("data.scc_subaccount_k8s_service_channel.scc_sc", "k8s_cluster", "cp.da2b3e1.stage.kyma.ondemand.com:443"),
 						resource.TestCheckResourceAttr("data.scc_subaccount_k8s_service_channel.scc_sc", "k8s_service", "bd64665f-060a-47b6-8aba-f406703f0acf"),
-						resource.TestCheckResourceAttr("data.scc_subaccount_k8s_service_channel.scc_sc", "port", "8080"),
+						resource.TestCheckResourceAttr("data.scc_subaccount_k8s_service_channel.scc_sc", "port", "8000"),
 						resource.TestCheckResourceAttr("data.scc_subaccount_k8s_service_channel.scc_sc", "connections", "1"),
 						resource.TestCheckResourceAttr("data.scc_subaccount_k8s_service_channel.scc_sc", "type", "K8S"),
 						resource.TestCheckResourceAttr("data.scc_subaccount_k8s_service_channel.scc_sc", "enabled", "true"),
