@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
+	"encoding/pem"
 	"fmt"
 	"io"
 	"net/http"
@@ -23,22 +24,51 @@ type ErrorResponse struct {
 	Message string `json:"message"`
 }
 
-func NewRestApiClient(client *http.Client, baseURL *url.URL, username, password string, caCertPEM []byte) (*RestApiClient, error) {
+func NewRestApiClient(client *http.Client, baseURL *url.URL, username, password string, caCertBytes []byte, clientCertBytes []byte, clientCertKey []byte) (*RestApiClient, error) {
+	useCertAuth := len(clientCertBytes) > 0 && len(clientCertKey) > 0
+	useBasicAuth := username != "" && password != ""
+
+	if useBasicAuth && useCertAuth {
+		return nil, fmt.Errorf("cannot use both certificate-based and basic authentication simultaneously")
+	}
+
+	if !useBasicAuth && !useCertAuth {
+		return nil, fmt.Errorf("either certificate-based or basic authentication must be provided")
+	}
+
+	tlsConfig := &tls.Config{}
+
 	// Create TLS config only if caCertPEM is provided
-	if caCertPEM != nil {
+	if len(caCertBytes) > 0 {
 		caCertPool := x509.NewCertPool()
-		if ok := caCertPool.AppendCertsFromPEM(caCertPEM); !ok {
+		if ok := caCertPool.AppendCertsFromPEM(caCertBytes); !ok {
 			return nil, fmt.Errorf("failed to parse CA certificate: input is not valid PEM-encoded data")
 		}
+		tlsConfig.RootCAs = caCertPool
+	}
 
-		// Initialize transport with custom TLS config
+	// If certificate auth is used, load the cert/key pair
+	if useCertAuth {
+		if block, _ := pem.Decode(clientCertBytes); block == nil {
+			return nil, fmt.Errorf("client certificate is not valid PEM-encoded data")
+		}
+		if block, _ := pem.Decode(clientCertKey); block == nil {
+			return nil, fmt.Errorf("client key is not valid PEM-encoded data")
+		}
+		cert, err := tls.X509KeyPair(clientCertBytes, clientCertKey)
+		if err != nil {
+			return nil, fmt.Errorf("failed to load client certificate/key: %w", err)
+		}
+		tlsConfig.Certificates = []tls.Certificate{cert}
+	}
+
+	// Only create a transport if we have a non-default TLS config
+	if tlsConfig.RootCAs != nil || len(tlsConfig.Certificates) > 0 {
 		if client == nil {
 			client = &http.Client{}
 		}
 		client.Transport = &http.Transport{
-			TLSClientConfig: &tls.Config{
-				RootCAs: caCertPool,
-			},
+			TLSClientConfig: tlsConfig,
 		}
 	} else if client == nil {
 		client = &http.Client{}
@@ -67,7 +97,10 @@ func (c *RestApiClient) DoRequest(method string, endpoint string, body []byte) (
 
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "*/*")
-	req.SetBasicAuth(c.Username, c.Password)
+
+	if c.Username != "" && c.Password != "" {
+		req.SetBasicAuth(c.Username, c.Password)
+	}
 
 	resp, err := c.Client.Do(req)
 	if err != nil {

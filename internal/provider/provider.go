@@ -2,6 +2,8 @@ package provider
 
 import (
 	"context"
+	"encoding/pem"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -38,10 +40,12 @@ type cloudConnectorProvider struct {
 }
 
 type cloudConnectorProviderData struct {
-	InstanceURL   types.String `tfsdk:"instance_url"`
-	Username      types.String `tfsdk:"username"`
-	Password      types.String `tfsdk:"password"`
-	CaCertificate types.String `tfsdk:"ca_certificate"`
+	InstanceURL       types.String `tfsdk:"instance_url"`
+	Username          types.String `tfsdk:"username"`
+	Password          types.String `tfsdk:"password"`
+	CaCertificate     types.String `tfsdk:"ca_certificate"`
+	ClientCertificate types.String `tfsdk:"client_certificate"`
+	ClientKey         types.String `tfsdk:"client_key"`
 }
 
 func (c *cloudConnectorProvider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -53,23 +57,33 @@ func (c *cloudConnectorProvider) Schema(_ context.Context, _ provider.SchemaRequ
 		MarkdownDescription: "The Terraform Provider for SAP Cloud Connector allows users to manage and configure SAP Cloud Connector instances within SAP BTP (Business Technology Platform). It enables automation of connectivity between SAP BTP subaccounts and on-premise systems using Terraform.",
 		Attributes: map[string]schema.Attribute{
 			"instance_url": schema.StringAttribute{
-				MarkdownDescription: "The URL of Cloud Connector Instance. This can also be sourced from the `SCC_INSTANCE_URL` environment variable.",
+				MarkdownDescription: "The URL of the Cloud Connector instance. This can also be sourced from the `SCC_INSTANCE_URL` environment variable.",
 				Optional:            true,
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(regexp.MustCompile(`^https?://`), "must be a valid URL starting with http:// or https://"),
 				},
 			},
 			"username": schema.StringAttribute{
-				MarkdownDescription: "The username used to connect to Cloud Connector Instance. This can also be sourced from the `SCC_USERNAME` environment variable.",
+				MarkdownDescription: "The username used for Basic Authentication with the Cloud Connector instance. This can also be sourced from the `SCC_USERNAME` environment variable.",
 				Optional:            true,
 			},
 			"password": schema.StringAttribute{
-				MarkdownDescription: "The password used to connect to Cloud Connector Instance. This can also be sourced from the `SCC_PASSWORD` environment variable.",
+				MarkdownDescription: "The password used for Basic Authentication with the Cloud Connector instance. This can also be sourced from the `SCC_PASSWORD` environment variable.",
 				Optional:            true,
 				Sensitive:           true,
 			},
 			"ca_certificate": schema.StringAttribute{
-				MarkdownDescription: "Contents of a PEM-encoded CA certificate. Use `file(\"path/to/cert.pem\")` in the provider block to read from a file. This can also be sourced from the `SCC_CA_CERTIFICATE` environment variable.",
+				MarkdownDescription: "Contents of a PEM-encoded CA certificate used to verify the Cloud Connector server. Use `file(\"path/to/ca.pem\")` in the provider block to load from a file. This can also be sourced from the `SCC_CA_CERTIFICATE` environment variable.",
+				Optional:            true,
+				Sensitive:           true,
+			},
+			"client_certificate": schema.StringAttribute{
+				MarkdownDescription: "Contents of a PEM-encoded client certificate used for mutual TLS authentication. Use `file(\"path/to/cert.pem\")` in the provider block to load from a file. This can also be sourced from the `SCC_CLIENT_CERTIFICATE` environment variable.",
+				Optional:            true,
+				Sensitive:           true,
+			},
+			"client_key": schema.StringAttribute{
+				MarkdownDescription: "Contents of a PEM-encoded client private key used for mutual TLS authentication. Use `file(\"path/to/key.pem\")` in the provider block to load from a file. This can also be sourced from the `SCC_CLIENT_KEY` environment variable.",
 				Optional:            true,
 				Sensitive:           true,
 			},
@@ -85,51 +99,16 @@ func (c *cloudConnectorProvider) Configure(ctx context.Context, req provider.Con
 		return
 	}
 
-	// Check for unknowns in required fields
-	if config.InstanceURL.IsUnknown() {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("instance_url"),
-			"Unknown Cloud Connector Instance URL",
-			"The provider cannot create the Cloud Connector client as the Cloud Connector Instance URL is unknown.",
-		)
-	}
-	if config.Username.IsUnknown() {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("username"),
-			"Unknown Username",
-			"The provider cannot create the Cloud Connector client as the username is unknown.",
-		)
-	}
-	if config.Password.IsUnknown() {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("password"),
-			"Unknown Password",
-			"The provider cannot create the Cloud Connector client as the password is unknown.",
-		)
-	}
-
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	// Load values from config or fallback to environment
-	instance_url := os.Getenv("SCC_INSTANCE_URL")
-	username := os.Getenv("SCC_USERNAME")
-	password := os.Getenv("SCC_PASSWORD")
-	ca_certificate := os.Getenv("SCC_CA_CERTIFICATE")
-
-	if !config.InstanceURL.IsNull() {
-		instance_url = config.InstanceURL.ValueString()
-	}
-	if !config.Username.IsNull() {
-		username = config.Username.ValueString()
-	}
-	if !config.Password.IsNull() {
-		password = config.Password.ValueString()
-	}
-	if !config.CaCertificate.IsNull() {
-		ca_certificate = config.CaCertificate.ValueString()
-	}
+	instance_url := getNonEmptyAttribute(config.InstanceURL, "SCC_INSTANCE_URL")
+	username := getNonEmptyAttribute(config.Username, "SCC_USERNAME")
+	password := getNonEmptyAttribute(config.Password, "SCC_PASSWORD")
+	ca_certificate := getNonEmptyAttribute(config.CaCertificate, "SCC_CA_CERTIFICATE")
+	client_certificate := getNonEmptyAttribute(config.ClientCertificate, "SCC_CLIENT_CERTIFICATE")
+	client_key := getNonEmptyAttribute(config.ClientKey, "SCC_CLIENT_KEY")
 
 	// Validate required values
 	if instance_url == "" {
@@ -138,20 +117,58 @@ func (c *cloudConnectorProvider) Configure(ctx context.Context, req provider.Con
 			"Missing Cloud Connector Instance URL",
 			"The provider cannot create the Cloud Connector client because the Cloud Connector Instance URL is empty.",
 		)
+		return
 	}
-	if username == "" {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("username"),
-			"Missing Username",
-			"The provider cannot create the Cloud Connector client because the username is empty.",
-		)
+
+	basicAuth := username != "" && password != ""
+	certAuth := client_certificate != "" && client_key != ""
+
+	if ca_certificate != "" {
+		if err := validatePEM(ca_certificate); err != nil {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("ca_certificate"),
+				"Invalid CA Certificate",
+				"The provided CA certificate is not a valid PEM-encoded block.",
+			)
+			return
+		}
 	}
-	if password == "" {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("password"),
-			"Missing Password",
-			"The provider cannot create the Cloud Connector client because the password is empty.",
+
+	if client_certificate != "" {
+		if err := validatePEM(client_certificate); err != nil {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("client_certificate"),
+				"Invalid Client Certificate",
+				"The provided client certificate is not a valid PEM-encoded block.",
+			)
+			return
+		}
+	}
+
+	if client_key != "" {
+		if err := validatePEM(client_key); err != nil {
+			resp.Diagnostics.AddAttributeError(
+				path.Root("client_key"),
+				"Invalid Client Key",
+				"The provided client key is not a valid PEM-encoded block.",
+			)
+			return
+		}
+	}
+
+	if !basicAuth && !certAuth {
+		resp.Diagnostics.AddError(
+			"Missing Authentication Details",
+			"Either a username/password or a client certificate/key must be provided for authentication.",
 		)
+		return
+	}
+	if basicAuth && certAuth {
+		resp.Diagnostics.AddError(
+			"Conflicting Authentication Details",
+			"Both Basic Authentication and Certificate-based Authentication were provided. Only one can be used.",
+		)
+		return
 	}
 
 	if resp.Diagnostics.HasError() {
@@ -170,12 +187,11 @@ func (c *cloudConnectorProvider) Configure(ctx context.Context, req provider.Con
 	}
 
 	// Convert CA certificate to []byte only if provided
-	var certBytes []byte
-	if ca_certificate != "" {
-		certBytes = []byte(ca_certificate)
-	}
+	caCertBytes := []byte(ca_certificate)
+	clientCertBytes := []byte(client_certificate)
+	clientKeyBytes := []byte(client_key)
 
-	client, err := api.NewRestApiClient(c.httpClient, parsedURL, username, password, certBytes)
+	client, err := api.NewRestApiClient(c.httpClient, parsedURL, username, password, caCertBytes, clientCertBytes, clientKeyBytes)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Client Creation Failed",
@@ -184,8 +200,47 @@ func (c *cloudConnectorProvider) Configure(ctx context.Context, req provider.Con
 		return
 	}
 
+	if err := testProviderConnection(client); err != nil {
+		resp.Diagnostics.AddError(
+			"Cloud Connector Authentication Failed",
+			fmt.Sprintf("Authentication or connectivity check failed: %v", err),
+		)
+		return
+	}
+
 	resp.DataSourceData = client
 	resp.ResourceData = client
+}
+
+func getNonEmptyAttribute(attr types.String, envVar string) string {
+	if !attr.IsNull() && attr.ValueString() != "" {
+		return attr.ValueString()
+	}
+	return os.Getenv(envVar)
+}
+
+func testProviderConnection(client *api.RestApiClient) error {
+	resp, err := client.GetRequest("/api/v1/connector/version")
+	if err != nil {
+		return fmt.Errorf("connection test failed: %w", err)
+	}
+	if cerr := resp.Body.Close(); cerr != nil {
+		return fmt.Errorf("failed to close response body: %w", cerr)
+	}
+
+	if resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden {
+		return fmt.Errorf("authentication rejected with status: %s", resp.Status)
+	}
+
+	return nil
+}
+
+func validatePEM(data string) error {
+	block, _ := pem.Decode([]byte(data))
+	if block == nil {
+		return errors.New("data is not a valid PEM block")
+	}
+	return nil
 }
 
 // DataSources defines the data sources implemented in the provider.

@@ -38,11 +38,11 @@ type User struct {
 }
 
 var redactedTestUser = User{
-	InstanceUsername: "testuser@sap.com",
-	InstancePassword: "testpassword",
-	InstanceURL:      "https://127.0.0.1:8443",
-	CloudUsername:    "testuser@sap.com",
-	CloudPassword:    "testpassword",
+	InstanceUsername: "test-user@example.com",
+	InstancePassword: "REDACTED_INSTANCE_PASSWORD",
+	InstanceURL:      "https://redacted.instance.url",
+	CloudUsername:    "cloud-user@example.com",
+	CloudPassword:    "REDACTED_CLOUD_PASSWORD",
 }
 
 func providerConfig(testUser User) string {
@@ -140,10 +140,11 @@ func hookRedactSensitiveCredentials() func(i *cassette.Interaction) error {
 			}
 		}
 
-		ipPattern := regexp.MustCompile(`https://(?:\d{1,3}\.){3}\d{1,3}(?::\d+)?`)
-		hostPattern := regexp.MustCompile(`^(?:\d{1,3}\.){3}\d{1,3}(?::\d+)?$`)
-		i.Request.URL = ipPattern.ReplaceAllString(i.Request.URL, redactedTestUser.InstanceURL)
-		i.Request.Host = hostPattern.ReplaceAllString(i.Request.Host, redactedTestUser.InstanceURL)
+		ipOrHostRegex := regexp.MustCompile(`https://(?:[a-zA-Z0-9\-\.]+|\d{1,3}(?:\.\d{1,3}){3})(?::\d+)?`)
+		i.Request.URL = ipOrHostRegex.ReplaceAllString(i.Request.URL, redactedTestUser.InstanceURL)
+
+		hostRegex := regexp.MustCompile(`^(?:[a-zA-Z0-9\-\.]+|\d{1,3}(?:\.\d{1,3}){3})(?::\d+)?$`)
+		i.Request.Host = hostRegex.ReplaceAllString(i.Request.Host, redactedTestUser.InstanceURL)
 
 		redact(i.Request.Headers)
 		redact(i.Response.Headers)
