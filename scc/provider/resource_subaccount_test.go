@@ -1,9 +1,7 @@
 package provider
 
 import (
-	"crypto/tls"
 	"fmt"
-	"net/http"
 	"regexp"
 	"testing"
 
@@ -12,16 +10,12 @@ import (
 )
 
 func TestResourceSubaccount(t *testing.T) {
+	subaccountId := "7480ee65-e039-41cf-ba72-6aaf56c312df"
+	regionHost := "cf.eu12.hana.ondemand.com"
 	t.Parallel()
 
 	t.Run("happy path", func(t *testing.T) {
 		rec, user := setupVCR(t, "fixtures/resource_subaccount")
-		rec.SetRealTransport(&http.Transport{
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true,
-			},
-		})
-
 		if len(user.CloudUsername) == 0 || len(user.CloudPassword) == 0 {
 			t.Fatalf("Missing TF_VAR_cloud_user or TF_VAR_cloud_password for recording test fixtures")
 		}
@@ -32,7 +26,7 @@ func TestResourceSubaccount(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(rec.GetDefaultClient()),
 			Steps: []resource.TestStep{
 				{
-					Config: providerConfig(user) + ResourceSubaccount("test", "cf.eu12.hana.ondemand.com", "7480ee65-e039-41cf-ba72-6aaf56c312df", user.CloudUsername, user.CloudPassword, "subaccount added via terraform tests"),
+					Config: providerConfig(user) + ResourceSubaccount("test", regionHost, subaccountId, user.CloudUsername, user.CloudPassword, "subaccount added via terraform tests"),
 					Check: resource.ComposeAggregateTestCheckFunc(
 						resource.TestCheckResourceAttr("scc_subaccount.test", "region_host", "cf.eu12.hana.ondemand.com"),
 						resource.TestMatchResourceAttr("scc_subaccount.test", "subaccount", regexpValidUUID),
@@ -56,6 +50,13 @@ func TestResourceSubaccount(t *testing.T) {
 						resource.TestMatchResourceAttr("scc_subaccount.test", "tunnel.subaccount_certificate.subject_dn", regexp.MustCompile(`CN=.*?,L=.*?,OU=.*?,OU=.*?,O=.*?,C=.*?`)),
 					),
 				},
+				// {
+				// 	Config: providerConfig(user) + ResourceSubaccountUpdateWithDisplayName("test", regionHost, subaccountId, user.CloudUsername, user.CloudPassword, "Updated description", "Updated Display Name"),
+				// 	Check: resource.ComposeAggregateTestCheckFunc(
+				// 		resource.TestCheckResourceAttr("scc_subaccount.test", "description", "Updated description"),
+				// 		resource.TestCheckResourceAttr("scc_subaccount.test", "display_name", "Updated Display Name"),
+				// 	),
+				// },
 				{
 					ResourceName:                         "scc_subaccount.test",
 					ImportState:                          true,
@@ -72,13 +73,70 @@ func TestResourceSubaccount(t *testing.T) {
 
 	})
 
-	t.Run("error path - region host mandatory", func(t *testing.T) {
-		rec, user := setupVCR(t, "fixtures/resource_subaccount_err_wo_region_host")
-		rec.SetRealTransport(&http.Transport{
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true,
+	t.Run("update path - update description and display name", func(t *testing.T) {
+		rec, user := setupVCR(t, "fixtures/resource_subaccount_update")
+		if len(user.CloudUsername) == 0 || len(user.CloudPassword) == 0 {
+			t.Fatalf("Missing TF_VAR_cloud_user or TF_VAR_cloud_password for recording test fixtures")
+		}
+		defer stopQuietly(rec)
+
+		resource.Test(t, resource.TestCase{
+			IsUnitTest:               true,
+			ProtoV6ProviderFactories: getTestProviders(rec.GetDefaultClient()),
+			Steps: []resource.TestStep{
+				{
+					Config: providerConfig(user) + ResourceSubaccountUpdateWithDisplayName("test", regionHost, subaccountId, user.CloudUsername, user.CloudPassword, "Initial description", "Initial Display Name"),
+					Check: resource.ComposeAggregateTestCheckFunc(
+						resource.TestCheckResourceAttr("scc_subaccount.test", "description", "Initial description"),
+						resource.TestCheckResourceAttr("scc_subaccount.test", "display_name", "Initial Display Name"),
+					),
+				},
+				{
+					Config: providerConfig(user) + ResourceSubaccountUpdateWithDisplayName("test", regionHost, subaccountId, user.CloudUsername, user.CloudPassword, "Updated description", "Updated Display Name"),
+					Check: resource.ComposeAggregateTestCheckFunc(
+						resource.TestCheckResourceAttr("scc_subaccount.test", "description", "Updated description"),
+						resource.TestCheckResourceAttr("scc_subaccount.test", "display_name", "Updated Display Name"),
+					),
+				},
 			},
 		})
+	})
+
+	t.Run("update path - tunnel state change", func(t *testing.T) {
+		rec, user := setupVCR(t, "fixtures/resource_subaccount_update_tunnel")
+		if user.CloudUsername == "" || user.CloudPassword == "" {
+			t.Fatalf("Missing TF_VAR_cloud_user or TF_VAR_cloud_password for recording test fixtures")
+		}
+		defer stopQuietly(rec)
+
+		resource.Test(t, resource.TestCase{
+			IsUnitTest:               true,
+			ProtoV6ProviderFactories: getTestProviders(rec.GetDefaultClient()),
+			Steps: []resource.TestStep{
+				{
+					Config: providerConfig(user) + ResourceSubaccountWithTunnelState("test", regionHost, subaccountId, user.CloudUsername, user.CloudPassword, "Testing tunnel connected", "Connected"),
+					Check: resource.ComposeAggregateTestCheckFunc(
+						resource.TestCheckResourceAttr("scc_subaccount.test", "tunnel.state", "Connected"),
+					),
+				},
+				{
+					Config: providerConfig(user) + ResourceSubaccountWithTunnelState("test", regionHost, subaccountId, user.CloudUsername, user.CloudPassword, "Testing tunnel disconnected", "Disconnected"),
+					Check: resource.ComposeAggregateTestCheckFunc(
+						resource.TestCheckResourceAttr("scc_subaccount.test", "tunnel.state", "Disconnected"),
+					),
+				},
+				{
+					Config: providerConfig(user) + ResourceSubaccountWithTunnelState("test", regionHost, subaccountId, user.CloudUsername, user.CloudPassword, "Testing tunnel reconnected", "Connected"),
+					Check: resource.ComposeAggregateTestCheckFunc(
+						resource.TestCheckResourceAttr("scc_subaccount.test", "tunnel.state", "Connected"),
+					),
+				},
+			},
+		})
+	})
+
+	t.Run("error path - region host mandatory", func(t *testing.T) {
+		rec, user := setupVCR(t, "fixtures/resource_subaccount_err_wo_region_host")
 
 		if len(user.CloudUsername) == 0 || len(user.CloudPassword) == 0 {
 			t.Fatalf("Missing TF_VAR_cloud_user or TF_VAR_cloud_password for recording test fixtures")
@@ -98,12 +156,6 @@ func TestResourceSubaccount(t *testing.T) {
 
 	t.Run("error path - subaccount id mandatory", func(t *testing.T) {
 		rec, user := setupVCR(t, "fixtures/resource_subaccount_err_wo_subaccount_id")
-		rec.SetRealTransport(&http.Transport{
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true,
-			},
-		})
-
 		if len(user.CloudUsername) == 0 || len(user.CloudPassword) == 0 {
 			t.Fatalf("Missing TF_VAR_cloud_user or TF_VAR_cloud_password for recording test fixtures")
 		}
@@ -122,11 +174,6 @@ func TestResourceSubaccount(t *testing.T) {
 
 	t.Run("error path - cloud user mandatory", func(t *testing.T) {
 		rec, user := setupVCR(t, "fixtures/resource_subaccount_err_wo_cloud_user")
-		rec.SetRealTransport(&http.Transport{
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true,
-			},
-		})
 
 		if len(user.CloudUsername) == 0 || len(user.CloudPassword) == 0 {
 			t.Fatalf("Missing TF_VAR_cloud_user or TF_VAR_cloud_password for recording test fixtures")
@@ -146,11 +193,6 @@ func TestResourceSubaccount(t *testing.T) {
 
 	t.Run("error path - cloud password mandatory", func(t *testing.T) {
 		rec, user := setupVCR(t, "fixtures/resource_subaccount_err_wo_password")
-		rec.SetRealTransport(&http.Transport{
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true,
-			},
-		})
 
 		if len(user.CloudUsername) == 0 || len(user.CloudPassword) == 0 {
 			t.Fatalf("Missing TF_VAR_cloud_user or TF_VAR_cloud_password for recording test fixtures")
@@ -224,6 +266,35 @@ func ResourceSubaccountWoPassword(datasourceName string, regionHost string, suba
     description= "%s"
 	}
 	`, datasourceName, regionHost, subaccount, cloudUser, description)
+}
+
+func ResourceSubaccountUpdateWithDisplayName(datasourceName, regionHost, subaccount, cloudUser, cloudPassword, description, displayName string) string {
+	return fmt.Sprintf(`
+resource "scc_subaccount" "%s" {
+  region_host   = "%s"
+  subaccount    = "%s"
+  cloud_user    = "%s"
+  cloud_password = "%s"
+  description   = "%s"
+  display_name  = "%s"
+}
+`, datasourceName, regionHost, subaccount, cloudUser, cloudPassword, description, displayName)
+}
+
+func ResourceSubaccountWithTunnelState(datasourceName, regionHost, subaccount, cloudUser, cloudPassword, description, tunnelState string) string {
+	return fmt.Sprintf(`
+resource "scc_subaccount" "%s" {
+  region_host    = "%s"
+  subaccount     = "%s"
+  cloud_user     = "%s"
+  cloud_password = "%s"
+  description    = "%s"
+
+  tunnel = {
+    state = "%s"
+  }
+}
+`, datasourceName, regionHost, subaccount, cloudUser, cloudPassword, description, tunnelState)
 }
 
 func getImportStateForSubaccount(resourceName string) resource.ImportStateIdFunc {

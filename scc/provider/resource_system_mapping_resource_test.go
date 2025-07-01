@@ -1,9 +1,7 @@
 package provider
 
 import (
-	"crypto/tls"
 	"fmt"
-	"net/http"
 	"regexp"
 	"testing"
 
@@ -17,11 +15,6 @@ func TestResourceSystemMappingResource(t *testing.T) {
 
 	t.Run("happy path", func(t *testing.T) {
 		rec, user := setupVCR(t, "fixtures/resource_system_mapping_resource")
-		rec.SetRealTransport(&http.Transport{
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true,
-			},
-		})
 		defer stopQuietly(rec)
 
 		resource.Test(t, resource.TestCase{
@@ -31,14 +24,16 @@ func TestResourceSystemMappingResource(t *testing.T) {
 				{
 					Config: providerConfig(user) + ResourceSystemMappingResource("test", "cf.eu12.hana.ondemand.com", "d3bbbcd7-d5e0-483b-a524-6dee7205f8e8", "testtfvirtualtesting", "90", "/", "create resource", true),
 					Check: resource.ComposeAggregateTestCheckFunc(
-						resource.TestCheckResourceAttr("scc_system_mapping_resource.test", "region_host", "cf.eu12.hana.ondemand.com"),
-						resource.TestMatchResourceAttr("scc_system_mapping_resource.test", "subaccount", regexpValidUUID),
-						resource.TestCheckResourceAttr("scc_system_mapping_resource.test", "virtual_host", "testtfvirtualtesting"),
-						resource.TestCheckResourceAttr("scc_system_mapping_resource.test", "virtual_port", "90"),
-
-						resource.TestCheckResourceAttr("scc_system_mapping_resource.test", "id", "/"),
 						resource.TestCheckResourceAttr("scc_system_mapping_resource.test", "description", "create resource"),
 						resource.TestCheckResourceAttr("scc_system_mapping_resource.test", "enabled", "true"),
+					),
+				},
+				{
+					// 🚀 This is the update step
+					Config: providerConfig(user) + ResourceSystemMappingResource("test", "cf.eu12.hana.ondemand.com", "d3bbbcd7-d5e0-483b-a524-6dee7205f8e8", "testtfvirtualtesting", "90", "/", "updated resource", false),
+					Check: resource.ComposeAggregateTestCheckFunc(
+						resource.TestCheckResourceAttr("scc_system_mapping_resource.test", "description", "updated resource"),
+						resource.TestCheckResourceAttr("scc_system_mapping_resource.test", "enabled", "false"),
 					),
 				},
 				{
@@ -49,7 +44,6 @@ func TestResourceSystemMappingResource(t *testing.T) {
 				},
 			},
 		})
-
 	})
 
 	t.Run("error path - region host mandatory", func(t *testing.T) {

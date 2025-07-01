@@ -116,12 +116,12 @@ func (r *SystemMappingResourceResource) Create(ctx context.Context, req resource
 		return
 	}
 
-	region_host := plan.RegionHost.ValueString()
+	regionHost := plan.RegionHost.ValueString()
 	subaccount := plan.Subaccount.ValueString()
-	virtual_host := plan.VirtualHost.ValueString()
-	virtual_port := plan.VirtualPort.ValueString()
+	virtualHost := plan.VirtualHost.ValueString()
+	virtualPort := plan.VirtualPort.ValueString()
 	resource_id := CreateEncodedResourceID(plan.ID.ValueString())
-	endpoint := endpoints.GetSystemMappingResourceBaseEndpoint(region_host, subaccount, virtual_host, virtual_port)
+	endpoint := endpoints.GetSystemMappingResourceBaseEndpoint(regionHost, subaccount, virtualHost, virtualPort)
 
 	planBody := map[string]string{
 		"id":                      plan.ID.ValueString(),
@@ -133,21 +133,21 @@ func (r *SystemMappingResourceResource) Create(ctx context.Context, req resource
 
 	err := requestAndUnmarshal(r.client, &respObj, "POST", endpoint, planBody, false)
 	if err != nil {
-		resp.Diagnostics.AddError("error creating the cloud connector system mapping resource", err.Error())
+		resp.Diagnostics.AddError(errMsgAddSystemMappingResourceFailed, err.Error())
 		return
 	}
 
-	endpoint = endpoints.GetSystemMappingResourceEndpoint(region_host, subaccount, virtual_host, virtual_port, resource_id)
+	endpoint = endpoints.GetSystemMappingResourceEndpoint(regionHost, subaccount, virtualHost, virtualPort, resource_id)
 
 	err = requestAndUnmarshal(r.client, &respObj, "GET", endpoint, planBody, true)
 	if err != nil {
-		resp.Diagnostics.AddError("error fetching the cloud connector system mapping resource", err.Error())
+		resp.Diagnostics.AddError(errMsgFetchSystemMappingResourceFailed, err.Error())
 		return
 	}
 
 	responseModel, err := SystemMappingResourceValueFrom(ctx, plan, respObj)
 	if err != nil {
-		resp.Diagnostics.AddError("error mapping system mapping resource value", fmt.Sprintf("%s", err))
+		resp.Diagnostics.AddError(errMsgMapSystemMappingResourceFailed, fmt.Sprintf("%s", err))
 		return
 	}
 
@@ -167,22 +167,22 @@ func (r *SystemMappingResourceResource) Read(ctx context.Context, req resource.R
 		return
 	}
 
-	region_host := state.RegionHost.ValueString()
+	regionHost := state.RegionHost.ValueString()
 	subaccount := state.Subaccount.ValueString()
-	virtual_host := state.VirtualHost.ValueString()
-	virtual_port := state.VirtualPort.ValueString()
+	virtualHost := state.VirtualHost.ValueString()
+	virtualPort := state.VirtualPort.ValueString()
 	resource_id := CreateEncodedResourceID(state.ID.ValueString())
-	endpoint := endpoints.GetSystemMappingResourceEndpoint(region_host, subaccount, virtual_host, virtual_port, resource_id)
+	endpoint := endpoints.GetSystemMappingResourceEndpoint(regionHost, subaccount, virtualHost, virtualPort, resource_id)
 
 	err := requestAndUnmarshal(r.client, &respObj, "GET", endpoint, nil, true)
 	if err != nil {
-		resp.Diagnostics.AddError("error fetching the cloud connector system mapping resource", err.Error())
+		resp.Diagnostics.AddError(errMsgFetchSystemMappingResourceFailed, err.Error())
 		return
 	}
 
 	responseModel, err := SystemMappingResourceValueFrom(ctx, state, respObj)
 	if err != nil {
-		resp.Diagnostics.AddError("error mapping system mapping resource value", fmt.Sprintf("%s", err))
+		resp.Diagnostics.AddError(errMsgMapSystemMappingResourceFailed, fmt.Sprintf("%s", err))
 		return
 	}
 
@@ -208,20 +208,20 @@ func (r *SystemMappingResourceResource) Update(ctx context.Context, req resource
 		return
 	}
 
-	region_host := plan.RegionHost.ValueString()
+	regionHost := plan.RegionHost.ValueString()
 	subaccount := plan.Subaccount.ValueString()
-	virtual_host := plan.VirtualHost.ValueString()
-	virtual_port := plan.VirtualPort.ValueString()
+	virtualHost := plan.VirtualHost.ValueString()
+	virtualPort := plan.VirtualPort.ValueString()
 	resource_id := CreateEncodedResourceID(plan.ID.ValueString())
 
-	if (plan.RegionHost.ValueString() != region_host) ||
+	if (plan.RegionHost.ValueString() != regionHost) ||
 		(plan.Subaccount.ValueString() != subaccount) ||
-		(plan.VirtualHost.ValueString() != virtual_host) ||
-		(plan.VirtualPort.ValueString() != virtual_port) {
-		resp.Diagnostics.AddError("error updating the cloud connector system mapping resource.", "Failed to update the cloud connector system mapping resource due to mismatched configuration values.")
+		(plan.VirtualHost.ValueString() != virtualHost) ||
+		(plan.VirtualPort.ValueString() != virtualPort) {
+		resp.Diagnostics.AddError(errMsgUpdateSystemMappingResourceFailed, "Failed to update the cloud connector system mapping resource due to mismatched configuration values.")
 		return
 	}
-	endpoint := fmt.Sprintf("/api/v1/configuration/subaccounts/%s/%s/systemMappings/%s:%s/resources/%s", region_host, subaccount, virtual_host, virtual_port, resource_id)
+	endpoint := fmt.Sprintf("/api/v1/configuration/subaccounts/%s/%s/systemMappings/%s:%s/resources/%s", regionHost, subaccount, virtualHost, virtualPort, resource_id)
 
 	planBody := map[string]string{
 		"enabled":                 fmt.Sprintf("%t", plan.Enabled.ValueBool()),
@@ -232,21 +232,21 @@ func (r *SystemMappingResourceResource) Update(ctx context.Context, req resource
 
 	err := requestAndUnmarshal(r.client, &respObj, "PUT", endpoint, planBody, false)
 	if err != nil {
-		resp.Diagnostics.AddError("error updating the cloud connector system mapping resource", err.Error())
+		resp.Diagnostics.AddError(errMsgUpdateSystemMappingResourceFailed, err.Error())
 		return
 	}
 
-	endpoint = endpoints.GetSystemMappingResourceEndpoint(region_host, subaccount, virtual_host, virtual_port, resource_id)
+	endpoint = endpoints.GetSystemMappingResourceEndpoint(regionHost, subaccount, virtualHost, virtualPort, resource_id)
 
 	err = requestAndUnmarshal(r.client, &respObj, "GET", endpoint, planBody, true)
 	if err != nil {
-		resp.Diagnostics.AddError("error fetching the cloud connector system mapping resource", err.Error())
+		resp.Diagnostics.AddError(errMsgFetchSystemMappingResourceFailed, err.Error())
 		return
 	}
 
 	responseModel, err := SystemMappingResourceValueFrom(ctx, plan, respObj)
 	if err != nil {
-		resp.Diagnostics.AddError("error mapping system mapping resource value", fmt.Sprintf("%s", err))
+		resp.Diagnostics.AddError(errMsgMapSystemMappingResourceFailed, fmt.Sprintf("%s", err))
 		return
 	}
 
@@ -266,22 +266,22 @@ func (r *SystemMappingResourceResource) Delete(ctx context.Context, req resource
 		return
 	}
 
-	region_host := state.RegionHost.ValueString()
+	regionHost := state.RegionHost.ValueString()
 	subaccount := state.Subaccount.ValueString()
-	virtual_host := state.VirtualHost.ValueString()
-	virtual_port := state.VirtualPort.ValueString()
+	virtualHost := state.VirtualHost.ValueString()
+	virtualPort := state.VirtualPort.ValueString()
 	resource_id := CreateEncodedResourceID(state.ID.ValueString())
-	endpoint := endpoints.GetSystemMappingResourceEndpoint(region_host, subaccount, virtual_host, virtual_port, resource_id)
+	endpoint := endpoints.GetSystemMappingResourceEndpoint(regionHost, subaccount, virtualHost, virtualPort, resource_id)
 
 	err := requestAndUnmarshal(r.client, &respObj, "DELETE", endpoint, nil, false)
 	if err != nil {
-		resp.Diagnostics.AddError("error deleting the system mapping resource", err.Error())
+		resp.Diagnostics.AddError(errMsgDeleteSystemMappingResourceFailed, err.Error())
 		return
 	}
 
 	responseModel, err := SystemMappingResourceValueFrom(ctx, state, respObj)
 	if err != nil {
-		resp.Diagnostics.AddError("error mapping system mapping resource value", fmt.Sprintf("%s", err))
+		resp.Diagnostics.AddError(errMsgMapSystemMappingResourceFailed, fmt.Sprintf("%s", err))
 		return
 	}
 

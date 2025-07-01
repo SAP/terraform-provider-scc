@@ -1,9 +1,7 @@
 package provider
 
 import (
-	"crypto/tls"
 	"fmt"
-	"net/http"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -16,11 +14,6 @@ func TestDataSourceSubaccounts(t *testing.T) {
 
 	t.Run("happy path", func(t *testing.T) {
 		rec, user := setupVCR(t, "fixtures/datasource_subaccounts")
-		rec.SetRealTransport(&http.Transport{
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true,
-			},
-		})
 		defer stopQuietly(rec)
 
 		resource.Test(t, resource.TestCase{

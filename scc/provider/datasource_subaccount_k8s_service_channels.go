@@ -13,21 +13,21 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
-var _ datasource.DataSource = &SubaccountServiceChannelsK8SDataSource{}
+var _ datasource.DataSource = &SubaccountK8SServiceChannelsDataSource{}
 
-func NewSubaccountServiceChannelsK8SDataSource() datasource.DataSource {
-	return &SubaccountServiceChannelsK8SDataSource{}
+func NewSubaccountK8SServiceChannelsDataSource() datasource.DataSource {
+	return &SubaccountK8SServiceChannelsDataSource{}
 }
 
-type SubaccountServiceChannelsK8SDataSource struct {
+type SubaccountK8SServiceChannelsDataSource struct {
 	client *api.RestApiClient
 }
 
-func (d *SubaccountServiceChannelsK8SDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (d *SubaccountK8SServiceChannelsDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_subaccount_k8s_service_channels"
 }
 
-func (r *SubaccountServiceChannelsK8SDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (r *SubaccountK8SServiceChannelsDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: `Cloud Connector Subaccount K8S Service Channels Data Source.
 				
@@ -114,7 +114,7 @@ __Further documentation:__
 	}
 }
 
-func (d *SubaccountServiceChannelsK8SDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *SubaccountK8SServiceChannelsDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -133,7 +133,7 @@ func (d *SubaccountServiceChannelsK8SDataSource) Configure(ctx context.Context, 
 	d.client = client
 }
 
-func (d *SubaccountServiceChannelsK8SDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (d *SubaccountK8SServiceChannelsDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data SubaccountK8SServiceChannelsConfig
 	var respObj apiobjects.SubaccountK8SServiceChannels
 	diags := req.Config.Get(ctx, &data)
@@ -143,20 +143,20 @@ func (d *SubaccountServiceChannelsK8SDataSource) Read(ctx context.Context, req d
 		return
 	}
 
-	region_host := data.RegionHost.ValueString()
+	regionHost := data.RegionHost.ValueString()
 	subaccount := data.Subaccount.ValueString()
 
-	endpoint := endpoints.GetSubaccountServiceChannelBaseEndpoint(region_host, subaccount, "K8S")
+	endpoint := endpoints.GetSubaccountServiceChannelBaseEndpoint(regionHost, subaccount, "K8S")
 
-	err := requestAndUnmarshal(d.client, &respObj.SubaccountServiceChannelsK8S, "GET", endpoint, nil, true)
+	err := requestAndUnmarshal(d.client, &respObj.SubaccountK8SServiceChannels, "GET", endpoint, nil, true)
 	if err != nil {
-		resp.Diagnostics.AddError("error fetching the cloud connector subaccount service channels", err.Error())
+		resp.Diagnostics.AddError(errMsgFetchSubaccountK8SServiceChannelsFailed, err.Error())
 		return
 	}
 
 	responseModel, err := SubaccountK8SServiceChannelsValueFrom(ctx, data, respObj)
 	if err != nil {
-		resp.Diagnostics.AddError("error mapping subaccount service channels value", fmt.Sprintf("%s", err))
+		resp.Diagnostics.AddError(errMsgMapSubaccountK8SServiceChannelsFailed, fmt.Sprintf("%s", err))
 		return
 	}
 

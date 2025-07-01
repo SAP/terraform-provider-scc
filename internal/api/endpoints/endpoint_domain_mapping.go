@@ -7,5 +7,5 @@ func GetDomainMappingEndpoint(regionHost, subaccount, internalDomain string) str
 }
 
 func GetDomainMappingBaseEndpoint(regionHost, subaccount string) string {
-	return fmt.Sprintf(GetSubaccountBaseEndpoint()+"%s/%s/domainMappings", regionHost, subaccount)
+	return fmt.Sprintf(GetSubaccountBaseEndpoint()+"/%s/%s/domainMappings", regionHost, subaccount)
 }

@@ -13,21 +13,21 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
-var _ datasource.DataSource = &SubaccountDataSource{}
+var _ datasource.DataSource = &SubaccountConfigurationDataSource{}
 
-func NewSubaccountDataSource() datasource.DataSource {
-	return &SubaccountDataSource{}
+func NewSubaccountConfigurationDataSource() datasource.DataSource {
+	return &SubaccountConfigurationDataSource{}
 }
 
-type SubaccountDataSource struct {
+type SubaccountConfigurationDataSource struct {
 	client *api.RestApiClient
 }
 
-func (d *SubaccountDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+func (d *SubaccountConfigurationDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_subaccount_configuration"
 }
 
-func (r *SubaccountDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+func (r *SubaccountConfigurationDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: `Cloud Connector Subaccount Configuration Data Source.
 				
@@ -163,7 +163,7 @@ __Further documentation:__
 	}
 }
 
-func (d *SubaccountDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+func (d *SubaccountConfigurationDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -182,7 +182,7 @@ func (d *SubaccountDataSource) Configure(ctx context.Context, req datasource.Con
 	d.client = client
 }
 
-func (d *SubaccountDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+func (d *SubaccountConfigurationDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data SubaccountData
 	var respObj apiobjects.Subaccount
 	diags := req.Config.Get(ctx, &data)
@@ -192,19 +192,19 @@ func (d *SubaccountDataSource) Read(ctx context.Context, req datasource.ReadRequ
 		return
 	}
 
-	region_host := data.RegionHost.ValueString()
+	regionHost := data.RegionHost.ValueString()
 	subaccount := data.Subaccount.ValueString()
-	endpoint := endpoints.GetSubaccountEndpoint(region_host, subaccount)
+	endpoint := endpoints.GetSubaccountEndpoint(regionHost, subaccount)
 
 	err := requestAndUnmarshal(d.client, &respObj, "GET", endpoint, nil, true)
 	if err != nil {
-		resp.Diagnostics.AddError("error fetching the cloud connector subaccount", err.Error())
+		resp.Diagnostics.AddError(errMsgFetchSubaccountFailed, err.Error())
 		return
 	}
 
 	responseModel, err := SubaccountDataSourceValueFrom(ctx, respObj)
 	if err != nil {
-		resp.Diagnostics.AddError("error mapping subaccount value", fmt.Sprintf("%s", err))
+		resp.Diagnostics.AddError(errMsgMapSubaccountFailed, fmt.Sprintf("%s", err))
 		return
 	}
 

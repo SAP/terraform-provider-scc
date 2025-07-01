@@ -26,7 +26,7 @@ type SubaccountK8SServiceChannelStateData struct {
 	ConnectedSinceTimeStamp types.Int64 `tfsdk:"connected_since_time_stamp"`
 }
 
-var SubaccountServiceChannelK8SStateType = map[string]attr.Type{
+var SubaccountK8SServiceChannelStateType = map[string]attr.Type{
 	"connected":                  types.BoolType,
 	"opened_connections":         types.Int64Type,
 	"connected_since_time_stamp": types.Int64Type,
@@ -59,7 +59,7 @@ func SubaccountK8SServiceChannelValueFrom(ctx context.Context, plan SubaccountK8
 		ConnectedSinceTimeStamp: types.Int64Value(value.State.ConnectedSinceTimeStamp),
 	}
 
-	state, _ := types.ObjectValueFrom(ctx, SubaccountServiceChannelK8SStateType, stateObj)
+	state, _ := types.ObjectValueFrom(ctx, SubaccountK8SServiceChannelStateType, stateObj)
 
 	model := &SubaccountK8SServiceChannelConfig{
 		RegionHost:  plan.RegionHost,
@@ -80,14 +80,14 @@ func SubaccountK8SServiceChannelValueFrom(ctx context.Context, plan SubaccountK8
 
 func SubaccountK8SServiceChannelsValueFrom(ctx context.Context, plan SubaccountK8SServiceChannelsConfig, value apiobjects.SubaccountK8SServiceChannels) (SubaccountK8SServiceChannelsConfig, error) {
 	serviceChannels := []SubaccountK8SServiceChannel{}
-	for _, channel := range value.SubaccountServiceChannelsK8S {
+	for _, channel := range value.SubaccountK8SServiceChannels {
 		stateObj := SubaccountK8SServiceChannelStateData{
 			Connected:               types.BoolValue(channel.State.Connected),
 			OpenedConnections:       types.Int64Value(channel.State.OpenedConnections),
 			ConnectedSinceTimeStamp: types.Int64Value(channel.State.ConnectedSinceTimeStamp),
 		}
 
-		state, _ := types.ObjectValueFrom(ctx, SubaccountServiceChannelK8SStateType, stateObj)
+		state, _ := types.ObjectValueFrom(ctx, SubaccountK8SServiceChannelStateType, stateObj)
 
 		c := SubaccountK8SServiceChannel{
 			K8SCluster:  types.StringValue(channel.K8SCluster),

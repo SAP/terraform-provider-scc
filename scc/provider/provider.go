@@ -103,95 +103,25 @@ func (c *cloudConnectorProvider) Configure(ctx context.Context, req provider.Con
 		return
 	}
 
-	instance_url := getNonEmptyAttribute(config.InstanceURL, "SCC_INSTANCE_URL")
-	username := getNonEmptyAttribute(config.Username, "SCC_USERNAME")
-	password := getNonEmptyAttribute(config.Password, "SCC_PASSWORD")
-	ca_certificate := getNonEmptyAttribute(config.CaCertificate, "SCC_CA_CERTIFICATE")
-	client_certificate := getNonEmptyAttribute(config.ClientCertificate, "SCC_CLIENT_CERTIFICATE")
-	client_key := getNonEmptyAttribute(config.ClientKey, "SCC_CLIENT_KEY")
+	instanceURL, username, password, caCertificate, clientCertificate, clientKey := resolveAttributes(config)
 
-	// Validate required values
-	if instance_url == "" {
-		resp.Diagnostics.AddAttributeError(
-			path.Root("instance_url"),
-			"Missing Cloud Connector Instance URL",
-			"The provider cannot create the Cloud Connector client because the Cloud Connector Instance URL is empty.",
-		)
-		return
-	}
-
-	basicAuth := username != "" && password != ""
-	certAuth := client_certificate != "" && client_key != ""
-
-	if ca_certificate != "" {
-		if err := validatePEM(ca_certificate); err != nil {
-			resp.Diagnostics.AddAttributeError(
-				path.Root("ca_certificate"),
-				"Invalid CA Certificate",
-				"The provided CA certificate is not a valid PEM-encoded block.",
-			)
-			return
-		}
-	}
-
-	if client_certificate != "" {
-		if err := validatePEM(client_certificate); err != nil {
-			resp.Diagnostics.AddAttributeError(
-				path.Root("client_certificate"),
-				"Invalid Client Certificate",
-				"The provided client certificate is not a valid PEM-encoded block.",
-			)
-			return
-		}
-	}
-
-	if client_key != "" {
-		if err := validatePEM(client_key); err != nil {
-			resp.Diagnostics.AddAttributeError(
-				path.Root("client_key"),
-				"Invalid Client Key",
-				"The provided client key is not a valid PEM-encoded block.",
-			)
-			return
-		}
-	}
-
-	if !basicAuth && !certAuth {
-		resp.Diagnostics.AddError(
-			"Missing Authentication Details",
-			"Either a username/password or a client certificate/key must be provided for authentication.",
-		)
-		return
-	}
-	if basicAuth && certAuth {
-		resp.Diagnostics.AddError(
-			"Conflicting Authentication Details",
-			"Both Basic Authentication and Certificate-based Authentication were provided. Only one can be used.",
-		)
-		return
-	}
-
-	if resp.Diagnostics.HasError() {
+	// Validate values from config
+	if !validateConfig(instanceURL, username, password, caCertificate, clientCertificate, clientKey, resp) {
 		return
 	}
 
 	// Parse the base URL
-	parsedURL, err := url.Parse(instance_url)
+	parsedURL, err := url.Parse(instanceURL)
 	if err != nil {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("instance_url"),
 			"Invalid Cloud Connector Instance URL",
-			fmt.Sprintf("Failed to parse the provided Cloud Connector Instance URL: %s. Error: %v", instance_url, err),
+			fmt.Sprintf("Failed to parse the provided Cloud Connector Instance URL: %s. Error: %v", instanceURL, err),
 		)
 		return
 	}
 
-	// Convert CA certificate to []byte only if provided
-	caCertBytes := []byte(ca_certificate)
-	clientCertBytes := []byte(client_certificate)
-	clientKeyBytes := []byte(client_key)
-
-	client, err := api.NewRestApiClient(c.httpClient, parsedURL, username, password, caCertBytes, clientCertBytes, clientKeyBytes)
+	client, err := api.NewRestApiClient(c.httpClient, parsedURL, username, password, []byte(caCertificate), []byte(clientCertificate), []byte(clientKey))
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Client Creation Failed",
@@ -212,11 +142,61 @@ func (c *cloudConnectorProvider) Configure(ctx context.Context, req provider.Con
 	resp.ResourceData = client
 }
 
+func resolveAttributes(config cloudConnectorProviderData) (string, string, string, string, string, string) {
+	return getNonEmptyAttribute(config.InstanceURL, "SCC_INSTANCE_URL"),
+		getNonEmptyAttribute(config.Username, "SCC_USERNAME"),
+		getNonEmptyAttribute(config.Password, "SCC_PASSWORD"),
+		getNonEmptyAttribute(config.CaCertificate, "SCC_CA_CERTIFICATE"),
+		getNonEmptyAttribute(config.ClientCertificate, "SCC_CLIENT_CERTIFICATE"),
+		getNonEmptyAttribute(config.ClientKey, "SCC_CLIENT_KEY")
+}
+
 func getNonEmptyAttribute(attr types.String, envVar string) string {
 	if !attr.IsNull() && attr.ValueString() != "" {
 		return attr.ValueString()
 	}
 	return os.Getenv(envVar)
+}
+
+func validateConfig(instanceURL, username, password, caCertificate, clientCertificate, clientKey string, resp *provider.ConfigureResponse) bool {
+	if instanceURL == "" {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("instance_url"),
+			"Missing Cloud Connector Instance URL",
+			"The provider cannot create the Cloud Connector client because the Cloud Connector Instance URL is empty.",
+		)
+		return false
+	}
+
+	if caCertificate != "" && validatePEMBlock(caCertificate, "ca_certificate", "CA Certificate", resp) {
+		return false
+	}
+	if clientCertificate != "" && validatePEMBlock(clientCertificate, "client_certificate", "Client Certificate", resp) {
+		return false
+	}
+	if clientKey != "" && validatePEMBlock(clientKey, "client_key", "Client Key", resp) {
+		return false
+	}
+
+	basicAuth := username != "" && password != ""
+	certAuth := clientCertificate != "" && clientKey != ""
+
+	switch {
+	case !basicAuth && !certAuth:
+		resp.Diagnostics.AddError(
+			"Missing Authentication Details",
+			"Either a username/password or a client certificate/key must be provided for authentication.",
+		)
+		return false
+	case basicAuth && certAuth:
+		resp.Diagnostics.AddError(
+			"Conflicting Authentication Details",
+			"Both Basic Authentication and Certificate-based Authentication were provided. Only one can be used.",
+		)
+		return false
+	}
+
+	return true
 }
 
 func testProviderConnection(client *api.RestApiClient) error {
@@ -235,6 +215,18 @@ func testProviderConnection(client *api.RestApiClient) error {
 	return nil
 }
 
+func validatePEMBlock(pemString, attribute, title string, resp *provider.ConfigureResponse) bool {
+	if err := validatePEM(pemString); err != nil {
+		resp.Diagnostics.AddAttributeError(
+			path.Root(attribute),
+			fmt.Sprintf("Invalid %s", title),
+			fmt.Sprintf("The provided %s is not a valid PEM-encoded block.", title),
+		)
+		return false
+	}
+	return true
+}
+
 func validatePEM(data string) error {
 	block, _ := pem.Decode([]byte(data))
 	if block == nil {
@@ -247,15 +239,15 @@ func validatePEM(data string) error {
 func (c *cloudConnectorProvider) DataSources(_ context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		NewSubaccountsDataSource,
-		NewSubaccountDataSource,
+		NewSubaccountConfigurationDataSource,
 		NewSystemMappingsDataSource,
 		NewSystemMappingDataSource,
 		NewSystemMappingResourcesDataSource,
 		NewSystemMappingResourceDataSource,
 		NewDomainMappingsDataSource,
 		NewDomainMappingDataSource,
-		NewSubaccountServiceChannelK8SDataSource,
-		NewSubaccountServiceChannelsK8SDataSource,
+		NewSubaccountK8SServiceChannelDataSource,
+		NewSubaccountK8SServiceChannelsDataSource,
 	}
 }
 
@@ -266,6 +258,6 @@ func (c *cloudConnectorProvider) Resources(_ context.Context) []func() resource.
 		NewSystemMappingResource,
 		NewSystemMappingResourceResource,
 		NewDomainMappingResource,
-		NewSubaccountServiceChannelK8SResource,
+		NewSubaccountK8SServiceChannelResource,
 	}
 }

@@ -1,9 +1,7 @@
 package provider
 
 import (
-	"crypto/tls"
 	"fmt"
-	"net/http"
 	"regexp"
 	"testing"
 
@@ -17,11 +15,6 @@ func TestResourceSubaccountK8SServiceChannel(t *testing.T) {
 
 	t.Run("happy path", func(t *testing.T) {
 		rec, user := setupVCR(t, "fixtures/resource_subaccount_k8s_service_channel")
-		rec.SetRealTransport(&http.Transport{
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true,
-			},
-		})
 		defer stopQuietly(rec)
 
 		resource.Test(t, resource.TestCase{
@@ -54,6 +47,56 @@ func TestResourceSubaccountK8SServiceChannel(t *testing.T) {
 			},
 		})
 
+	})
+
+	t.Run("update path - comment and connections update", func(t *testing.T) {
+		rec, user := setupVCR(t, "fixtures/resource_subaccount_k8s_service_channel_update")
+		defer stopQuietly(rec)
+
+		resource.Test(t, resource.TestCase{
+			IsUnitTest:               true,
+			ProtoV6ProviderFactories: getTestProviders(rec.GetDefaultClient()),
+			Steps: []resource.TestStep{
+				{
+					Config: providerConfig(user) + `
+					resource "scc_subaccount_k8s_service_channel" "test" {
+					  region_host = "cf.eu12.hana.ondemand.com"
+					  subaccount = "d3bbbcd7-d5e0-483b-a524-6dee7205f8e8"
+					  k8s_cluster = "cp.ace9fb5.stage.kyma.ondemand.com:443"
+					  k8s_service = "29d4e6f6-8e7f-4882-b434-21a52bb75e0f"
+					  port = 3000
+					  connections = 1
+					  comment = "initial"
+					  enabled = true
+					}
+					`,
+					Check: resource.ComposeAggregateTestCheckFunc(
+						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.test", "comment", "initial"),
+						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.test", "connections", "1"),
+						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.test", "enabled", "true"),
+					),
+				},
+				{
+					Config: providerConfig(user) + `
+					resource "scc_subaccount_k8s_service_channel" "test" {
+					  region_host = "cf.eu12.hana.ondemand.com"
+					  subaccount = "d3bbbcd7-d5e0-483b-a524-6dee7205f8e8"
+					  k8s_cluster = "cp.ace9fb5.stage.kyma.ondemand.com:443"
+					  k8s_service = "29d4e6f6-8e7f-4882-b434-21a52bb75e0f"
+					  port = 3000
+					  connections = 2
+					  comment = "updated"
+					  enabled = false
+					}
+					`,
+					Check: resource.ComposeAggregateTestCheckFunc(
+						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.test", "comment", "updated"),
+						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.test", "connections", "2"),
+						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.test", "enabled", "false"),
+					),
+				},
+			},
+		})
 	})
 
 	t.Run("error path - region host mandatory", func(t *testing.T) {

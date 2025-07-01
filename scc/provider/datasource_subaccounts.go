@@ -96,13 +96,13 @@ func (d *SubaccountsDataSource) Read(ctx context.Context, req datasource.ReadReq
 
 	err := requestAndUnmarshal(d.client, &respObj.Subaccounts, "GET", endpoint, nil, true)
 	if err != nil {
-		resp.Diagnostics.AddError("error fetching the cloud connector subaccounts", err.Error())
+		resp.Diagnostics.AddError(errMsgFetchSubaccountsFailed, err.Error())
 		return
 	}
 
 	responseModel, err := SubaccountsDataSourceValueFrom(respObj)
 	if err != nil {
-		resp.Diagnostics.AddError("error mapping subaccounts value", fmt.Sprintf("%s", err))
+		resp.Diagnostics.AddError(errMsgMapSubaccountsFailed, fmt.Sprintf("%s", err))
 		return
 	}
 
