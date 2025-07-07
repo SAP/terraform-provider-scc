@@ -42,6 +42,18 @@ func TestResourceSystemMappingResource(t *testing.T) {
 					ImportStateVerify: true,
 					ImportStateIdFunc: getImportStateForSystemMappingResource("scc_system_mapping_resource.test"),
 				},
+				{
+					ResourceName:  "scc_system_mapping_resource.test",
+					ImportState:   true,
+					ImportStateId: "cf.eu12.hana.ondemand.comd3bbbcd7-d5e0-483b-a524-6dee7205f8e8testtfvirtualtesting90/", // malformed ID
+					ExpectError:   regexp.MustCompile(`(?s)Expected import identifier with format:.*id.*Got:`),
+				},
+				{
+					ResourceName:  "scc_system_mapping_resource.test",
+					ImportState:   true,
+					ImportStateId: "cf.eu12.hana.ondemand.com,d3bbbcd7-d5e0-483b-a524-6dee7205f8e8,testtfvirtualtesting,90,/,extra",
+					ExpectError:   regexp.MustCompile(`(?s)Expected import identifier with format:.*id.*Got:`),
+				},
 			},
 		})
 	})

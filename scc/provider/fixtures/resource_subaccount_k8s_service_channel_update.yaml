@@ -40,7 +40,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Mon, 30 Jun 2025 12:19:10 GMT
+                - Mon, 07 Jul 2025 05:54:22 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -50,10 +50,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - b30fff3b-bc54-48ec-4908-7f2c251f2d18
+                - dee20aa4-48fc-4e63-6d7c-77c2a66926b0
         status: 200 OK
         code: 200
-        duration: 722.291834ms
+        duration: 767.534459ms
     - id: 1
       request:
         proto: HTTP/1.1
@@ -93,7 +93,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Mon, 30 Jun 2025 12:19:10 GMT
+                - Mon, 07 Jul 2025 05:54:22 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -103,10 +103,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - c1c081f7-3b9d-4125-6849-31ea0b97769f
+                - 65d95a14-9a2e-4da5-64c9-fec6efeb3497
         status: 200 OK
         code: 200
-        duration: 226.653624ms
+        duration: 275.078167ms
     - id: 2
       request:
         proto: HTTP/1.1
@@ -144,7 +144,7 @@ interactions:
             Content-Length:
                 - "0"
             Date:
-                - Mon, 30 Jun 2025 12:19:10 GMT
+                - Mon, 07 Jul 2025 05:54:22 GMT
             Location:
                 - redacted
             Server:
@@ -156,10 +156,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - afd4bf08-fa8a-433b-7fca-cb30131a0e44
+                - 77abc285-93ab-4c4b-53df-55b1baee4721
         status: 201 Created
         code: 201
-        duration: 308.705917ms
+        duration: 307.358875ms
     - id: 3
       request:
         proto: HTTP/1.1
@@ -188,18 +188,18 @@ interactions:
         proto_minor: 1
         transfer_encoding: []
         trailer: {}
-        content_length: 600
+        content_length: 597
         uncompressed: false
-        body: '[{"k8sCluster":"cp.ace9fb5.stage.kyma.ondemand.com:443","k8sService":"29d4e6f6-8e7f-4882-b434-21a52bb75e0f","id":11,"type":"K8S","port":3000,"enabled":false,"connections":1,"comment":"initial","_links":{"self":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"}}}]'
+        body: '[{"k8sCluster":"cp.ace9fb5.stage.kyma.ondemand.com:443","k8sService":"29d4e6f6-8e7f-4882-b434-21a52bb75e0f","id":3,"type":"K8S","port":3000,"enabled":false,"connections":1,"comment":"initial","_links":{"self":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"}}}]'
         headers:
             Cache-Control:
                 - no-store
             Content-Length:
-                - "600"
+                - "597"
             Content-Type:
                 - application/json
             Date:
-                - Mon, 30 Jun 2025 12:19:10 GMT
+                - Mon, 07 Jul 2025 05:54:23 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -209,10 +209,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 502a2a59-f691-4477-5759-fc5dab680be0
+                - 41c33e6e-e706-401f-666f-b4515f77c42f
         status: 200 OK
         code: 200
-        duration: 250.874084ms
+        duration: 231.187459ms
     - id: 4
       request:
         proto: HTTP/1.1
@@ -233,7 +233,7 @@ interactions:
                 - redacted
             Content-Type:
                 - application/json
-        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/channels/K8S/11/state
+        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/channels/K8S/3/state
         method: PUT
       response:
         proto: HTTP/1.1
@@ -248,7 +248,7 @@ interactions:
             Cache-Control:
                 - no-store
             Date:
-                - Mon, 30 Jun 2025 12:19:11 GMT
+                - Mon, 07 Jul 2025 05:54:23 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -258,10 +258,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 030d386f-4485-4ade-696b-6456d33e919c
+                - 2f6aec9f-5c67-4923-779e-f84459a66ecf
         status: 204 No Content
         code: 204
-        duration: 669.815375ms
+        duration: 784.573292ms
     - id: 5
       request:
         proto: HTTP/1.1
@@ -282,7 +282,7 @@ interactions:
                 - redacted
             Content-Type:
                 - application/json
-        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/channels/K8S/11
+        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/channels/K8S/3
         method: GET
       response:
         proto: HTTP/1.1
@@ -290,18 +290,18 @@ interactions:
         proto_minor: 1
         transfer_encoding: []
         trailer: {}
-        content_length: 686
+        content_length: 683
         uncompressed: false
-        body: '{"k8sCluster":"cp.ace9fb5.stage.kyma.ondemand.com:443","k8sService":"29d4e6f6-8e7f-4882-b434-21a52bb75e0f","id":11,"type":"K8S","port":3000,"enabled":true,"connections":1,"comment":"initial","state":{"connected":true,"openedConnections":1,"connectedSinceTimeStamp":1751285951434},"_links":{"self":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"}}}'
+        body: '{"k8sCluster":"cp.ace9fb5.stage.kyma.ondemand.com:443","k8sService":"29d4e6f6-8e7f-4882-b434-21a52bb75e0f","id":3,"type":"K8S","port":3000,"enabled":true,"connections":1,"comment":"initial","state":{"connected":true,"openedConnections":1,"connectedSinceTimeStamp":1751867663692},"_links":{"self":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"}}}'
         headers:
             Cache-Control:
                 - no-store
             Content-Length:
-                - "686"
+                - "683"
             Content-Type:
                 - application/json
             Date:
-                - Mon, 30 Jun 2025 12:19:11 GMT
+                - Mon, 07 Jul 2025 05:54:24 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -311,10 +311,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 22b767e6-405c-416a-633a-c40c0e1ef755
+                - 980f900a-7926-44e9-4828-85b641f055a0
         status: 200 OK
         code: 200
-        duration: 309.279ms
+        duration: 515.279792ms
     - id: 6
       request:
         proto: HTTP/1.1
@@ -354,7 +354,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Mon, 30 Jun 2025 12:19:12 GMT
+                - Mon, 07 Jul 2025 05:54:24 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -364,10 +364,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - a52297df-4f9b-4f24-767c-d17f0fe2336d
+                - ba18776f-b6d9-4ae0-7a0b-e90e85a229a0
         status: 200 OK
         code: 200
-        duration: 240.108542ms
+        duration: 544.181833ms
     - id: 7
       request:
         proto: HTTP/1.1
@@ -407,7 +407,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Mon, 30 Jun 2025 12:19:12 GMT
+                - Mon, 07 Jul 2025 05:54:25 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -417,10 +417,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 1b257e05-d386-4ec6-7009-9365c07520c3
+                - d6b45316-2450-419a-6d23-f26862e38a2b
         status: 200 OK
         code: 200
-        duration: 246.955167ms
+        duration: 283.342042ms
     - id: 8
       request:
         proto: HTTP/1.1
@@ -441,7 +441,7 @@ interactions:
                 - redacted
             Content-Type:
                 - application/json
-        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/channels/K8S/11
+        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/channels/K8S/3
         method: GET
       response:
         proto: HTTP/1.1
@@ -449,18 +449,18 @@ interactions:
         proto_minor: 1
         transfer_encoding: []
         trailer: {}
-        content_length: 686
+        content_length: 683
         uncompressed: false
-        body: '{"k8sCluster":"cp.ace9fb5.stage.kyma.ondemand.com:443","k8sService":"29d4e6f6-8e7f-4882-b434-21a52bb75e0f","id":11,"type":"K8S","port":3000,"enabled":true,"connections":1,"comment":"initial","state":{"connected":true,"openedConnections":1,"connectedSinceTimeStamp":1751285951434},"_links":{"self":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"}}}'
+        body: '{"k8sCluster":"cp.ace9fb5.stage.kyma.ondemand.com:443","k8sService":"29d4e6f6-8e7f-4882-b434-21a52bb75e0f","id":3,"type":"K8S","port":3000,"enabled":true,"connections":1,"comment":"initial","state":{"connected":true,"openedConnections":1,"connectedSinceTimeStamp":1751867663692},"_links":{"self":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"}}}'
         headers:
             Cache-Control:
                 - no-store
             Content-Length:
-                - "686"
+                - "683"
             Content-Type:
                 - application/json
             Date:
-                - Mon, 30 Jun 2025 12:19:12 GMT
+                - Mon, 07 Jul 2025 05:54:25 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -470,10 +470,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 479c90cf-46a2-4dac-72d6-8ddf919e06a4
+                - 54de9cb1-7352-4596-6825-c8e4cc1dc92e
         status: 200 OK
         code: 200
-        duration: 228.497792ms
+        duration: 242.084834ms
     - id: 9
       request:
         proto: HTTP/1.1
@@ -513,7 +513,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Mon, 30 Jun 2025 12:19:13 GMT
+                - Mon, 07 Jul 2025 05:54:25 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -523,10 +523,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - f975429e-cc7d-4d3b-4f59-887ec0408dc6
+                - 3517161c-119f-4fd0-7b54-7c6a57d9fe50
         status: 200 OK
         code: 200
-        duration: 227.989584ms
+        duration: 231.500375ms
     - id: 10
       request:
         proto: HTTP/1.1
@@ -547,7 +547,7 @@ interactions:
                 - redacted
             Content-Type:
                 - application/json
-        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/channels/K8S/11
+        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/channels/K8S/3
         method: GET
       response:
         proto: HTTP/1.1
@@ -555,18 +555,18 @@ interactions:
         proto_minor: 1
         transfer_encoding: []
         trailer: {}
-        content_length: 686
+        content_length: 683
         uncompressed: false
-        body: '{"k8sCluster":"cp.ace9fb5.stage.kyma.ondemand.com:443","k8sService":"29d4e6f6-8e7f-4882-b434-21a52bb75e0f","id":11,"type":"K8S","port":3000,"enabled":true,"connections":1,"comment":"initial","state":{"connected":true,"openedConnections":1,"connectedSinceTimeStamp":1751285951434},"_links":{"self":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"}}}'
+        body: '{"k8sCluster":"cp.ace9fb5.stage.kyma.ondemand.com:443","k8sService":"29d4e6f6-8e7f-4882-b434-21a52bb75e0f","id":3,"type":"K8S","port":3000,"enabled":true,"connections":1,"comment":"initial","state":{"connected":true,"openedConnections":1,"connectedSinceTimeStamp":1751867663692},"_links":{"self":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"}}}'
         headers:
             Cache-Control:
                 - no-store
             Content-Length:
-                - "686"
+                - "683"
             Content-Type:
                 - application/json
             Date:
-                - Mon, 30 Jun 2025 12:19:13 GMT
+                - Mon, 07 Jul 2025 05:54:26 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -576,10 +576,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 93037bad-fb82-4ad9-7d73-439aa0be48d0
+                - 0072aa47-c932-468d-6953-9b548a3fc85d
         status: 200 OK
         code: 200
-        duration: 233.380125ms
+        duration: 231.151542ms
     - id: 11
       request:
         proto: HTTP/1.1
@@ -619,7 +619,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Mon, 30 Jun 2025 12:19:13 GMT
+                - Mon, 07 Jul 2025 05:54:26 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -629,10 +629,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 7761c85d-3136-45f2-5958-6f6faf1bf9c9
+                - bbd47adf-70e2-4beb-7b7f-3b2754e2fcd0
         status: 200 OK
         code: 200
-        duration: 259.1375ms
+        duration: 243.281709ms
     - id: 12
       request:
         proto: HTTP/1.1
@@ -653,7 +653,7 @@ interactions:
                 - redacted
             Content-Type:
                 - application/json
-        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/channels/K8S/11
+        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/channels/K8S/3
         method: PUT
       response:
         proto: HTTP/1.1
@@ -668,7 +668,7 @@ interactions:
             Cache-Control:
                 - no-store
             Date:
-                - Mon, 30 Jun 2025 12:19:13 GMT
+                - Mon, 07 Jul 2025 05:54:26 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -678,10 +678,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 0b33a5ec-48fe-465d-51a4-286e262a180b
+                - 9f25f07b-8839-4d9b-4b8e-3df0cf9dfa5c
         status: 204 No Content
         code: 204
-        duration: 327.808834ms
+        duration: 329.772542ms
     - id: 13
       request:
         proto: HTTP/1.1
@@ -702,7 +702,7 @@ interactions:
                 - redacted
             Content-Type:
                 - application/json
-        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/channels/K8S/11/state
+        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/channels/K8S/3/state
         method: PUT
       response:
         proto: HTTP/1.1
@@ -717,7 +717,7 @@ interactions:
             Cache-Control:
                 - no-store
             Date:
-                - Mon, 30 Jun 2025 12:19:14 GMT
+                - Mon, 07 Jul 2025 05:54:27 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -727,10 +727,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 5400104c-0dfc-4b8a-485c-e935a45fb956
+                - f6b725e3-549a-4c17-5993-b4c954ba416b
         status: 204 No Content
         code: 204
-        duration: 314.723916ms
+        duration: 232.470375ms
     - id: 14
       request:
         proto: HTTP/1.1
@@ -751,7 +751,7 @@ interactions:
                 - redacted
             Content-Type:
                 - application/json
-        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/channels/K8S/11
+        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/channels/K8S/3
         method: GET
       response:
         proto: HTTP/1.1
@@ -759,18 +759,18 @@ interactions:
         proto_minor: 1
         transfer_encoding: []
         trailer: {}
-        content_length: 598
+        content_length: 595
         uncompressed: false
-        body: '{"k8sCluster":"cp.ace9fb5.stage.kyma.ondemand.com:443","k8sService":"29d4e6f6-8e7f-4882-b434-21a52bb75e0f","id":11,"type":"K8S","port":3000,"enabled":false,"connections":2,"comment":"updated","_links":{"self":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"}}}'
+        body: '{"k8sCluster":"cp.ace9fb5.stage.kyma.ondemand.com:443","k8sService":"29d4e6f6-8e7f-4882-b434-21a52bb75e0f","id":3,"type":"K8S","port":3000,"enabled":false,"connections":2,"comment":"updated","_links":{"self":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"}}}'
         headers:
             Cache-Control:
                 - no-store
             Content-Length:
-                - "598"
+                - "595"
             Content-Type:
                 - application/json
             Date:
-                - Mon, 30 Jun 2025 12:19:14 GMT
+                - Mon, 07 Jul 2025 05:54:27 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -780,10 +780,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 39f22ba8-d640-455f-644a-6b015454d4d9
+                - 01d68652-bdce-4cba-7958-76d801bab1b5
         status: 200 OK
         code: 200
-        duration: 306.873459ms
+        duration: 236.390208ms
     - id: 15
       request:
         proto: HTTP/1.1
@@ -823,7 +823,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Mon, 30 Jun 2025 12:19:14 GMT
+                - Mon, 07 Jul 2025 05:54:27 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -833,10 +833,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - b309a643-c1f3-4b2e-6423-22d4d86643e8
+                - 1d3a0933-2fc3-4833-452a-bf29b0767bf3
         status: 200 OK
         code: 200
-        duration: 241.003291ms
+        duration: 233.386625ms
     - id: 16
       request:
         proto: HTTP/1.1
@@ -876,7 +876,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Mon, 30 Jun 2025 12:19:15 GMT
+                - Mon, 07 Jul 2025 05:54:27 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -886,10 +886,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 454daa1e-206f-4c23-54f2-16643a8a794d
+                - e3334164-3cb1-476c-65c8-eebdf4a99eb5
         status: 200 OK
         code: 200
-        duration: 237.845709ms
+        duration: 242.001541ms
     - id: 17
       request:
         proto: HTTP/1.1
@@ -910,7 +910,7 @@ interactions:
                 - redacted
             Content-Type:
                 - application/json
-        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/channels/K8S/11
+        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/channels/K8S/3
         method: GET
       response:
         proto: HTTP/1.1
@@ -918,18 +918,18 @@ interactions:
         proto_minor: 1
         transfer_encoding: []
         trailer: {}
-        content_length: 598
+        content_length: 595
         uncompressed: false
-        body: '{"k8sCluster":"cp.ace9fb5.stage.kyma.ondemand.com:443","k8sService":"29d4e6f6-8e7f-4882-b434-21a52bb75e0f","id":11,"type":"K8S","port":3000,"enabled":false,"connections":2,"comment":"updated","_links":{"self":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"}}}'
+        body: '{"k8sCluster":"cp.ace9fb5.stage.kyma.ondemand.com:443","k8sService":"29d4e6f6-8e7f-4882-b434-21a52bb75e0f","id":3,"type":"K8S","port":3000,"enabled":false,"connections":2,"comment":"updated","_links":{"self":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"}}}'
         headers:
             Cache-Control:
                 - no-store
             Content-Length:
-                - "598"
+                - "595"
             Content-Type:
                 - application/json
             Date:
-                - Mon, 30 Jun 2025 12:19:15 GMT
+                - Mon, 07 Jul 2025 05:54:28 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -939,10 +939,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - ccdbfe4e-5572-4131-6931-3e8c87e2ba75
+                - 7585d555-ff37-49d8-72c9-efe7db2ff758
         status: 200 OK
         code: 200
-        duration: 228.634375ms
+        duration: 232.1355ms
     - id: 18
       request:
         proto: HTTP/1.1
@@ -982,7 +982,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Mon, 30 Jun 2025 12:19:15 GMT
+                - Mon, 07 Jul 2025 05:54:28 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -992,10 +992,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 0a503fa5-95c4-4a5b-6209-3ea6813ab217
+                - fc6e96c2-ff5f-4c81-59a7-4d13b27c551f
         status: 200 OK
         code: 200
-        duration: 228.858583ms
+        duration: 314.358667ms
     - id: 19
       request:
         proto: HTTP/1.1
@@ -1035,7 +1035,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Mon, 30 Jun 2025 12:19:15 GMT
+                - Mon, 07 Jul 2025 05:54:28 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -1045,10 +1045,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 81fc07a1-bee8-4427-4632-540cb4c0b4fd
+                - a74cf524-60db-424f-7ca5-2d41b422ae32
         status: 200 OK
         code: 200
-        duration: 228.85ms
+        duration: 278.356708ms
     - id: 20
       request:
         proto: HTTP/1.1
@@ -1069,7 +1069,7 @@ interactions:
                 - redacted
             Content-Type:
                 - application/json
-        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/channels/K8S/11
+        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/channels/K8S/3
         method: DELETE
       response:
         proto: HTTP/1.1
@@ -1084,7 +1084,7 @@ interactions:
             Cache-Control:
                 - no-store
             Date:
-                - Mon, 30 Jun 2025 12:19:16 GMT
+                - Mon, 07 Jul 2025 05:54:29 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -1094,7 +1094,7 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - c4ef19c3-6cad-4219-6123-ce3495dfec75
+                - 6b9e955f-b2f2-4d77-6953-0bf1f938053e
         status: 204 No Content
         code: 204
-        duration: 308.650459ms
+        duration: 304.510917ms

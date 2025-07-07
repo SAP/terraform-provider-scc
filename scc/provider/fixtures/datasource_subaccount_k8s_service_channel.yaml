@@ -40,7 +40,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 25 Jun 2025 06:40:18 GMT
+                - Mon, 07 Jul 2025 05:48:32 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -50,10 +50,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - ac8c4c92-7829-47b5-6158-e428c39a6b0a
+                - 5078d782-70bb-4bc7-6fea-49269f6d3094
         status: 200 OK
         code: 200
-        duration: 692.194417ms
+        duration: 880.892209ms
     - id: 1
       request:
         proto: HTTP/1.1
@@ -84,7 +84,7 @@ interactions:
         trailer: {}
         content_length: 676
         uncompressed: false
-        body: '{"k8sCluster":"cp.da2b3e1.stage.kyma.ondemand.com:443","k8sService":"bd64665f-060a-47b6-8aba-f406703f0acf","id":1,"type":"K8S","port":8000,"enabled":true,"connections":1,"comment":"","state":{"connected":true,"openedConnections":1,"connectedSinceTimeStamp":1750406472591},"_links":{"self":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"}}}'
+        body: '{"k8sCluster":"cp.da2b3e1.stage.kyma.ondemand.com:443","k8sService":"bd64665f-060a-47b6-8aba-f406703f0acf","id":1,"type":"K8S","port":8000,"enabled":true,"connections":1,"comment":"","state":{"connected":true,"openedConnections":1,"connectedSinceTimeStamp":1751344093120},"_links":{"self":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"}}}'
         headers:
             Cache-Control:
                 - no-store
@@ -93,7 +93,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 25 Jun 2025 06:40:18 GMT
+                - Mon, 07 Jul 2025 05:48:32 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -103,10 +103,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - ca095fa3-3de6-4cdc-4e86-2ff76f2a30ef
+                - e5120ac0-ad0c-41d4-4a74-d13f685a6cb0
         status: 200 OK
         code: 200
-        duration: 240.488667ms
+        duration: 272.501ms
     - id: 2
       request:
         proto: HTTP/1.1
@@ -146,7 +146,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 25 Jun 2025 06:40:18 GMT
+                - Mon, 07 Jul 2025 05:48:33 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -156,10 +156,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 9a5b8732-fd36-4b5f-7511-5395765361ea
+                - f0128670-98cb-43a7-5e7d-9582f848d4af
         status: 200 OK
         code: 200
-        duration: 235.806375ms
+        duration: 232.284041ms
     - id: 3
       request:
         proto: HTTP/1.1
@@ -199,7 +199,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 25 Jun 2025 06:40:19 GMT
+                - Mon, 07 Jul 2025 05:48:33 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -209,10 +209,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - a80d7521-cc52-4aee-441d-73a0790a2a7d
+                - 5e14e436-de50-4e4a-4d74-3fcff95ed3a9
         status: 200 OK
         code: 200
-        duration: 242.502584ms
+        duration: 231.7515ms
     - id: 4
       request:
         proto: HTTP/1.1
@@ -243,7 +243,7 @@ interactions:
         trailer: {}
         content_length: 676
         uncompressed: false
-        body: '{"k8sCluster":"cp.da2b3e1.stage.kyma.ondemand.com:443","k8sService":"bd64665f-060a-47b6-8aba-f406703f0acf","id":1,"type":"K8S","port":8000,"enabled":true,"connections":1,"comment":"","state":{"connected":true,"openedConnections":1,"connectedSinceTimeStamp":1750406472591},"_links":{"self":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"}}}'
+        body: '{"k8sCluster":"cp.da2b3e1.stage.kyma.ondemand.com:443","k8sService":"bd64665f-060a-47b6-8aba-f406703f0acf","id":1,"type":"K8S","port":8000,"enabled":true,"connections":1,"comment":"","state":{"connected":true,"openedConnections":1,"connectedSinceTimeStamp":1751344093120},"_links":{"self":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"}}}'
         headers:
             Cache-Control:
                 - no-store
@@ -252,7 +252,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 25 Jun 2025 06:40:19 GMT
+                - Mon, 07 Jul 2025 05:48:33 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -262,10 +262,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 5d135dc8-d52c-455a-4c44-3c2df682b964
+                - 53580f12-6f59-4a3f-76ec-2de2fd0b004a
         status: 200 OK
         code: 200
-        duration: 259.613833ms
+        duration: 456.600083ms
     - id: 5
       request:
         proto: HTTP/1.1
@@ -305,7 +305,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 25 Jun 2025 06:40:19 GMT
+                - Mon, 07 Jul 2025 05:48:34 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -315,10 +315,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 70cd0c98-e760-4320-7a76-f8ca37f21e74
+                - 732f2c25-263a-4ee8-4b69-9e4ff8d1ff4f
         status: 200 OK
         code: 200
-        duration: 234.540916ms
+        duration: 230.030791ms
     - id: 6
       request:
         proto: HTTP/1.1
@@ -349,7 +349,7 @@ interactions:
         trailer: {}
         content_length: 676
         uncompressed: false
-        body: '{"k8sCluster":"cp.da2b3e1.stage.kyma.ondemand.com:443","k8sService":"bd64665f-060a-47b6-8aba-f406703f0acf","id":1,"type":"K8S","port":8000,"enabled":true,"connections":1,"comment":"","state":{"connected":true,"openedConnections":1,"connectedSinceTimeStamp":1750406472591},"_links":{"self":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"}}}'
+        body: '{"k8sCluster":"cp.da2b3e1.stage.kyma.ondemand.com:443","k8sService":"bd64665f-060a-47b6-8aba-f406703f0acf","id":1,"type":"K8S","port":8000,"enabled":true,"connections":1,"comment":"","state":{"connected":true,"openedConnections":1,"connectedSinceTimeStamp":1751344093120},"_links":{"self":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"}}}'
         headers:
             Cache-Control:
                 - no-store
@@ -358,7 +358,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 25 Jun 2025 06:40:20 GMT
+                - Mon, 07 Jul 2025 05:48:34 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -368,10 +368,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 0fcf943d-6609-460d-45df-db0d8335a692
+                - cf1f3b8b-5b4c-4b36-62f6-a1e3fdf6b941
         status: 200 OK
         code: 200
-        duration: 239.324792ms
+        duration: 231.150084ms
     - id: 7
       request:
         proto: HTTP/1.1
@@ -411,7 +411,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 25 Jun 2025 06:40:20 GMT
+                - Mon, 07 Jul 2025 05:48:34 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -421,7 +421,7 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - a101dfe7-17d0-408f-431d-8bc715144dc9
+                - fa99b6b9-7ce1-477c-58c9-5a57be9890ee
         status: 200 OK
         code: 200
-        duration: 237.697125ms
+        duration: 241.535208ms

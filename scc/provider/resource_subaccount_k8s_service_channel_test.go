@@ -44,6 +44,18 @@ func TestResourceSubaccountK8SServiceChannel(t *testing.T) {
 					ImportStateVerify: true,
 					ImportStateIdFunc: getImportStateForSubaccountK8SServiceChannel("scc_subaccount_k8s_service_channel.test"),
 				},
+				{
+					ResourceName:  "scc_subaccount_k8s_service_channel.test",
+					ImportState:   true,
+					ImportStateId: "cf.eu12.hana.ondemand.comd3bbbcd7-d5e0-483b-a524-6dee7205f8e81", // malformed ID
+					ExpectError:   regexp.MustCompile(`(?s)Expected import identifier with format:.*id.*Got:`),
+				},
+				{
+					ResourceName:  "scc_subaccount_k8s_service_channel.test",
+					ImportState:   true,
+					ImportStateId: "cf.eu12.hana.ondemand.com,d3bbbcd7-d5e0-483b-a524-6dee7205f8e8,1,extra",
+					ExpectError:   regexp.MustCompile(`(?s)Expected import identifier with format:.*id.*Got:`),
+				},
 			},
 		})
 

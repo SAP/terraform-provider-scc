@@ -50,13 +50,6 @@ func TestResourceSubaccount(t *testing.T) {
 						resource.TestMatchResourceAttr("scc_subaccount.test", "tunnel.subaccount_certificate.subject_dn", regexp.MustCompile(`CN=.*?,L=.*?,OU=.*?,OU=.*?,O=.*?,C=.*?`)),
 					),
 				},
-				// {
-				// 	Config: providerConfig(user) + ResourceSubaccountUpdateWithDisplayName("test", regionHost, subaccountId, user.CloudUsername, user.CloudPassword, "Updated description", "Updated Display Name"),
-				// 	Check: resource.ComposeAggregateTestCheckFunc(
-				// 		resource.TestCheckResourceAttr("scc_subaccount.test", "description", "Updated description"),
-				// 		resource.TestCheckResourceAttr("scc_subaccount.test", "display_name", "Updated Display Name"),
-				// 	),
-				// },
 				{
 					ResourceName:                         "scc_subaccount.test",
 					ImportState:                          true,
@@ -67,6 +60,18 @@ func TestResourceSubaccount(t *testing.T) {
 						"cloud_user",
 						"cloud_password",
 					},
+				},
+				{
+					ResourceName:  "scc_subaccount.test",
+					ImportState:   true,
+					ImportStateId: "cf.eu12.hana.ondemand.com7480ee65-e039-41cf-ba72-6aaf56c312df", // malformed ID
+					ExpectError:   regexp.MustCompile(`(?s)Expected import identifier with format:.*subaccount.*Got:`),
+				},
+				{
+					ResourceName:  "scc_subaccount.test",
+					ImportState:   true,
+					ImportStateId: "cf.eu12.hana.ondemand.com,7480ee65-e039-41cf-ba72-6aaf56c312df,extra",
+					ExpectError:   regexp.MustCompile(`(?s)Expected import identifier with format:.*subaccount.*Got:`),
 				},
 			},
 		})
@@ -209,7 +214,6 @@ func TestResourceSubaccount(t *testing.T) {
 			},
 		})
 	})
-
 }
 
 func ResourceSubaccount(datasourceName string, regionHost string, subaccount string, cloudUser string, cloudPassword string, description string) string {

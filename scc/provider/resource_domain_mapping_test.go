@@ -43,6 +43,18 @@ func TestResourceDomainMapping(t *testing.T) {
 					ImportStateIdFunc:                    getImportStateForSubaccountEntitlement("scc_domain_mapping.test"),
 					ImportStateVerifyIdentifierAttribute: "internal_domain",
 				},
+				{
+					ResourceName:  "scc_domain_mapping.test",
+					ImportState:   true,
+					ImportStateId: "cf.eu12.hana.ondemand.comd3bbbcd7-d5e0-483b-a524-6dee7205f8e8testtfinternaldomain", // malformed ID
+					ExpectError:   regexp.MustCompile(`(?s)Expected import identifier with format:.*internal_domain.*Got:`),
+				},
+				{
+					ResourceName:  "scc_domain_mapping.test",
+					ImportState:   true,
+					ImportStateId: "cf.eu12.hana.ondemand.com,d3bbbcd7-d5e0-483b-a524-6dee7205f8e8,testtfinternaldomain,extra",
+					ExpectError:   regexp.MustCompile(`(?s)Expected import identifier with format:.*internal_domain.*Got:`),
+				},
 			},
 		})
 	})

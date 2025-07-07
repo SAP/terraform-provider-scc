@@ -300,47 +300,6 @@ func (r *SubaccountResource) Update(ctx context.Context, req resource.UpdateRequ
 		return
 	}
 
-	// Update subaccount connection state: defaults to "Connected" (true) when created,
-	// but can be changed to "Disconnected" (false). Updates the "connected" value accordingly.
-
-	// if !plan.Tunnel.IsNull() && !plan.Tunnel.IsUnknown() {
-	// 	diags = state.Tunnel.As(ctx, &stateTunnelData, basetypes.ObjectAsOptions{})
-	// 	resp.Diagnostics.Append(diags...)
-	// 	if resp.Diagnostics.HasError() {
-	// 		return
-	// 	}
-
-	// 	diags = plan.Tunnel.As(ctx, &planTunnelData, basetypes.ObjectAsOptions{})
-	// 	resp.Diagnostics.Append(diags...)
-	// 	if resp.Diagnostics.HasError() {
-	// 		return
-	// 	}
-
-	// 	tunnelState := stateTunnelData.State.ValueString()
-
-	// 	if !planTunnelData.State.IsNull() && !planTunnelData.State.IsUnknown() && planTunnelData.State.ValueString() != tunnelState {
-	// 		connected := true
-	// 		if planTunnelData.State.ValueString() == "Disconnected" {
-	// 			connected = false
-	// 		}
-	// 		planBody := map[string]string{
-	// 			"connected": fmt.Sprintf("%t", connected),
-	// 		}
-
-	// 		err := requestAndUnmarshal(r.client, &respObj, "PUT", endpoint+"/state", planBody, false)
-	// 		if err != nil {
-	// 			resp.Diagnostics.AddError(errMsgUpdateSubaccountFailed, err.Error())
-	// 			return
-	// 		}
-
-	// 		err = requestAndUnmarshal(r.client, &respObj, "GET", endpoint, nil, true)
-	// 		if err != nil {
-	// 			resp.Diagnostics.AddError(errMsgUpdateSubaccountFailed, err.Error())
-	// 			return
-	// 		}
-	// 	}
-	// }
-
 	if shouldUpdateTunnel(plan, state) {
 		if err := r.updateTunnelState(ctx, plan, state, endpoint, &respObj, &resp.Diagnostics); err != nil {
 			return

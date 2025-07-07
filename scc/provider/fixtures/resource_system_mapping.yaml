@@ -40,7 +40,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Mon, 30 Jun 2025 12:23:49 GMT
+                - Mon, 07 Jul 2025 05:56:01 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -50,10 +50,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 538eaa5f-302d-41a0-7b25-3f05f5a1f992
+                - aa3f8193-f3c4-4ff8-6506-f967e0edc70b
         status: 200 OK
         code: 200
-        duration: 787.975ms
+        duration: 689.68575ms
     - id: 1
       request:
         proto: HTTP/1.1
@@ -93,7 +93,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Mon, 30 Jun 2025 12:23:49 GMT
+                - Mon, 07 Jul 2025 05:56:02 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -103,10 +103,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 30d4ee2e-b8f1-44e8-4239-e48ec100e6d6
+                - bcab4741-d690-414a-59f8-31c2f763daec
         status: 200 OK
         code: 200
-        duration: 227.414083ms
+        duration: 261.781ms
     - id: 2
       request:
         proto: HTTP/1.1
@@ -144,7 +144,7 @@ interactions:
             Content-Length:
                 - "0"
             Date:
-                - Mon, 30 Jun 2025 12:23:49 GMT
+                - Mon, 07 Jul 2025 05:56:02 GMT
             Location:
                 - redacted
             Server:
@@ -156,10 +156,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 3c83be66-c3cc-4e36-5318-3c7ac48c7550
+                - 078305a8-386e-49de-7b31-253fad5d8dd0
         status: 201 Created
         code: 201
-        duration: 340.100791ms
+        duration: 373.280417ms
     - id: 3
       request:
         proto: HTTP/1.1
@@ -190,7 +190,7 @@ interactions:
         trailer: {}
         content_length: 794
         uncompressed: false
-        body: '{"virtualHost":"testtfvirtual","virtualPort":"900","localHost":"testtfinternal","localPort":"900","creationDate":"1751286229878","protocol":"HTTP","backendType":"abapSys","hostInHeader":"VIRTUAL","sid":"","totalResourcesCount":0,"enabledResourcesCount":0,"authenticationMode":"KERBEROS","description":"","allowedClients":[],"blacklistedUsers":[],"_links":{"self":{"href": "https://redacted.url/path"},"resources":{"href": "https://redacted.url/path"}}}'
+        body: '{"virtualHost":"testtfvirtual","virtualPort":"900","localHost":"testtfinternal","localPort":"900","creationDate":"1751867762517","protocol":"HTTP","backendType":"abapSys","hostInHeader":"VIRTUAL","sid":"","totalResourcesCount":0,"enabledResourcesCount":0,"authenticationMode":"KERBEROS","description":"","allowedClients":[],"blacklistedUsers":[],"_links":{"self":{"href": "https://redacted.url/path"},"resources":{"href": "https://redacted.url/path"}}}'
         headers:
             Cache-Control:
                 - no-store
@@ -199,7 +199,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Mon, 30 Jun 2025 12:23:50 GMT
+                - Mon, 07 Jul 2025 05:56:02 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -209,10 +209,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - dc7edf9a-8cec-48e4-6dd3-0a27d86cdf05
+                - 56b6b83d-b775-4545-7d80-8fc5051100e5
         status: 200 OK
         code: 200
-        duration: 231.588126ms
+        duration: 309.604458ms
     - id: 4
       request:
         proto: HTTP/1.1
@@ -252,7 +252,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Mon, 30 Jun 2025 12:23:50 GMT
+                - Mon, 07 Jul 2025 05:56:03 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -262,10 +262,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 5f297657-d230-4fd8-6561-654f1f12d337
+                - 4f1e1ad7-d8db-4a1d-528a-0098e069c963
         status: 200 OK
         code: 200
-        duration: 227.218791ms
+        duration: 272.533709ms
     - id: 5
       request:
         proto: HTTP/1.1
@@ -305,7 +305,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Mon, 30 Jun 2025 12:23:50 GMT
+                - Mon, 07 Jul 2025 05:56:03 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -315,10 +315,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 08644d85-f3e7-4228-7394-970ba440f785
+                - df2063fd-1695-439f-507c-a896abf7289c
         status: 200 OK
         code: 200
-        duration: 228.227875ms
+        duration: 233.936459ms
     - id: 6
       request:
         proto: HTTP/1.1
@@ -349,7 +349,7 @@ interactions:
         trailer: {}
         content_length: 794
         uncompressed: false
-        body: '{"virtualHost":"testtfvirtual","virtualPort":"900","localHost":"testtfinternal","localPort":"900","creationDate":"1751286229878","protocol":"HTTP","backendType":"abapSys","hostInHeader":"VIRTUAL","sid":"","totalResourcesCount":0,"enabledResourcesCount":0,"authenticationMode":"KERBEROS","description":"","allowedClients":[],"blacklistedUsers":[],"_links":{"self":{"href": "https://redacted.url/path"},"resources":{"href": "https://redacted.url/path"}}}'
+        body: '{"virtualHost":"testtfvirtual","virtualPort":"900","localHost":"testtfinternal","localPort":"900","creationDate":"1751867762517","protocol":"HTTP","backendType":"abapSys","hostInHeader":"VIRTUAL","sid":"","totalResourcesCount":0,"enabledResourcesCount":0,"authenticationMode":"KERBEROS","description":"","allowedClients":[],"blacklistedUsers":[],"_links":{"self":{"href": "https://redacted.url/path"},"resources":{"href": "https://redacted.url/path"}}}'
         headers:
             Cache-Control:
                 - no-store
@@ -358,7 +358,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Mon, 30 Jun 2025 12:23:51 GMT
+                - Mon, 07 Jul 2025 05:56:03 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -368,10 +368,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - acaea670-da2c-4702-5230-4da64f91e2a3
+                - 9562d201-6bfc-4ee4-6921-b0ce10bde713
         status: 200 OK
         code: 200
-        duration: 232.706042ms
+        duration: 233.959834ms
     - id: 7
       request:
         proto: HTTP/1.1
@@ -411,7 +411,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Mon, 30 Jun 2025 12:23:51 GMT
+                - Mon, 07 Jul 2025 05:56:04 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -421,10 +421,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 1641947f-1de9-4666-753d-4033f229eeac
+                - cf22d747-2646-4298-5c2a-9751f004e1a3
         status: 200 OK
         code: 200
-        duration: 228.909167ms
+        duration: 230.601792ms
     - id: 8
       request:
         proto: HTTP/1.1
@@ -455,7 +455,7 @@ interactions:
         trailer: {}
         content_length: 794
         uncompressed: false
-        body: '{"virtualHost":"testtfvirtual","virtualPort":"900","localHost":"testtfinternal","localPort":"900","creationDate":"1751286229878","protocol":"HTTP","backendType":"abapSys","hostInHeader":"VIRTUAL","sid":"","totalResourcesCount":0,"enabledResourcesCount":0,"authenticationMode":"KERBEROS","description":"","allowedClients":[],"blacklistedUsers":[],"_links":{"self":{"href": "https://redacted.url/path"},"resources":{"href": "https://redacted.url/path"}}}'
+        body: '{"virtualHost":"testtfvirtual","virtualPort":"900","localHost":"testtfinternal","localPort":"900","creationDate":"1751867762517","protocol":"HTTP","backendType":"abapSys","hostInHeader":"VIRTUAL","sid":"","totalResourcesCount":0,"enabledResourcesCount":0,"authenticationMode":"KERBEROS","description":"","allowedClients":[],"blacklistedUsers":[],"_links":{"self":{"href": "https://redacted.url/path"},"resources":{"href": "https://redacted.url/path"}}}'
         headers:
             Cache-Control:
                 - no-store
@@ -464,7 +464,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Mon, 30 Jun 2025 12:23:51 GMT
+                - Mon, 07 Jul 2025 05:56:04 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -474,10 +474,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 9c808e00-8803-4f41-611e-1b40794cf712
+                - 08ab996a-7ec8-4c0d-5169-466d1dc55d93
         status: 200 OK
         code: 200
-        duration: 232.380875ms
+        duration: 229.918625ms
     - id: 9
       request:
         proto: HTTP/1.1
@@ -517,7 +517,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Mon, 30 Jun 2025 12:23:51 GMT
+                - Mon, 07 Jul 2025 05:56:04 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -527,10 +527,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 0adc9f06-c898-4f5b-6376-0b729ff76fe9
+                - 6332cebb-9e8b-490e-7898-c8429fc87505
         status: 200 OK
         code: 200
-        duration: 264.323708ms
+        duration: 229.793459ms
     - id: 10
       request:
         proto: HTTP/1.1
@@ -566,7 +566,7 @@ interactions:
             Cache-Control:
                 - no-store
             Date:
-                - Mon, 30 Jun 2025 12:23:52 GMT
+                - Mon, 07 Jul 2025 05:56:04 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -576,10 +576,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 40c82157-c6c2-4723-441b-1f190411b2e2
+                - 0bc90766-4bb1-40a8-6e2f-f55446644066
         status: 204 No Content
         code: 204
-        duration: 307.244958ms
+        duration: 309.450583ms
     - id: 11
       request:
         proto: HTTP/1.1
@@ -610,7 +610,7 @@ interactions:
         trailer: {}
         content_length: 795
         uncompressed: false
-        body: '{"virtualHost":"testtfvirtual","virtualPort":"900","localHost":"updatedlocal","localPort":"905","creationDate":"1751286229878","protocol":"HTTPS","backendType":"hana","hostInHeader":"INTERNAL","sid":"","totalResourcesCount":0,"enabledResourcesCount":0,"authenticationMode":"X509_GENERAL","description":"","allowedClients":[],"blacklistedUsers":[],"_links":{"self":{"href": "https://redacted.url/path"},"resources":{"href": "https://redacted.url/path"}}}'
+        body: '{"virtualHost":"testtfvirtual","virtualPort":"900","localHost":"updatedlocal","localPort":"905","creationDate":"1751867762517","protocol":"HTTPS","backendType":"hana","hostInHeader":"INTERNAL","sid":"","totalResourcesCount":0,"enabledResourcesCount":0,"authenticationMode":"X509_GENERAL","description":"","allowedClients":[],"blacklistedUsers":[],"_links":{"self":{"href": "https://redacted.url/path"},"resources":{"href": "https://redacted.url/path"}}}'
         headers:
             Cache-Control:
                 - no-store
@@ -619,7 +619,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Mon, 30 Jun 2025 12:23:52 GMT
+                - Mon, 07 Jul 2025 05:56:05 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -629,10 +629,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 8a4d27cf-4d3a-4294-7130-15653ea16bfa
+                - 5533163e-efbe-4401-7566-1e18dee92900
         status: 200 OK
         code: 200
-        duration: 233.99425ms
+        duration: 231.055417ms
     - id: 12
       request:
         proto: HTTP/1.1
@@ -672,7 +672,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Mon, 30 Jun 2025 12:23:52 GMT
+                - Mon, 07 Jul 2025 05:56:05 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -682,10 +682,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 77c01b4c-2122-4dc4-467f-d05e15ee1939
+                - 29b534d5-5dd6-4cea-4a3b-eb54f555d9c4
         status: 200 OK
         code: 200
-        duration: 238.161542ms
+        duration: 313.945209ms
     - id: 13
       request:
         proto: HTTP/1.1
@@ -725,7 +725,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Mon, 30 Jun 2025 12:23:53 GMT
+                - Mon, 07 Jul 2025 05:56:05 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -735,10 +735,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - cc7f0a5f-f212-45be-558e-22bbf4aa0930
+                - b8d3800f-8376-414d-7ea7-7221fd9524b8
         status: 200 OK
         code: 200
-        duration: 228.003042ms
+        duration: 294.845917ms
     - id: 14
       request:
         proto: HTTP/1.1
@@ -769,7 +769,7 @@ interactions:
         trailer: {}
         content_length: 795
         uncompressed: false
-        body: '{"virtualHost":"testtfvirtual","virtualPort":"900","localHost":"updatedlocal","localPort":"905","creationDate":"1751286229878","protocol":"HTTPS","backendType":"hana","hostInHeader":"INTERNAL","sid":"","totalResourcesCount":0,"enabledResourcesCount":0,"authenticationMode":"X509_GENERAL","description":"","allowedClients":[],"blacklistedUsers":[],"_links":{"self":{"href": "https://redacted.url/path"},"resources":{"href": "https://redacted.url/path"}}}'
+        body: '{"virtualHost":"testtfvirtual","virtualPort":"900","localHost":"updatedlocal","localPort":"905","creationDate":"1751867762517","protocol":"HTTPS","backendType":"hana","hostInHeader":"INTERNAL","sid":"","totalResourcesCount":0,"enabledResourcesCount":0,"authenticationMode":"X509_GENERAL","description":"","allowedClients":[],"blacklistedUsers":[],"_links":{"self":{"href": "https://redacted.url/path"},"resources":{"href": "https://redacted.url/path"}}}'
         headers:
             Cache-Control:
                 - no-store
@@ -778,7 +778,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Mon, 30 Jun 2025 12:23:53 GMT
+                - Mon, 07 Jul 2025 05:56:06 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -788,10 +788,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 5283cc15-98e9-4334-6f52-6e90b9a3f4eb
+                - e4a7c710-86ba-412b-7745-18c4b3f1a282
         status: 200 OK
         code: 200
-        duration: 232.104584ms
+        duration: 228.847166ms
     - id: 15
       request:
         proto: HTTP/1.1
@@ -831,7 +831,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Mon, 30 Jun 2025 12:23:53 GMT
+                - Mon, 07 Jul 2025 05:56:06 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -841,10 +841,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - e8069d03-f226-4c40-7d80-8c4edf4b8659
+                - 2cabbd79-a241-40a5-591e-14bd2e555efb
         status: 200 OK
         code: 200
-        duration: 231.588959ms
+        duration: 377.500417ms
     - id: 16
       request:
         proto: HTTP/1.1
@@ -875,7 +875,7 @@ interactions:
         trailer: {}
         content_length: 795
         uncompressed: false
-        body: '{"virtualHost":"testtfvirtual","virtualPort":"900","localHost":"updatedlocal","localPort":"905","creationDate":"1751286229878","protocol":"HTTPS","backendType":"hana","hostInHeader":"INTERNAL","sid":"","totalResourcesCount":0,"enabledResourcesCount":0,"authenticationMode":"X509_GENERAL","description":"","allowedClients":[],"blacklistedUsers":[],"_links":{"self":{"href": "https://redacted.url/path"},"resources":{"href": "https://redacted.url/path"}}}'
+        body: '{"virtualHost":"testtfvirtual","virtualPort":"900","localHost":"updatedlocal","localPort":"905","creationDate":"1751867762517","protocol":"HTTPS","backendType":"hana","hostInHeader":"INTERNAL","sid":"","totalResourcesCount":0,"enabledResourcesCount":0,"authenticationMode":"X509_GENERAL","description":"","allowedClients":[],"blacklistedUsers":[],"_links":{"self":{"href": "https://redacted.url/path"},"resources":{"href": "https://redacted.url/path"}}}'
         headers:
             Cache-Control:
                 - no-store
@@ -884,7 +884,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Mon, 30 Jun 2025 12:23:53 GMT
+                - Mon, 07 Jul 2025 05:56:06 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -894,10 +894,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 3bc0857b-f724-4092-64a8-4bcbed1599f8
+                - 72833d1f-691e-41e7-6598-9b694553fd85
         status: 200 OK
         code: 200
-        duration: 260.742291ms
+        duration: 486.652458ms
     - id: 17
       request:
         proto: HTTP/1.1
@@ -937,7 +937,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Mon, 30 Jun 2025 12:23:54 GMT
+                - Mon, 07 Jul 2025 05:56:07 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -947,10 +947,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 722ab5cc-eff3-49fd-7fc5-75e16598bff9
+                - 86aaadf7-bf0b-4a48-6912-a7ecb6e332f2
         status: 200 OK
         code: 200
-        duration: 226.91425ms
+        duration: 234.683583ms
     - id: 18
       request:
         proto: HTTP/1.1
@@ -990,7 +990,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Mon, 30 Jun 2025 12:23:54 GMT
+                - Mon, 07 Jul 2025 05:56:07 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -1000,11 +1000,117 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - d24b9073-5d8f-4152-605c-6b12db4dd2a9
+                - bca26427-601e-4767-48bf-50756e448c14
         status: 200 OK
         code: 200
-        duration: 229.423042ms
+        duration: 231.265208ms
     - id: 19
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: https://redacted.instance.url
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/json
+        url: https://redacted.instance.url/api/v1/connector/version
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 20
+        uncompressed: false
+        body: '{"version":"2.18.1"}'
+        headers:
+            Cache-Control:
+                - max-age=3600
+            Content-Length:
+                - "20"
+            Content-Type:
+                - application/json
+            Date:
+                - Mon, 07 Jul 2025 05:56:08 GMT
+            Server:
+                - nginx/1.27.4
+            Set-Cookie:
+                - redacted
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            X-Csrf-Token:
+                - redacted
+            X-Vcap-Request-Id:
+                - 19369213-480e-4b4d-5534-b43cb4051055
+        status: 200 OK
+        code: 200
+        duration: 238.951334ms
+    - id: 20
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: https://redacted.instance.url
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/json
+        url: https://redacted.instance.url/api/v1/connector/version
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 20
+        uncompressed: false
+        body: '{"version":"2.18.1"}'
+        headers:
+            Cache-Control:
+                - max-age=3600
+            Content-Length:
+                - "20"
+            Content-Type:
+                - application/json
+            Date:
+                - Mon, 07 Jul 2025 05:56:08 GMT
+            Server:
+                - nginx/1.27.4
+            Set-Cookie:
+                - redacted
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            X-Csrf-Token:
+                - redacted
+            X-Vcap-Request-Id:
+                - f66f33d2-506b-4dba-55cc-ba897361495b
+        status: 200 OK
+        code: 200
+        duration: 307.382959ms
+    - id: 21
       request:
         proto: HTTP/1.1
         proto_major: 1
@@ -1039,7 +1145,7 @@ interactions:
             Cache-Control:
                 - no-store
             Date:
-                - Mon, 30 Jun 2025 12:23:54 GMT
+                - Mon, 07 Jul 2025 05:56:08 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -1049,7 +1155,7 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 28ffa6bd-6bc0-43d1-5a1a-54c8c027862f
+                - 67bf0d8b-7235-4787-7937-b319b08ee17f
         status: 204 No Content
         code: 204
-        duration: 345.852375ms
+        duration: 346.350209ms

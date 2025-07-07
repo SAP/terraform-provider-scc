@@ -40,7 +40,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 25 Jun 2025 06:39:27 GMT
+                - Mon, 07 Jul 2025 05:48:20 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -50,10 +50,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 0457ee11-f117-4020-5022-9b38f259b471
+                - 64d0cb7b-4d9f-4e36-613a-d9c736b93ea3
         status: 200 OK
         code: 200
-        duration: 716.669458ms
+        duration: 905.474751ms
     - id: 1
       request:
         proto: HTTP/1.1
@@ -85,14 +85,14 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"description":"This subaccount has all the configurations for data source.","displayName":"Terraform Subaccount Datasource","tunnel":{"state":"Connected","connectedSinceTimeStamp":1750485670063,"connections":0,"applicationConnections":[],"serviceChannels":[{"type":"K8S","state":"Connected","details":"cp.da2b3e1.stage.kyma.ondemand.com:443/bd64665f-060a-47b6-8aba-f406703f0acf","comment":""}],"subaccountCertificate":{"notAfterTimeStamp": 1111111111111,"notBeforeTimeStamp": 1111111111111,"subjectDN": "CN=redacted,L=redacted,OU=redacted,OU=redacted,O=redacted,C=redacted","issuer": "CN=redacted,OU=SAP Cloud Platform Clients,O=redacted,L=redacted,C=redacted","serialNumber": "aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa"},"user":"cloud-user@example.com"},"_links":{"ABAPCloud-channels":{"href": "https://redacted.url/path"},"HANA-channels":{"href": "https://redacted.url/path"},"systemMappings":{"href": "https://redacted.url/path"},"self":{"href": "https://redacted.url/path"},"K8S-channels":{"href": "https://redacted.url/path"},"validity":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"},"VirtualMachine-channels":{"href": "https://redacted.url/path"},"domainMappings":{"href": "https://redacted.url/path"}},"regionHost":"cf.eu12.hana.ondemand.com","subaccount":"0bcb0012-a982-42f9-bda4-0a5cb15f88c8","locationID":""}'
+        body: '{"description":"This subaccount has all the configurations for data source.","displayName":"Terraform Subaccount Datasource","tunnel":{"state":"Connected","connectedSinceTimeStamp":1751850091589,"connections":0,"applicationConnections":[],"serviceChannels":[{"type":"K8S","state":"Connected","details":"cp.da2b3e1.stage.kyma.ondemand.com:443/bd64665f-060a-47b6-8aba-f406703f0acf","comment":""}],"subaccountCertificate":{"notAfterTimeStamp": 1111111111111,"notBeforeTimeStamp": 1111111111111,"subjectDN": "CN=redacted,L=redacted,OU=redacted,OU=redacted,O=redacted,C=redacted","issuer": "CN=redacted,OU=SAP Cloud Platform Clients,O=redacted,L=redacted,C=redacted","serialNumber": "aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa"},"user":"cloud-user@example.com"},"_links":{"ABAPCloud-channels":{"href": "https://redacted.url/path"},"HANA-channels":{"href": "https://redacted.url/path"},"systemMappings":{"href": "https://redacted.url/path"},"self":{"href": "https://redacted.url/path"},"K8S-channels":{"href": "https://redacted.url/path"},"validity":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"},"VirtualMachine-channels":{"href": "https://redacted.url/path"},"domainMappings":{"href": "https://redacted.url/path"}},"regionHost":"cf.eu12.hana.ondemand.com","subaccount":"0bcb0012-a982-42f9-bda4-0a5cb15f88c8","locationID":""}'
         headers:
             Cache-Control:
                 - no-store
             Content-Type:
                 - application/json
             Date:
-                - Wed, 25 Jun 2025 06:39:27 GMT
+                - Mon, 07 Jul 2025 05:48:20 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -104,10 +104,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 9ea6c0b7-5d3d-4321-7f2a-8622425648cb
+                - 14d46acd-815a-416c-5251-f5ec769d03c0
         status: 200 OK
         code: 200
-        duration: 268.285708ms
+        duration: 278.879167ms
     - id: 2
       request:
         proto: HTTP/1.1
@@ -147,7 +147,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 25 Jun 2025 06:39:28 GMT
+                - Mon, 07 Jul 2025 05:48:21 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -157,10 +157,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 7eadd0fd-b626-4c8d-5478-5971d70cf9a7
+                - 792a5d9f-e6b8-4706-5c64-4f9a4af554f1
         status: 200 OK
         code: 200
-        duration: 239.468001ms
+        duration: 278.239584ms
     - id: 3
       request:
         proto: HTTP/1.1
@@ -200,7 +200,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 25 Jun 2025 06:39:28 GMT
+                - Mon, 07 Jul 2025 05:48:21 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -210,10 +210,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 66ec7992-09c8-4ca9-6940-2463d42647ba
+                - 313df628-11b3-4c20-4a96-5170beca3702
         status: 200 OK
         code: 200
-        duration: 243.966ms
+        duration: 346.107042ms
     - id: 4
       request:
         proto: HTTP/1.1
@@ -245,14 +245,14 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"description":"This subaccount has all the configurations for data source.","displayName":"Terraform Subaccount Datasource","tunnel":{"state":"Connected","connectedSinceTimeStamp":1750485670063,"connections":0,"applicationConnections":[],"serviceChannels":[{"type":"K8S","state":"Connected","details":"cp.da2b3e1.stage.kyma.ondemand.com:443/bd64665f-060a-47b6-8aba-f406703f0acf","comment":""}],"subaccountCertificate":{"notAfterTimeStamp": 1111111111111,"notBeforeTimeStamp": 1111111111111,"subjectDN": "CN=redacted,L=redacted,OU=redacted,OU=redacted,O=redacted,C=redacted","issuer": "CN=redacted,OU=SAP Cloud Platform Clients,O=redacted,L=redacted,C=redacted","serialNumber": "aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa"},"user":"cloud-user@example.com"},"_links":{"ABAPCloud-channels":{"href": "https://redacted.url/path"},"HANA-channels":{"href": "https://redacted.url/path"},"systemMappings":{"href": "https://redacted.url/path"},"self":{"href": "https://redacted.url/path"},"K8S-channels":{"href": "https://redacted.url/path"},"validity":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"},"VirtualMachine-channels":{"href": "https://redacted.url/path"},"domainMappings":{"href": "https://redacted.url/path"}},"regionHost":"cf.eu12.hana.ondemand.com","subaccount":"0bcb0012-a982-42f9-bda4-0a5cb15f88c8","locationID":""}'
+        body: '{"description":"This subaccount has all the configurations for data source.","displayName":"Terraform Subaccount Datasource","tunnel":{"state":"Connected","connectedSinceTimeStamp":1751850091589,"connections":0,"applicationConnections":[],"serviceChannels":[{"type":"K8S","state":"Connected","details":"cp.da2b3e1.stage.kyma.ondemand.com:443/bd64665f-060a-47b6-8aba-f406703f0acf","comment":""}],"subaccountCertificate":{"notAfterTimeStamp": 1111111111111,"notBeforeTimeStamp": 1111111111111,"subjectDN": "CN=redacted,L=redacted,OU=redacted,OU=redacted,O=redacted,C=redacted","issuer": "CN=redacted,OU=SAP Cloud Platform Clients,O=redacted,L=redacted,C=redacted","serialNumber": "aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa"},"user":"cloud-user@example.com"},"_links":{"ABAPCloud-channels":{"href": "https://redacted.url/path"},"HANA-channels":{"href": "https://redacted.url/path"},"systemMappings":{"href": "https://redacted.url/path"},"self":{"href": "https://redacted.url/path"},"K8S-channels":{"href": "https://redacted.url/path"},"validity":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"},"VirtualMachine-channels":{"href": "https://redacted.url/path"},"domainMappings":{"href": "https://redacted.url/path"}},"regionHost":"cf.eu12.hana.ondemand.com","subaccount":"0bcb0012-a982-42f9-bda4-0a5cb15f88c8","locationID":""}'
         headers:
             Cache-Control:
                 - no-store
             Content-Type:
                 - application/json
             Date:
-                - Wed, 25 Jun 2025 06:39:28 GMT
+                - Mon, 07 Jul 2025 05:48:21 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -264,10 +264,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - c60fb5ce-1935-4133-7137-14a018d541de
+                - f19cf9f1-b861-469e-6c4b-684f2a45d085
         status: 200 OK
         code: 200
-        duration: 266.321125ms
+        duration: 279.225125ms
     - id: 5
       request:
         proto: HTTP/1.1
@@ -307,7 +307,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 25 Jun 2025 06:39:29 GMT
+                - Mon, 07 Jul 2025 05:48:22 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -317,10 +317,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 15249906-97cd-4669-5a89-86f13b248207
+                - 385257d6-6820-4864-57e4-75dbfe099fd8
         status: 200 OK
         code: 200
-        duration: 241.747416ms
+        duration: 236.023542ms
     - id: 6
       request:
         proto: HTTP/1.1
@@ -352,14 +352,14 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"description":"This subaccount has all the configurations for data source.","displayName":"Terraform Subaccount Datasource","tunnel":{"state":"Connected","connectedSinceTimeStamp":1750485670063,"connections":0,"applicationConnections":[],"serviceChannels":[{"type":"K8S","state":"Connected","details":"cp.da2b3e1.stage.kyma.ondemand.com:443/bd64665f-060a-47b6-8aba-f406703f0acf","comment":""}],"subaccountCertificate":{"notAfterTimeStamp": 1111111111111,"notBeforeTimeStamp": 1111111111111,"subjectDN": "CN=redacted,L=redacted,OU=redacted,OU=redacted,O=redacted,C=redacted","issuer": "CN=redacted,OU=SAP Cloud Platform Clients,O=redacted,L=redacted,C=redacted","serialNumber": "aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa"},"user":"cloud-user@example.com"},"_links":{"ABAPCloud-channels":{"href": "https://redacted.url/path"},"HANA-channels":{"href": "https://redacted.url/path"},"systemMappings":{"href": "https://redacted.url/path"},"self":{"href": "https://redacted.url/path"},"K8S-channels":{"href": "https://redacted.url/path"},"validity":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"},"VirtualMachine-channels":{"href": "https://redacted.url/path"},"domainMappings":{"href": "https://redacted.url/path"}},"regionHost":"cf.eu12.hana.ondemand.com","subaccount":"0bcb0012-a982-42f9-bda4-0a5cb15f88c8","locationID":""}'
+        body: '{"description":"This subaccount has all the configurations for data source.","displayName":"Terraform Subaccount Datasource","tunnel":{"state":"Connected","connectedSinceTimeStamp":1751850091589,"connections":0,"applicationConnections":[],"serviceChannels":[{"type":"K8S","state":"Connected","details":"cp.da2b3e1.stage.kyma.ondemand.com:443/bd64665f-060a-47b6-8aba-f406703f0acf","comment":""}],"subaccountCertificate":{"notAfterTimeStamp": 1111111111111,"notBeforeTimeStamp": 1111111111111,"subjectDN": "CN=redacted,L=redacted,OU=redacted,OU=redacted,O=redacted,C=redacted","issuer": "CN=redacted,OU=SAP Cloud Platform Clients,O=redacted,L=redacted,C=redacted","serialNumber": "aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa"},"user":"cloud-user@example.com"},"_links":{"ABAPCloud-channels":{"href": "https://redacted.url/path"},"HANA-channels":{"href": "https://redacted.url/path"},"systemMappings":{"href": "https://redacted.url/path"},"self":{"href": "https://redacted.url/path"},"K8S-channels":{"href": "https://redacted.url/path"},"validity":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"},"VirtualMachine-channels":{"href": "https://redacted.url/path"},"domainMappings":{"href": "https://redacted.url/path"}},"regionHost":"cf.eu12.hana.ondemand.com","subaccount":"0bcb0012-a982-42f9-bda4-0a5cb15f88c8","locationID":""}'
         headers:
             Cache-Control:
                 - no-store
             Content-Type:
                 - application/json
             Date:
-                - Wed, 25 Jun 2025 06:39:29 GMT
+                - Mon, 07 Jul 2025 05:48:22 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -371,10 +371,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 5d2a4c65-0e47-44b5-7c28-3100b1efd4f8
+                - c009c626-762d-4750-699f-c8761c11cda5
         status: 200 OK
         code: 200
-        duration: 266.670125ms
+        duration: 256.959584ms
     - id: 7
       request:
         proto: HTTP/1.1
@@ -414,7 +414,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 25 Jun 2025 06:39:29 GMT
+                - Mon, 07 Jul 2025 05:48:22 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -424,7 +424,7 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 2882e45f-efd5-4e8b-6642-363af7fcc690
+                - 474f8019-5898-47be-4175-a78dc80cd2ca
         status: 200 OK
         code: 200
-        duration: 241.159875ms
+        duration: 405.252875ms
