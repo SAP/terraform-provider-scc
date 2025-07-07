@@ -4,7 +4,7 @@ const (
 	// Subaccount
 	errMsgAddSubaccountFailed    = "error creating the cloud connector subaccount."
 	errMsgFetchSubaccountFailed  = "error fetching the cloud connector subaccount"
-	errMsgFetchSubaccountsFailed = "error fetching the cloud connector subaccount service channels"
+	errMsgFetchSubaccountsFailed = "error fetching the cloud connector subaccounts"
 	errMsgUpdateSubaccountFailed = "error updating the cloud connector subaccount."
 	errMsgDeleteSubaccountFailed = "error deleting the cloud connector subaccount"
 	errMsgMapSubaccountFailed    = "error mapping the cloud connector subaccount value"

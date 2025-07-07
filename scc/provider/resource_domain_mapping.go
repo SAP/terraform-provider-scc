@@ -206,7 +206,7 @@ func (r *DomainMappingResource) Update(ctx context.Context, req resource.UpdateR
 		return
 	}
 
-	endpoint = fmt.Sprintf("/api/v1/configuration/subaccounts/%s/%s/domainMappings", regionHost, subaccount)
+	endpoint = endpoints.GetDomainMappingBaseEndpoint(regionHost, subaccount)
 
 	err = requestAndUnmarshal(r.client, &respObj.DomainMappings, "GET", endpoint, nil, true)
 	if err != nil {
