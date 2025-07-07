@@ -168,13 +168,13 @@ func validateConfig(instanceURL, username, password, caCertificate, clientCertif
 		return false
 	}
 
-	if caCertificate != "" && validatePEMBlock(caCertificate, "ca_certificate", "CA Certificate", resp) {
+	if caCertificate != "" && !validatePEMBlock(caCertificate, "ca_certificate", "CA Certificate", resp) {
 		return false
 	}
-	if clientCertificate != "" && validatePEMBlock(clientCertificate, "client_certificate", "Client Certificate", resp) {
+	if clientCertificate != "" && !validatePEMBlock(clientCertificate, "client_certificate", "Client Certificate", resp) {
 		return false
 	}
-	if clientKey != "" && validatePEMBlock(clientKey, "client_key", "Client Key", resp) {
+	if clientKey != "" && !validatePEMBlock(clientKey, "client_key", "Client Key", resp) {
 		return false
 	}
 
