@@ -300,7 +300,7 @@ func (r *SubaccountResource) Update(ctx context.Context, req resource.UpdateRequ
 		return
 	}
 
-	if shouldUpdateTunnel(plan, state) {
+	if shouldUpdateTunnel(plan) {
 		if err := r.updateTunnelState(ctx, plan, state, endpoint, &respObj, &resp.Diagnostics); err != nil {
 			return
 		}
@@ -328,7 +328,7 @@ func validateUpdateInputs(plan, state SubaccountConfig) error {
 	return nil
 }
 
-func shouldUpdateTunnel(plan, state SubaccountConfig) bool {
+func shouldUpdateTunnel(plan SubaccountConfig) bool {
 	return !plan.Tunnel.IsNull() && !plan.Tunnel.IsUnknown()
 }
 

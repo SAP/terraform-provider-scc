@@ -25,7 +25,7 @@ __Further documentation:__
 ## Example Usage
 
 ```terraform
-resource "scc_subaccount" "scc_subaccount" {
+resource "scc_subaccount" "scc_sa" {
   region_host = "cf.eu12.hana.ondemand.com"
   subaccount = "12345678-90ab-cdef-1234-567890abcdef"
   cloud_user = "Cloud Username"
@@ -113,5 +113,5 @@ Import is supported using the following syntax:
 ```terraform
 # terraform import scc_subaccount.<resource_name> '<region_host>,<subaccount>`
 
-terraform import scc_subaccount.scc_subaccount 'cf.eu12.hana.ondemand.com,12345678-90ab-cdef-1234-567890abcdef'
+terraform import scc_subaccount.scc_sa 'cf.eu12.hana.ondemand.com,12345678-90ab-cdef-1234-567890abcdef'
 ```
