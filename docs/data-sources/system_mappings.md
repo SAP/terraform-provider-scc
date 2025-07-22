@@ -38,8 +38,8 @@ data "scc_system_mappings" "all" {
 
 ### Required
 
-- `region_host` (String)
-- `subaccount` (String)
+- `region_host` (String) Region Host Name.
+- `subaccount` (String) The ID of the subaccount.
 
 ### Read-Only
 

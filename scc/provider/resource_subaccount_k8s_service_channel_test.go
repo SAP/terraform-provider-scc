@@ -10,11 +10,15 @@ import (
 )
 
 func TestResourceSubaccountK8SServiceChannel(t *testing.T) {
-
+	regionHost := "cf.eu12.hana.ondemand.com"
+	subaccount := "d3bbbcd7-d5e0-483b-a524-6dee7205f8e8"
 	t.Parallel()
 
 	t.Run("happy path", func(t *testing.T) {
 		rec, user := setupVCR(t, "fixtures/resource_subaccount_k8s_service_channel")
+		if len(user.K8SCluster) == 0 || len(user.K8SService) == 0 {
+			t.Fatalf("Missing TF_VAR_k8s_cluster or TF_VAR_k8s_service for recording test fixtures")
+		}
 		defer stopQuietly(rec)
 
 		resource.Test(t, resource.TestCase{
@@ -22,12 +26,12 @@ func TestResourceSubaccountK8SServiceChannel(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(rec.GetDefaultClient()),
 			Steps: []resource.TestStep{
 				{
-					Config: providerConfig(user) + ResourceSubaccountK8SServiceChannel("test", "cf.eu12.hana.ondemand.com", "d3bbbcd7-d5e0-483b-a524-6dee7205f8e8", "cp.ace9fb5.stage.kyma.ondemand.com:443", "29d4e6f6-8e7f-4882-b434-21a52bb75e0f", 3000, 1, true),
+					Config: providerConfig(user) + ResourceSubaccountK8SServiceChannel("test", regionHost, subaccount, user.K8SCluster, user.K8SService, 3000, 1, true, "Created"),
 					Check: resource.ComposeAggregateTestCheckFunc(
-						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.test", "region_host", "cf.eu12.hana.ondemand.com"),
+						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.test", "region_host", regionHost),
 						resource.TestMatchResourceAttr("scc_subaccount_k8s_service_channel.test", "subaccount", regexpValidUUID),
-						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.test", "k8s_cluster", "cp.ace9fb5.stage.kyma.ondemand.com:443"),
-						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.test", "k8s_service", "29d4e6f6-8e7f-4882-b434-21a52bb75e0f"),
+						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.test", "k8s_cluster", user.K8SCluster),
+						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.test", "k8s_service", user.K8SService),
 						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.test", "port", "3000"),
 						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.test", "connections", "1"),
 						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.test", "type", "K8S"),
@@ -47,19 +51,19 @@ func TestResourceSubaccountK8SServiceChannel(t *testing.T) {
 				{
 					ResourceName:  "scc_subaccount_k8s_service_channel.test",
 					ImportState:   true,
-					ImportStateId: "cf.eu12.hana.ondemand.comd3bbbcd7-d5e0-483b-a524-6dee7205f8e81", // malformed ID
+					ImportStateId: regionHost + subaccount + "1", // malformed ID
 					ExpectError:   regexp.MustCompile(`(?is)Expected import identifier with format:.*id.*Got:`),
 				},
 				{
 					ResourceName:  "scc_subaccount_k8s_service_channel.test",
 					ImportState:   true,
-					ImportStateId: "cf.eu12.hana.ondemand.com,d3bbbcd7-d5e0-483b-a524-6dee7205f8e8,1,extra",
+					ImportStateId: regionHost + "," + subaccount + ",1, extra",
 					ExpectError:   regexp.MustCompile(`(?is)Expected import identifier with format:.*id.*Got:`),
 				},
 				{
 					ResourceName:  "scc_subaccount_k8s_service_channel.test",
 					ImportState:   true,
-					ImportStateId: "cf.eu12.hana.ondemand.com,d3bbbcd7-d5e0-483b-a524-6dee7205f8e8,not-an-int",
+					ImportStateId: regionHost + "," + subaccount + ",not-an-int",
 					ExpectError:   regexp.MustCompile(`(?is)The 'id' part must be an integer.*Got:.*not-an-int`),
 				},
 			},
@@ -76,55 +80,22 @@ func TestResourceSubaccountK8SServiceChannel(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(rec.GetDefaultClient()),
 			Steps: []resource.TestStep{
 				{
-					Config: providerConfig(user) + `
-					resource "scc_subaccount_k8s_service_channel" "test" {
-					  region_host = "cf.eu12.hana.ondemand.com"
-					  subaccount = "d3bbbcd7-d5e0-483b-a524-6dee7205f8e8"
-					  k8s_cluster = "cp.ace9fb5.stage.kyma.ondemand.com:443"
-					  k8s_service = "29d4e6f6-8e7f-4882-b434-21a52bb75e0f"
-					  port = 3000
-					  connections = 1
-					  comment = "initial"
-					  enabled = true
-					}
-					`,
+					Config: providerConfig(user) + ResourceSubaccountK8SServiceChannel("test", regionHost, subaccount, user.K8SCluster, user.K8SService, 3000, 1, true, "Created"),
 					Check: resource.ComposeAggregateTestCheckFunc(
-						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.test", "comment", "initial"),
+						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.test", "comment", "Created"),
 						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.test", "connections", "1"),
 						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.test", "enabled", "true"),
 					),
 				},
 				// Update with mismatched configuration should throw error
 				{
-					Config: providerConfig(user) + `
-					resource "scc_subaccount_k8s_service_channel" "test" {
-					  region_host = "cf.us10.hana.ondemand.com"
-					  subaccount = "d3bbbcd7-d5e0-483b-a524-6dee7205f8e8"
-					  k8s_cluster = "cp.ace9fb5.stage.kyma.ondemand.com:443"
-					  k8s_service = "29d4e6f6-8e7f-4882-b434-21a52bb75e0f"
-					  port = 3000
-					  connections = 1
-					  comment = "initial"
-					  enabled = true
-					}
-					`,
-					ExpectError: regexp.MustCompile(`(?is)error updating the cloud connector subaccount service channel.*mismatched\s+configuration values`),
+					Config:      providerConfig(user) + ResourceSubaccountK8SServiceChannel("test", "cf.us10.hana.ondemand.com", subaccount, user.K8SCluster, user.K8SService, 3000, 1, true, "Updated"),
+					ExpectError: regexp.MustCompile(`(?is)error updating the cloud connector subaccount K8S service channel.*mismatched\s+configuration values`),
 				},
 				{
-					Config: providerConfig(user) + `
-					resource "scc_subaccount_k8s_service_channel" "test" {
-					  region_host = "cf.eu12.hana.ondemand.com"
-					  subaccount = "d3bbbcd7-d5e0-483b-a524-6dee7205f8e8"
-					  k8s_cluster = "cp.ace9fb5.stage.kyma.ondemand.com:443"
-					  k8s_service = "29d4e6f6-8e7f-4882-b434-21a52bb75e0f"
-					  port = 3000
-					  connections = 2
-					  comment = "updated"
-					  enabled = false
-					}
-					`,
+					Config: providerConfig(user) + ResourceSubaccountK8SServiceChannel("test", regionHost, subaccount, user.K8SCluster, user.K8SService, 3000, 2, false, "Updated"),
 					Check: resource.ComposeAggregateTestCheckFunc(
-						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.test", "comment", "updated"),
+						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.test", "comment", "Updated"),
 						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.test", "connections", "2"),
 						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.test", "enabled", "false"),
 					),
@@ -139,7 +110,7 @@ func TestResourceSubaccountK8SServiceChannel(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      ResourceSubaccountK8SServiceChannelWoRegionHost("test", "d3bbbcd7-d5e0-483b-a524-6dee7205f8e8", "cp.ace9fb5.stage.kyma.ondemand.com:443", "29d4e6f6-8e7f-4882-b434-21a52bb75e0f", 3000, 1, true),
+					Config:      ResourceSubaccountK8SServiceChannelWoRegionHost("test", regionHost, "testclusterhost", "testserviceid", 3000, 1, true),
 					ExpectError: regexp.MustCompile(`The argument "region_host" is required, but no definition was found.`),
 				},
 			},
@@ -152,7 +123,7 @@ func TestResourceSubaccountK8SServiceChannel(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      ResourceSubaccountK8SServiceChannelWoSubaccount("test", "cf.eu12.hana.ondemand.com", "cp.ace9fb5.stage.kyma.ondemand.com:443", "29d4e6f6-8e7f-4882-b434-21a52bb75e0f", 3000, 1, true),
+					Config:      ResourceSubaccountK8SServiceChannelWoSubaccount("test", regionHost, "testclusterhost", "testserviceid", 3000, 1, true),
 					ExpectError: regexp.MustCompile(`The argument "subaccount" is required, but no definition was found.`),
 				},
 			},
@@ -165,7 +136,7 @@ func TestResourceSubaccountK8SServiceChannel(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      ResourceSubaccountK8SServiceChannelWoCluster("test", "cf.eu12.hana.ondemand.com", "d3bbbcd7-d5e0-483b-a524-6dee7205f8e8", "29d4e6f6-8e7f-4882-b434-21a52bb75e0f", 3000, 1, true),
+					Config:      ResourceSubaccountK8SServiceChannelWoCluster("test", regionHost, subaccount, "testserviceid", 3000, 1, true),
 					ExpectError: regexp.MustCompile(`The argument "k8s_cluster" is required, but no definition was found.`),
 				},
 			},
@@ -178,7 +149,7 @@ func TestResourceSubaccountK8SServiceChannel(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      ResourceSubaccountK8SServiceChannelWoService("test", "cf.eu12.hana.ondemand.com", "d3bbbcd7-d5e0-483b-a524-6dee7205f8e8", "cp.ace9fb5.stage.kyma.ondemand.com:443", 3000, 1, true),
+					Config:      ResourceSubaccountK8SServiceChannelWoService("test", regionHost, subaccount, "testclusterhost", 3000, 1, true),
 					ExpectError: regexp.MustCompile(`The argument "k8s_service" is required, but no definition was found.`),
 				},
 			},
@@ -191,7 +162,7 @@ func TestResourceSubaccountK8SServiceChannel(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      ResourceSubaccountK8SServiceChannelWoPort("test", "cf.eu12.hana.ondemand.com", "d3bbbcd7-d5e0-483b-a524-6dee7205f8e8", "cp.ace9fb5.stage.kyma.ondemand.com:443", "29d4e6f6-8e7f-4882-b434-21a52bb75e0f", 1, true),
+					Config:      ResourceSubaccountK8SServiceChannelWoPort("test", regionHost, subaccount, "testclusterhost", "testserviceid", 1, true),
 					ExpectError: regexp.MustCompile(`The argument "port" is required, but no definition was found.`),
 				},
 			},
@@ -204,7 +175,7 @@ func TestResourceSubaccountK8SServiceChannel(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      ResourceSubaccountK8SServiceChannelWoConnections("test", "cf.eu12.hana.ondemand.com", "d3bbbcd7-d5e0-483b-a524-6dee7205f8e8", "cp.ace9fb5.stage.kyma.ondemand.com:443", "29d4e6f6-8e7f-4882-b434-21a52bb75e0f", 3000, true),
+					Config:      ResourceSubaccountK8SServiceChannelWoConnections("test", regionHost, subaccount, "testclusterhost", "testserviceid", 3000, true),
 					ExpectError: regexp.MustCompile(`The argument "connections" is required, but no definition was found.`),
 				},
 			},
@@ -213,7 +184,7 @@ func TestResourceSubaccountK8SServiceChannel(t *testing.T) {
 
 }
 
-func ResourceSubaccountK8SServiceChannel(datasourceName string, regionHost string, subaccount string, k8sCluster string, k8sService string, port int64, connections int64, enabled bool) string {
+func ResourceSubaccountK8SServiceChannel(datasourceName string, regionHost string, subaccount string, k8sCluster string, k8sService string, port int64, connections int64, enabled bool, comment string) string {
 	return fmt.Sprintf(`
 	resource "scc_subaccount_k8s_service_channel" "%s" {
 	region_host = "%s"
@@ -223,8 +194,9 @@ func ResourceSubaccountK8SServiceChannel(datasourceName string, regionHost strin
 	port = "%d"
 	connections = "%d"
 	enabled= "%t"
+	comment = "%s"
 	}
-	`, datasourceName, regionHost, subaccount, k8sCluster, k8sService, port, connections, enabled)
+	`, datasourceName, regionHost, subaccount, k8sCluster, k8sService, port, connections, enabled, comment)
 }
 
 func ResourceSubaccountK8SServiceChannelWoRegionHost(datasourceName string, subaccount string, k8sCluster string, k8sService string, port int64, connections int64, enabled bool) string {

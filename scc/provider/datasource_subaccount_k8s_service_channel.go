@@ -58,7 +58,7 @@ __Further documentation:__
 			},
 
 			"k8s_service": schema.StringAttribute{
-				MarkdownDescription: "Host name providiing the service inside of Kubernetes cluster.",
+				MarkdownDescription: "Host name providing the service inside of Kubernetes cluster.",
 				Computed:            true,
 			},
 			"id": schema.Int64Attribute{
@@ -70,7 +70,7 @@ __Further documentation:__
 				Computed:            true,
 			},
 			"port": schema.Int64Attribute{
-				MarkdownDescription: "Port of the subaccount service channel for the virtual machine.",
+				MarkdownDescription: "Port of the subaccount service channel for the Kubernetes Cluster.",
 				Computed:            true,
 			},
 			"enabled": schema.BoolAttribute{

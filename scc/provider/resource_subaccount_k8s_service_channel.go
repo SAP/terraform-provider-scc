@@ -9,9 +9,12 @@ import (
 	"github.com/SAP/terraform-provider-scc/internal/api"
 	apiobjects "github.com/SAP/terraform-provider-scc/internal/api/apiObjects"
 	"github.com/SAP/terraform-provider-scc/internal/api/endpoints"
+	"github.com/SAP/terraform-provider-scc/validation/uuidvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 var _ resource.Resource = &SubaccountK8SServiceChannelResource{}
@@ -47,6 +50,9 @@ __Further documentation:__
 			"subaccount": schema.StringAttribute{
 				MarkdownDescription: "The ID of the subaccount.",
 				Required:            true,
+				Validators: []validator.String{
+					uuidvalidator.ValidUUID(),
+				},
 			},
 			"k8s_cluster": schema.StringAttribute{
 				MarkdownDescription: "Host name to access the Kubernetes cluster.",
@@ -54,7 +60,7 @@ __Further documentation:__
 			},
 
 			"k8s_service": schema.StringAttribute{
-				MarkdownDescription: "Host name providiing the service inside of Kubernetes cluster.",
+				MarkdownDescription: "Host name providing the service inside of Kubernetes cluster.",
 				Required:            true,
 			},
 			"id": schema.Int64Attribute{
@@ -67,8 +73,11 @@ __Further documentation:__
 				Computed:            true,
 			},
 			"port": schema.Int64Attribute{
-				MarkdownDescription: "Port of the subaccount service channel for the virtual machine.",
+				MarkdownDescription: "Port of the subaccount service channel for the Kubernetes Cluster.",
 				Required:            true,
+				Validators: []validator.Int64{
+					int64validator.Between(1, 65535),
+				},
 			},
 			"enabled": schema.BoolAttribute{
 				MarkdownDescription: "Boolean flag indicating whether the channel is enabled and therefore should be open.",

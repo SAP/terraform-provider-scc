@@ -7,8 +7,10 @@ import (
 	"github.com/SAP/terraform-provider-scc/internal/api"
 	apiobjects "github.com/SAP/terraform-provider-scc/internal/api/apiObjects"
 	"github.com/SAP/terraform-provider-scc/internal/api/endpoints"
+	"github.com/SAP/terraform-provider-scc/validation/uuidvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 var _ datasource.DataSource = &SystemMappingsDataSource{}
@@ -40,10 +42,15 @@ __Further documentation:__
 <https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/system-mappings>`,
 		Attributes: map[string]schema.Attribute{
 			"region_host": schema.StringAttribute{
-				Required: true,
+				MarkdownDescription: "Region Host Name.",
+				Required:            true,
 			},
 			"subaccount": schema.StringAttribute{
-				Required: true,
+				MarkdownDescription: "The ID of the subaccount.",
+				Required:            true,
+				Validators: []validator.String{
+					uuidvalidator.ValidUUID(),
+				},
 			},
 			"system_mappings": schema.ListNestedAttribute{
 				MarkdownDescription: "List of System Mappings between Virtual and Internal System.",

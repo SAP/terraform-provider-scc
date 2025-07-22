@@ -43,8 +43,8 @@ resource "scc_subaccount_k8s_service_channel" "scc_sc" {
 
 - `connections` (Number) Maximal number of open connections.
 - `k8s_cluster` (String) Host name to access the Kubernetes cluster.
-- `k8s_service` (String) Host name providiing the service inside of Kubernetes cluster.
-- `port` (Number) Port of the subaccount service channel for the virtual machine.
+- `k8s_service` (String) Host name providing the service inside of Kubernetes cluster.
+- `port` (Number) Port of the subaccount service channel for the Kubernetes Cluster.
 - `region_host` (String) Region Host Name.
 - `subaccount` (String) The ID of the subaccount.
 

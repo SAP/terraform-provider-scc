@@ -49,8 +49,8 @@ data "scc_subaccount_k8s_service_channel" "by_id" {
 - `connections` (Number) Maximal number of open connections.
 - `enabled` (Boolean) Boolean flag indicating whether the channel is enabled and therefore should be open.
 - `k8s_cluster` (String) Host name to access the Kubernetes cluster.
-- `k8s_service` (String) Host name providiing the service inside of Kubernetes cluster.
-- `port` (Number) Port of the subaccount service channel for the virtual machine.
+- `k8s_service` (String) Host name providing the service inside of Kubernetes cluster.
+- `port` (Number) Port of the subaccount service channel for the Kubernetes Cluster.
 - `state` (Attributes) Current connection state; this property is only available if the channel is enabled. (see [below for nested schema](#nestedatt--state))
 - `type` (String) Type of Subaccount Service Channel.
 

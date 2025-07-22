@@ -7,8 +7,10 @@ import (
 	"github.com/SAP/terraform-provider-scc/internal/api"
 	apiobjects "github.com/SAP/terraform-provider-scc/internal/api/apiObjects"
 	"github.com/SAP/terraform-provider-scc/internal/api/endpoints"
+	"github.com/SAP/terraform-provider-scc/validation/uuidvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 var _ datasource.DataSource = &SubaccountsDataSource{}
@@ -51,6 +53,9 @@ __Further documentation:__
 						"subaccount": schema.StringAttribute{
 							MarkdownDescription: "The ID of the subaccount.",
 							Computed:            true,
+							Validators: []validator.String{
+								uuidvalidator.ValidUUID(),
+							},
 						},
 						"location_id": schema.StringAttribute{
 							MarkdownDescription: "Location identifier for the Cloud Connector instance. This property is not available if the default location ID is in use.",

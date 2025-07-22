@@ -38,12 +38,22 @@ const (
 	errMsgMapDomainMappingsFailed   = "error mapping the cloud connector domain mappings value"
 
 	// Subaccount K8S Service Channel
-	errMsgAddSubaccountK8SServiceChannelFailed    = "error creating the cloud connector subaccount service channel"
-	errMsgFetchSubaccountK8SServiceChannelFailed  = "error fetching the cloud connector subaccount service channel"
-	errMsgFetchSubaccountK8SServiceChannelsFailed = "error fetching the cloud connector subaccount service channels"
-	errMsgUpdateSubaccountK8SServiceChannelFailed = "error updating the cloud connector subaccount service channel"
-	errMsgEnableSubaccountK8SServiceChannelFailed = "error enabling the cloud connector subaccount service channel"
-	errMsgDeleteSubaccountK8SServiceChannelFailed = "error deleting the cloud connector subaccount service channel"
-	errMsgMapSubaccountK8SServiceChannelFailed    = "error mapping the cloud connector subaccount service channel value"
-	errMsgMapSubaccountK8SServiceChannelsFailed   = "error mapping the cloud connector subaccount service channels value"
+	errMsgAddSubaccountK8SServiceChannelFailed    = "error creating the cloud connector subaccount K8S service channel"
+	errMsgFetchSubaccountK8SServiceChannelFailed  = "error fetching the cloud connector subaccount K8S service channel"
+	errMsgFetchSubaccountK8SServiceChannelsFailed = "error fetching the cloud connector subaccount K8S service channels"
+	errMsgUpdateSubaccountK8SServiceChannelFailed = "error updating the cloud connector subaccount K8S service channel"
+	errMsgEnableSubaccountK8SServiceChannelFailed = "error enabling the cloud connector subaccount K8S service channel"
+	errMsgDeleteSubaccountK8SServiceChannelFailed = "error deleting the cloud connector subaccount K8S service channel"
+	errMsgMapSubaccountK8SServiceChannelFailed    = "error mapping the cloud connector subaccount K8S service channel value"
+	errMsgMapSubaccountK8SServiceChannelsFailed   = "error mapping the cloud connector subaccount K8S service channels value"
+
+	// Subaccount ABAP Service Channel
+	errMsgAddSubaccountABAPServiceChannelFailed    = "error creating the cloud connector subaccount ABAP service channel"
+	errMsgFetchSubaccountABAPServiceChannelFailed  = "error fetching the cloud connector subaccount ABAP service channel"
+	errMsgFetchSubaccountABAPServiceChannelsFailed = "error fetching the cloud connector subaccount ABAP service channels"
+	errMsgUpdateSubaccountABAPServiceChannelFailed = "error updating the cloud connector subaccount ABAP service channel"
+	errMsgEnableSubaccountABAPServiceChannelFailed = "error enabling the cloud connector subaccount ABAP service channel"
+	errMsgDeleteSubaccountABAPServiceChannelFailed = "error deleting the cloud connector subaccount ABAP service channel"
+	errMsgMapSubaccountABAPServiceChannelFailed    = "error mapping the cloud connector subaccount ABAP service channel value"
+	errMsgMapSubaccountABAPServiceChannelsFailed   = "error mapping the cloud connector subaccount ABAP service channels value"
 )

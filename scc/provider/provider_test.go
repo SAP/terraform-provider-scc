@@ -40,6 +40,9 @@ type User struct {
 	CloudUsername           string
 	CloudPassword           string
 	CloudAuthenticationData string
+	// For adding K8S service channel to subaccount
+	K8SCluster string
+	K8SService string
 }
 
 var redactedTestUser = User{
@@ -49,6 +52,8 @@ var redactedTestUser = User{
 	CloudUsername:           "cloud-user@example.com",
 	CloudPassword:           "REDACTED_CLOUD_PASSWORD",
 	CloudAuthenticationData: "REDACTED_SUBACCOUNT_AUTHENTICATION_DATA",
+	K8SCluster:              "REDACTED_K8S_CLUSTER",
+	K8SService:              "REDACTED_K8S_SERVICE",
 }
 
 func providerConfig(testUser User) string {
@@ -92,13 +97,17 @@ func setupVCR(t *testing.T, cassetteName string) (*recorder.Recorder, User) {
 
 	if rec.IsRecording() {
 		t.Logf("ATTENTION: Recording '%s'", cassetteName)
+		// Get environment variables for initiating provider
 		user.InstanceUsername = os.Getenv("SCC_USERNAME")
 		user.InstancePassword = os.Getenv("SCC_PASSWORD")
 		user.InstanceURL = os.Getenv("SCC_INSTANCE_URL")
 
+		// Get environment variables for recording test fixtures
 		user.CloudUsername = os.Getenv("TF_VAR_cloud_user")
 		user.CloudPassword = os.Getenv("TF_VAR_cloud_password")
 		user.CloudAuthenticationData = os.Getenv("TF_VAR_authentication_data")
+		user.K8SCluster = os.Getenv("TF_VAR_k8s_cluster")
+		user.K8SService = os.Getenv("TF_VAR_k8s_service")
 		if len(user.InstanceUsername) == 0 || len(user.InstancePassword) == 0 || len(user.InstanceURL) == 0 {
 			t.Fatal("Env vars SCC_USERNAME, SCC_PASSWORD and SCC_INSTANCE_URL are required when recording test fixtures")
 		}
@@ -175,6 +184,26 @@ func hookRedactSensitiveBody() func(i *cassette.Interaction) error {
 		if strings.Contains(i.Request.Body, "authenticationData") {
 			reBindingSecret := regexp.MustCompile(`"authenticationData":"(.*?)"`)
 			i.Request.Body = reBindingSecret.ReplaceAllString(i.Request.Body, `"authenticationData":"`+redactedTestUser.CloudAuthenticationData+`"`)
+		}
+
+		if strings.Contains(i.Request.Body, "k8sCluster") {
+			reBindingSecret := regexp.MustCompile(`"authenticationData":"(.*?)"`)
+			i.Request.Body = reBindingSecret.ReplaceAllString(i.Request.Body, `"authenticationData":"`+redactedTestUser.K8SCluster+`"`)
+		}
+
+		if strings.Contains(i.Request.Body, "k8sService") {
+			reBindingSecret := regexp.MustCompile(`"authenticationData":"(.*?)"`)
+			i.Request.Body = reBindingSecret.ReplaceAllString(i.Request.Body, `"authenticationData":"`+redactedTestUser.K8SService+`"`)
+		}
+
+		if strings.Contains(i.Response.Body, "k8sCluster") {
+			reBindingSecret := regexp.MustCompile(`"authenticationData":"(.*?)"`)
+			i.Response.Body = reBindingSecret.ReplaceAllString(i.Response.Body, `"authenticationData":"`+redactedTestUser.K8SCluster+`"`)
+		}
+
+		if strings.Contains(i.Response.Body, "k8sService") {
+			reBindingSecret := regexp.MustCompile(`"authenticationData":"(.*?)"`)
+			i.Response.Body = reBindingSecret.ReplaceAllString(i.Response.Body, `"authenticationData":"`+redactedTestUser.K8SService+`"`)
 		}
 
 		if strings.Contains(i.Response.Body, "subaccountCertificate") {

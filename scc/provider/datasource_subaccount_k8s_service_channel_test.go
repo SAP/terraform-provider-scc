@@ -9,7 +9,8 @@ import (
 )
 
 func TestDataSourceSubaccountK8SServiceChannel(t *testing.T) {
-
+	regionHost := "cf.eu12.hana.ondemand.com"
+	subaccount := "0bcb0012-a982-42f9-bda4-0a5cb15f88c8"
 	t.Parallel()
 
 	t.Run("happy path", func(t *testing.T) {
@@ -21,21 +22,21 @@ func TestDataSourceSubaccountK8SServiceChannel(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(rec.GetDefaultClient()),
 			Steps: []resource.TestStep{
 				{
-					Config: providerConfig(user) + DataSourceSubaccountK8SServiceChannel("scc_sc", "cf.eu12.hana.ondemand.com", "0bcb0012-a982-42f9-bda4-0a5cb15f88c8", 1),
+					Config: providerConfig(user) + DataSourceSubaccountK8SServiceChannel("scc_sc", regionHost, subaccount, 50),
 					Check: resource.ComposeAggregateTestCheckFunc(
-						resource.TestCheckResourceAttr("data.scc_subaccount_k8s_service_channel.scc_sc", "region_host", "cf.eu12.hana.ondemand.com"),
+						resource.TestCheckResourceAttr("data.scc_subaccount_k8s_service_channel.scc_sc", "region_host", regionHost),
 						resource.TestMatchResourceAttr("data.scc_subaccount_k8s_service_channel.scc_sc", "subaccount", regexpValidUUID),
 
-						resource.TestCheckResourceAttr("data.scc_subaccount_k8s_service_channel.scc_sc", "k8s_cluster", "cp.da2b3e1.stage.kyma.ondemand.com:443"),
-						resource.TestCheckResourceAttr("data.scc_subaccount_k8s_service_channel.scc_sc", "k8s_service", "bd64665f-060a-47b6-8aba-f406703f0acf"),
-						resource.TestCheckResourceAttr("data.scc_subaccount_k8s_service_channel.scc_sc", "port", "8000"),
+						resource.TestCheckResourceAttr("data.scc_subaccount_k8s_service_channel.scc_sc", "k8s_cluster", "testclusterhost"),
+						resource.TestCheckResourceAttr("data.scc_subaccount_k8s_service_channel.scc_sc", "k8s_service", "testserviceid"),
+						resource.TestCheckResourceAttr("data.scc_subaccount_k8s_service_channel.scc_sc", "port", "3000"),
 						resource.TestCheckResourceAttr("data.scc_subaccount_k8s_service_channel.scc_sc", "connections", "1"),
 						resource.TestCheckResourceAttr("data.scc_subaccount_k8s_service_channel.scc_sc", "type", "K8S"),
-						resource.TestCheckResourceAttr("data.scc_subaccount_k8s_service_channel.scc_sc", "enabled", "true"),
+						resource.TestCheckResourceAttr("data.scc_subaccount_k8s_service_channel.scc_sc", "enabled", "false"),
 						resource.TestCheckResourceAttrSet("data.scc_subaccount_k8s_service_channel.scc_sc", "id"),
-						resource.TestCheckResourceAttr("data.scc_subaccount_k8s_service_channel.scc_sc", "state.connected", "true"),
+						resource.TestCheckResourceAttr("data.scc_subaccount_k8s_service_channel.scc_sc", "state.connected", "false"),
 						resource.TestMatchResourceAttr("data.scc_subaccount_k8s_service_channel.scc_sc", "state.connected_since_time_stamp", regexp.MustCompile(`^(0|\d{13})$`)),
-						resource.TestCheckResourceAttr("data.scc_subaccount_k8s_service_channel.scc_sc", "state.opened_connections", "1"),
+						resource.TestCheckResourceAttr("data.scc_subaccount_k8s_service_channel.scc_sc", "state.opened_connections", "0"),
 					),
 				},
 			},
@@ -49,7 +50,7 @@ func TestDataSourceSubaccountK8SServiceChannel(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      DataSourceSubaccountK8SServiceChannelWoRegionHost("scc_sc", "0bcb0012-a982-42f9-bda4-0a5cb15f88c8", 2),
+					Config:      DataSourceSubaccountK8SServiceChannelWoRegionHost("scc_sc", subaccount, 50),
 					ExpectError: regexp.MustCompile(`The argument "region_host" is required, but no definition was found.`),
 				},
 			},
@@ -62,7 +63,7 @@ func TestDataSourceSubaccountK8SServiceChannel(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      DataSourceSubaccountK8SServiceChannelWoSubaccount("scc_sc", "cf.eu12.hana.ondemand.com", 2),
+					Config:      DataSourceSubaccountK8SServiceChannelWoSubaccount("scc_sc", regionHost, 50),
 					ExpectError: regexp.MustCompile(`The argument "subaccount" is required, but no definition was found.`),
 				},
 			},
@@ -75,7 +76,7 @@ func TestDataSourceSubaccountK8SServiceChannel(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      DataSourceSubaccountK8SServiceChannelWoID("scc_sc", "cf.eu12.hana.ondemand.com", "0bcb0012-a982-42f9-bda4-0a5cb15f88c8"),
+					Config:      DataSourceSubaccountK8SServiceChannelWoID("scc_sc", regionHost, subaccount),
 					ExpectError: regexp.MustCompile(`The argument "id" is required, but no definition was found.`),
 				},
 			},
