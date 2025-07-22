@@ -46,14 +46,4 @@ const (
 	errMsgDeleteSubaccountK8SServiceChannelFailed = "error deleting the cloud connector subaccount K8S service channel"
 	errMsgMapSubaccountK8SServiceChannelFailed    = "error mapping the cloud connector subaccount K8S service channel value"
 	errMsgMapSubaccountK8SServiceChannelsFailed   = "error mapping the cloud connector subaccount K8S service channels value"
-
-	// Subaccount ABAP Service Channel
-	errMsgAddSubaccountABAPServiceChannelFailed    = "error creating the cloud connector subaccount ABAP service channel"
-	errMsgFetchSubaccountABAPServiceChannelFailed  = "error fetching the cloud connector subaccount ABAP service channel"
-	errMsgFetchSubaccountABAPServiceChannelsFailed = "error fetching the cloud connector subaccount ABAP service channels"
-	errMsgUpdateSubaccountABAPServiceChannelFailed = "error updating the cloud connector subaccount ABAP service channel"
-	errMsgEnableSubaccountABAPServiceChannelFailed = "error enabling the cloud connector subaccount ABAP service channel"
-	errMsgDeleteSubaccountABAPServiceChannelFailed = "error deleting the cloud connector subaccount ABAP service channel"
-	errMsgMapSubaccountABAPServiceChannelFailed    = "error mapping the cloud connector subaccount ABAP service channel value"
-	errMsgMapSubaccountABAPServiceChannelsFailed   = "error mapping the cloud connector subaccount ABAP service channels value"
 )
