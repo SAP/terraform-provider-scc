@@ -187,23 +187,23 @@ func hookRedactSensitiveBody() func(i *cassette.Interaction) error {
 		}
 
 		if strings.Contains(i.Request.Body, "k8sCluster") {
-			reBindingSecret := regexp.MustCompile(`"authenticationData":"(.*?)"`)
-			i.Request.Body = reBindingSecret.ReplaceAllString(i.Request.Body, `"authenticationData":"`+redactedTestUser.K8SCluster+`"`)
+			reBindingSecret := regexp.MustCompile(`"k8sCluster":"(.*?)"`)
+			i.Request.Body = reBindingSecret.ReplaceAllString(i.Request.Body, `"k8sCluster":"`+redactedTestUser.K8SCluster+`"`)
 		}
 
 		if strings.Contains(i.Request.Body, "k8sService") {
-			reBindingSecret := regexp.MustCompile(`"authenticationData":"(.*?)"`)
-			i.Request.Body = reBindingSecret.ReplaceAllString(i.Request.Body, `"authenticationData":"`+redactedTestUser.K8SService+`"`)
+			reBindingSecret := regexp.MustCompile(`"k8sService":"(.*?)"`)
+			i.Request.Body = reBindingSecret.ReplaceAllString(i.Request.Body, `"k8sService":"`+redactedTestUser.K8SService+`"`)
 		}
 
 		if strings.Contains(i.Response.Body, "k8sCluster") {
-			reBindingSecret := regexp.MustCompile(`"authenticationData":"(.*?)"`)
-			i.Response.Body = reBindingSecret.ReplaceAllString(i.Response.Body, `"authenticationData":"`+redactedTestUser.K8SCluster+`"`)
+			reBindingSecret := regexp.MustCompile(`"k8sCluster":"(.*?)"`)
+			i.Response.Body = reBindingSecret.ReplaceAllString(i.Response.Body, `"k8sCluster":"`+redactedTestUser.K8SCluster+`"`)
 		}
 
 		if strings.Contains(i.Response.Body, "k8sService") {
-			reBindingSecret := regexp.MustCompile(`"authenticationData":"(.*?)"`)
-			i.Response.Body = reBindingSecret.ReplaceAllString(i.Response.Body, `"authenticationData":"`+redactedTestUser.K8SService+`"`)
+			reBindingSecret := regexp.MustCompile(`"k8sService":"(.*?)"`)
+			i.Response.Body = reBindingSecret.ReplaceAllString(i.Response.Body, `"k8sService":"`+redactedTestUser.K8SService+`"`)
 		}
 
 		if strings.Contains(i.Response.Body, "subaccountCertificate") {
