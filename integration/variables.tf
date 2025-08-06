@@ -31,13 +31,13 @@ variable "virtual_port" {
   default     = "500"
 }
 
-variable "local_host" {
+variable "internal_host" {
   type        = string
   description = "The actual IP or hostname of the internal system behind the Cloud Connector."
   default     = "34.32.203.52"
 }
 
-variable "local_port" {
+variable "internal_port" {
   type        = string
   description = "The port number of the internal system to which the Cloud Connector connects."
   default     = "50000"

@@ -19,6 +19,8 @@ resource "scc_system_mapping" "scc_sm" {
   virtual_port = var.virtual_port
   local_host = var.local_host
   local_port = var.local_port
+  internal_host = var.internal_host
+  internal_port = var.internal_port
   protocol = "HTTP"
   backend_type = "abapSys"
   authentication_mode = "KERBEROS"
