@@ -65,11 +65,11 @@ __Further documentation:__
 							MarkdownDescription: "Virtual port used on the cloud side.",
 							Required:            true,
 						},
-						"local_host": schema.StringAttribute{
+						"internal_host": schema.StringAttribute{
 							MarkdownDescription: "Host on the on-premise side.",
 							Computed:            true,
 						},
-						"local_port": schema.StringAttribute{
+						"internal_port": schema.StringAttribute{
 							MarkdownDescription: "Port on the on-premise side.",
 							Computed:            true,
 						},

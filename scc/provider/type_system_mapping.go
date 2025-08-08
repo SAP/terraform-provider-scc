@@ -12,8 +12,8 @@ type SystemMappingConfig struct {
 	Subaccount            types.String `tfsdk:"subaccount"`
 	VirtualHost           types.String `tfsdk:"virtual_host"`
 	VirtualPort           types.String `tfsdk:"virtual_port"`
-	LocalHost             types.String `tfsdk:"local_host"`
-	LocalPort             types.String `tfsdk:"local_port"`
+	InternalHost             types.String `tfsdk:"internal_host"`
+	InternalPort             types.String `tfsdk:"internal_port"`
 	CreationDate          types.String `tfsdk:"creation_date"`
 	Protocol              types.String `tfsdk:"protocol"`
 	BackendType           types.String `tfsdk:"backend_type"`
@@ -35,8 +35,8 @@ type SystemMappingsConfig struct {
 type SystemMapping struct {
 	VirtualHost           types.String `tfsdk:"virtual_host"`
 	VirtualPort           types.String `tfsdk:"virtual_port"`
-	LocalHost             types.String `tfsdk:"local_host"`
-	LocalPort             types.String `tfsdk:"local_port"`
+	InternalHost             types.String `tfsdk:"internal_host"`
+	InternalPort             types.String `tfsdk:"internal_port"`
 	CreationDate          types.String `tfsdk:"creation_date"`
 	Protocol              types.String `tfsdk:"protocol"`
 	BackendType           types.String `tfsdk:"backend_type"`
@@ -55,8 +55,8 @@ func SystemMappingsValueFrom(ctx context.Context, plan SystemMappingsConfig, val
 		c := SystemMapping{
 			VirtualHost:           types.StringValue(mapping.VirtualHost),
 			VirtualPort:           types.StringValue(mapping.VirtualPort),
-			LocalHost:             types.StringValue(mapping.LocalHost),
-			LocalPort:             types.StringValue(mapping.LocalPort),
+			InternalHost:             types.StringValue(mapping.InternalHost),
+			InternalPort:             types.StringValue(mapping.InternalPort),
 			CreationDate:          types.StringValue(mapping.CreationDate),
 			Protocol:              types.StringValue(mapping.Protocol),
 			BackendType:           types.StringValue(mapping.BackendType),
@@ -85,8 +85,8 @@ func SystemMappingValueFrom(ctx context.Context, plan SystemMappingConfig, value
 		Subaccount:            plan.Subaccount,
 		VirtualHost:           types.StringValue(value.VirtualHost),
 		VirtualPort:           types.StringValue(value.VirtualPort),
-		LocalHost:             types.StringValue(value.LocalHost),
-		LocalPort:             types.StringValue(value.LocalPort),
+		InternalHost:             types.StringValue(value.InternalHost),
+		InternalPort:             types.StringValue(value.InternalPort),
 		CreationDate:          types.StringValue(value.CreationDate),
 		Protocol:              types.StringValue(value.Protocol),
 		BackendType:           types.StringValue(value.BackendType),

@@ -28,8 +28,8 @@ func TestDataSourceSystemMapping(t *testing.T) {
 
 						resource.TestCheckResourceAttr("data.scc_system_mapping.test", "virtual_host", "testterraformvirtual"),
 						resource.TestCheckResourceAttr("data.scc_system_mapping.test", "virtual_port", "900"),
-						resource.TestCheckResourceAttr("data.scc_system_mapping.test", "local_host", "testterraforminternal"),
-						resource.TestCheckResourceAttr("data.scc_system_mapping.test", "local_port", "900"),
+						resource.TestCheckResourceAttr("data.scc_system_mapping.test", "internal_host", "testterraforminternal"),
+						resource.TestCheckResourceAttr("data.scc_system_mapping.test", "internal_port", "900"),
 						resource.TestMatchResourceAttr("data.scc_system_mapping.test", "creation_date", regexValidTimeStamp),
 						resource.TestCheckResourceAttr("data.scc_system_mapping.test", "protocol", "HTTP"),
 						resource.TestCheckResourceAttr("data.scc_system_mapping.test", "backend_type", "abapSys"),

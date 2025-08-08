@@ -68,8 +68,8 @@ resource "scc_system_mapping" "scc_sm" {
   | --- | --- | 
   | internal/INTERNAL | Use internal (local) host for HTTP headers | 
   | virtual/VIRTUAL | Use virtual host (default) for HTTP headers | The default is virtual.
-- `local_host` (String) Host on the on-premise side.
-- `local_port` (String) Port on the on-premise side.
+- `internal_host` (String) Host on the on-premise side.
+- `internal_port` (String) Port on the on-premise side.
 - `protocol` (String) Protocol used when sending requests and receiving responses, which must be one of the following values:
   | protocol | description | 
   | --- | --- | 

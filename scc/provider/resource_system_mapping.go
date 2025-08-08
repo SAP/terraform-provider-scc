@@ -68,11 +68,11 @@ __Further documentation:__
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"local_host": schema.StringAttribute{
+			"internal_host": schema.StringAttribute{
 				MarkdownDescription: "Host on the on-premise side.",
 				Required:            true,
 			},
-			"local_port": schema.StringAttribute{
+			"internal_port": schema.StringAttribute{
 				MarkdownDescription: "Port on the on-premise side.",
 				Required:            true,
 			},
@@ -192,8 +192,8 @@ func (r *SystemMappingResource) Create(ctx context.Context, req resource.CreateR
 	planBody := map[string]string{
 		"virtualHost":        plan.VirtualHost.ValueString(),
 		"virtualPort":        plan.VirtualPort.ValueString(),
-		"localHost":          plan.LocalHost.ValueString(),
-		"localPort":          plan.LocalPort.ValueString(),
+		"localHost":          plan.InternalHost.ValueString(),
+		"localPort":          plan.InternalPort.ValueString(),
 		"protocol":           plan.Protocol.ValueString(),
 		"backendType":        plan.BackendType.ValueString(),
 		"authenticationMode": plan.AuthenticationMode.ValueString(),
@@ -295,8 +295,8 @@ func (r *SystemMappingResource) Update(ctx context.Context, req resource.UpdateR
 	planBody := map[string]string{
 		"virtualHost":        plan.VirtualHost.ValueString(),
 		"virtualPort":        plan.VirtualPort.ValueString(),
-		"localHost":          plan.LocalHost.ValueString(),
-		"localPort":          plan.LocalPort.ValueString(),
+		"localHost":          plan.InternalHost.ValueString(),
+		"localPort":          plan.InternalPort.ValueString(),
 		"protocol":           plan.Protocol.ValueString(),
 		"backendType":        plan.BackendType.ValueString(),
 		"authenticationMode": plan.AuthenticationMode.ValueString(),
