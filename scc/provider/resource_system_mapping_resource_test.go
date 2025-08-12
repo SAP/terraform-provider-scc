@@ -42,11 +42,11 @@ func TestResourceSystemMappingResource(t *testing.T) {
 					),
 				},
 				{
-					ResourceName:      "scc_system_mapping_resource.test",
-					ImportState:       true,
-					ImportStateVerify: true,
-					ImportStateVerifyIdentifierAttribute: "region_host", 
-					ImportStateIdFunc: getImportStateForSystemMappingResource("scc_system_mapping_resource.test"),
+					ResourceName:                         "scc_system_mapping_resource.test",
+					ImportState:                          true,
+					ImportStateVerify:                    true,
+					ImportStateVerifyIdentifierAttribute: "region_host",
+					ImportStateIdFunc:                    getImportStateForSystemMappingResource("scc_system_mapping_resource.test"),
 				},
 				{
 					ResourceName:  "scc_system_mapping_resource.test",

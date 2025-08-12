@@ -7,8 +7,8 @@ type SystemMappings struct {
 type SystemMapping struct {
 	VirtualHost           string `json:"virtualHost"`
 	VirtualPort           string `json:"virtualPort"`
-	InternalHost             string `json:"localHost"`
-	InternalPort             string `json:"localPort"`
+	InternalHost          string `json:"localHost"`
+	InternalPort          string `json:"localPort"`
 	CreationDate          string `json:"creationDate"`
 	Protocol              string `json:"protocol"`
 	BackendType           string `json:"backendType"`

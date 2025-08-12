@@ -209,11 +209,14 @@ func (r *SubaccountResource) Create(ctx context.Context, req resource.CreateRequ
 		return
 	}
 
+	regionHost := plan.RegionHost.ValueString()
+	subaccount := plan.Subaccount.ValueString()
+
 	endpoint := endpoints.GetSubaccountBaseEndpoint()
 
 	planBody := map[string]string{
-		"regionHost":    plan.RegionHost.ValueString(),
-		"subaccount":    plan.Subaccount.ValueString(),
+		"regionHost":    regionHost,
+		"subaccount":    subaccount,
 		"cloudUser":     plan.CloudUser.ValueString(),
 		"cloudPassword": plan.CloudPassword.ValueString(),
 		"description":   plan.Description.ValueString(),
@@ -222,6 +225,15 @@ func (r *SubaccountResource) Create(ctx context.Context, req resource.CreateRequ
 	}
 
 	err := requestAndUnmarshal(r.client, &respObj, "POST", endpoint, planBody, true)
+	if err != nil {
+		resp.Diagnostics.AddError(errMsgAddSubaccountFailed, err.Error())
+		return
+	}
+
+	// Trigger trust configuration sync for the subaccount without persisting to Terraform state
+	endpoint = endpoints.GetSubaccountEndpoint(regionHost, subaccount) + "/trust"
+
+	err = requestAndUnmarshal(r.client, &respObj, "POST", endpoint, nil, true)
 	if err != nil {
 		resp.Diagnostics.AddError(errMsgAddSubaccountFailed, err.Error())
 		return
@@ -256,6 +268,15 @@ func (r *SubaccountResource) Read(ctx context.Context, req resource.ReadRequest,
 	err := requestAndUnmarshal(r.client, &respObj, "GET", endpoint, nil, true)
 	if err != nil {
 		resp.Diagnostics.AddError(errMsgFetchSubaccountFailed, err.Error())
+		return
+	}
+
+	// Trigger trust configuration sync for the subaccount without persisting to Terraform state
+	endpoint = endpoint + "/trust"
+
+	err = requestAndUnmarshal(r.client, &respObj, "POST", endpoint, nil, true)
+	if err != nil {
+		resp.Diagnostics.AddError(errMsgAddSubaccountFailed, err.Error())
 		return
 	}
 
@@ -309,6 +330,15 @@ func (r *SubaccountResource) Update(ctx context.Context, req resource.UpdateRequ
 		if err := r.updateTunnelState(ctx, plan, state, endpoint, &respObj, &resp.Diagnostics); err != nil {
 			return
 		}
+	}
+
+	// Trigger trust configuration sync for the subaccount without persisting to Terraform state
+	endpoint = endpoint + "/trust"
+
+	err = requestAndUnmarshal(r.client, &respObj, "POST", endpoint, nil, true)
+	if err != nil {
+		resp.Diagnostics.AddError(errMsgAddSubaccountFailed, err.Error())
+		return
 	}
 
 	if responseModel, diags := SubaccountResourceValueFrom(ctx, plan, respObj); diags.HasError() {
