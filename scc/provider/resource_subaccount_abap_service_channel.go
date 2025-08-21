@@ -154,7 +154,7 @@ func (r *SubaccountABAPServiceChannelResource) Create(ctx context.Context, req r
 	subaccount := plan.Subaccount.ValueString()
 	endpoint := endpoints.GetSubaccountServiceChannelBaseEndpoint(regionHost, subaccount, "ABAPCloud")
 
-	planBody := map[string]string{
+	planBody := map[string]any{
 		"abapCloudTenantHost": plan.ABAPCloudTenantHost.ValueString(),
 		"instanceNumber":      fmt.Sprintf("%d", plan.InstanceNumber.ValueInt64()),
 		"connections":         fmt.Sprintf("%d", plan.Connections.ValueInt64()),
@@ -337,7 +337,7 @@ func (r *SubaccountABAPServiceChannelResource) getSubaccountABAPServiceChannel(s
 }
 
 func (r *SubaccountABAPServiceChannelResource) enableSubaccountABAPServiceChannel(plan SubaccountABAPServiceChannelConfig, respObj apiobjects.SubaccountABAPServiceChannel, resp *resource.UpdateResponse, endpoint string) {
-	planBody := map[string]string{
+	planBody := map[string]any{
 		"enabled": fmt.Sprintf("%t", plan.Enabled.ValueBool()),
 	}
 
@@ -349,7 +349,7 @@ func (r *SubaccountABAPServiceChannelResource) enableSubaccountABAPServiceChanne
 }
 
 func (r *SubaccountABAPServiceChannelResource) updateSubaccountABAPServiceChannel(plan SubaccountABAPServiceChannelConfig, respObj apiobjects.SubaccountABAPServiceChannel, resp *resource.UpdateResponse, endpoint string) {
-	planBody := map[string]string{
+	planBody := map[string]any{
 		"abapCloudTenantHost": plan.ABAPCloudTenantHost.ValueString(),
 		"instanceNumber":      fmt.Sprintf("%d", plan.InstanceNumber.ValueInt64()),
 		"connections":         fmt.Sprintf("%d", plan.Connections.ValueInt64()),

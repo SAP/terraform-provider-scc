@@ -2,8 +2,11 @@ package provider
 
 import (
 	"context"
+	"strings"
 
 	apiobjects "github.com/SAP/terraform-provider-scc/internal/api/apiObjects"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -24,6 +27,9 @@ type SystemMappingConfig struct {
 	EnabledResourcesCount types.Int64  `tfsdk:"enabled_resources_count"`
 	Description           types.String `tfsdk:"description"`
 	SAPRouter             types.String `tfsdk:"sap_router"`
+	SNCPartnerName        types.String `tfsdk:"snc_partner_name"`
+	AllowedClients        types.List   `tfsdk:"allowed_clients"`
+	BlacklistedUsers      types.List   `tfsdk:"blacklisted_users"`
 }
 
 type SystemMappingsConfig struct {
@@ -47,11 +53,44 @@ type SystemMapping struct {
 	EnabledResourcesCount types.Int64  `tfsdk:"enabled_resources_count"`
 	Description           types.String `tfsdk:"description"`
 	SAPRouter             types.String `tfsdk:"sap_router"`
+	SNCPartnerName        types.String `tfsdk:"snc_partner_name"`
+	AllowedClients        types.List   `tfsdk:"allowed_clients"`
+	BlacklistedUsers      types.List   `tfsdk:"blacklisted_users"`
 }
 
-func SystemMappingsValueFrom(ctx context.Context, plan SystemMappingsConfig, value apiobjects.SystemMappings) (SystemMappingsConfig, error) {
+type SystemMappingBlacklistedUsersData struct {
+	Client types.String `tfsdk:"client"`
+	User   types.String `tfsdk:"user"`
+}
+
+var SystemMappingBlacklistedUsersType = types.ObjectType{
+	AttrTypes: map[string]attr.Type{
+		"client": types.StringType,
+		"user":   types.StringType,
+	},
+}
+
+func SystemMappingsValueFrom(ctx context.Context, plan SystemMappingsConfig, value apiobjects.SystemMappings) (SystemMappingsConfig, diag.Diagnostics) {
 	system_mappings := []SystemMapping{}
 	for _, mapping := range value.SystemMappings {
+		blacklistedUsersValue := []SystemMappingBlacklistedUsersData{}
+		for _, user := range mapping.BlacklistedUsers {
+			bl := SystemMappingBlacklistedUsersData{
+				Client: types.StringValue(user.Client),
+				User:   types.StringValue(user.User),
+			}
+			blacklistedUsersValue = append(blacklistedUsersValue, bl)
+		}
+		blacklistedUsers, err := types.ListValueFrom(ctx, SystemMappingBlacklistedUsersType, blacklistedUsersValue)
+		if err.HasError() {
+			return SystemMappingsConfig{}, err
+		}
+
+		allowedClients, err := types.ListValueFrom(ctx, types.StringType, mapping.AllowedClients)
+		if err.HasError() {
+			return SystemMappingsConfig{}, err
+		}
+
 		c := SystemMapping{
 			VirtualHost:           types.StringValue(mapping.VirtualHost),
 			VirtualPort:           types.StringValue(mapping.VirtualPort),
@@ -67,6 +106,9 @@ func SystemMappingsValueFrom(ctx context.Context, plan SystemMappingsConfig, val
 			EnabledResourcesCount: types.Int64Value(mapping.TotalResourcesCount),
 			Description:           types.StringValue(mapping.Description),
 			SAPRouter:             types.StringValue(mapping.SAPRouter),
+			SNCPartnerName:        types.StringValue(mapping.SNCPartnerName),
+			AllowedClients:        allowedClients,
+			BlacklistedUsers:      blacklistedUsers,
 		}
 		system_mappings = append(system_mappings, c)
 	}
@@ -79,7 +121,32 @@ func SystemMappingsValueFrom(ctx context.Context, plan SystemMappingsConfig, val
 	return *model, nil
 }
 
-func SystemMappingValueFrom(ctx context.Context, plan SystemMappingConfig, value apiobjects.SystemMapping) (SystemMappingConfig, error) {
+func SystemMappingValueFrom(ctx context.Context, plan SystemMappingConfig, value apiobjects.SystemMapping) (SystemMappingConfig, diag.Diagnostics) {
+	blacklistedUsersValue := []SystemMappingBlacklistedUsersData{}
+	for _, user := range value.BlacklistedUsers {
+		bl := SystemMappingBlacklistedUsersData{
+			Client: types.StringValue(user.Client),
+			User:   types.StringValue(user.User),
+		}
+		blacklistedUsersValue = append(blacklistedUsersValue, bl)
+	}
+	blacklistedUsers, err := types.ListValueFrom(ctx, SystemMappingBlacklistedUsersType, blacklistedUsersValue)
+	if err.HasError() {
+		return SystemMappingConfig{}, err
+	}
+
+	allowedClients, err := types.ListValueFrom(ctx, types.StringType, value.AllowedClients)
+	if err.HasError() {
+		return SystemMappingConfig{}, err
+	}
+
+	hostInHeader := types.StringValue(value.HostInHeader)
+	if !plan.HostInHeader.IsNull() && !plan.HostInHeader.IsUnknown() {
+		if hostInHeader.ValueString() != strings.ToLower(plan.HostInHeader.ValueString()) {
+			hostInHeader = plan.HostInHeader
+		}
+	}
+
 	model := &SystemMappingConfig{
 		RegionHost:            plan.RegionHost,
 		Subaccount:            plan.Subaccount,
@@ -91,12 +158,15 @@ func SystemMappingValueFrom(ctx context.Context, plan SystemMappingConfig, value
 		Protocol:              types.StringValue(value.Protocol),
 		BackendType:           types.StringValue(value.BackendType),
 		AuthenticationMode:    types.StringValue(value.AuthenticationMode),
-		HostInHeader:          types.StringValue(value.HostInHeader),
+		HostInHeader:          hostInHeader,
 		Sid:                   types.StringValue(value.Sid),
 		TotalResourcesCount:   types.Int64Value(value.TotalResourcesCount),
 		EnabledResourcesCount: types.Int64Value(value.EnabledResourcesCount),
 		Description:           types.StringValue(value.Description),
 		SAPRouter:             types.StringValue(value.SAPRouter),
+		SNCPartnerName:        types.StringValue(value.SNCPartnerName),
+		AllowedClients:        allowedClients,
+		BlacklistedUsers:      blacklistedUsers,
 	}
 
 	return *model, nil

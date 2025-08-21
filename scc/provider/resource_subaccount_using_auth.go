@@ -9,6 +9,7 @@ import (
 	apiobjects "github.com/SAP/terraform-provider-scc/internal/api/apiObjects"
 	"github.com/SAP/terraform-provider-scc/internal/api/endpoints"
 	"github.com/SAP/terraform-provider-scc/validation/uuidvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -100,6 +101,9 @@ is **not required** for updating optional attributes such as location_id, displa
 							getFormattedValueAsTableRow("`Disconnected`", "The tunnel was previously connected but is now intentionally or unintentionally disconnected."),
 						Optional: true,
 						Computed: true,
+						Validators: []validator.String{
+							stringvalidator.OneOf("Connected", "Disconnected"),
+						},
 					},
 					"connected_since_time_stamp": schema.Int64Attribute{
 						MarkdownDescription: "Timestamp of the start of the connection.",
@@ -219,7 +223,7 @@ func (r *SubaccountUsingAuthResource) Create(ctx context.Context, req resource.C
 
 	endpoint := endpoints.GetSubaccountBaseEndpoint()
 
-	planBody := map[string]string{
+	planBody := map[string]any{
 		"authenticationData": plan.AuthenticationData.ValueString(),
 		"description":        plan.Description.ValueString(),
 		"locationID":         plan.LocationID.ValueString(),
@@ -312,7 +316,7 @@ func (r *SubaccountUsingAuthResource) Update(ctx context.Context, req resource.U
 	subaccount := state.Subaccount.ValueString()
 	endpoint := endpoints.GetSubaccountEndpoint(regionHost, subaccount)
 
-	planBody := map[string]string{
+	planBody := map[string]any{
 		"locationID":  plan.LocationID.ValueString(),
 		"displayName": plan.DisplayName.ValueString(),
 		"description": plan.Description.ValueString(),
@@ -370,7 +374,7 @@ func (r *SubaccountUsingAuthResource) updateTunnelState(ctx context.Context, pla
 	}
 
 	connected := desiredState != "Disconnected"
-	patch := map[string]string{"connected": fmt.Sprintf("%t", connected)}
+	patch := map[string]any{"connected": fmt.Sprintf("%t", connected)}
 
 	if err := requestAndUnmarshal(r.client, respObj, "PUT", endpoint+"/state", patch, false); err != nil {
 		diagnostics.AddError(errMsgUpdateSubaccountFailed, err.Error())

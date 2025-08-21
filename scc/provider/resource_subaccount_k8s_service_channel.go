@@ -148,7 +148,7 @@ func (r *SubaccountK8SServiceChannelResource) Create(ctx context.Context, req re
 	subaccount := plan.Subaccount.ValueString()
 	endpoint := endpoints.GetSubaccountServiceChannelBaseEndpoint(regionHost, subaccount, "K8S")
 
-	planBody := map[string]string{
+	planBody := map[string]any{
 		"k8sCluster":  plan.K8SClusterHost.ValueString(),
 		"k8sService":  plan.K8SServiceID.ValueString(),
 		"port":        fmt.Sprintf("%d", plan.LocalPort.ValueInt64()),
@@ -332,7 +332,7 @@ func (r *SubaccountK8SServiceChannelResource) getSubaccountK8SServiceChannel(ser
 }
 
 func (r *SubaccountK8SServiceChannelResource) enableSubaccountK8SServiceChannel(plan SubaccountK8SServiceChannelConfig, respObj apiobjects.SubaccountK8SServiceChannel, resp *resource.UpdateResponse, endpoint string) {
-	planBody := map[string]string{
+	planBody := map[string]any{
 		"enabled": fmt.Sprintf("%t", plan.Enabled.ValueBool()),
 	}
 
@@ -344,7 +344,7 @@ func (r *SubaccountK8SServiceChannelResource) enableSubaccountK8SServiceChannel(
 }
 
 func (r *SubaccountK8SServiceChannelResource) updateSubaccountK8SServiceChannel(plan SubaccountK8SServiceChannelConfig, respObj apiobjects.SubaccountK8SServiceChannel, resp *resource.UpdateResponse, endpoint string) {
-	planBody := map[string]string{
+	planBody := map[string]any{
 		"k8sCluster":  plan.K8SClusterHost.ValueString(),
 		"k8sService":  plan.K8SServiceID.ValueString(),
 		"port":        fmt.Sprintf("%d", plan.LocalPort.ValueInt64()),

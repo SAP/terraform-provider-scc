@@ -9,6 +9,7 @@ import (
 	apiobjects "github.com/SAP/terraform-provider-scc/internal/api/apiObjects"
 	"github.com/SAP/terraform-provider-scc/internal/api/endpoints"
 	"github.com/SAP/terraform-provider-scc/validation/uuidvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
@@ -92,6 +93,9 @@ __Further documentation:__
 							getFormattedValueAsTableRow("`Disconnected`", "The tunnel was previously connected but is now intentionally or unintentionally disconnected."),
 						Optional: true,
 						Computed: true,
+						Validators: []validator.String{
+							stringvalidator.OneOf("Connected", "Disconnected"),
+						},
 					},
 					"connected_since_time_stamp": schema.Int64Attribute{
 						MarkdownDescription: "Timestamp of the start of the connection.",
@@ -214,7 +218,7 @@ func (r *SubaccountResource) Create(ctx context.Context, req resource.CreateRequ
 
 	endpoint := endpoints.GetSubaccountBaseEndpoint()
 
-	planBody := map[string]string{
+	planBody := map[string]any{
 		"regionHost":    regionHost,
 		"subaccount":    subaccount,
 		"cloudUser":     plan.CloudUser.ValueString(),
@@ -315,7 +319,7 @@ func (r *SubaccountResource) Update(ctx context.Context, req resource.UpdateRequ
 	subaccount := plan.Subaccount.ValueString()
 	endpoint := endpoints.GetSubaccountEndpoint(regionHost, subaccount)
 
-	planBody := map[string]string{
+	planBody := map[string]any{
 		"locationID":  plan.LocationID.ValueString(),
 		"displayName": plan.DisplayName.ValueString(),
 		"description": plan.Description.ValueString(),
@@ -383,7 +387,7 @@ func (r *SubaccountResource) updateTunnelState(ctx context.Context, plan, state 
 	}
 
 	connected := desiredState != "Disconnected"
-	patch := map[string]string{"connected": fmt.Sprintf("%t", connected)}
+	patch := map[string]any{"connected": fmt.Sprintf("%t", connected)}
 
 	if err := requestAndUnmarshal(r.client, respObj, "PUT", endpoint+"/state", patch, false); err != nil {
 		diagnostics.AddError(errMsgUpdateSubaccountFailed, err.Error())
