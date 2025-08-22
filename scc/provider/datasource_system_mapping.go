@@ -228,7 +228,7 @@ __Format rules:__
 				},
 			},
 			"snc_partner_name": schema.StringAttribute{
-				MarkdownDescription: "SAP router route, required only if an SAP router is used. Required when RFCS protocol is used. Must match the syntax: 'p:<Distinguished_Name>' where <Distinguished_Name> is the distinguished name of the SNC partner.",
+				MarkdownDescription: "Distinguished name of the SNC partner in the format 'p:<Distinguished_Name>' (RFCS only).",
 				Computed:            true,
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(regexp.MustCompile(`^p:.+`), "snc_partner_name must match syntax: 'p:<Distinguished_Name>'"),
@@ -314,7 +314,7 @@ func (d *SystemMappingDataSource) Read(ctx context.Context, req datasource.ReadR
 	}
 
 	responseModel, diags := SystemMappingValueFrom(ctx, data, respObj)
-	if err != nil {
+	if diags.HasError() {
 		resp.Diagnostics.AddError(errMsgMapSystemMappingFailed, fmt.Sprintf("%s", diags))
 		return
 	}

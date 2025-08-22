@@ -81,14 +81,14 @@ func SystemMappingsValueFrom(ctx context.Context, plan SystemMappingsConfig, val
 			}
 			blacklistedUsersValue = append(blacklistedUsersValue, bl)
 		}
-		blacklistedUsers, err := types.ListValueFrom(ctx, SystemMappingBlacklistedUsersType, blacklistedUsersValue)
-		if err.HasError() {
-			return SystemMappingsConfig{}, err
+		blacklistedUsers, diags := types.ListValueFrom(ctx, SystemMappingBlacklistedUsersType, blacklistedUsersValue)
+		if diags.HasError() {
+			return SystemMappingsConfig{}, diags
 		}
 
-		allowedClients, err := types.ListValueFrom(ctx, types.StringType, mapping.AllowedClients)
-		if err.HasError() {
-			return SystemMappingsConfig{}, err
+		allowedClients, diags := types.ListValueFrom(ctx, types.StringType, mapping.AllowedClients)
+		if diags.HasError() {
+			return SystemMappingsConfig{}, diags
 		}
 
 		c := SystemMapping{
@@ -130,14 +130,14 @@ func SystemMappingValueFrom(ctx context.Context, plan SystemMappingConfig, value
 		}
 		blacklistedUsersValue = append(blacklistedUsersValue, bl)
 	}
-	blacklistedUsers, err := types.ListValueFrom(ctx, SystemMappingBlacklistedUsersType, blacklistedUsersValue)
-	if err.HasError() {
-		return SystemMappingConfig{}, err
+	blacklistedUsers, diags := types.ListValueFrom(ctx, SystemMappingBlacklistedUsersType, blacklistedUsersValue)
+	if diags.HasError() {
+		return SystemMappingConfig{}, diags
 	}
 
-	allowedClients, err := types.ListValueFrom(ctx, types.StringType, value.AllowedClients)
-	if err.HasError() {
-		return SystemMappingConfig{}, err
+	allowedClients, diags := types.ListValueFrom(ctx, types.StringType, value.AllowedClients)
+	if diags.HasError() {
+		return SystemMappingConfig{}, diags
 	}
 
 	hostInHeader := types.StringValue(value.HostInHeader)

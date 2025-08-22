@@ -135,7 +135,7 @@ __Format rules:__
 * Host can be a hostname, FQDN, or IPv4
 * Port must be numeric (0–65535)
 - `sid` (String) The ID of the system.
-- `snc_partner_name` (String) SAP router route, required only if an SAP router is used. Required when RFCS protocol is used. Must match the syntax: 'p:<Distinguished_Name>' where <Distinguished_Name> is the distinguished name of the SNC partner.
+- `snc_partner_name` (String) Distinguished name of the SNC partner in the format 'p:<Distinguished_Name>' (RFCS only).
 - `total_resources_count` (Number) The total number of resources.
 
 <a id="nestedatt--system_mappings--blacklisted_users"></a>
