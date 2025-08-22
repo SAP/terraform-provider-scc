@@ -47,6 +47,14 @@ resource "scc_subaccount" "scc_sa" {
 
 ### Optional
 
+- `connected` (Boolean) Indicates whether the subaccount is connected to the Cloud Connector.
+This value depends on the **tunnel state**:
+- If the tunnel is in state *Connected*, this will be *true*.
+- If the tunnel is in state *Disconnected*, this will be *false*.
+
+**Note**:
+"In case of a *ConnectFailure*, you may attempt to recover the connection by first setting connected to false 
+and then back to true, which will retry connecting the subaccount.
 - `description` (String) Description of the subaccount.
 - `display_name` (String) Display name of the subaccount.
 - `location_id` (String) Location identifier for the Cloud Connector instance.

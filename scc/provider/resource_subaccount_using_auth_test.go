@@ -101,6 +101,39 @@ func TestResourceSubaccountUsingAuth(t *testing.T) {
 		})
 	})
 
+	t.Run("update path - tunnel state change", func(t *testing.T) {
+		rec, user := setupVCR(t, "fixtures/resource_subaccount_using_auth_update_tunnel")
+		if user.CloudUsername == "" || user.CloudPassword == "" {
+			t.Fatalf("Missing TF_VAR_cloud_user or TF_VAR_cloud_password for recording test fixtures")
+		}
+		defer stopQuietly(rec)
+
+		resource.Test(t, resource.TestCase{
+			IsUnitTest:               true,
+			ProtoV6ProviderFactories: getTestProviders(rec.GetDefaultClient()),
+			Steps: []resource.TestStep{
+				{
+					Config: providerConfig(user) + ResourceSubaccountUsingAuthWithTunnelState("test", user.CloudAuthenticationData, "Testing tunnel connected", true),
+					Check: resource.ComposeAggregateTestCheckFunc(
+						resource.TestCheckResourceAttr("scc_subaccount_using_auth.test", "tunnel.state", "Connected"),
+					),
+				},
+				{
+					Config: providerConfig(user) + ResourceSubaccountUsingAuthWithTunnelState("test", user.CloudAuthenticationData, "Testing tunnel disconnected", false),
+					Check: resource.ComposeAggregateTestCheckFunc(
+						resource.TestCheckResourceAttr("scc_subaccount_using_auth.test", "tunnel.state", "Disconnected"),
+					),
+				},
+				{
+					Config: providerConfig(user) + ResourceSubaccountUsingAuthWithTunnelState("test", user.CloudAuthenticationData, "Testing tunnel reconnected", true),
+					Check: resource.ComposeAggregateTestCheckFunc(
+						resource.TestCheckResourceAttr("scc_subaccount_using_auth.test", "tunnel.state", "Connected"),
+					),
+				},
+			},
+		})
+	})
+
 	t.Run("error path - authentication data mandatory", func(t *testing.T) {
 		rec, _ := setupVCR(t, "fixtures/resource_subaccount_using_auth_err_wo_authentication_data")
 		defer stopQuietly(rec)
@@ -142,6 +175,16 @@ resource "scc_subaccount_using_auth" "%s" {
   display_name  = "%s"
 }
 `, datasourceName, authenticationData, description, displayName)
+}
+
+func ResourceSubaccountUsingAuthWithTunnelState(datasourceName, authenticationData, description string, connected bool) string {
+	return fmt.Sprintf(`
+resource "scc_subaccount_using_auth" "%s" {
+  authentication_data = "%s"
+  description    = "%s"
+  connected = "%t"
+}
+`, datasourceName, authenticationData, description, connected)
 }
 
 func getImportStateForSubaccountUsingAuth(resourceName string) resource.ImportStateIdFunc {

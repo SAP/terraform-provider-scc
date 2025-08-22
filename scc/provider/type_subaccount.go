@@ -109,6 +109,7 @@ type SubaccountConfig struct {
 	DisplayName   types.String `tfsdk:"display_name"`
 	Description   types.String `tfsdk:"description"`
 	Tunnel        types.Object `tfsdk:"tunnel"`
+	Connected     types.Bool   `tfsdk:"connected"`
 }
 
 type SubaccountUsingAuthConfig struct {
@@ -119,6 +120,7 @@ type SubaccountUsingAuthConfig struct {
 	DisplayName        types.String `tfsdk:"display_name"`
 	Description        types.String `tfsdk:"description"`
 	Tunnel             types.Object `tfsdk:"tunnel"`
+	Connected          types.Bool   `tfsdk:"connected"`
 }
 
 func SubaccountsDataSourceValueFrom(value apiobjects.SubaccountsDataSource) (SubaccountsConfig, diag.Diagnostics) {
@@ -281,6 +283,12 @@ func SubaccountResourceValueFrom(ctx context.Context, plan SubaccountConfig, val
 		CloudUser:     plan.CloudUser,
 		CloudPassword: plan.CloudPassword,
 		Tunnel:        tunnel,
+		Connected: func() types.Bool {
+			if value.Tunnel.State == "Connected" {
+				return types.BoolValue(true)
+			}
+			return types.BoolValue(false)
+		}(),
 	}
 	return *model, diag.Diagnostics{}
 }
@@ -355,6 +363,12 @@ func SubaccountUsingAuthResourceValueFrom(ctx context.Context, plan SubaccountUs
 		DisplayName:        types.StringValue(value.DisplayName),
 		Description:        types.StringValue(value.Description),
 		Tunnel:             tunnel,
+		Connected: func() types.Bool {
+			if value.Tunnel.State == "Connected" {
+				return types.BoolValue(true)
+			}
+			return types.BoolValue(false)
+		}(),
 	}
 	return *model, diag.Diagnostics{}
 }
