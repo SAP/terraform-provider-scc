@@ -182,7 +182,7 @@ func ResourceSubaccountUsingAuthWithTunnelState(datasourceName, authenticationDa
 resource "scc_subaccount_using_auth" "%s" {
   authentication_data = "%s"
   description    = "%s"
-  connected = "%t"
+  connected = %t
 }
 `, datasourceName, authenticationData, description, connected)
 }

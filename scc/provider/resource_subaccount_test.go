@@ -303,7 +303,7 @@ resource "scc_subaccount" "%s" {
   cloud_user     = "%s"
   cloud_password = "%s"
   description    = "%s"
-  connected = "%t"
+  connected = %t
 }
 `, datasourceName, regionHost, subaccount, cloudUser, cloudPassword, description, connected)
 }
