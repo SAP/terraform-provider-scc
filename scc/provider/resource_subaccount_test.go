@@ -59,6 +59,7 @@ func TestResourceSubaccount(t *testing.T) {
 					ImportStateVerifyIgnore: []string{
 						"cloud_user",
 						"cloud_password",
+						"connected",
 					},
 				},
 				{

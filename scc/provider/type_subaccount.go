@@ -283,7 +283,7 @@ func SubaccountResourceValueFrom(ctx context.Context, plan SubaccountConfig, val
 		CloudUser:     plan.CloudUser,
 		CloudPassword: plan.CloudPassword,
 		Tunnel:        tunnel,
-		Connected:     types.BoolValue(value.Tunnel.State == "Connected"),
+		Connected:     plan.Connected,
 	}
 	return *model, diag.Diagnostics{}
 }
@@ -358,7 +358,7 @@ func SubaccountUsingAuthResourceValueFrom(ctx context.Context, plan SubaccountUs
 		DisplayName:        types.StringValue(value.DisplayName),
 		Description:        types.StringValue(value.Description),
 		Tunnel:             tunnel,
-		Connected:          types.BoolValue(value.Tunnel.State == "Connected"),
+		Connected:          plan.Connected,
 	}
 	return *model, diag.Diagnostics{}
 }

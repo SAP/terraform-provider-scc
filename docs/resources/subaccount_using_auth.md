@@ -47,14 +47,21 @@ is **not required** for updating optional attributes such as location_id, displa
 
 ### Optional
 
-- `connected` (Boolean) Indicates whether the subaccount is connected to the Cloud Connector.
-This value depends on the **tunnel state**:
-- If the tunnel is in state *Connected*, this will be *true*.
-- If the tunnel is in state *Disconnected*, this will be *false*.
+- `connected` (Boolean) Specifies whether the subaccount should be connected to the Cloud Connector.
 
-**Note**:
-"In case of a *ConnectFailure*, you may attempt to recover the connection by first setting connected to false 
-and then back to true, which will retry connecting the subaccount.
+- **true** → attempts to establish a tunnel connection.
+- **false** → disconnects the subaccount from the Cloud Connector.
+
+The value is persisted in state based on what you configure (not overwritten by runtime status).  
+The actual tunnel status is reported by the Cloud Connector and may differ:
+
+- *Connected* → tunnel established successfully.
+- *Disconnected* → tunnel was intentionally or unintentionally closed.
+- *ConnectFailure* → tunnel could not be established (e.g., invalid credentials, network issues).  
+
+**Important:**  
+In case of *ConnectFailure*, the provider will issue a warning but will **not reset** the value of connected.  
+To recover, set connected = false, apply, and then set it back to true to retry the connection.
 - `description` (String) Description of the subaccount.
 - `display_name` (String) Display name of the subaccount.
 - `location_id` (String) Location identifier for the Cloud Connector instance.

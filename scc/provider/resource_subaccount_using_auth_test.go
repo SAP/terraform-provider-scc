@@ -53,6 +53,7 @@ func TestResourceSubaccountUsingAuth(t *testing.T) {
 					ImportStateVerifyIdentifierAttribute: "subaccount",
 					ImportStateVerifyIgnore: []string{
 						"authentication_data",
+						"connected",
 					},
 				},
 				{
