@@ -44,14 +44,6 @@ resource "scc_system_mapping" "scc_sm" {
 
 ### Required
 
-- `authentication_mode` (String) Authentication mode to be used on the backend side, which must be one of the following:
-  | authentication mode | description | 
-  | --- | --- | 
-  | NONE | No authentication | 
-  | NONE_RESTRICTED | No authentication; system certificate will never be sent | 
-  | X509_GENERAL | X.509 certificate-based authentication, system certificate may be sent | 
-  | X509_RESTRICTED | X.509 certificate-based authentication, system certificate never sent | 
-  | KERBEROS | Kerberos-based authentication | The authentication modes NONE_RESTRICTED and X509_RESTRICTED prevent the Cloud Connector from sending the system certificate in any case, whereas NONE and X509_GENERAL will send the system certificate if the circumstances allow it.
 - `backend_type` (String) Type of the backend system. Valid values are:
   | backend | description | 
   | --- | --- | 
@@ -63,13 +55,22 @@ resource "scc_system_mapping" "scc_sm" {
   | hana | SAP HANA system | 
   | otherSAPsys | Other SAP system | 
   | nonSAPsys | Non-SAP system |
-- `host_in_header` (String) Policy for setting the host in the response header. This property is applicable to HTTP(S) protocols only. If set, it must be one of the following strings:
-  | policy | description | 
-  | --- | --- | 
-  | internal/INTERNAL | Use internal (local) host for HTTP headers | 
-  | virtual/VIRTUAL | Use virtual host (default) for HTTP headers | The default is virtual.
 - `internal_host` (String) Host on the on-premise side.
+				Host names with underscore ('_') may cause problems. We recommend refraining from using underscore in host names.
+Note: In the UI, this attribute may appear with different names depending on the protocol used:
+* **HTTP(S), TCP, LDAP** → "Internal Host"
+* **RFC** → "Message Server/ Application Server"
 - `internal_port` (String) Port on the on-premise side.
+__UI Note:__ This field may appear under different names in the Cloud Connector UI depending on the protocol:
+* **HTTP(S), TCP, LDAP** → "Internal Port / Port Range"
+* **RFC** → "System ID / Instance Number"
+				
+				
+__Allowed formats:__
+* **Numeric (0–65535)** → for HTTP(S), TCP/TCPS, LDAP/LDAPS
+* **sapgwXX** or **sapgwXXs** → for RFC without load balancing
+* **33XX** → Classic RFC Port
+* **48XX** → Secure RFC Port
 - `protocol` (String) Protocol used when sending requests and receiving responses, which must be one of the following values:
   | protocol | description | 
   | --- | --- | 
@@ -83,20 +84,66 @@ resource "scc_system_mapping" "scc_sm" {
   | TCPS | Secure TCP |
 - `region_host` (String) Region Host Name.
 - `subaccount` (String) The ID of the subaccount.
-- `virtual_host` (String) Virtual host used on the cloud side. Cannot be updated after creation.
-- `virtual_port` (String) Virtual port used on the cloud side.
+- `virtual_host` (String) Virtual host used on the cloud side.
+				Cannot be updated after creation (changing it requires a resource replacement).
+				Host names with underscore ('_') may cause problems. We recommend refraining from using underscore in host names.
+				
+Note: In the UI, this attribute may appear with different names depending on the protocol used:
+* **HTTP(S), TCP, LDAP** → "Virtual Host"
+* **RFC** → "Virtual Message Server/ Virtual Application Server"
+- `virtual_port` (String) Port on the cloud (virtual) side.  
+Cannot be updated after creation (changing this value requires resource replacement).
+
+__UI Note:__ This attribute appears under different names depending on the protocol:
+* **HTTP(S), TCP, LDAP** → "Virtual Port"
+* **RFC** → "Virtual Instance Number/ Virtual System ID"
+
+__Allowed formats:__
+* **Numeric (0–65535)** → for HTTP(S), TCP/TCPS, LDAP/LDAPS
+* **sapgwXX** or **sapgwXXs** → for RFC without load balancing
+* **33XX** → Classic RFC Port
+* **48XX** → Secure RFC Port
 
 ### Optional
 
+- `allowed_clients` (List of String) List of allowed SAP clients (3 characters each). Only applicable for RFC-based communication.
+- `authentication_mode` (String) Authentication mode to be used on the backend side, which must be one of the following:
+  | authentication mode | description | 
+  | --- | --- | 
+  | NONE | No authentication | 
+  | NONE_RESTRICTED | No authentication; system certificate will never be sent | 
+  | X509_GENERAL | X.509 certificate-based authentication, system certificate may be sent | 
+  | X509_RESTRICTED | X.509 certificate-based authentication, system certificate never sent | 
+  | KERBEROS | Kerberos-based authentication | The authentication modes NONE_RESTRICTED and X509_RESTRICTED prevent the Cloud Connector from sending the system certificate in any case, whereas NONE and X509_GENERAL will send the system certificate if the circumstances allow it.
+- `blacklisted_users` (Attributes List) List of users that are not allowed to execute the call, even if the client is listed under allowed clients. If not specified, no users are blacklisted. Only applicable for RFC-based communication. (see [below for nested schema](#nestedatt--blacklisted_users))
 - `description` (String) Description for the system mapping.
-- `sap_router` (String) SAP router route, required only if an SAP router is used.
+- `host_in_header` (String) Policy for setting the host in the response header. This property is applicable to HTTP(S) protocols only. If set, it must be one of the following strings:
+  | policy | description | 
+  | --- | --- | 
+  | internal/INTERNAL | Use internal (local) host for HTTP headers | 
+  | virtual/VIRTUAL | Use virtual host (default) for HTTP headers | The default is virtual.
+- `sap_router` (String) SAP router string (only applicable if an SAP router is used). Only applicable for RFC-based communication.
+__Format rules:__
+* Sequence of hops separated by */H/* and */S/*
+* Each hop must contain a host and a port
+* Host can be a hostname, FQDN, or IPv4
+* Port must be numeric (0–65535)
 - `sid` (String) The ID of the system.
+- `snc_partner_name` (String) Distinguished name of the SNC partner in the format 'p:<Distinguished_Name>' (RFCS only).
 
 ### Read-Only
 
 - `creation_date` (String) Date of creation of system mapping.
 - `enabled_resources_count` (Number) The number of enabled resources.
 - `total_resources_count` (Number) The total number of resources.
+
+<a id="nestedatt--blacklisted_users"></a>
+### Nested Schema for `blacklisted_users`
+
+Required:
+
+- `client` (String) Client ID of the user (3 characters).
+- `user` (String) User ID of the user.
 
 ## Import
 

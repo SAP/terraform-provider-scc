@@ -133,7 +133,7 @@ func (r *SystemMappingResourceResource) Create(ctx context.Context, req resource
 	resourceID := CreateEncodedResourceID(plan.URLPath.ValueString())
 	endpoint := endpoints.GetSystemMappingResourceBaseEndpoint(regionHost, subaccount, virtualHost, virtualPort)
 
-	planBody := map[string]string{
+	planBody := map[string]any{
 		"id":                      plan.URLPath.ValueString(),
 		"enabled":                 fmt.Sprintf("%t", plan.Enabled.ValueBool()),
 		"exactMatchOnly":          fmt.Sprintf("%t", plan.PathOnly.ValueBool()),
@@ -233,7 +233,7 @@ func (r *SystemMappingResourceResource) Update(ctx context.Context, req resource
 	}
 	endpoint := fmt.Sprintf("/api/v1/configuration/subaccounts/%s/%s/systemMappings/%s:%s/resources/%s", regionHost, subaccount, virtualHost, virtualPort, resourceID)
 
-	planBody := map[string]string{
+	planBody := map[string]any{
 		"enabled":                 fmt.Sprintf("%t", plan.Enabled.ValueBool()),
 		"exactMatchOnly":          fmt.Sprintf("%t", plan.PathOnly.ValueBool()),
 		"websocketUpgradeAllowed": fmt.Sprintf("%t", plan.WebsocketUpgradeAllowed.ValueBool()),

@@ -98,7 +98,7 @@ func (r *DomainMappingResource) Create(ctx context.Context, req resource.CreateR
 	internalDomain := plan.InternalDomain.ValueString()
 	endpoint := endpoints.GetDomainMappingBaseEndpoint(regionHost, subaccount)
 
-	planBody := map[string]string{
+	planBody := map[string]any{
 		"virtualDomain":  plan.VirtualDomain.ValueString(),
 		"internalDomain": plan.InternalDomain.ValueString(),
 	}
@@ -200,7 +200,7 @@ func (r *DomainMappingResource) Update(ctx context.Context, req resource.UpdateR
 	}
 	endpoint := endpoints.GetDomainMappingEndpoint(regionHost, subaccount, internalDomain)
 
-	planBody := map[string]string{
+	planBody := map[string]any{
 		"virtualDomain":  plan.VirtualDomain.ValueString(),
 		"internalDomain": plan.InternalDomain.ValueString(),
 	}

@@ -183,32 +183,6 @@ func TestResourceSystemMapping(t *testing.T) {
 		})
 	})
 
-	t.Run("error path - host in header mandatory", func(t *testing.T) {
-		resource.Test(t, resource.TestCase{
-			IsUnitTest:               true,
-			ProtoV6ProviderFactories: getTestProviders(nil),
-			Steps: []resource.TestStep{
-				{
-					Config:      ResourceSystemMappingWoHostInHeader("test", "cf.eu12.hana.ondemand.com", "d3bbbcd7-d5e0-483b-a524-6dee7205f8e8", "testtfvirtual", "900", "testtfinternal", "900", "HTTP", "abapSys", "KERBEROS"),
-					ExpectError: regexp.MustCompile(`The argument "host_in_header" is required, but no definition was found.`),
-				},
-			},
-		})
-	})
-
-	t.Run("error path - authentication mode mandatory", func(t *testing.T) {
-		resource.Test(t, resource.TestCase{
-			IsUnitTest:               true,
-			ProtoV6ProviderFactories: getTestProviders(nil),
-			Steps: []resource.TestStep{
-				{
-					Config:      ResourceSystemMappingWoAuthMode("test", "cf.eu12.hana.ondemand.com", "d3bbbcd7-d5e0-483b-a524-6dee7205f8e8", "testtfvirtual", "900", "testtfinternal", "900", "HTTP", "abapSys", "VIRTUAL"),
-					ExpectError: regexp.MustCompile(`The argument "authentication_mode" is required, but no definition was found.`),
-				},
-			},
-		})
-	})
-
 }
 
 func ResourceSystemMapping(datasourceName string, regionHost string, subaccount string, virtualHost string, virtualPort string,
@@ -362,40 +336,6 @@ func ResourceSystemMappingWoBackendType(datasourceName string, regionHost string
 	authentication_mode= "%s"
 	}
 	`, datasourceName, regionHost, subaccount, virtualHost, virtualPort, internalHost, internalPort, protocol, hostInHeader, authenticationMode)
-}
-
-func ResourceSystemMappingWoHostInHeader(datasourceName string, regionHost string, subaccount string, virtualHost string, virtualPort string,
-	internalHost string, internalPort string, protocol string, backendType string, authenticationMode string) string {
-	return fmt.Sprintf(`
-	resource "scc_system_mapping" "%s" {
-	region_host= "%s"
-	subaccount= "%s"
-	virtual_host= "%s"
-	virtual_port= "%s"
-	internal_host= "%s"
-	internal_port= "%s"
-	protocol= "%s"
-	backend_type= "%s"
-	authentication_mode= "%s"
-	}
-	`, datasourceName, regionHost, subaccount, virtualHost, virtualPort, internalHost, internalPort, protocol, backendType, authenticationMode)
-}
-
-func ResourceSystemMappingWoAuthMode(datasourceName string, regionHost string, subaccount string, virtualHost string, virtualPort string,
-	internalHost string, internalPort string, protocol string, backendType string, hostInHeader string) string {
-	return fmt.Sprintf(`
-	resource "scc_system_mapping" "%s" {
-	region_host= "%s"
-	subaccount= "%s"
-	virtual_host= "%s"
-	virtual_port= "%s"
-	internal_host= "%s"
-	internal_port= "%s"
-	protocol= "%s"
-	backend_type= "%s"
-	host_in_header= "%s"
-	}
-	`, datasourceName, regionHost, subaccount, virtualHost, virtualPort, internalHost, internalPort, protocol, backendType, hostInHeader)
 }
 
 func getImportStateForSystemMapping(resourceName string) resource.ImportStateIdFunc {

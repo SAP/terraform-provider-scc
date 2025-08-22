@@ -112,44 +112,6 @@ func TestResourceSubaccount(t *testing.T) {
 		})
 	})
 
-	t.Run("update path - tunnel state change", func(t *testing.T) {
-		rec, user := setupVCR(t, "fixtures/resource_subaccount_update_tunnel")
-		if user.CloudUsername == "" || user.CloudPassword == "" {
-			t.Fatalf("Missing TF_VAR_cloud_user or TF_VAR_cloud_password for recording test fixtures")
-		}
-		defer stopQuietly(rec)
-
-		resource.Test(t, resource.TestCase{
-			IsUnitTest:               true,
-			ProtoV6ProviderFactories: getTestProviders(rec.GetDefaultClient()),
-			Steps: []resource.TestStep{
-				{
-					Config: providerConfig(user) + ResourceSubaccountWithTunnelState("test", regionHost, subaccountId, user.CloudUsername, user.CloudPassword, "Testing tunnel connected", "Connected"),
-					Check: resource.ComposeAggregateTestCheckFunc(
-						resource.TestCheckResourceAttr("scc_subaccount.test", "tunnel.state", "Connected"),
-					),
-				},
-				// Update with mismatched configuration should throw error
-				{
-					Config:      providerConfig(user) + ResourceSubaccountWithTunnelState("test", "cf.us10.hana.ondemand.com", subaccountId, user.CloudUsername, user.CloudPassword, "Testing tunnel disconnected", "Disconnected"),
-					ExpectError: regexp.MustCompile(`(?is)failed to update the cloud connector subaccount due to mismatched\s+configuration values`),
-				},
-				{
-					Config: providerConfig(user) + ResourceSubaccountWithTunnelState("test", regionHost, subaccountId, user.CloudUsername, user.CloudPassword, "Testing tunnel disconnected", "Disconnected"),
-					Check: resource.ComposeAggregateTestCheckFunc(
-						resource.TestCheckResourceAttr("scc_subaccount.test", "tunnel.state", "Disconnected"),
-					),
-				},
-				{
-					Config: providerConfig(user) + ResourceSubaccountWithTunnelState("test", regionHost, subaccountId, user.CloudUsername, user.CloudPassword, "Testing tunnel reconnected", "Connected"),
-					Check: resource.ComposeAggregateTestCheckFunc(
-						resource.TestCheckResourceAttr("scc_subaccount.test", "tunnel.state", "Connected"),
-					),
-				},
-			},
-		})
-	})
-
 	t.Run("error path - region host mandatory", func(t *testing.T) {
 		rec, user := setupVCR(t, "fixtures/resource_subaccount_err_wo_region_host")
 
@@ -293,22 +255,6 @@ resource "scc_subaccount" "%s" {
   display_name  = "%s"
 }
 `, datasourceName, regionHost, subaccount, cloudUser, cloudPassword, description, displayName)
-}
-
-func ResourceSubaccountWithTunnelState(datasourceName, regionHost, subaccount, cloudUser, cloudPassword, description, tunnelState string) string {
-	return fmt.Sprintf(`
-resource "scc_subaccount" "%s" {
-  region_host    = "%s"
-  subaccount     = "%s"
-  cloud_user     = "%s"
-  cloud_password = "%s"
-  description    = "%s"
-
-  tunnel = {
-    state = "%s"
-  }
-}
-`, datasourceName, regionHost, subaccount, cloudUser, cloudPassword, description, tunnelState)
 }
 
 func getImportStateForSubaccount(resourceName string) resource.ImportStateIdFunc {

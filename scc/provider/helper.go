@@ -18,7 +18,7 @@ func sendGetRequest(client *api.RestApiClient, endpoint string) (*http.Response,
 	return response, nil
 }
 
-func sendPostOrPutRequest(client *api.RestApiClient, planBody map[string]string, endpoint string, action string) (*http.Response, error) {
+func sendPostOrPutRequest(client *api.RestApiClient, planBody map[string]any, endpoint string, action string) (*http.Response, error) {
 	var response *http.Response
 	requestByteBody, err := json.Marshal(planBody)
 	if err != nil {
@@ -51,7 +51,7 @@ func sendDeleteRequest(client *api.RestApiClient, endpoint string) (*http.Respon
 	return response, nil
 }
 
-func requestAndUnmarshal[T any](client *api.RestApiClient, respObj *T, requestType string, endpoint string, planBody map[string]string, marshalResponse bool) error {
+func requestAndUnmarshal[T any](client *api.RestApiClient, respObj *T, requestType string, endpoint string, planBody map[string]any, marshalResponse bool) error {
 	var response *http.Response
 	var err error
 	switch requestType {

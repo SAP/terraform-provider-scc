@@ -50,25 +50,15 @@ is **not required** for updating optional attributes such as location_id, displa
 - `description` (String) Description of the subaccount.
 - `display_name` (String) Display name of the subaccount.
 - `location_id` (String) Location identifier for the Cloud Connector instance.
-- `tunnel` (Attributes) Details of connection tunnel used by the subaccount. (see [below for nested schema](#nestedatt--tunnel))
 
 ### Read-Only
 
 - `region_host` (String) Region Host Name.
 - `subaccount` (String) The ID of the subaccount.
+- `tunnel` (Attributes) Details of connection tunnel used by the subaccount. (see [below for nested schema](#nestedatt--tunnel))
 
 <a id="nestedatt--tunnel"></a>
 ### Nested Schema for `tunnel`
-
-Optional:
-
-- `state` (String) State of the tunnel. Possible values are: 
-
-  | state | description | 
-  | --- | --- | 
-  | `Connected` | The tunnel is active and functioning properly. | 
-  | `ConnectFailure` | The tunnel failed to establish a connection due to an issue. | 
-  | `Disconnected` | The tunnel was previously connected but is now intentionally or unintentionally disconnected. |
 
 Read-Only:
 
@@ -76,6 +66,13 @@ Read-Only:
 - `connected_since_time_stamp` (Number) Timestamp of the start of the connection.
 - `connections` (Number) Number of subaccount connections.
 - `service_channels` (Attributes List) Type and state of the service channels used (types: HANA database, Virtual Machine or RFC) (see [below for nested schema](#nestedatt--tunnel--service_channels))
+- `state` (String) State of the tunnel. Possible values are: 
+
+  | state | description | 
+  | --- | --- | 
+  | `Connected` | The tunnel is active and functioning properly. | 
+  | `ConnectFailure` | The tunnel failed to establish a connection due to an issue. | 
+  | `Disconnected` | The tunnel was previously connected but is now intentionally or unintentionally disconnected. |
 - `subaccount_certificate` (Attributes) Information on the subaccount certificate such as validity period, issuer and subject DN. (see [below for nested schema](#nestedatt--tunnel--subaccount_certificate))
 - `user` (String) User for the specified region host and subaccount.
 

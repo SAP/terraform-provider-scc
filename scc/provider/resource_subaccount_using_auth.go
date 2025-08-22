@@ -16,7 +16,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
 var _ resource.Resource = &SubaccountUsingAuthResource{}
@@ -88,7 +87,6 @@ is **not required** for updating optional attributes such as location_id, displa
 			},
 			"tunnel": schema.SingleNestedAttribute{
 				MarkdownDescription: "Details of connection tunnel used by the subaccount.",
-				Optional:            true,
 				Computed:            true,
 				Attributes: map[string]schema.Attribute{
 					"state": schema.StringAttribute{
@@ -98,7 +96,6 @@ is **not required** for updating optional attributes such as location_id, displa
 							getFormattedValueAsTableRow("`Connected`", "The tunnel is active and functioning properly.") +
 							getFormattedValueAsTableRow("`ConnectFailure`", "The tunnel failed to establish a connection due to an issue.") +
 							getFormattedValueAsTableRow("`Disconnected`", "The tunnel was previously connected but is now intentionally or unintentionally disconnected."),
-						Optional: true,
 						Computed: true,
 					},
 					"connected_since_time_stamp": schema.Int64Attribute{
@@ -219,7 +216,7 @@ func (r *SubaccountUsingAuthResource) Create(ctx context.Context, req resource.C
 
 	endpoint := endpoints.GetSubaccountBaseEndpoint()
 
-	planBody := map[string]string{
+	planBody := map[string]any{
 		"authenticationData": plan.AuthenticationData.ValueString(),
 		"description":        plan.Description.ValueString(),
 		"locationID":         plan.LocationID.ValueString(),
@@ -312,7 +309,7 @@ func (r *SubaccountUsingAuthResource) Update(ctx context.Context, req resource.U
 	subaccount := state.Subaccount.ValueString()
 	endpoint := endpoints.GetSubaccountEndpoint(regionHost, subaccount)
 
-	planBody := map[string]string{
+	planBody := map[string]any{
 		"locationID":  plan.LocationID.ValueString(),
 		"displayName": plan.DisplayName.ValueString(),
 		"description": plan.Description.ValueString(),
@@ -324,11 +321,11 @@ func (r *SubaccountUsingAuthResource) Update(ctx context.Context, req resource.U
 		return
 	}
 
-	if shouldUpdateTunnelCopy(plan) {
-		if err := r.updateTunnelState(ctx, plan, state, endpoint, &respObj, &resp.Diagnostics); err != nil {
-			return
-		}
-	}
+	// if shouldUpdateTunnelCopy(plan) {
+	// 	if err := r.updateTunnelState(ctx, plan, state, endpoint, &respObj, &resp.Diagnostics); err != nil {
+	// 		return
+	// 	}
+	// }
 
 	if respObj.Tunnel.State == "Connected" {
 		// Trigger trust configuration sync for the subaccount without persisting to Terraform state
@@ -350,41 +347,41 @@ func appendAndCheckErrorsCopy(diags *diag.Diagnostics, newDiags diag.Diagnostics
 	return diags.HasError()
 }
 
-func shouldUpdateTunnelCopy(plan SubaccountUsingAuthConfig) bool {
-	return !plan.Tunnel.IsNull() && !plan.Tunnel.IsUnknown()
-}
+// func shouldUpdateTunnelCopy(plan SubaccountUsingAuthConfig) bool {
+// 	return !plan.Tunnel.IsNull() && !plan.Tunnel.IsUnknown()
+// }
 
-func (r *SubaccountUsingAuthResource) updateTunnelState(ctx context.Context, plan, state SubaccountUsingAuthConfig, endpoint string, respObj *apiobjects.SubaccountUsingAuthResource, diagnostics *diag.Diagnostics) error {
-	var planTunnel, stateTunnel SubaccountTunnelData
+// func (r *SubaccountUsingAuthResource) updateTunnelState(ctx context.Context, plan, state SubaccountUsingAuthConfig, endpoint string, respObj *apiobjects.SubaccountUsingAuthResource, diagnostics *diag.Diagnostics) error {
+// 	var planTunnel, stateTunnel SubaccountTunnelData
 
-	if diags := state.Tunnel.As(ctx, &stateTunnel, basetypes.ObjectAsOptions{}); appendAndCheckErrors(diagnostics, diags) {
-		return fmt.Errorf("error reading state tunnel")
-	}
-	if diags := plan.Tunnel.As(ctx, &planTunnel, basetypes.ObjectAsOptions{}); appendAndCheckErrors(diagnostics, diags) {
-		return fmt.Errorf("error reading plan tunnel")
-	}
+// 	if diags := state.Tunnel.As(ctx, &stateTunnel, basetypes.ObjectAsOptions{}); appendAndCheckErrors(diagnostics, diags) {
+// 		return fmt.Errorf("error reading state tunnel")
+// 	}
+// 	if diags := plan.Tunnel.As(ctx, &planTunnel, basetypes.ObjectAsOptions{}); appendAndCheckErrors(diagnostics, diags) {
+// 		return fmt.Errorf("error reading plan tunnel")
+// 	}
 
-	desiredState := planTunnel.State.ValueString()
-	if desiredState == stateTunnel.State.ValueString() {
-		return nil
-	}
+// 	desiredState := planTunnel.State.ValueString()
+// 	if desiredState == stateTunnel.State.ValueString() {
+// 		return nil
+// 	}
 
-	connected := desiredState != "Disconnected"
-	patch := map[string]string{"connected": fmt.Sprintf("%t", connected)}
+// 	connected := desiredState != "Disconnected"
+// 	patch := map[string]any{"connected": fmt.Sprintf("%t", connected)}
 
-	if err := requestAndUnmarshal(r.client, respObj, "PUT", endpoint+"/state", patch, false); err != nil {
-		diagnostics.AddError(errMsgUpdateSubaccountFailed, err.Error())
-		return err
-	}
+// 	if err := requestAndUnmarshal(r.client, respObj, "PUT", endpoint+"/state", patch, false); err != nil {
+// 		diagnostics.AddError(errMsgUpdateSubaccountFailed, err.Error())
+// 		return err
+// 	}
 
-	// Re-fetch to update tunnel state
-	if err := requestAndUnmarshal(r.client, respObj, "GET", endpoint, nil, true); err != nil {
-		diagnostics.AddError(errMsgUpdateSubaccountFailed, err.Error())
-		return err
-	}
+// 	// Re-fetch to update tunnel state
+// 	if err := requestAndUnmarshal(r.client, respObj, "GET", endpoint, nil, true); err != nil {
+// 		diagnostics.AddError(errMsgUpdateSubaccountFailed, err.Error())
+// 		return err
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
 
 func (r *SubaccountUsingAuthResource) syncTrustConfiguration(regionHost, subaccount string, respObj *apiobjects.SubaccountUsingAuthResource, diagnostics *diag.Diagnostics) error {
 	endpoint := endpoints.GetSubaccountEndpoint(regionHost, subaccount) + "/trust"
