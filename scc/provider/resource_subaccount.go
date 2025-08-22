@@ -384,10 +384,6 @@ func validateUpdateInputs(plan, state SubaccountConfig) error {
 	return nil
 }
 
-func shouldUpdateTunnel(plan SubaccountConfig) bool {
-	return !plan.Connected.IsNull() && !plan.Connected.IsUnknown()
-}
-
 func (r *SubaccountResource) syncTrustConfiguration(regionHost, subaccount string, respObj *apiobjects.SubaccountResource, diagnostics *diag.Diagnostics) error {
 	endpoint := endpoints.GetSubaccountEndpoint(regionHost, subaccount) + "/trust"
 
