@@ -1,8 +1,6 @@
 module github.com/SAP/terraform-provider-scc
 
-go 1.23.1
-
-toolchain go1.24.1
+go 1.25
 
 require (
 	github.com/hashicorp/terraform-plugin-framework v1.15.1
