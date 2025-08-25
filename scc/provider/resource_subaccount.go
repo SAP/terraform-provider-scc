@@ -13,8 +13,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
-	// "github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
 var _ resource.Resource = &SubaccountResource{}
@@ -77,6 +77,26 @@ __Further documentation:__
 				MarkdownDescription: "Description of the subaccount.",
 				Computed:            true,
 				Optional:            true,
+			},
+			"connected": schema.BoolAttribute{
+				MarkdownDescription: `Specifies whether the subaccount should be connected to the Cloud Connector.
+
+- **true** → attempts to establish a tunnel connection.
+- **false** → disconnects the subaccount from the Cloud Connector.
+
+The value is persisted in state based on what you configure (not overwritten by runtime status).  
+The actual tunnel status is reported by the Cloud Connector and may differ:
+
+- *Connected* → tunnel established successfully.
+- *Disconnected* → tunnel was intentionally or unintentionally closed.
+- *ConnectFailure* → tunnel could not be established (e.g., invalid credentials, network issues).  
+
+**Important:**  
+In case of *ConnectFailure*, the provider will issue a warning but will **not reset** the value of connected.  
+To recover, set connected = false, apply, and then set it back to true to retry the connection.`,
+				Optional: true,
+				Computed: true,
+				Default:  booldefault.StaticBool(true),
 			},
 			"tunnel": schema.SingleNestedAttribute{
 				MarkdownDescription: "Details of connection tunnel used by the subaccount.",
@@ -228,11 +248,25 @@ func (r *SubaccountResource) Create(ctx context.Context, req resource.CreateRequ
 		return
 	}
 
+	connectedState := respObj.Tunnel.State == "Connected"
+
+	if !plan.Connected.IsNull() && !plan.Connected.IsUnknown() {
+		endpoint = endpoints.GetSubaccountEndpoint(regionHost, subaccount)
+		if err := r.updateTunnelState(plan, connectedState, endpoint, &respObj, &resp.Diagnostics); err != nil {
+			return
+		}
+	}
+
+	if respObj.Tunnel.State == "ConnectFailure" {
+		resp.Diagnostics.AddWarning(
+			"Tunnel connection failed",
+			"The subaccount was created/updated successfully, but the tunnel could not be established (state=ConnectFailure). "+
+				"You can retry by toggling 'connected' from false to true.",
+		)
+	}
+
 	if respObj.Tunnel.State == "Connected" {
 		// Trigger trust configuration sync for the subaccount without persisting to Terraform state
-		regionHost := respObj.RegionHost
-		subaccount := respObj.Subaccount
-
 		if err = r.syncTrustConfiguration(regionHost, subaccount, &respObj, &resp.Diagnostics); err != nil {
 			resp.Diagnostics.AddError(errMsgAddSubaccountFailed, err.Error())
 			return
@@ -325,11 +359,22 @@ func (r *SubaccountResource) Update(ctx context.Context, req resource.UpdateRequ
 		return
 	}
 
-	// if shouldUpdateTunnel(plan) {
-	// 	if err := r.updateTunnelState(ctx, plan, state, endpoint, &respObj, &resp.Diagnostics); err != nil {
-	// 		return
-	// 	}
-	// }
+	connectedState := respObj.Tunnel.State == "Connected"
+
+	if !plan.Connected.IsNull() && !plan.Connected.IsUnknown() {
+		if err := r.updateTunnelState(plan, connectedState, endpoint, &respObj, &resp.Diagnostics); err != nil {
+			return
+		}
+
+	}
+
+	if respObj.Tunnel.State == "ConnectFailure" {
+		resp.Diagnostics.AddWarning(
+			"Tunnel connection failed",
+			"The subaccount was created/updated successfully, but the tunnel could not be established (state=ConnectFailure). "+
+				"You can retry by toggling 'connected' from false to true.",
+		)
+	}
 
 	if respObj.Tunnel.State == "Connected" {
 		// Trigger trust configuration sync for the subaccount without persisting to Terraform state
@@ -361,48 +406,33 @@ func validateUpdateInputs(plan, state SubaccountConfig) error {
 	return nil
 }
 
-// func shouldUpdateTunnel(plan SubaccountConfig) bool {
-// 	return !plan.Tunnel.IsNull() && !plan.Tunnel.IsUnknown()
-// }
-
-// func (r *SubaccountResource) updateTunnelState(ctx context.Context, plan, state SubaccountConfig, endpoint string, respObj *apiobjects.SubaccountResource, diagnostics *diag.Diagnostics) error {
-// 	var planTunnel, stateTunnel SubaccountTunnelData
-
-// 	if diags := state.Tunnel.As(ctx, &stateTunnel, basetypes.ObjectAsOptions{}); appendAndCheckErrors(diagnostics, diags) {
-// 		return fmt.Errorf("error reading state tunnel")
-// 	}
-// 	if diags := plan.Tunnel.As(ctx, &planTunnel, basetypes.ObjectAsOptions{}); appendAndCheckErrors(diagnostics, diags) {
-// 		return fmt.Errorf("error reading plan tunnel")
-// 	}
-
-// 	desiredState := planTunnel.State.ValueString()
-// 	if desiredState == stateTunnel.State.ValueString() {
-// 		return nil
-// 	}
-
-// 	connected := desiredState != "Disconnected"
-// 	patch := map[string]any{"connected": fmt.Sprintf("%t", connected)}
-
-// 	if err := requestAndUnmarshal(r.client, respObj, "PUT", endpoint+"/state", patch, false); err != nil {
-// 		diagnostics.AddError(errMsgUpdateSubaccountFailed, err.Error())
-// 		return err
-// 	}
-
-// 	// Re-fetch to update tunnel state
-// 	if err := requestAndUnmarshal(r.client, respObj, "GET", endpoint, nil, true); err != nil {
-// 		diagnostics.AddError(errMsgUpdateSubaccountFailed, err.Error())
-// 		return err
-// 	}
-
-// 	return nil
-// }
-
 func (r *SubaccountResource) syncTrustConfiguration(regionHost, subaccount string, respObj *apiobjects.SubaccountResource, diagnostics *diag.Diagnostics) error {
 	endpoint := endpoints.GetSubaccountEndpoint(regionHost, subaccount) + "/trust"
 
 	err := requestAndUnmarshal(r.client, &respObj, "POST", endpoint, nil, false)
 	if err != nil {
 		diagnostics.AddError(errMsgAddSubaccountFailed, err.Error())
+		return err
+	}
+
+	return nil
+}
+
+func (r *SubaccountResource) updateTunnelState(plan SubaccountConfig, connectedState bool, endpoint string, respObj *apiobjects.SubaccountResource, diagnostics *diag.Diagnostics) error {
+	desiredState := plan.Connected.ValueBool()
+	if desiredState == connectedState {
+		return nil
+	}
+	patch := map[string]any{"connected": desiredState}
+
+	if err := requestAndUnmarshal(r.client, respObj, "PUT", endpoint+"/state", patch, false); err != nil {
+		diagnostics.AddError(errMsgUpdateSubaccountFailed, err.Error())
+		return err
+	}
+
+	// Re-fetch to update tunnel state
+	if err := requestAndUnmarshal(r.client, respObj, "GET", endpoint, nil, true); err != nil {
+		diagnostics.AddError(errMsgUpdateSubaccountFailed, err.Error())
 		return err
 	}
 

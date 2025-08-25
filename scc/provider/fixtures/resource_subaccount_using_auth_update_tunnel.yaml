@@ -40,7 +40,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Fri, 22 Aug 2025 16:38:51 GMT
+                - Fri, 22 Aug 2025 16:41:47 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -50,10 +50,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 09e40d5b-553b-4aad-5807-753d6e988420
+                - 154f27fe-77d7-44a3-69cc-8dc08338c2b3
         status: 200 OK
         code: 200
-        duration: 797.101542ms
+        duration: 788.466917ms
     - id: 1
       request:
         proto: HTTP/1.1
@@ -93,7 +93,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Fri, 22 Aug 2025 16:38:51 GMT
+                - Fri, 22 Aug 2025 16:41:47 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -103,22 +103,22 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 799bfd12-7e09-4482-4296-31310f773f83
+                - 34ae515a-c5e9-4be2-5a3a-f6917ef2f283
         status: 200 OK
         code: 200
-        duration: 362.760876ms
+        duration: 267.995208ms
     - id: 2
       request:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
-        content_length: 274
+        content_length: 727
         transfer_encoding: []
         trailer: {}
         host: https://redacted.instance.url
         remote_addr: ""
         request_uri: ""
-        body: '{"cloudPassword":"REDACTED_CLOUD_PASSWORD","cloudUser":"cloud-user@example.com","description":"Initial description","displayName":"Initial Display Name","locationID":"","regionHost":"cf.eu12.hana.ondemand.com","subaccount":"4916a705-273c-45a6-a2f0-08c234c7a23d"}'
+        body: '{"authenticationData":"REDACTED_SUBACCOUNT_AUTHENTICATION_DATA","description":"Testing tunnel connected","displayName":"","locationID":""}'
         form: {}
         headers:
             Accept:
@@ -138,14 +138,14 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"description":"Initial description","displayName":"Initial Display Name","tunnel":{"state":"Connected","connectedSinceTimeStamp":1755880737043,"connections":0,"applicationConnections":[],"serviceChannels":[],"subaccountCertificate":{"notAfterTimeStamp": 1111111111111,"notBeforeTimeStamp": 1111111111111,"subjectDN": "CN=redacted,L=redacted,OU=redacted,OU=redacted,O=redacted,C=redacted","issuer": "CN=redacted,OU=SAP Cloud Platform Clients,O=redacted,L=redacted,C=redacted","serialNumber": "aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa"},"user":"cloud-user@example.com"},"_links":{"ABAPCloud-channels":{"href": "https://redacted.url/path"},"HANA-channels":{"href": "https://redacted.url/path"},"systemMappings":{"href": "https://redacted.url/path"},"self":{"href": "https://redacted.url/path"},"K8S-channels":{"href": "https://redacted.url/path"},"validity":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"},"VirtualMachine-channels":{"href": "https://redacted.url/path"},"domainMappings":{"href": "https://redacted.url/path"}},"regionHost":"cf.eu12.hana.ondemand.com","subaccount":"4916a705-273c-45a6-a2f0-08c234c7a23d","locationID":""}'
+        body: '{"description":"Testing tunnel connected","displayName":"terraform-cloud-connector-subaccount-87pt0qgr","tunnel":{"state":"Connected","connectedSinceTimeStamp":1755880911916,"connections":0,"applicationConnections":[],"serviceChannels":[],"subaccountCertificate":{"notAfterTimeStamp": 1111111111111,"notBeforeTimeStamp": 1111111111111,"subjectDN": "CN=redacted,L=redacted,OU=redacted,OU=redacted,O=redacted,C=redacted","issuer": "CN=redacted,OU=SAP Cloud Platform Clients,O=redacted,L=redacted,C=redacted","serialNumber": "aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa"},"user":"cloud-user@example.com"},"_links":{"ABAPCloud-channels":{"href": "https://redacted.url/path"},"HANA-channels":{"href": "https://redacted.url/path"},"systemMappings":{"href": "https://redacted.url/path"},"self":{"href": "https://redacted.url/path"},"K8S-channels":{"href": "https://redacted.url/path"},"validity":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"},"VirtualMachine-channels":{"href": "https://redacted.url/path"},"domainMappings":{"href": "https://redacted.url/path"}},"regionHost":"cf.eu12.hana.ondemand.com","subaccount":"4916a705-273c-45a6-a2f0-08c234c7a23d","locationID":""}'
         headers:
             Cache-Control:
                 - no-store
             Content-Type:
                 - application/json
             Date:
-                - Fri, 22 Aug 2025 16:38:57 GMT
+                - Fri, 22 Aug 2025 16:41:51 GMT
             Location:
                 - redacted
             Server:
@@ -159,10 +159,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - cbed46f2-66e7-48b1-759b-c806aff519a8
+                - 17af3ddb-3e3b-4055-4121-66df92cf048b
         status: 201 Created
         code: 201
-        duration: 5.302110253s
+        duration: 4.512065003s
     - id: 3
       request:
         proto: HTTP/1.1
@@ -198,7 +198,7 @@ interactions:
             Cache-Control:
                 - no-store
             Date:
-                - Fri, 22 Aug 2025 16:38:57 GMT
+                - Fri, 22 Aug 2025 16:41:52 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -208,10 +208,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - ca4ad1d0-dfb8-4736-5a3f-fb31cac0bf8b
+                - e169cbd3-9ad8-48cb-65c4-e75eb2d0d954
         status: 204 No Content
         code: 204
-        duration: 529.828584ms
+        duration: 498.072875ms
     - id: 4
       request:
         proto: HTTP/1.1
@@ -251,7 +251,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Fri, 22 Aug 2025 16:38:57 GMT
+                - Fri, 22 Aug 2025 16:41:52 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -261,10 +261,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - d8d28d24-739f-43d9-69be-5c69699d5dd4
+                - 78b54554-ae94-4294-63fb-9dc51184a90b
         status: 200 OK
         code: 200
-        duration: 274.600042ms
+        duration: 292.594958ms
     - id: 5
       request:
         proto: HTTP/1.1
@@ -304,7 +304,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Fri, 22 Aug 2025 16:38:58 GMT
+                - Fri, 22 Aug 2025 16:41:53 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -314,10 +314,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 1e8f0721-b5fc-4aa0-5973-00ac8904577f
+                - 3996027c-6a07-4296-4d7f-028ab12bd9a0
         status: 200 OK
         code: 200
-        duration: 275.039792ms
+        duration: 266.207126ms
     - id: 6
       request:
         proto: HTTP/1.1
@@ -349,14 +349,14 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"description":"Initial description","displayName":"Initial Display Name","tunnel":{"state":"Connected","connectedSinceTimeStamp":1755880737043,"connections":0,"applicationConnections":[],"serviceChannels":[],"subaccountCertificate":{"notAfterTimeStamp": 1111111111111,"notBeforeTimeStamp": 1111111111111,"subjectDN": "CN=redacted,L=redacted,OU=redacted,OU=redacted,O=redacted,C=redacted","issuer": "CN=redacted,OU=SAP Cloud Platform Clients,O=redacted,L=redacted,C=redacted","serialNumber": "aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa"},"user":"cloud-user@example.com"},"_links":{"ABAPCloud-channels":{"href": "https://redacted.url/path"},"HANA-channels":{"href": "https://redacted.url/path"},"systemMappings":{"href": "https://redacted.url/path"},"self":{"href": "https://redacted.url/path"},"K8S-channels":{"href": "https://redacted.url/path"},"validity":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"},"VirtualMachine-channels":{"href": "https://redacted.url/path"},"domainMappings":{"href": "https://redacted.url/path"}},"regionHost":"cf.eu12.hana.ondemand.com","subaccount":"4916a705-273c-45a6-a2f0-08c234c7a23d","locationID":""}'
+        body: '{"description":"Testing tunnel connected","displayName":"terraform-cloud-connector-subaccount-87pt0qgr","tunnel":{"state":"Connected","connectedSinceTimeStamp":1755880911916,"connections":0,"applicationConnections":[],"serviceChannels":[],"subaccountCertificate":{"notAfterTimeStamp": 1111111111111,"notBeforeTimeStamp": 1111111111111,"subjectDN": "CN=redacted,L=redacted,OU=redacted,OU=redacted,O=redacted,C=redacted","issuer": "CN=redacted,OU=SAP Cloud Platform Clients,O=redacted,L=redacted,C=redacted","serialNumber": "aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa"},"user":"cloud-user@example.com"},"_links":{"ABAPCloud-channels":{"href": "https://redacted.url/path"},"HANA-channels":{"href": "https://redacted.url/path"},"systemMappings":{"href": "https://redacted.url/path"},"self":{"href": "https://redacted.url/path"},"K8S-channels":{"href": "https://redacted.url/path"},"validity":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"},"VirtualMachine-channels":{"href": "https://redacted.url/path"},"domainMappings":{"href": "https://redacted.url/path"}},"regionHost":"cf.eu12.hana.ondemand.com","subaccount":"4916a705-273c-45a6-a2f0-08c234c7a23d","locationID":""}'
         headers:
             Cache-Control:
                 - no-store
             Content-Type:
                 - application/json
             Date:
-                - Fri, 22 Aug 2025 16:38:58 GMT
+                - Fri, 22 Aug 2025 16:41:53 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -368,10 +368,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 9806b2ad-5ddf-4bb9-7a5d-c53acd4e147a
+                - bf92aa46-16e8-4ff7-5c05-e575e95c2b07
         status: 200 OK
         code: 200
-        duration: 305.028ms
+        duration: 303.053917ms
     - id: 7
       request:
         proto: HTTP/1.1
@@ -407,7 +407,7 @@ interactions:
             Cache-Control:
                 - no-store
             Date:
-                - Fri, 22 Aug 2025 16:38:59 GMT
+                - Fri, 22 Aug 2025 16:41:54 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -417,10 +417,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 6d941e75-c6da-4a10-674a-7b908b0434c0
+                - bfceddbd-71db-42a1-4496-c0c625e33616
         status: 204 No Content
         code: 204
-        duration: 612.232209ms
+        duration: 579.067208ms
     - id: 8
       request:
         proto: HTTP/1.1
@@ -460,7 +460,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Fri, 22 Aug 2025 16:38:59 GMT
+                - Fri, 22 Aug 2025 16:41:54 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -470,10 +470,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 9bb9a828-a6a3-4463-63cc-29984bb3331d
+                - cbf1797d-6b37-479e-70e5-c8bdd461be39
         status: 200 OK
         code: 200
-        duration: 329.178375ms
+        duration: 277.904209ms
     - id: 9
       request:
         proto: HTTP/1.1
@@ -505,14 +505,14 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"description":"Initial description","displayName":"Initial Display Name","tunnel":{"state":"Connected","connectedSinceTimeStamp":1755880737043,"connections":0,"applicationConnections":[],"serviceChannels":[],"subaccountCertificate":{"notAfterTimeStamp": 1111111111111,"notBeforeTimeStamp": 1111111111111,"subjectDN": "CN=redacted,L=redacted,OU=redacted,OU=redacted,O=redacted,C=redacted","issuer": "CN=redacted,OU=SAP Cloud Platform Clients,O=redacted,L=redacted,C=redacted","serialNumber": "aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa"},"user":"cloud-user@example.com"},"_links":{"ABAPCloud-channels":{"href": "https://redacted.url/path"},"HANA-channels":{"href": "https://redacted.url/path"},"systemMappings":{"href": "https://redacted.url/path"},"self":{"href": "https://redacted.url/path"},"K8S-channels":{"href": "https://redacted.url/path"},"validity":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"},"VirtualMachine-channels":{"href": "https://redacted.url/path"},"domainMappings":{"href": "https://redacted.url/path"}},"regionHost":"cf.eu12.hana.ondemand.com","subaccount":"4916a705-273c-45a6-a2f0-08c234c7a23d","locationID":""}'
+        body: '{"description":"Testing tunnel connected","displayName":"terraform-cloud-connector-subaccount-87pt0qgr","tunnel":{"state":"Connected","connectedSinceTimeStamp":1755880911916,"connections":0,"applicationConnections":[],"serviceChannels":[],"subaccountCertificate":{"notAfterTimeStamp": 1111111111111,"notBeforeTimeStamp": 1111111111111,"subjectDN": "CN=redacted,L=redacted,OU=redacted,OU=redacted,O=redacted,C=redacted","issuer": "CN=redacted,OU=SAP Cloud Platform Clients,O=redacted,L=redacted,C=redacted","serialNumber": "aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa"},"user":"cloud-user@example.com"},"_links":{"ABAPCloud-channels":{"href": "https://redacted.url/path"},"HANA-channels":{"href": "https://redacted.url/path"},"systemMappings":{"href": "https://redacted.url/path"},"self":{"href": "https://redacted.url/path"},"K8S-channels":{"href": "https://redacted.url/path"},"validity":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"},"VirtualMachine-channels":{"href": "https://redacted.url/path"},"domainMappings":{"href": "https://redacted.url/path"}},"regionHost":"cf.eu12.hana.ondemand.com","subaccount":"4916a705-273c-45a6-a2f0-08c234c7a23d","locationID":""}'
         headers:
             Cache-Control:
                 - no-store
             Content-Type:
                 - application/json
             Date:
-                - Fri, 22 Aug 2025 16:38:59 GMT
+                - Fri, 22 Aug 2025 16:41:54 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -524,10 +524,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - bf36a292-2450-429c-4d0a-9e7818f93d5b
+                - 2ab5ff9c-4cd2-45c5-4720-6fa4f583e5d1
         status: 200 OK
         code: 200
-        duration: 360.7875ms
+        duration: 302.703709ms
     - id: 10
       request:
         proto: HTTP/1.1
@@ -563,7 +563,7 @@ interactions:
             Cache-Control:
                 - no-store
             Date:
-                - Fri, 22 Aug 2025 16:39:00 GMT
+                - Fri, 22 Aug 2025 16:41:55 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -573,10 +573,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - bf8ac447-df08-4374-412c-780495b48be7
+                - 1e376e28-81a9-45b5-77e6-045efef61433
         status: 204 No Content
         code: 204
-        duration: 602.014042ms
+        duration: 576.568542ms
     - id: 11
       request:
         proto: HTTP/1.1
@@ -616,7 +616,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Fri, 22 Aug 2025 16:39:00 GMT
+                - Fri, 22 Aug 2025 16:41:55 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -626,22 +626,22 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 556eb97d-bded-44fd-5856-68ddca74b78e
+                - 82e01e2f-ff72-4187-7005-0aab76001503
         status: 200 OK
         code: 200
-        duration: 306.831042ms
+        duration: 273.417625ms
     - id: 12
       request:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
-        content_length: 0
+        content_length: 78
         transfer_encoding: []
         trailer: {}
         host: https://redacted.instance.url
         remote_addr: ""
         request_uri: ""
-        body: ""
+        body: '{"description":"Testing tunnel disconnected","displayName":"","locationID":""}'
         form: {}
         headers:
             Accept:
@@ -650,26 +650,76 @@ interactions:
                 - redacted
             Content-Type:
                 - application/json
-        url: https://redacted.instance.url/api/v1/connector/version
-        method: GET
+        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/4916a705-273c-45a6-a2f0-08c234c7a23d
+        method: PUT
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding:
+            - chunked
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"description":"Testing tunnel disconnected","displayName":"4916a705-273c-45a6-a2f0-08c234c7a23d","tunnel":{"state":"Connected","connectedSinceTimeStamp":1755880911916,"connections":0,"applicationConnections":[],"serviceChannels":[],"subaccountCertificate":{"notAfterTimeStamp": 1111111111111,"notBeforeTimeStamp": 1111111111111,"subjectDN": "CN=redacted,L=redacted,OU=redacted,OU=redacted,O=redacted,C=redacted","issuer": "CN=redacted,OU=SAP Cloud Platform Clients,O=redacted,L=redacted,C=redacted","serialNumber": "aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa"},"user":"cloud-user@example.com"},"_links":{"ABAPCloud-channels":{"href": "https://redacted.url/path"},"HANA-channels":{"href": "https://redacted.url/path"},"systemMappings":{"href": "https://redacted.url/path"},"self":{"href": "https://redacted.url/path"},"K8S-channels":{"href": "https://redacted.url/path"},"validity":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"},"VirtualMachine-channels":{"href": "https://redacted.url/path"},"domainMappings":{"href": "https://redacted.url/path"}},"regionHost":"cf.eu12.hana.ondemand.com","subaccount":"4916a705-273c-45a6-a2f0-08c234c7a23d","locationID":""}'
+        headers:
+            Cache-Control:
+                - no-store
+            Content-Type:
+                - application/json
+            Date:
+                - Fri, 22 Aug 2025 16:41:56 GMT
+            Server:
+                - nginx/1.27.4
+            Set-Cookie:
+                - redacted
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            Vary:
+                - accept-encoding
+            X-Csrf-Token:
+                - redacted
+            X-Vcap-Request-Id:
+                - 64262c0c-759e-406d-55f9-eb44ba9b23cc
+        status: 200 OK
+        code: 200
+        duration: 383.487459ms
+    - id: 13
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 19
+        transfer_encoding: []
+        trailer: {}
+        host: https://redacted.instance.url
+        remote_addr: ""
+        request_uri: ""
+        body: '{"connected":false}'
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/json
+        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/4916a705-273c-45a6-a2f0-08c234c7a23d/state
+        method: PUT
       response:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
         transfer_encoding: []
         trailer: {}
-        content_length: 20
+        content_length: 0
         uncompressed: false
-        body: '{"version":"2.18.1"}'
+        body: ""
         headers:
             Cache-Control:
-                - max-age=3600
-            Content-Length:
-                - "20"
-            Content-Type:
-                - application/json
+                - no-store
             Date:
-                - Fri, 22 Aug 2025 16:39:01 GMT
+                - Fri, 22 Aug 2025 16:41:56 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -679,11 +729,11 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 29652461-73e1-4a1b-44e2-e5c13ed3da3c
-        status: 200 OK
-        code: 200
-        duration: 278.153708ms
-    - id: 13
+                - 1c5c8eb0-7f46-4762-7a1a-12f69169290e
+        status: 204 No Content
+        code: 204
+        duration: 344.497167ms
+    - id: 14
       request:
         proto: HTTP/1.1
         proto_major: 1
@@ -714,14 +764,14 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"description":"Initial description","displayName":"Initial Display Name","tunnel":{"state":"Connected","connectedSinceTimeStamp":1755880737043,"connections":0,"applicationConnections":[],"serviceChannels":[],"subaccountCertificate":{"notAfterTimeStamp": 1111111111111,"notBeforeTimeStamp": 1111111111111,"subjectDN": "CN=redacted,L=redacted,OU=redacted,OU=redacted,O=redacted,C=redacted","issuer": "CN=redacted,OU=SAP Cloud Platform Clients,O=redacted,L=redacted,C=redacted","serialNumber": "aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa"},"user":"cloud-user@example.com"},"_links":{"ABAPCloud-channels":{"href": "https://redacted.url/path"},"HANA-channels":{"href": "https://redacted.url/path"},"systemMappings":{"href": "https://redacted.url/path"},"self":{"href": "https://redacted.url/path"},"K8S-channels":{"href": "https://redacted.url/path"},"validity":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"},"VirtualMachine-channels":{"href": "https://redacted.url/path"},"domainMappings":{"href": "https://redacted.url/path"}},"regionHost":"cf.eu12.hana.ondemand.com","subaccount":"4916a705-273c-45a6-a2f0-08c234c7a23d","locationID":""}'
+        body: '{"description":"Testing tunnel disconnected","displayName":"4916a705-273c-45a6-a2f0-08c234c7a23d","tunnel":{"state":"Disconnected","connectedSinceTimeStamp":0,"connections":0,"applicationConnections":[],"serviceChannels":[],"subaccountCertificate":{"notAfterTimeStamp": 1111111111111,"notBeforeTimeStamp": 1111111111111,"subjectDN": "CN=redacted,L=redacted,OU=redacted,OU=redacted,O=redacted,C=redacted","issuer": "CN=redacted,OU=SAP Cloud Platform Clients,O=redacted,L=redacted,C=redacted","serialNumber": "aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa"},"user":"cloud-user@example.com"},"_links":{"ABAPCloud-channels":{"href": "https://redacted.url/path"},"HANA-channels":{"href": "https://redacted.url/path"},"systemMappings":{"href": "https://redacted.url/path"},"self":{"href": "https://redacted.url/path"},"K8S-channels":{"href": "https://redacted.url/path"},"validity":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"},"VirtualMachine-channels":{"href": "https://redacted.url/path"},"domainMappings":{"href": "https://redacted.url/path"}},"regionHost":"cf.eu12.hana.ondemand.com","subaccount":"4916a705-273c-45a6-a2f0-08c234c7a23d","locationID":""}'
         headers:
             Cache-Control:
                 - no-store
             Content-Type:
                 - application/json
             Date:
-                - Fri, 22 Aug 2025 16:39:01 GMT
+                - Fri, 22 Aug 2025 16:41:56 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -733,59 +783,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 53fa1576-d3f2-4691-5b93-d57c19e0c28b
+                - 51b3a470-da5c-4f50-6b49-d61352707c9c
         status: 200 OK
         code: 200
-        duration: 312.282417ms
-    - id: 14
-      request:
-        proto: HTTP/1.1
-        proto_major: 1
-        proto_minor: 1
-        content_length: 4
-        transfer_encoding: []
-        trailer: {}
-        host: https://redacted.instance.url
-        remote_addr: ""
-        request_uri: ""
-        body: "null"
-        form: {}
-        headers:
-            Accept:
-                - '*/*'
-            Authorization:
-                - redacted
-            Content-Type:
-                - application/json
-        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/4916a705-273c-45a6-a2f0-08c234c7a23d/trust
-        method: POST
-      response:
-        proto: HTTP/1.1
-        proto_major: 1
-        proto_minor: 1
-        transfer_encoding: []
-        trailer: {}
-        content_length: 0
-        uncompressed: false
-        body: ""
-        headers:
-            Cache-Control:
-                - no-store
-            Date:
-                - Fri, 22 Aug 2025 16:39:02 GMT
-            Server:
-                - nginx/1.27.4
-            Set-Cookie:
-                - redacted
-            Strict-Transport-Security:
-                - max-age=31536000; includeSubDomains; preload;
-            X-Csrf-Token:
-                - redacted
-            X-Vcap-Request-Id:
-                - a3fbe84f-7bef-4d6d-4f0b-2106657525c0
-        status: 204 No Content
-        code: 204
-        duration: 674.176625ms
+        duration: 286.860125ms
     - id: 15
       request:
         proto: HTTP/1.1
@@ -825,7 +826,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Fri, 22 Aug 2025 16:39:02 GMT
+                - Fri, 22 Aug 2025 16:41:56 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -835,22 +836,75 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 1bce17ab-fbe1-43a0-7353-a01dbb30799a
+                - 5aa6ad83-d543-4a49-70e4-509bf2b54a71
         status: 200 OK
         code: 200
-        duration: 281.123709ms
+        duration: 277.174834ms
     - id: 16
       request:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
-        content_length: 90
+        content_length: 0
         transfer_encoding: []
         trailer: {}
         host: https://redacted.instance.url
         remote_addr: ""
         request_uri: ""
-        body: '{"description":"Updated description","displayName":"Updated Display Name","locationID":""}'
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/json
+        url: https://redacted.instance.url/api/v1/connector/version
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 20
+        uncompressed: false
+        body: '{"version":"2.18.1"}'
+        headers:
+            Cache-Control:
+                - max-age=3600
+            Content-Length:
+                - "20"
+            Content-Type:
+                - application/json
+            Date:
+                - Fri, 22 Aug 2025 16:41:57 GMT
+            Server:
+                - nginx/1.27.4
+            Set-Cookie:
+                - redacted
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            X-Csrf-Token:
+                - redacted
+            X-Vcap-Request-Id:
+                - 4d62d079-67ae-4d13-4e8e-ca38e778234c
+        status: 200 OK
+        code: 200
+        duration: 271.192667ms
+    - id: 17
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: https://redacted.instance.url
+        remote_addr: ""
+        request_uri: ""
+        body: ""
         form: {}
         headers:
             Accept:
@@ -860,7 +914,7 @@ interactions:
             Content-Type:
                 - application/json
         url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/4916a705-273c-45a6-a2f0-08c234c7a23d
-        method: PUT
+        method: GET
       response:
         proto: HTTP/1.1
         proto_major: 1
@@ -870,14 +924,14 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"description":"Updated description","displayName":"Updated Display Name","tunnel":{"state":"Connected","connectedSinceTimeStamp":1755880737043,"connections":0,"applicationConnections":[],"serviceChannels":[],"subaccountCertificate":{"notAfterTimeStamp": 1111111111111,"notBeforeTimeStamp": 1111111111111,"subjectDN": "CN=redacted,L=redacted,OU=redacted,OU=redacted,O=redacted,C=redacted","issuer": "CN=redacted,OU=SAP Cloud Platform Clients,O=redacted,L=redacted,C=redacted","serialNumber": "aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa"},"user":"cloud-user@example.com"},"_links":{"ABAPCloud-channels":{"href": "https://redacted.url/path"},"HANA-channels":{"href": "https://redacted.url/path"},"systemMappings":{"href": "https://redacted.url/path"},"self":{"href": "https://redacted.url/path"},"K8S-channels":{"href": "https://redacted.url/path"},"validity":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"},"VirtualMachine-channels":{"href": "https://redacted.url/path"},"domainMappings":{"href": "https://redacted.url/path"}},"regionHost":"cf.eu12.hana.ondemand.com","subaccount":"4916a705-273c-45a6-a2f0-08c234c7a23d","locationID":""}'
+        body: '{"description":"Testing tunnel disconnected","displayName":"4916a705-273c-45a6-a2f0-08c234c7a23d","tunnel":{"state":"Disconnected","connectedSinceTimeStamp":0,"connections":0,"applicationConnections":[],"serviceChannels":[],"subaccountCertificate":{"notAfterTimeStamp": 1111111111111,"notBeforeTimeStamp": 1111111111111,"subjectDN": "CN=redacted,L=redacted,OU=redacted,OU=redacted,O=redacted,C=redacted","issuer": "CN=redacted,OU=SAP Cloud Platform Clients,O=redacted,L=redacted,C=redacted","serialNumber": "aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa"},"user":"cloud-user@example.com"},"_links":{"ABAPCloud-channels":{"href": "https://redacted.url/path"},"HANA-channels":{"href": "https://redacted.url/path"},"systemMappings":{"href": "https://redacted.url/path"},"self":{"href": "https://redacted.url/path"},"K8S-channels":{"href": "https://redacted.url/path"},"validity":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"},"VirtualMachine-channels":{"href": "https://redacted.url/path"},"domainMappings":{"href": "https://redacted.url/path"}},"regionHost":"cf.eu12.hana.ondemand.com","subaccount":"4916a705-273c-45a6-a2f0-08c234c7a23d","locationID":""}'
         headers:
             Cache-Control:
                 - no-store
             Content-Type:
                 - application/json
             Date:
-                - Fri, 22 Aug 2025 16:39:03 GMT
+                - Fri, 22 Aug 2025 16:41:57 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -889,59 +943,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 984f6175-90fd-4c27-40ed-2042efcf55d6
+                - 47822ee2-4d44-4db9-4f34-295b842b5e99
         status: 200 OK
         code: 200
-        duration: 417.305709ms
-    - id: 17
-      request:
-        proto: HTTP/1.1
-        proto_major: 1
-        proto_minor: 1
-        content_length: 4
-        transfer_encoding: []
-        trailer: {}
-        host: https://redacted.instance.url
-        remote_addr: ""
-        request_uri: ""
-        body: "null"
-        form: {}
-        headers:
-            Accept:
-                - '*/*'
-            Authorization:
-                - redacted
-            Content-Type:
-                - application/json
-        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/4916a705-273c-45a6-a2f0-08c234c7a23d/trust
-        method: POST
-      response:
-        proto: HTTP/1.1
-        proto_major: 1
-        proto_minor: 1
-        transfer_encoding: []
-        trailer: {}
-        content_length: 0
-        uncompressed: false
-        body: ""
-        headers:
-            Cache-Control:
-                - no-store
-            Date:
-                - Fri, 22 Aug 2025 16:39:03 GMT
-            Server:
-                - nginx/1.27.4
-            Set-Cookie:
-                - redacted
-            Strict-Transport-Security:
-                - max-age=31536000; includeSubDomains; preload;
-            X-Csrf-Token:
-                - redacted
-            X-Vcap-Request-Id:
-                - f0ac5a74-79a8-4e3f-62ae-a1893a42b079
-        status: 204 No Content
-        code: 204
-        duration: 583.246417ms
+        duration: 297.973ms
     - id: 18
       request:
         proto: HTTP/1.1
@@ -981,7 +986,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Fri, 22 Aug 2025 16:39:04 GMT
+                - Fri, 22 Aug 2025 16:41:57 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -991,11 +996,65 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 52bb0786-1750-4c2f-7686-80bedfc1dfae
+                - cb94ada9-c5a2-4de0-5ed7-5bcc3e6de249
         status: 200 OK
         code: 200
-        duration: 279.620625ms
+        duration: 267.06975ms
     - id: 19
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: https://redacted.instance.url
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/json
+        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/4916a705-273c-45a6-a2f0-08c234c7a23d
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding:
+            - chunked
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"description":"Testing tunnel disconnected","displayName":"4916a705-273c-45a6-a2f0-08c234c7a23d","tunnel":{"state":"Disconnected","connectedSinceTimeStamp":0,"connections":0,"applicationConnections":[],"serviceChannels":[],"subaccountCertificate":{"notAfterTimeStamp": 1111111111111,"notBeforeTimeStamp": 1111111111111,"subjectDN": "CN=redacted,L=redacted,OU=redacted,OU=redacted,O=redacted,C=redacted","issuer": "CN=redacted,OU=SAP Cloud Platform Clients,O=redacted,L=redacted,C=redacted","serialNumber": "aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa"},"user":"cloud-user@example.com"},"_links":{"ABAPCloud-channels":{"href": "https://redacted.url/path"},"HANA-channels":{"href": "https://redacted.url/path"},"systemMappings":{"href": "https://redacted.url/path"},"self":{"href": "https://redacted.url/path"},"K8S-channels":{"href": "https://redacted.url/path"},"validity":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"},"VirtualMachine-channels":{"href": "https://redacted.url/path"},"domainMappings":{"href": "https://redacted.url/path"}},"regionHost":"cf.eu12.hana.ondemand.com","subaccount":"4916a705-273c-45a6-a2f0-08c234c7a23d","locationID":""}'
+        headers:
+            Cache-Control:
+                - no-store
+            Content-Type:
+                - application/json
+            Date:
+                - Fri, 22 Aug 2025 16:41:58 GMT
+            Server:
+                - nginx/1.27.4
+            Set-Cookie:
+                - redacted
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            Vary:
+                - accept-encoding
+            X-Csrf-Token:
+                - redacted
+            X-Vcap-Request-Id:
+                - 12e29be8-c456-4eb5-773c-a1f441fcde7f
+        status: 200 OK
+        code: 200
+        duration: 290.322292ms
+    - id: 20
       request:
         proto: HTTP/1.1
         proto_major: 1
@@ -1034,7 +1093,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Fri, 22 Aug 2025 16:39:04 GMT
+                - Fri, 22 Aug 2025 16:41:58 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -1044,11 +1103,114 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 31ca1c52-b008-4c5d-4eaa-602ef66ed303
+                - 6dd8af4f-aeab-4377-46f5-7acef4e13193
         status: 200 OK
         code: 200
-        duration: 360.878ms
-    - id: 20
+        duration: 267.70975ms
+    - id: 21
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 77
+        transfer_encoding: []
+        trailer: {}
+        host: https://redacted.instance.url
+        remote_addr: ""
+        request_uri: ""
+        body: '{"description":"Testing tunnel reconnected","displayName":"","locationID":""}'
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/json
+        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/4916a705-273c-45a6-a2f0-08c234c7a23d
+        method: PUT
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding:
+            - chunked
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"description":"Testing tunnel reconnected","displayName":"4916a705-273c-45a6-a2f0-08c234c7a23d","tunnel":{"state":"Disconnected","connectedSinceTimeStamp":0,"connections":0,"applicationConnections":[],"serviceChannels":[],"subaccountCertificate":{"notAfterTimeStamp": 1111111111111,"notBeforeTimeStamp": 1111111111111,"subjectDN": "CN=redacted,L=redacted,OU=redacted,OU=redacted,O=redacted,C=redacted","issuer": "CN=redacted,OU=SAP Cloud Platform Clients,O=redacted,L=redacted,C=redacted","serialNumber": "aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa"},"user":"cloud-user@example.com"},"_links":{"ABAPCloud-channels":{"href": "https://redacted.url/path"},"HANA-channels":{"href": "https://redacted.url/path"},"systemMappings":{"href": "https://redacted.url/path"},"self":{"href": "https://redacted.url/path"},"K8S-channels":{"href": "https://redacted.url/path"},"validity":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"},"VirtualMachine-channels":{"href": "https://redacted.url/path"},"domainMappings":{"href": "https://redacted.url/path"}},"regionHost":"cf.eu12.hana.ondemand.com","subaccount":"4916a705-273c-45a6-a2f0-08c234c7a23d","locationID":""}'
+        headers:
+            Cache-Control:
+                - no-store
+            Content-Type:
+                - application/json
+            Date:
+                - Fri, 22 Aug 2025 16:41:59 GMT
+            Server:
+                - nginx/1.27.4
+            Set-Cookie:
+                - redacted
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            Vary:
+                - accept-encoding
+            X-Csrf-Token:
+                - redacted
+            X-Vcap-Request-Id:
+                - 0d823dce-15af-4c29-76e3-40d28f432167
+        status: 200 OK
+        code: 200
+        duration: 401.167875ms
+    - id: 22
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 18
+        transfer_encoding: []
+        trailer: {}
+        host: https://redacted.instance.url
+        remote_addr: ""
+        request_uri: ""
+        body: '{"connected":true}'
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/json
+        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/4916a705-273c-45a6-a2f0-08c234c7a23d/state
+        method: PUT
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 0
+        uncompressed: false
+        body: ""
+        headers:
+            Cache-Control:
+                - no-store
+            Date:
+                - Fri, 22 Aug 2025 16:41:59 GMT
+            Server:
+                - nginx/1.27.4
+            Set-Cookie:
+                - redacted
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            X-Csrf-Token:
+                - redacted
+            X-Vcap-Request-Id:
+                - 0b49d877-8efe-49ad-6297-d125e2bafc04
+        status: 204 No Content
+        code: 204
+        duration: 641.166667ms
+    - id: 23
       request:
         proto: HTTP/1.1
         proto_major: 1
@@ -1079,14 +1241,14 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"description":"Updated description","displayName":"Updated Display Name","tunnel":{"state":"Connected","connectedSinceTimeStamp":1755880737043,"connections":0,"applicationConnections":[],"serviceChannels":[],"subaccountCertificate":{"notAfterTimeStamp": 1111111111111,"notBeforeTimeStamp": 1111111111111,"subjectDN": "CN=redacted,L=redacted,OU=redacted,OU=redacted,O=redacted,C=redacted","issuer": "CN=redacted,OU=SAP Cloud Platform Clients,O=redacted,L=redacted,C=redacted","serialNumber": "aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa"},"user":"cloud-user@example.com"},"_links":{"ABAPCloud-channels":{"href": "https://redacted.url/path"},"HANA-channels":{"href": "https://redacted.url/path"},"systemMappings":{"href": "https://redacted.url/path"},"self":{"href": "https://redacted.url/path"},"K8S-channels":{"href": "https://redacted.url/path"},"validity":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"},"VirtualMachine-channels":{"href": "https://redacted.url/path"},"domainMappings":{"href": "https://redacted.url/path"}},"regionHost":"cf.eu12.hana.ondemand.com","subaccount":"4916a705-273c-45a6-a2f0-08c234c7a23d","locationID":""}'
+        body: '{"description":"Testing tunnel reconnected","displayName":"4916a705-273c-45a6-a2f0-08c234c7a23d","tunnel":{"state":"Connected","connectedSinceTimeStamp":1755880919661,"connections":0,"applicationConnections":[],"serviceChannels":[],"subaccountCertificate":{"notAfterTimeStamp": 1111111111111,"notBeforeTimeStamp": 1111111111111,"subjectDN": "CN=redacted,L=redacted,OU=redacted,OU=redacted,O=redacted,C=redacted","issuer": "CN=redacted,OU=SAP Cloud Platform Clients,O=redacted,L=redacted,C=redacted","serialNumber": "aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa"},"user":"cloud-user@example.com"},"_links":{"ABAPCloud-channels":{"href": "https://redacted.url/path"},"HANA-channels":{"href": "https://redacted.url/path"},"systemMappings":{"href": "https://redacted.url/path"},"self":{"href": "https://redacted.url/path"},"K8S-channels":{"href": "https://redacted.url/path"},"validity":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"},"VirtualMachine-channels":{"href": "https://redacted.url/path"},"domainMappings":{"href": "https://redacted.url/path"}},"regionHost":"cf.eu12.hana.ondemand.com","subaccount":"4916a705-273c-45a6-a2f0-08c234c7a23d","locationID":""}'
         headers:
             Cache-Control:
                 - no-store
             Content-Type:
                 - application/json
             Date:
-                - Fri, 22 Aug 2025 16:39:04 GMT
+                - Fri, 22 Aug 2025 16:41:59 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -1098,11 +1260,11 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 0183db54-889c-4978-492c-f03365c7c530
+                - 5e575684-d569-4e35-55c8-7a6b6c2df2fd
         status: 200 OK
         code: 200
-        duration: 303.469583ms
-    - id: 21
+        duration: 293.427292ms
+    - id: 24
       request:
         proto: HTTP/1.1
         proto_major: 1
@@ -1137,7 +1299,7 @@ interactions:
             Cache-Control:
                 - no-store
             Date:
-                - Fri, 22 Aug 2025 16:39:05 GMT
+                - Fri, 22 Aug 2025 16:42:00 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -1147,11 +1309,11 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - edd5d557-65b2-49eb-5da5-29b9744989ee
+                - c47dc6c2-c8f4-48ae-77e6-c92649d5ecd9
         status: 204 No Content
         code: 204
-        duration: 573.622125ms
-    - id: 22
+        duration: 547.398917ms
+    - id: 25
       request:
         proto: HTTP/1.1
         proto_major: 1
@@ -1190,7 +1352,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Fri, 22 Aug 2025 16:39:05 GMT
+                - Fri, 22 Aug 2025 16:42:00 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -1200,11 +1362,11 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - b6b18488-7c72-4c17-451c-44722951c74c
+                - 29c62176-85cc-4ffa-768f-e063a2a734a8
         status: 200 OK
         code: 200
-        duration: 272.422292ms
-    - id: 23
+        duration: 268.247209ms
+    - id: 26
       request:
         proto: HTTP/1.1
         proto_major: 1
@@ -1243,7 +1405,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Fri, 22 Aug 2025 16:39:05 GMT
+                - Fri, 22 Aug 2025 16:42:01 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -1253,11 +1415,220 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - b49c9341-a759-453e-563d-e7344c9b888c
+                - 3a4145a8-4b4a-4cfc-6cb7-70811ecd7502
         status: 200 OK
         code: 200
-        duration: 385.47175ms
-    - id: 24
+        duration: 267.266166ms
+    - id: 27
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: https://redacted.instance.url
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/json
+        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/4916a705-273c-45a6-a2f0-08c234c7a23d
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding:
+            - chunked
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '{"description":"Testing tunnel reconnected","displayName":"4916a705-273c-45a6-a2f0-08c234c7a23d","tunnel":{"state":"Connected","connectedSinceTimeStamp":1755880919661,"connections":0,"applicationConnections":[],"serviceChannels":[],"subaccountCertificate":{"notAfterTimeStamp": 1111111111111,"notBeforeTimeStamp": 1111111111111,"subjectDN": "CN=redacted,L=redacted,OU=redacted,OU=redacted,O=redacted,C=redacted","issuer": "CN=redacted,OU=SAP Cloud Platform Clients,O=redacted,L=redacted,C=redacted","serialNumber": "aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa"},"user":"cloud-user@example.com"},"_links":{"ABAPCloud-channels":{"href": "https://redacted.url/path"},"HANA-channels":{"href": "https://redacted.url/path"},"systemMappings":{"href": "https://redacted.url/path"},"self":{"href": "https://redacted.url/path"},"K8S-channels":{"href": "https://redacted.url/path"},"validity":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"},"VirtualMachine-channels":{"href": "https://redacted.url/path"},"domainMappings":{"href": "https://redacted.url/path"}},"regionHost":"cf.eu12.hana.ondemand.com","subaccount":"4916a705-273c-45a6-a2f0-08c234c7a23d","locationID":""}'
+        headers:
+            Cache-Control:
+                - no-store
+            Content-Type:
+                - application/json
+            Date:
+                - Fri, 22 Aug 2025 16:42:01 GMT
+            Server:
+                - nginx/1.27.4
+            Set-Cookie:
+                - redacted
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            Vary:
+                - accept-encoding
+            X-Csrf-Token:
+                - redacted
+            X-Vcap-Request-Id:
+                - 05bfde43-d30c-4409-6f01-427bdec57dd8
+        status: 200 OK
+        code: 200
+        duration: 300.512667ms
+    - id: 28
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 4
+        transfer_encoding: []
+        trailer: {}
+        host: https://redacted.instance.url
+        remote_addr: ""
+        request_uri: ""
+        body: "null"
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/json
+        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/4916a705-273c-45a6-a2f0-08c234c7a23d/trust
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 0
+        uncompressed: false
+        body: ""
+        headers:
+            Cache-Control:
+                - no-store
+            Date:
+                - Fri, 22 Aug 2025 16:42:02 GMT
+            Server:
+                - nginx/1.27.4
+            Set-Cookie:
+                - redacted
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            X-Csrf-Token:
+                - redacted
+            X-Vcap-Request-Id:
+                - b6f2f17f-4b80-4c12-6e13-12443b6de3d8
+        status: 204 No Content
+        code: 204
+        duration: 545.910958ms
+    - id: 29
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: https://redacted.instance.url
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/json
+        url: https://redacted.instance.url/api/v1/connector/version
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 20
+        uncompressed: false
+        body: '{"version":"2.18.1"}'
+        headers:
+            Cache-Control:
+                - max-age=3600
+            Content-Length:
+                - "20"
+            Content-Type:
+                - application/json
+            Date:
+                - Fri, 22 Aug 2025 16:42:02 GMT
+            Server:
+                - nginx/1.27.4
+            Set-Cookie:
+                - redacted
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            X-Csrf-Token:
+                - redacted
+            X-Vcap-Request-Id:
+                - f34b7909-0ffd-4f53-6af7-307037514f8a
+        status: 200 OK
+        code: 200
+        duration: 266.531917ms
+    - id: 30
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: https://redacted.instance.url
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/json
+        url: https://redacted.instance.url/api/v1/connector/version
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 20
+        uncompressed: false
+        body: '{"version":"2.18.1"}'
+        headers:
+            Cache-Control:
+                - max-age=3600
+            Content-Length:
+                - "20"
+            Content-Type:
+                - application/json
+            Date:
+                - Fri, 22 Aug 2025 16:42:02 GMT
+            Server:
+                - nginx/1.27.4
+            Set-Cookie:
+                - redacted
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            X-Csrf-Token:
+                - redacted
+            X-Vcap-Request-Id:
+                - 2279124e-7be4-4578-40df-9166eb47900a
+        status: 200 OK
+        code: 200
+        duration: 273.510375ms
+    - id: 31
       request:
         proto: HTTP/1.1
         proto_major: 1
@@ -1292,7 +1663,7 @@ interactions:
             Cache-Control:
                 - no-store
             Date:
-                - Fri, 22 Aug 2025 16:39:06 GMT
+                - Fri, 22 Aug 2025 16:42:03 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -1302,7 +1673,7 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - a6d90cdb-fade-4509-5849-6b93b285f221
+                - c9f3d6d8-3b12-4673-77bd-7e65f8959fee
         status: 204 No Content
         code: 204
-        duration: 816.238084ms
+        duration: 708.3805ms

@@ -59,6 +59,7 @@ func TestResourceSubaccount(t *testing.T) {
 					ImportStateVerifyIgnore: []string{
 						"cloud_user",
 						"cloud_password",
+						"connected",
 					},
 				},
 				{
@@ -106,6 +107,44 @@ func TestResourceSubaccount(t *testing.T) {
 					Check: resource.ComposeAggregateTestCheckFunc(
 						resource.TestCheckResourceAttr("scc_subaccount.test", "description", "Updated description"),
 						resource.TestCheckResourceAttr("scc_subaccount.test", "display_name", "Updated Display Name"),
+					),
+				},
+			},
+		})
+	})
+
+	t.Run("update path - tunnel state change", func(t *testing.T) {
+		rec, user := setupVCR(t, "fixtures/resource_subaccount_update_tunnel")
+		if user.CloudUsername == "" || user.CloudPassword == "" {
+			t.Fatalf("Missing TF_VAR_cloud_user or TF_VAR_cloud_password for recording test fixtures")
+		}
+		defer stopQuietly(rec)
+
+		resource.Test(t, resource.TestCase{
+			IsUnitTest:               true,
+			ProtoV6ProviderFactories: getTestProviders(rec.GetDefaultClient()),
+			Steps: []resource.TestStep{
+				{
+					Config: providerConfig(user) + ResourceSubaccountWithTunnelState("test", regionHost, subaccountId, user.CloudUsername, user.CloudPassword, "Testing tunnel connected", true),
+					Check: resource.ComposeAggregateTestCheckFunc(
+						resource.TestCheckResourceAttr("scc_subaccount.test", "tunnel.state", "Connected"),
+					),
+				},
+				// Update with mismatched configuration should throw error
+				{
+					Config:      providerConfig(user) + ResourceSubaccountWithTunnelState("test", "cf.us10.hana.ondemand.com", subaccountId, user.CloudUsername, user.CloudPassword, "Testing tunnel disconnected", false),
+					ExpectError: regexp.MustCompile(`(?is)failed to update the cloud connector subaccount due to mismatched\s+configuration values`),
+				},
+				{
+					Config: providerConfig(user) + ResourceSubaccountWithTunnelState("test", regionHost, subaccountId, user.CloudUsername, user.CloudPassword, "Testing tunnel disconnected", false),
+					Check: resource.ComposeAggregateTestCheckFunc(
+						resource.TestCheckResourceAttr("scc_subaccount.test", "tunnel.state", "Disconnected"),
+					),
+				},
+				{
+					Config: providerConfig(user) + ResourceSubaccountWithTunnelState("test", regionHost, subaccountId, user.CloudUsername, user.CloudPassword, "Testing tunnel reconnected", true),
+					Check: resource.ComposeAggregateTestCheckFunc(
+						resource.TestCheckResourceAttr("scc_subaccount.test", "tunnel.state", "Connected"),
 					),
 				},
 			},
@@ -255,6 +294,19 @@ resource "scc_subaccount" "%s" {
   display_name  = "%s"
 }
 `, datasourceName, regionHost, subaccount, cloudUser, cloudPassword, description, displayName)
+}
+
+func ResourceSubaccountWithTunnelState(datasourceName, regionHost, subaccount, cloudUser, cloudPassword, description string, connected bool) string {
+	return fmt.Sprintf(`
+resource "scc_subaccount" "%s" {
+  region_host    = "%s"
+  subaccount     = "%s"
+  cloud_user     = "%s"
+  cloud_password = "%s"
+  description    = "%s"
+  connected = %t
+}
+`, datasourceName, regionHost, subaccount, cloudUser, cloudPassword, description, connected)
 }
 
 func getImportStateForSubaccount(resourceName string) resource.ImportStateIdFunc {
