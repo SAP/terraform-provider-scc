@@ -194,7 +194,9 @@ func validateResponse(response *http.Response) diag.Diagnostics {
 	}
 
 	bodyBytes, _ := io.ReadAll(response.Body)
-	response.Body.Close()
+	if err := response.Body.Close(); err != nil {
+		diags.AddWarning("Response Body Close Failed", fmt.Sprintf("Failed to close response body: %v", err))
+	}
 	response.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 
 	// Handle 401 Unauthorized explicitly
