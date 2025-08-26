@@ -130,15 +130,15 @@ func (d *SystemMappingResourceDataSource) Read(ctx context.Context, req datasour
 
 	endpoint := endpoints.GetSystemMappingResourceEndpoint(regionHost, subaccount, virtualHost, virtualPort, resourceID)
 
-	err := requestAndUnmarshal(d.client, &respObj, "GET", endpoint, nil, true)
-	if err != nil {
-		resp.Diagnostics.AddError(errMsgFetchSystemMappingResourceFailed, err.Error())
+	diags = requestAndUnmarshal(d.client, &respObj, "GET", endpoint, nil, true)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	responseModel, err := SystemMappingResourceValueFrom(ctx, data, respObj)
-	if err != nil {
-		resp.Diagnostics.AddError(errMsgMapSystemMappingResourceFailed, fmt.Sprintf("%s", err))
+	responseModel, diags := SystemMappingResourceValueFrom(ctx, data, respObj)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 	diags = resp.State.Set(ctx, &responseModel)

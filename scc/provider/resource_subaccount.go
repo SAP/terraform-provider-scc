@@ -242,9 +242,10 @@ func (r *SubaccountResource) Create(ctx context.Context, req resource.CreateRequ
 		"displayName":   plan.DisplayName.ValueString(),
 	}
 
-	err := requestAndUnmarshal(r.client, &respObj, "POST", endpoint, planBody, true)
-	if err != nil {
-		resp.Diagnostics.AddError(errMsgAddSubaccountFailed, err.Error())
+	diags = requestAndUnmarshal(r.client, &respObj, "POST", endpoint, planBody, true)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		// resp.Diagnostics.AddError(errMsgAddSubaccountFailed, fmt.Sprintf("%s", diags))
 		return
 	}
 
@@ -252,7 +253,9 @@ func (r *SubaccountResource) Create(ctx context.Context, req resource.CreateRequ
 
 	if !plan.Connected.IsNull() && !plan.Connected.IsUnknown() {
 		endpoint = endpoints.GetSubaccountEndpoint(regionHost, subaccount)
-		if err := r.updateTunnelState(plan, connectedState, endpoint, &respObj, &resp.Diagnostics); err != nil {
+		diags = r.updateTunnelState(plan, connectedState, endpoint, &respObj)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
 			return
 		}
 	}
@@ -267,15 +270,16 @@ func (r *SubaccountResource) Create(ctx context.Context, req resource.CreateRequ
 
 	if respObj.Tunnel.State == "Connected" {
 		// Trigger trust configuration sync for the subaccount without persisting to Terraform state
-		if err = r.syncTrustConfiguration(regionHost, subaccount, &respObj, &resp.Diagnostics); err != nil {
-			resp.Diagnostics.AddError(errMsgAddSubaccountFailed, err.Error())
+		diags = r.syncTrustConfiguration(regionHost, subaccount, &respObj)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
 			return
 		}
 	}
 
 	responseModel, diags := SubaccountResourceValueFrom(ctx, plan, respObj)
-	if diags.HasError() {
-		resp.Diagnostics.AddError(errMsgMapSubaccountFailed, fmt.Sprintf("%s", diags))
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -299,23 +303,24 @@ func (r *SubaccountResource) Read(ctx context.Context, req resource.ReadRequest,
 	subaccount := state.Subaccount.ValueString()
 	endpoint := endpoints.GetSubaccountEndpoint(regionHost, subaccount)
 
-	err := requestAndUnmarshal(r.client, &respObj, "GET", endpoint, nil, true)
-	if err != nil {
-		resp.Diagnostics.AddError(errMsgFetchSubaccountFailed, err.Error())
+	diags = requestAndUnmarshal(r.client, &respObj, "GET", endpoint, nil, true)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	if respObj.Tunnel.State == "Connected" {
 		// Trigger trust configuration sync for the subaccount without persisting to Terraform state
-		if err = r.syncTrustConfiguration(regionHost, subaccount, &respObj, &resp.Diagnostics); err != nil {
-			resp.Diagnostics.AddError(errMsgAddSubaccountFailed, err.Error())
+		diags = r.syncTrustConfiguration(regionHost, subaccount, &respObj)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
 			return
 		}
 	}
 
 	responseModel, diags := SubaccountResourceValueFrom(ctx, state, respObj)
-	if diags.HasError() {
-		resp.Diagnostics.AddError(errMsgMapSubaccountFailed, fmt.Sprintf("%s", diags))
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -338,8 +343,9 @@ func (r *SubaccountResource) Update(ctx context.Context, req resource.UpdateRequ
 		return
 	}
 
-	if err := validateUpdateInputs(plan, state); err != nil {
-		resp.Diagnostics.AddError(errMsgUpdateSubaccountFailed, err.Error())
+	diags := validateUpdateInputs(plan, state)
+	resp.Diagnostics.Append(diags...)
+	if diags.HasError() {
 		return
 	}
 
@@ -347,22 +353,24 @@ func (r *SubaccountResource) Update(ctx context.Context, req resource.UpdateRequ
 	subaccount := plan.Subaccount.ValueString()
 	endpoint := endpoints.GetSubaccountEndpoint(regionHost, subaccount)
 
-	planBody := map[string]any{
+	updateBody := map[string]any{
 		"locationID":  plan.LocationID.ValueString(),
 		"displayName": plan.DisplayName.ValueString(),
 		"description": plan.Description.ValueString(),
 	}
 
-	err := requestAndUnmarshal(r.client, &respObj, "PUT", endpoint, planBody, true)
-	if err != nil {
-		resp.Diagnostics.AddError(errMsgUpdateSubaccountFailed, err.Error())
+	diags = requestAndUnmarshal(r.client, &respObj, "PUT", endpoint, updateBody, true)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	connectedState := respObj.Tunnel.State == "Connected"
 
 	if !plan.Connected.IsNull() && !plan.Connected.IsUnknown() {
-		if err := r.updateTunnelState(plan, connectedState, endpoint, &respObj, &resp.Diagnostics); err != nil {
+		diags = r.updateTunnelState(plan, connectedState, endpoint, &respObj)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
 			return
 		}
 
@@ -378,14 +386,17 @@ func (r *SubaccountResource) Update(ctx context.Context, req resource.UpdateRequ
 
 	if respObj.Tunnel.State == "Connected" {
 		// Trigger trust configuration sync for the subaccount without persisting to Terraform state
-		if err = r.syncTrustConfiguration(regionHost, subaccount, &respObj, &resp.Diagnostics); err != nil {
-			resp.Diagnostics.AddError(errMsgAddSubaccountFailed, err.Error())
+		diags = r.syncTrustConfiguration(regionHost, subaccount, &respObj)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
 			return
 		}
 	}
 
-	if responseModel, diags := SubaccountResourceValueFrom(ctx, plan, respObj); diags.HasError() {
-		resp.Diagnostics.AddError(errMsgMapSubaccountFailed, fmt.Sprintf("%s", diags))
+	responseModel, diags := SubaccountResourceValueFrom(ctx, plan, respObj)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
 	} else {
 		resp.Diagnostics.Append(resp.State.Set(ctx, responseModel)...)
 	}
@@ -396,47 +407,54 @@ func appendAndCheckErrors(diags *diag.Diagnostics, newDiags diag.Diagnostics) bo
 	return diags.HasError()
 }
 
-func validateUpdateInputs(plan, state SubaccountConfig) error {
+func validateUpdateInputs(plan, state SubaccountConfig) diag.Diagnostics {
+	var diags diag.Diagnostics
 	if plan.RegionHost.ValueString() != state.RegionHost.ValueString() ||
 		plan.Subaccount.ValueString() != state.Subaccount.ValueString() ||
 		plan.CloudUser.ValueString() != state.CloudUser.ValueString() ||
 		plan.CloudPassword.ValueString() != state.CloudPassword.ValueString() {
-		return fmt.Errorf("failed to update the cloud connector subaccount due to mismatched configuration values")
+		diags.AddError(
+			"Update Failed",
+			"failed to update the cloud connector subaccount due to mismatched configuration values",
+		)
+		return diags
 	}
-	return nil
+	return diags
 }
 
-func (r *SubaccountResource) syncTrustConfiguration(regionHost, subaccount string, respObj *apiobjects.SubaccountResource, diagnostics *diag.Diagnostics) error {
+func (r *SubaccountResource) syncTrustConfiguration(regionHost, subaccount string, respObj *apiobjects.SubaccountResource) diag.Diagnostics {
 	endpoint := endpoints.GetSubaccountEndpoint(regionHost, subaccount) + "/trust"
 
-	err := requestAndUnmarshal(r.client, &respObj, "POST", endpoint, nil, false)
-	if err != nil {
-		diagnostics.AddError(errMsgAddSubaccountFailed, err.Error())
-		return err
+	diags := requestAndUnmarshal(r.client, &respObj, "POST", endpoint, nil, false)
+	if diags.HasError() {
+		return diags
 	}
 
-	return nil
+	return diags
 }
 
-func (r *SubaccountResource) updateTunnelState(plan SubaccountConfig, connectedState bool, endpoint string, respObj *apiobjects.SubaccountResource, diagnostics *diag.Diagnostics) error {
+func (r *SubaccountResource) updateTunnelState(plan SubaccountConfig, connectedState bool, endpoint string, respObj *apiobjects.SubaccountResource) diag.Diagnostics {
+	var diags diag.Diagnostics
+	// Check if the desired state is different from the current state
 	desiredState := plan.Connected.ValueBool()
 	if desiredState == connectedState {
-		return nil
+		return diags
 	}
+	// Update the tunnel state
 	patch := map[string]any{"connected": desiredState}
 
-	if err := requestAndUnmarshal(r.client, respObj, "PUT", endpoint+"/state", patch, false); err != nil {
-		diagnostics.AddError(errMsgUpdateSubaccountFailed, err.Error())
-		return err
+	diags = requestAndUnmarshal(r.client, respObj, "PUT", endpoint+"/state", patch, false)
+	if diags.HasError() {
+		return diags
 	}
 
 	// Re-fetch to update tunnel state
-	if err := requestAndUnmarshal(r.client, respObj, "GET", endpoint, nil, true); err != nil {
-		diagnostics.AddError(errMsgUpdateSubaccountFailed, err.Error())
-		return err
+	diags = requestAndUnmarshal(r.client, respObj, "GET", endpoint, nil, true)
+	if diags.HasError() {
+		return diags
 	}
 
-	return nil
+	return diags
 }
 
 func (r *SubaccountResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -452,15 +470,15 @@ func (r *SubaccountResource) Delete(ctx context.Context, req resource.DeleteRequ
 
 	endpoint := endpoints.GetSubaccountEndpoint(regionHost, subaccount)
 
-	err := requestAndUnmarshal(r.client, &respObj, "DELETE", endpoint, nil, false)
-	if err != nil {
-		resp.Diagnostics.AddError(errMsgDeleteSubaccountFailed, err.Error())
+	diags = requestAndUnmarshal(r.client, &respObj, "DELETE", endpoint, nil, false)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	responseModel, diags := SubaccountResourceValueFrom(ctx, state, respObj)
-	if diags.HasError() {
-		resp.Diagnostics.AddError(errMsgMapSubaccountFailed, fmt.Sprintf("%s", diags))
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 

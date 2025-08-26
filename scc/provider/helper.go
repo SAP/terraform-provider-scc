@@ -7,88 +7,99 @@ import (
 	"net/http"
 
 	"github.com/SAP/terraform-provider-scc/internal/api"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 )
 
-func sendGetRequest(client *api.RestApiClient, endpoint string) (*http.Response, error) {
-	response, err := client.GetRequest(endpoint)
-	if err != nil {
-		return nil, fmt.Errorf("failed to send GET request to %s: %v", endpoint, err)
+const (
+	actionCreateRequest = "Create"
+	actionUpdateRequest = "Update"
+)
+
+func sendGetRequest(client *api.RestApiClient, endpoint string) (*http.Response, diag.Diagnostics) {
+	response, diags := client.GetRequest(endpoint)
+	if diags.HasError() {
+		return nil, diags
 	}
 
-	return response, nil
+	return response, diags
 }
 
-func sendPostOrPutRequest(client *api.RestApiClient, planBody map[string]any, endpoint string, action string) (*http.Response, error) {
+func sendPostOrPutRequest(client *api.RestApiClient, planBody map[string]any, endpoint string, action string) (*http.Response, diag.Diagnostics) {
 	var response *http.Response
+	var diags diag.Diagnostics
 	requestByteBody, err := json.Marshal(planBody)
 	if err != nil {
-		return nil, fmt.Errorf("failed to marshal API request body from plan: %v", err)
+		diags.AddError("Failed to Marshal Request Body", fmt.Sprintf("failed to marshal API request body from plan: %v", err))
+		return nil, diags
 	}
 
-	if action == "Create" {
-		response, err = client.PostRequest(endpoint, requestByteBody)
-		if err != nil {
-			return nil, fmt.Errorf("failed to send POST request to %s: %v", endpoint, err)
-		}
+	switch action {
+	case actionCreateRequest:
+		response, diags = client.PostRequest(endpoint, requestByteBody)
+	case actionUpdateRequest:
+		response, diags = client.PutRequest(endpoint, requestByteBody)
+	default:
+		diags.AddError("Invalid Action", fmt.Sprintf("unsupported action type: %s", action))
+		return nil, diags
 	}
 
-	if action == "Update" {
-		response, err = client.PutRequest(endpoint, requestByteBody)
-		if err != nil {
-			return nil, fmt.Errorf("failed to send PUT request to %s: %v", endpoint, err)
-		}
+	if diags.HasError() {
+		return nil, diags
 	}
 
-	return response, nil
+	return response, diags
 }
 
-func sendDeleteRequest(client *api.RestApiClient, endpoint string) (*http.Response, error) {
-	response, err := client.DeleteRequest(endpoint)
-	if err != nil {
-		return nil, fmt.Errorf("failed to send DELETE request to %s: %v", endpoint, err)
+func sendDeleteRequest(client *api.RestApiClient, endpoint string) (*http.Response, diag.Diagnostics) {
+	response, diags := client.DeleteRequest(endpoint)
+	if diags.HasError() {
+		return nil, diags
 	}
 
-	return response, nil
+	return response, diags
 }
 
-func requestAndUnmarshal[T any](client *api.RestApiClient, respObj *T, requestType string, endpoint string, planBody map[string]any, marshalResponse bool) error {
+func requestAndUnmarshal[T any](client *api.RestApiClient, respObj *T, requestType string, endpoint string, planBody map[string]any, marshalResponse bool) diag.Diagnostics {
 	var response *http.Response
-	var err error
+	var diags diag.Diagnostics
 	switch requestType {
 	case "GET":
-		response, err = sendGetRequest(client, endpoint)
+		response, diags = sendGetRequest(client, endpoint)
 	case "POST":
-		response, err = sendPostOrPutRequest(client, planBody, endpoint, "Create")
+		response, diags = sendPostOrPutRequest(client, planBody, endpoint, "Create")
 	case "PUT":
-		response, err = sendPostOrPutRequest(client, planBody, endpoint, "Update")
+		response, diags = sendPostOrPutRequest(client, planBody, endpoint, "Update")
 	case "DELETE":
-		response, err = sendDeleteRequest(client, endpoint)
+		response, diags = sendDeleteRequest(client, endpoint)
 	default:
-		return fmt.Errorf("invalid request type: %s", requestType)
+		diags.AddError("Invalid Request Type", fmt.Sprintf("unsupported request type: %s", requestType))
+		return diags
 	}
 
-	if err != nil {
-		return err
+	if diags.HasError() {
+		return diags
 	}
 
 	defer func() {
-		if responseBodyClose := response.Body.Close(); err != nil {
-			err = fmt.Errorf("failed to close response body: %v; original error: %v", responseBodyClose, err)
+		if err := response.Body.Close(); err != nil {
+			diags.AddError("Failed to Close Response Body", fmt.Sprintf("failed to close response body: %v", err))
 		}
 	}()
 
 	if marshalResponse {
 		body, err := io.ReadAll(response.Body)
 		if err != nil {
-			return fmt.Errorf("failed to read API response body: %v", err)
+			diags.AddError("Failed to Read Response Body", fmt.Sprintf("failed to read API response body: %v", err))
+			return diags
 		}
 
-		err = json.Unmarshal(body, &respObj)
+		err = json.Unmarshal(body, respObj)
 		if err != nil {
-			return fmt.Errorf("failed to unmarshal API response body: %v", err)
+			diags.AddError("Failed to Unmarshal Response Body", fmt.Sprintf("failed to unmarshal API response body: %v", err))
+			return diags
 		}
 	}
 
-	return nil
+	return diags
 
 }

@@ -15,8 +15,13 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"strings"
 	"testing"
 	"time"
+
+	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestRestApiClient_BasicAuth(t *testing.T) {
@@ -34,15 +39,15 @@ func TestRestApiClient_BasicAuth(t *testing.T) {
 	server := httptest.NewServer(handler)
 	defer server.Close()
 
-	client, err := createBasicAuthClient(server.URL)
-	if err != nil {
-		t.Fatalf("failed to create basic auth client: %v", err)
+	client, diags := createBasicAuthClient(server.URL)
+	if diags.HasError() {
+		t.Fatalf("failed to create basic auth client: %v", diags)
 	}
 
 	t.Run("GET /success", func(t *testing.T) {
-		resp, err := client.GetRequest("/success")
-		if err != nil {
-			t.Fatalf("unexpected error: %v", err)
+		resp, diags := client.GetRequest("/success")
+		if diags.HasError() {
+			t.Fatalf("unexpected error: %v", diags)
 		}
 		if resp.StatusCode != http.StatusOK {
 			t.Errorf("expected 200 OK, got %d", resp.StatusCode)
@@ -52,15 +57,15 @@ func TestRestApiClient_BasicAuth(t *testing.T) {
 
 func TestRestApiClient_CertificateAuth(t *testing.T) {
 	// Generate server cert
-	serverCertPEM, serverKeyPEM, _, err := generateSelfSignedCert()
-	if err != nil {
-		t.Fatalf("server cert generation failed: %v", err)
+	serverCertPEM, serverKeyPEM, _, diags := generateSelfSignedCert()
+	if diags.HasError() {
+		t.Fatalf("server cert generation failed: %v", diags)
 	}
 
 	// Generate client cert
-	clientCertPEM, clientKeyPEM, clientCert, err := generateSelfSignedCert()
-	if err != nil {
-		t.Fatalf("client cert generation failed: %v", err)
+	clientCertPEM, clientKeyPEM, clientCert, diags := generateSelfSignedCert()
+	if diags.HasError() {
+		t.Fatalf("client cert generation failed: %v", diags)
 	}
 
 	// Create server that validates client cert
@@ -87,15 +92,15 @@ func TestRestApiClient_CertificateAuth(t *testing.T) {
 	server.StartTLS()
 	defer server.Close()
 
-	client, err := createCertAuthClient(server.URL, serverCertPEM, clientCertPEM, clientKeyPEM)
-	if err != nil {
-		t.Fatalf("failed to create cert auth client: %v", err)
+	client, diags := createCertAuthClient(server.URL, serverCertPEM, clientCertPEM, clientKeyPEM)
+	if diags.HasError() {
+		t.Fatalf("failed to create cert auth client: %v", diags)
 	}
 
 	t.Run("GET /secure", func(t *testing.T) {
-		resp, err := client.GetRequest("/secure")
-		if err != nil {
-			t.Fatalf("unexpected error: %v", err)
+		resp, diags := client.GetRequest("/secure")
+		if diags.HasError() {
+			t.Fatalf("unexpected error: %v", diags)
 		}
 		if resp.StatusCode != http.StatusOK {
 			t.Errorf("expected 200 OK, got %d", resp.StatusCode)
@@ -107,29 +112,40 @@ func TestRestApiClient_BothAuthProvidedFails(t *testing.T) {
 	baseURL, _ := url.Parse("https://localhost")
 	certPEM, keyPEM, _, _ := generateSelfSignedCert()
 	// Provided both basic authentication(username/password) and certificate based authentication to the function
-	_, err := NewRestApiClient(nil, baseURL, "user", "pass", certPEM, certPEM, keyPEM)
-	if err == nil || err.Error() != "cannot use both certificate-based and basic authentication simultaneously" {
-		t.Fatalf("expected error for both auth methods provided, got: %v", err)
-	}
+	client, diags := NewRestApiClient(nil, baseURL, "user", "pass", certPEM, certPEM, keyPEM)
+
+	assert.Nil(t, client, "expected client to be nil when both auth methods are provided")
+	assert.True(t, diags.HasError(), "expected diagnostics to have error")
+
+	require.Len(t, diags, 1)
+	assert.Contains(t, diags[0].Summary(), "Authentication")
+	assert.Contains(t, diags[0].Detail(), "Cannot use both certificate-based and basic authentication simultaneously. Please choose one method.")
 }
 
 func TestRestApiClient_NoAuthProvidedFails(t *testing.T) {
 	baseURL, _ := url.Parse("https://localhost")
 	// Provided neither basic authentication(username/password) nor certificate based authentication to the function
-	_, err := NewRestApiClient(nil, baseURL, "", "", nil, nil, nil)
-	if err == nil || err.Error() != "either certificate-based or basic authentication must be provided" {
-		t.Fatalf("expected error for no auth provided, got: %v", err)
-	}
+	client, diags := NewRestApiClient(nil, baseURL, "", "", nil, nil, nil)
+	assert.Nil(t, client)
+	assert.True(t, diags.HasError(), "expected error for no auth provided")
+
+	require.Len(t, diags, 1)
+	assert.Contains(t, diags[0].Summary(), "Authentication")
+	assert.Contains(t, diags[0].Detail(), "Either certificate-based or basic authentication must be provided.")
 }
 
 func TestRestApiClient_InvalidClientCertFails(t *testing.T) {
 	baseURL, _ := url.Parse("https://localhost")
 	// Generate invalid client certificate and key and provided to the function
 	invalidPEM := []byte("not a valid pem")
-	_, err := NewRestApiClient(nil, baseURL, "", "", nil, invalidPEM, invalidPEM)
-	if err == nil || err.Error() != "client certificate is not valid PEM-encoded data" {
-		t.Fatalf("expected PEM validation error, got: %v", err)
-	}
+	client, diags := NewRestApiClient(nil, baseURL, "", "", nil, invalidPEM, invalidPEM)
+
+	assert.Nil(t, client)
+	assert.True(t, diags.HasError(), "expected error for invalid client cert")
+
+	require.Len(t, diags, 1)
+	assert.Contains(t, diags[0].Summary(), "Missing CA Certificate")
+	assert.Contains(t, diags[0].Detail(), "When using certificate-based authentication, a CA certificate must be provided.")
 }
 
 func TestRestApiClient_InvalidCACertFails(t *testing.T) {
@@ -138,18 +154,23 @@ func TestRestApiClient_InvalidCACertFails(t *testing.T) {
 	certPEM, keyPEM, _, _ := generateSelfSignedCert()
 	// Generate invalid CA Certificate
 	invalidCA := []byte("not valid pem")
-	_, err := NewRestApiClient(nil, baseURL, "", "", invalidCA, certPEM, keyPEM)
-	if err == nil || err.Error() != "failed to parse CA certificate: input is not valid PEM-encoded data" {
-		t.Fatalf("expected CA cert parse error, got: %v", err)
-	}
+	client, diags := NewRestApiClient(nil, baseURL, "", "", invalidCA, certPEM, keyPEM)
+
+	assert.Nil(t, client)
+	assert.True(t, diags.HasError(), "expected CA cert parse error")
+
+	require.Len(t, diags, 1)
+	assert.Contains(t, diags[0].Summary(), "CA Certificate")
+	assert.Contains(t, diags[0].Detail(), "The provided CA certificate is not valid PEM-encoded data.")
 }
 
 // generateSelfSignedCert generates a self-signed TLS certificate and its private key.
-func generateSelfSignedCert() (certPEM, keyPEM []byte, cert *x509.Certificate, err error) {
+func generateSelfSignedCert() (certPEM, keyPEM []byte, cert *x509.Certificate, diags diag.Diagnostics) {
 	// Generate a new RSA private key with 2048-bit length
 	privKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
-		return nil, nil, nil, err
+		diags.AddError("Private Key Generation Failed", fmt.Sprintf("failed to generate private key: %v", err))
+		return nil, nil, nil, diags
 	}
 
 	// Create a certificate template with required fields
@@ -173,7 +194,8 @@ func generateSelfSignedCert() (certPEM, keyPEM []byte, cert *x509.Certificate, e
 	// The template is being used for parent issuer certificate and the certificate itself since it is a self-signed certfificate.
 	derBytes, err := x509.CreateCertificate(rand.Reader, &template, &template, &privKey.PublicKey, privKey)
 	if err != nil {
-		return nil, nil, nil, err
+		diags.AddError("Certificate Creation Failed", fmt.Sprintf("failed to create certificate: %v", err))
+		return nil, nil, nil, diags
 	}
 
 	// Encode the certificate & private key to PEM format
@@ -183,11 +205,12 @@ func generateSelfSignedCert() (certPEM, keyPEM []byte, cert *x509.Certificate, e
 	// Parse the DER-encoded certificate into an x509.Certificate object
 	parsedCert, err := x509.ParseCertificate(derBytes)
 	if err != nil {
-		return nil, nil, nil, err
+		diags.AddError("Certificate Parsing Failed", fmt.Sprintf("failed to parse certificate: %v", err))
+		return nil, nil, nil, diags
 	}
 
 	// Return the PEM-encoded certificate, key, and parsed certificate
-	return certPEM, keyPEM, parsedCert, nil
+	return certPEM, keyPEM, parsedCert, diags
 }
 
 func TestValidateResponse_SuccessCodes(t *testing.T) {
@@ -199,9 +222,9 @@ func TestValidateResponse_SuccessCodes(t *testing.T) {
 			Body:       io.NopCloser(bytes.NewBuffer(nil)),
 		}
 
-		err := validateResponse(resp)
-		if err != nil {
-			t.Errorf("expected no error for status %d, got %v", code, err)
+		diags := validateResponse(resp)
+		if diags != nil {
+			t.Errorf("expected no error for status %d, got %v", code, diags)
 		}
 	}
 }
@@ -216,9 +239,16 @@ func TestValidateResponse_ErrorWithValidJSON(t *testing.T) {
 		Body:       io.NopCloser(bytes.NewBufferString(body)),
 	}
 
-	err := validateResponse(resp)
-	if err == nil || err.Error() != "HTTP POST http://example.com/api failed with status 400: Invalid input" {
-		t.Errorf("unexpected error: %v", err)
+	diags := validateResponse(resp)
+	if !diags.HasError() {
+		t.Fatalf("expected error diagnostics, got none")
+	}
+
+	got := diags[0].Summary() + ": " + diags[0].Detail()
+	expected := "API Error: HTTP POST http://example.com/api failed with status 400: Invalid input"
+
+	if got != expected {
+		t.Errorf("expected %q, got %q", expected, got)
 	}
 }
 
@@ -232,26 +262,39 @@ func TestValidateResponse_ErrorWithInvalidJSON(t *testing.T) {
 		Body:       io.NopCloser(bytes.NewBufferString(body)),
 	}
 
-	err := validateResponse(resp)
-	expectedStart := "HTTP DELETE http://example.com/delete failed with status 500. Raw response:"
-	if err == nil || err.Error()[:len(expectedStart)] != expectedStart {
-		t.Errorf("unexpected error: %v", err)
+	diags := validateResponse(resp)
+	if !diags.HasError() {
+		t.Fatalf("expected error diagnostics, got none")
+	}
+
+	gotSummary := diags[0].Summary()
+	expectedSummary := "API Error"
+	if gotSummary != expectedSummary {
+		t.Errorf("expected summary %q, got %q", expectedSummary, gotSummary)
+	}
+
+	if !strings.Contains(diags[0].Detail(), "Raw response: <<<garbage>>>") {
+		t.Errorf("expected raw response detail, got %q", diags[0].Detail())
 	}
 }
 
-func createBasicAuthClient(serverURL string) (*RestApiClient, error) {
+func createBasicAuthClient(serverURL string) (*RestApiClient, diag.Diagnostics) {
+	var diags diag.Diagnostics
 	baseURL, err := url.Parse(serverURL)
 	if err != nil {
-		return nil, fmt.Errorf("invalid server URL: %w", err)
+		diags.AddError("Invalid URL", fmt.Sprintf("invalid server URL: %v", diags))
+		return nil, diags
 	}
 
 	return NewRestApiClient(nil, baseURL, "testuser", "testpassword", nil, nil, nil)
 }
 
-func createCertAuthClient(serverURL string, serverCACert, clientCert, clientKey []byte) (*RestApiClient, error) {
+func createCertAuthClient(serverURL string, serverCACert, clientCert, clientKey []byte) (*RestApiClient, diag.Diagnostics) {
+	var diags diag.Diagnostics
 	baseURL, err := url.Parse(serverURL)
 	if err != nil {
-		return nil, fmt.Errorf("invalid server URL: %w", err)
+		diags.AddError("Invalid URL", fmt.Sprintf("invalid server URL: %v", diags))
+		return nil, diags
 	}
 
 	return NewRestApiClient(nil, baseURL, "", "", serverCACert, clientCert, clientKey)

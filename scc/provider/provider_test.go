@@ -395,8 +395,9 @@ func TestSCCProvider_NoAuth(t *testing.T) {
 }
 
 func TestSCCProvider_InvalidPEM(t *testing.T) {
-	err := validatePEM("not-a-valid-pem")
-	assert.Error(t, err)
+	diags := validatePEM("not-a-valid-pem")
+	assert.True(t, diags.HasError(), "Expected diagnostics to contain error for invalid PEM")
+	assert.Equal(t, "Invalid PEM Block", diags[0].Summary())
 }
 
 func TestSCCProvider_ValidPEM(t *testing.T) {
@@ -411,8 +412,9 @@ zj0EAwIDSAAwRQIgTTb7LtqRQon2OHxMOyuvl+e8FQZXzSH14Yc7u9s9n9ICIQDE
 CEGH5OML6z7C7oCSys7ce4GkTbtJ4rNZoxVOxFwPvA==
 -----END CERTIFICATE-----`
 
-	err := validatePEM(dummyPEM)
-	assert.NoError(t, err)
+	diags := validatePEM(dummyPEM)
+	assert.False(t, diags.HasError(), "expected no error diagnostics for valid PEM")
+	assert.Len(t, diags, 0)
 }
 
 func TestSCCProvider_ClientCreationFails(t *testing.T) {
@@ -457,8 +459,9 @@ func Test_ProviderConnection_Success(t *testing.T) {
 		Password: "pass",
 	}
 
-	err := testProviderConnection(client)
-	assert.NoError(t, err)
+	diags := testProviderConnection(client)
+	assert.False(t, diags.HasError(), "expected no error diagnostics for successful connection")
+	assert.Len(t, diags, 0)
 }
 
 func Test_ProviderConnection_Unauthorized(t *testing.T) {
@@ -480,11 +483,12 @@ func Test_ProviderConnection_Unauthorized(t *testing.T) {
 		Password: "wrong-pass",
 	}
 
-	err := testProviderConnection(client)
+	diags := testProviderConnection(client)
 
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "authentication rejected")
-	assert.Contains(t, err.Error(), "unauthorized")
+	assert.True(t, diags.HasError(), "expected diagnostics to contain error for unauthorized response")
+	assert.Len(t, diags, 1)
+	assert.Contains(t, diags[0].Summary(), "Authentication Failed")
+	assert.Contains(t, diags[0].Detail(), "rejected")
 }
 
 type roundTripFunc func(req *http.Request) *http.Response

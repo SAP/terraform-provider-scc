@@ -307,15 +307,15 @@ func (d *SystemMappingDataSource) Read(ctx context.Context, req datasource.ReadR
 	virtualPort := data.VirtualPort.ValueString()
 	endpoint := endpoints.GetSystemMappingEndpoint(regionHost, subaccount, virtualHost, virtualPort)
 
-	err := requestAndUnmarshal(d.client, &respObj, "GET", endpoint, nil, true)
-	if err != nil {
-		resp.Diagnostics.AddError(errMsgFetchSystemMappingFailed, err.Error())
+	diags = requestAndUnmarshal(d.client, &respObj, "GET", endpoint, nil, true)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	responseModel, diags := SystemMappingValueFrom(ctx, data, respObj)
-	if diags.HasError() {
-		resp.Diagnostics.AddError(errMsgMapSystemMappingFailed, fmt.Sprintf("%s", diags))
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 	diags = resp.State.Set(ctx, &responseModel)

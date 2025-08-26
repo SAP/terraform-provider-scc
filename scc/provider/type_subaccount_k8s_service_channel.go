@@ -60,9 +60,9 @@ func SubaccountK8SServiceChannelValueFrom(ctx context.Context, plan SubaccountK8
 		ConnectedSinceTimeStamp: types.Int64Value(value.State.ConnectedSinceTimeStamp),
 	}
 
-	state, err := types.ObjectValueFrom(ctx, SubaccountK8SServiceChannelStateType, stateObj)
-	if err.HasError() {
-		return SubaccountK8SServiceChannelConfig{}, err
+	state, diags := types.ObjectValueFrom(ctx, SubaccountK8SServiceChannelStateType, stateObj)
+	if diags.HasError() {
+		return SubaccountK8SServiceChannelConfig{}, diags
 	}
 
 	model := &SubaccountK8SServiceChannelConfig{
@@ -91,9 +91,9 @@ func SubaccountK8SServiceChannelsValueFrom(ctx context.Context, plan SubaccountK
 			ConnectedSinceTimeStamp: types.Int64Value(channel.State.ConnectedSinceTimeStamp),
 		}
 
-		state, err := types.ObjectValueFrom(ctx, SubaccountK8SServiceChannelStateType, stateObj)
-		if err.HasError() {
-			return SubaccountK8SServiceChannelsConfig{}, err
+		state, diags := types.ObjectValueFrom(ctx, SubaccountK8SServiceChannelStateType, stateObj)
+		if diags.HasError() {
+			return SubaccountK8SServiceChannelsConfig{}, diags
 		}
 
 		c := SubaccountK8SServiceChannel{

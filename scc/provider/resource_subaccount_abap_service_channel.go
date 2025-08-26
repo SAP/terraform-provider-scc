@@ -2,7 +2,6 @@ package provider
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -12,6 +11,7 @@ import (
 	"github.com/SAP/terraform-provider-scc/internal/api/endpoints"
 	"github.com/SAP/terraform-provider-scc/validation/uuidvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -161,21 +161,21 @@ func (r *SubaccountABAPServiceChannelResource) Create(ctx context.Context, req r
 		"comment":             plan.Comment.ValueString(),
 	}
 
-	err := requestAndUnmarshal(r.client, &respObj.SubaccountABAPServiceChannels, "POST", endpoint, planBody, false)
-	if err != nil {
-		resp.Diagnostics.AddError(errMsgAddSubaccountABAPServiceChannelFailed, err.Error())
+	diags = requestAndUnmarshal(r.client, &respObj.SubaccountABAPServiceChannels, "POST", endpoint, planBody, false)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	err = requestAndUnmarshal(r.client, &respObj.SubaccountABAPServiceChannels, "GET", endpoint, nil, true)
-	if err != nil {
-		resp.Diagnostics.AddError(errMsgFetchSubaccountABAPServiceChannelsFailed, err.Error())
+	diags = requestAndUnmarshal(r.client, &respObj.SubaccountABAPServiceChannels, "GET", endpoint, nil, true)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	serviceChannelRespObj, err := r.getSubaccountABAPServiceChannel(respObj, plan.ABAPCloudTenantHost.ValueString())
-	if err != nil {
-		resp.Diagnostics.AddError(errMsgFetchSubaccountABAPServiceChannelFailed, err.Error())
+	serviceChannelRespObj, diags := r.getSubaccountABAPServiceChannel(respObj, plan.ABAPCloudTenantHost.ValueString())
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -183,18 +183,22 @@ func (r *SubaccountABAPServiceChannelResource) Create(ctx context.Context, req r
 
 	if !plan.Enabled.IsNull() {
 		endpoint = endpoints.GetSubaccountServiceChannelEndpoint(regionHost, subaccount, "ABAPCloud", id)
-		r.enableSubaccountABAPServiceChannel(plan, *serviceChannelRespObj, (*resource.UpdateResponse)(resp), endpoint+"/state")
+		diags = r.enableSubaccountABAPServiceChannel(plan, *serviceChannelRespObj, endpoint+"/state")
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
 
-		err = requestAndUnmarshal(r.client, &serviceChannelRespObj, "GET", endpoint, nil, true)
-		if err != nil {
-			resp.Diagnostics.AddError(errMsgFetchSubaccountABAPServiceChannelFailed, err.Error())
+		diags = requestAndUnmarshal(r.client, &serviceChannelRespObj, "GET", endpoint, nil, true)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
 			return
 		}
 	}
 
 	responseModel, diags := SubaccountABAPServiceChannelValueFrom(ctx, plan, *serviceChannelRespObj)
-	if diags.HasError() {
-		resp.Diagnostics.AddError(errMsgMapSubaccountABAPServiceChannelFailed, fmt.Sprintf("%s", diags))
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -219,15 +223,15 @@ func (r *SubaccountABAPServiceChannelResource) Read(ctx context.Context, req res
 	id := state.ID.ValueInt64()
 	endpoint := endpoints.GetSubaccountServiceChannelEndpoint(regionHost, subaccount, "ABAPCloud", id)
 
-	err := requestAndUnmarshal(r.client, &respObj, "GET", endpoint, nil, true)
-	if err != nil {
-		resp.Diagnostics.AddError(errMsgFetchSubaccountABAPServiceChannelFailed, err.Error())
+	diags = requestAndUnmarshal(r.client, &respObj, "GET", endpoint, nil, true)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	responseModel, diags := SubaccountABAPServiceChannelValueFrom(ctx, state, respObj)
-	if diags.HasError() {
-		resp.Diagnostics.AddError(errMsgMapSubaccountABAPServiceChannelFailed, fmt.Sprintf("%s", diags))
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -260,29 +264,37 @@ func (r *SubaccountABAPServiceChannelResource) Update(ctx context.Context, req r
 
 	if (state.RegionHost.ValueString() != regionHost) ||
 		(state.Subaccount.ValueString() != subaccount) {
-		resp.Diagnostics.AddError(errMsgUpdateSubaccountABAPServiceChannelFailed, "Failed to update the cloud connector ABAP service channel due to mismatched configuration values.")
+		resp.Diagnostics.AddError("Error updating the cloud connector subaccount ABAP service channel", "Failed to update the cloud connector ABAP service channel due to mismatched configuration values.")
 		return
 	}
 	// Update Service Channel
 	endpoint := endpoints.GetSubaccountServiceChannelEndpoint(regionHost, subaccount, "ABAPCloud", id)
-	r.updateSubaccountABAPServiceChannel(plan, respObj, resp, endpoint)
+	diags = r.updateSubaccountABAPServiceChannel(plan, respObj, endpoint)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	// Enable/Disable Service Channel
 	if plan.Enabled.ValueBool() != state.Enabled.ValueBool() {
-		r.enableSubaccountABAPServiceChannel(plan, respObj, resp, endpoint+"/state")
+		diags = r.enableSubaccountABAPServiceChannel(plan, respObj, endpoint+"/state")
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
 	}
 
 	endpoint = endpoints.GetSubaccountServiceChannelEndpoint(regionHost, subaccount, "ABAPCloud", id)
 
-	err := requestAndUnmarshal(r.client, &respObj, "GET", endpoint, nil, true)
-	if err != nil {
-		resp.Diagnostics.AddError(errMsgFetchSubaccountABAPServiceChannelFailed, err.Error())
+	diags = requestAndUnmarshal(r.client, &respObj, "GET", endpoint, nil, true)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	responseModel, diags := SubaccountABAPServiceChannelValueFrom(ctx, plan, respObj)
-	if diags.HasError() {
-		resp.Diagnostics.AddError(errMsgMapSubaccountABAPServiceChannelFailed, fmt.Sprintf("%s", diags))
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -308,15 +320,15 @@ func (r *SubaccountABAPServiceChannelResource) Delete(ctx context.Context, req r
 
 	endpoint := endpoints.GetSubaccountServiceChannelEndpoint(regionHost, subaccount, "ABAPCloud", id)
 
-	err := requestAndUnmarshal(r.client, &respObj, "DELETE", endpoint, nil, false)
-	if err != nil {
-		resp.Diagnostics.AddError(errMsgDeleteSubaccountABAPServiceChannelFailed, err.Error())
+	diags = requestAndUnmarshal(r.client, &respObj, "DELETE", endpoint, nil, false)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	responseModel, diags := SubaccountABAPServiceChannelValueFrom(ctx, state, respObj)
-	if diags.HasError() {
-		resp.Diagnostics.AddError(errMsgMapSubaccountABAPServiceChannelFailed, fmt.Sprintf("%s", diags))
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -327,28 +339,31 @@ func (r *SubaccountABAPServiceChannelResource) Delete(ctx context.Context, req r
 	}
 }
 
-func (r *SubaccountABAPServiceChannelResource) getSubaccountABAPServiceChannel(serviceChannels apiobjects.SubaccountABAPServiceChannels, targetABAPCloudTenantHost string) (*apiobjects.SubaccountABAPServiceChannel, error) {
+func (r *SubaccountABAPServiceChannelResource) getSubaccountABAPServiceChannel(serviceChannels apiobjects.SubaccountABAPServiceChannels, targetABAPCloudTenantHost string) (*apiobjects.SubaccountABAPServiceChannel, diag.Diagnostics) {
+	var diags diag.Diagnostics
 	for _, channel := range serviceChannels.SubaccountABAPServiceChannels {
 		if channel.ABAPCloudTenantHost == targetABAPCloudTenantHost {
 			return &channel, nil
 		}
 	}
-	return nil, errors.New("subaccount service channel doesn't exist")
+	diags.AddError("Subaccount ABAP Service Channel Not Found", "The specified subaccount ABAP service channel with the given ABAP Cloud Tenant Host was not found.")
+	return nil, diags
 }
 
-func (r *SubaccountABAPServiceChannelResource) enableSubaccountABAPServiceChannel(plan SubaccountABAPServiceChannelConfig, respObj apiobjects.SubaccountABAPServiceChannel, resp *resource.UpdateResponse, endpoint string) {
+func (r *SubaccountABAPServiceChannelResource) enableSubaccountABAPServiceChannel(plan SubaccountABAPServiceChannelConfig, respObj apiobjects.SubaccountABAPServiceChannel, endpoint string) diag.Diagnostics {
 	planBody := map[string]any{
 		"enabled": fmt.Sprintf("%t", plan.Enabled.ValueBool()),
 	}
 
-	err := requestAndUnmarshal(r.client, &respObj, "PUT", endpoint, planBody, false)
-	if err != nil {
-		resp.Diagnostics.AddError(errMsgEnableSubaccountABAPServiceChannelFailed, err.Error())
-		return
+	diags := requestAndUnmarshal(r.client, &respObj, "PUT", endpoint, planBody, false)
+	if diags.HasError() {
+		return diags
 	}
+
+	return diags
 }
 
-func (r *SubaccountABAPServiceChannelResource) updateSubaccountABAPServiceChannel(plan SubaccountABAPServiceChannelConfig, respObj apiobjects.SubaccountABAPServiceChannel, resp *resource.UpdateResponse, endpoint string) {
+func (r *SubaccountABAPServiceChannelResource) updateSubaccountABAPServiceChannel(plan SubaccountABAPServiceChannelConfig, respObj apiobjects.SubaccountABAPServiceChannel, endpoint string) diag.Diagnostics {
 	planBody := map[string]any{
 		"abapCloudTenantHost": plan.ABAPCloudTenantHost.ValueString(),
 		"instanceNumber":      fmt.Sprintf("%d", plan.InstanceNumber.ValueInt64()),
@@ -356,11 +371,12 @@ func (r *SubaccountABAPServiceChannelResource) updateSubaccountABAPServiceChanne
 		"comment":             plan.Comment.ValueString(),
 	}
 
-	err := requestAndUnmarshal(r.client, &respObj, "PUT", endpoint, planBody, false)
-	if err != nil {
-		resp.Diagnostics.AddError(errMsgUpdateSubaccountABAPServiceChannelFailed, err.Error())
-		return
+	diags := requestAndUnmarshal(r.client, &respObj, "PUT", endpoint, planBody, false)
+	if diags.HasError() {
+		return diags
 	}
+
+	return diags
 }
 
 func (rs *SubaccountABAPServiceChannelResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
@@ -374,8 +390,8 @@ func (rs *SubaccountABAPServiceChannelResource) ImportState(ctx context.Context,
 		return
 	}
 
-	intID, err := strconv.Atoi(idParts[2])
-	if err != nil {
+	intID, diags := strconv.Atoi(idParts[2])
+	if diags != nil {
 		resp.Diagnostics.AddError(
 			"Invalid ID Format",
 			fmt.Sprintf("The 'id' part must be an integer. Got: %q", idParts[2]),

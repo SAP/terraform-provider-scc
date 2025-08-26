@@ -96,23 +96,24 @@ func (d *DomainMappingDataSource) Read(ctx context.Context, req datasource.ReadR
 
 	endpoint := fmt.Sprintf("/api/v1/configuration/subaccounts/%s/%s/domainMappings", regionHost, subaccount)
 
-	err := requestAndUnmarshal(d.client, &respObj.DomainMappings, "GET", endpoint, nil, true)
-	if err != nil {
-		resp.Diagnostics.AddError(errMsgFetchDomainMappingsFailed, err.Error())
+	diags = requestAndUnmarshal(d.client, &respObj.DomainMappings, "GET", endpoint, nil, true)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	mappingRespObj, err := GetDomainMapping(respObj, internalDomain)
-	if err != nil {
-		resp.Diagnostics.AddError(errMsgFetchDomainMappingFailed, fmt.Sprintf("%s", err))
+	mappingRespObj, diags := GetDomainMapping(respObj, internalDomain)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	responseModel, err := DomainMappingValueFrom(ctx, data, *mappingRespObj)
-	if err != nil {
-		resp.Diagnostics.AddError(errMsgMapDomainMappingFailed, fmt.Sprintf("%s", err))
+	responseModel, diags := DomainMappingValueFrom(ctx, data, *mappingRespObj)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
+
 	diags = resp.State.Set(ctx, &responseModel)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
