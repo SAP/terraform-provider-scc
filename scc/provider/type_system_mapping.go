@@ -118,7 +118,7 @@ func SystemMappingsValueFrom(ctx context.Context, plan SystemMappingsConfig, val
 		Subaccount:     plan.Subaccount,
 		SystemMappings: system_mappings,
 	}
-	return *model, nil
+	return *model, diag.Diagnostics{}
 }
 
 func SystemMappingValueFrom(ctx context.Context, plan SystemMappingConfig, value apiobjects.SystemMapping) (SystemMappingConfig, diag.Diagnostics) {
@@ -169,5 +169,5 @@ func SystemMappingValueFrom(ctx context.Context, plan SystemMappingConfig, value
 		BlacklistedUsers:      blacklistedUsers,
 	}
 
-	return *model, nil
+	return *model, diag.Diagnostics{}
 }

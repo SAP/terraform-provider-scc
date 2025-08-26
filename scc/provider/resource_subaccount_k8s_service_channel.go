@@ -11,6 +11,7 @@ import (
 	"github.com/SAP/terraform-provider-scc/internal/api/endpoints"
 	"github.com/SAP/terraform-provider-scc/validation/uuidvalidator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
@@ -156,21 +157,21 @@ func (r *SubaccountK8SServiceChannelResource) Create(ctx context.Context, req re
 		"comment":     plan.Description.ValueString(),
 	}
 
-	err := requestAndUnmarshal(r.client, &respObj.SubaccountK8SServiceChannels, "POST", endpoint, planBody, false)
-	if err != nil {
-		resp.Diagnostics.AddError(errMsgAddSubaccountK8SServiceChannelFailed, err.Error())
+	diags = requestAndUnmarshal(r.client, &respObj.SubaccountK8SServiceChannels, "POST", endpoint, planBody, false)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	err = requestAndUnmarshal(r.client, &respObj.SubaccountK8SServiceChannels, "GET", endpoint, nil, true)
-	if err != nil {
-		resp.Diagnostics.AddError(errMsgFetchSubaccountK8SServiceChannelsFailed, err.Error())
+	diags = requestAndUnmarshal(r.client, &respObj.SubaccountK8SServiceChannels, "GET", endpoint, nil, true)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	serviceChannelRespObj, err := r.getSubaccountK8SServiceChannel(respObj, plan.K8SClusterHost.ValueString())
-	if err != nil {
-		resp.Diagnostics.AddError(errMsgFetchSubaccountK8SServiceChannelFailed, err.Error())
+	serviceChannelRespObj, diags := r.getSubaccountK8SServiceChannel(respObj, plan.K8SClusterHost.ValueString())
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -178,18 +179,22 @@ func (r *SubaccountK8SServiceChannelResource) Create(ctx context.Context, req re
 
 	if !plan.Enabled.IsNull() {
 		endpoint = endpoints.GetSubaccountServiceChannelEndpoint(regionHost, subaccount, "K8S", id)
-		r.enableSubaccountK8SServiceChannel(plan, *serviceChannelRespObj, (*resource.UpdateResponse)(resp), endpoint+"/state")
+		diags = r.enableSubaccountK8SServiceChannel(plan, *serviceChannelRespObj, endpoint+"/state")
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
 
-		err = requestAndUnmarshal(r.client, &serviceChannelRespObj, "GET", endpoint, nil, true)
-		if err != nil {
-			resp.Diagnostics.AddError(errMsgFetchSubaccountK8SServiceChannelFailed, err.Error())
+		diags = requestAndUnmarshal(r.client, &serviceChannelRespObj, "GET", endpoint, nil, true)
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
 			return
 		}
 	}
 
 	responseModel, diags := SubaccountK8SServiceChannelValueFrom(ctx, plan, *serviceChannelRespObj)
-	if diags.HasError() {
-		resp.Diagnostics.AddError(errMsgMapSubaccountK8SServiceChannelFailed, fmt.Sprintf("%s", diags))
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -214,15 +219,15 @@ func (r *SubaccountK8SServiceChannelResource) Read(ctx context.Context, req reso
 	id := state.ID.ValueInt64()
 	endpoint := endpoints.GetSubaccountServiceChannelEndpoint(regionHost, subaccount, "K8S", id)
 
-	err := requestAndUnmarshal(r.client, &respObj, "GET", endpoint, nil, true)
-	if err != nil {
-		resp.Diagnostics.AddError(errMsgFetchSubaccountK8SServiceChannelFailed, err.Error())
+	diags = requestAndUnmarshal(r.client, &respObj, "GET", endpoint, nil, true)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	responseModel, diags := SubaccountK8SServiceChannelValueFrom(ctx, state, respObj)
-	if diags.HasError() {
-		resp.Diagnostics.AddError(errMsgMapSubaccountK8SServiceChannelFailed, fmt.Sprintf("%s", diags))
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -255,29 +260,38 @@ func (r *SubaccountK8SServiceChannelResource) Update(ctx context.Context, req re
 
 	if (state.RegionHost.ValueString() != regionHost) ||
 		(state.Subaccount.ValueString() != subaccount) {
-		resp.Diagnostics.AddError(errMsgUpdateSubaccountK8SServiceChannelFailed, "Failed to update the cloud connector k8s service channel due to mismatched configuration values.")
+		resp.Diagnostics.AddError("Error updating the cloud connector subaccount K8S service channel", "Failed to update the cloud connector k8s service channel due to mismatched configuration values.")
 		return
 	}
 	// Update Service Channel
 	endpoint := endpoints.GetSubaccountServiceChannelEndpoint(regionHost, subaccount, "K8S", id)
-	r.updateSubaccountK8SServiceChannel(plan, respObj, resp, endpoint)
+	diags = r.updateSubaccountK8SServiceChannel(plan, respObj, endpoint)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	// Enable/Disable Service Channel
 	if plan.Enabled.ValueBool() != state.Enabled.ValueBool() {
-		r.enableSubaccountK8SServiceChannel(plan, respObj, resp, endpoint+"/state")
+		diags = r.enableSubaccountK8SServiceChannel(plan, respObj, endpoint+"/state")
+		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+
 	}
 
 	endpoint = endpoints.GetSubaccountServiceChannelEndpoint(regionHost, subaccount, "K8S", id)
 
-	err := requestAndUnmarshal(r.client, &respObj, "GET", endpoint, nil, true)
-	if err != nil {
-		resp.Diagnostics.AddError(errMsgFetchSubaccountK8SServiceChannelFailed, err.Error())
+	diags = requestAndUnmarshal(r.client, &respObj, "GET", endpoint, nil, true)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	responseModel, diags := SubaccountK8SServiceChannelValueFrom(ctx, plan, respObj)
-	if diags.HasError() {
-		resp.Diagnostics.AddError(errMsgMapSubaccountK8SServiceChannelFailed, fmt.Sprintf("%s", diags))
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -303,15 +317,15 @@ func (r *SubaccountK8SServiceChannelResource) Delete(ctx context.Context, req re
 
 	endpoint := endpoints.GetSubaccountServiceChannelEndpoint(regionHost, subaccount, "K8S", id)
 
-	err := requestAndUnmarshal(r.client, &respObj, "DELETE", endpoint, nil, false)
-	if err != nil {
-		resp.Diagnostics.AddError(errMsgDeleteSubaccountK8SServiceChannelFailed, err.Error())
+	diags = requestAndUnmarshal(r.client, &respObj, "DELETE", endpoint, nil, false)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	responseModel, diags := SubaccountK8SServiceChannelValueFrom(ctx, state, respObj)
-	if diags.HasError() {
-		resp.Diagnostics.AddError(errMsgMapSubaccountK8SServiceChannelFailed, fmt.Sprintf("%s", diags))
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -322,28 +336,31 @@ func (r *SubaccountK8SServiceChannelResource) Delete(ctx context.Context, req re
 	}
 }
 
-func (r *SubaccountK8SServiceChannelResource) getSubaccountK8SServiceChannel(serviceChannels apiobjects.SubaccountK8SServiceChannels, targetK8SCluster string) (*apiobjects.SubaccountK8SServiceChannel, error) {
+func (r *SubaccountK8SServiceChannelResource) getSubaccountK8SServiceChannel(serviceChannels apiobjects.SubaccountK8SServiceChannels, targetK8SCluster string) (*apiobjects.SubaccountK8SServiceChannel, diag.Diagnostics) {
+	var diags diag.Diagnostics
 	for _, channel := range serviceChannels.SubaccountK8SServiceChannels {
 		if channel.K8SClusterHost == targetK8SCluster {
 			return &channel, nil
 		}
 	}
-	return nil, fmt.Errorf("%s", "subaccount service channel doesn't exist")
+	diags.AddError("Subaccount K8S Service Channel Not Found", "The specified subaccount k8s service channel was not found.")
+	return nil, diags
 }
 
-func (r *SubaccountK8SServiceChannelResource) enableSubaccountK8SServiceChannel(plan SubaccountK8SServiceChannelConfig, respObj apiobjects.SubaccountK8SServiceChannel, resp *resource.UpdateResponse, endpoint string) {
+func (r *SubaccountK8SServiceChannelResource) enableSubaccountK8SServiceChannel(plan SubaccountK8SServiceChannelConfig, respObj apiobjects.SubaccountK8SServiceChannel, endpoint string) diag.Diagnostics {
 	planBody := map[string]any{
 		"enabled": fmt.Sprintf("%t", plan.Enabled.ValueBool()),
 	}
 
-	err := requestAndUnmarshal(r.client, &respObj, "PUT", endpoint, planBody, false)
-	if err != nil {
-		resp.Diagnostics.AddError(errMsgEnableSubaccountK8SServiceChannelFailed, err.Error())
-		return
+	diags := requestAndUnmarshal(r.client, &respObj, "PUT", endpoint, planBody, false)
+	if diags.HasError() {
+		return diags
 	}
+
+	return diags
 }
 
-func (r *SubaccountK8SServiceChannelResource) updateSubaccountK8SServiceChannel(plan SubaccountK8SServiceChannelConfig, respObj apiobjects.SubaccountK8SServiceChannel, resp *resource.UpdateResponse, endpoint string) {
+func (r *SubaccountK8SServiceChannelResource) updateSubaccountK8SServiceChannel(plan SubaccountK8SServiceChannelConfig, respObj apiobjects.SubaccountK8SServiceChannel, endpoint string) diag.Diagnostics {
 	planBody := map[string]any{
 		"k8sCluster":  plan.K8SClusterHost.ValueString(),
 		"k8sService":  plan.K8SServiceID.ValueString(),
@@ -352,11 +369,12 @@ func (r *SubaccountK8SServiceChannelResource) updateSubaccountK8SServiceChannel(
 		"comment":     plan.Description.ValueString(),
 	}
 
-	err := requestAndUnmarshal(r.client, &respObj, "PUT", endpoint, planBody, false)
-	if err != nil {
-		resp.Diagnostics.AddError(errMsgUpdateSubaccountK8SServiceChannelFailed, err.Error())
-		return
+	diags := requestAndUnmarshal(r.client, &respObj, "PUT", endpoint, planBody, false)
+	if diags.HasError() {
+		return diags
 	}
+
+	return diags
 }
 
 func (rs *SubaccountK8SServiceChannelResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
@@ -370,8 +388,8 @@ func (rs *SubaccountK8SServiceChannelResource) ImportState(ctx context.Context, 
 		return
 	}
 
-	intID, err := strconv.Atoi(idParts[2])
-	if err != nil {
+	intID, diags := strconv.Atoi(idParts[2])
+	if diags != nil {
 		resp.Diagnostics.AddError(
 			"Invalid ID Format",
 			fmt.Sprintf("The 'id' part must be an integer. Got: %q", idParts[2]),

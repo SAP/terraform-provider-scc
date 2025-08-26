@@ -148,9 +148,9 @@ func SubaccountDataSourceValueFrom(ctx context.Context, value apiobjects.Subacco
 		SerialNumber:       types.StringValue(value.Tunnel.SubaccountCertificate.SerialNumber),
 	}
 
-	certificate, err := types.ObjectValueFrom(ctx, SubaccountCertificateType, certificateObj)
-	if err.HasError() {
-		return SubaccountData{}, err
+	certificate, diags := types.ObjectValueFrom(ctx, SubaccountCertificateType, certificateObj)
+	if diags.HasError() {
+		return SubaccountData{}, diags
 	}
 
 	applicationConnectionsValues := []SubaccountApplicationConnectionsData{}
@@ -164,9 +164,9 @@ func SubaccountDataSourceValueFrom(ctx context.Context, value apiobjects.Subacco
 		applicationConnectionsValues = append(applicationConnectionsValues, ac)
 	}
 
-	applicationConnections, err := types.ListValueFrom(ctx, SubaccountApplicationConnectionsType, applicationConnectionsValues)
-	if err.HasError() {
-		return SubaccountData{}, err
+	applicationConnections, diags := types.ListValueFrom(ctx, SubaccountApplicationConnectionsType, applicationConnectionsValues)
+	if diags.HasError() {
+		return SubaccountData{}, diags
 	}
 
 	serviceChannelsValues := []SubaccountServiceChannelsData{}
@@ -181,9 +181,9 @@ func SubaccountDataSourceValueFrom(ctx context.Context, value apiobjects.Subacco
 		serviceChannelsValues = append(serviceChannelsValues, sc)
 	}
 
-	serviceChannels, err := types.ListValueFrom(ctx, SubaccountServiceChannelsType, serviceChannelsValues)
-	if err.HasError() {
-		return SubaccountData{}, err
+	serviceChannels, diags := types.ListValueFrom(ctx, SubaccountServiceChannelsType, serviceChannelsValues)
+	if diags.HasError() {
+		return SubaccountData{}, diags
 	}
 
 	tunnelObj := SubaccountTunnelData{
@@ -196,9 +196,9 @@ func SubaccountDataSourceValueFrom(ctx context.Context, value apiobjects.Subacco
 		ServiceChannels:         serviceChannels,
 	}
 
-	tunnel, err := types.ObjectValueFrom(ctx, SubaccountTunnelType, tunnelObj)
-	if err.HasError() {
-		return SubaccountData{}, err
+	tunnel, diags := types.ObjectValueFrom(ctx, SubaccountTunnelType, tunnelObj)
+	if diags.HasError() {
+		return SubaccountData{}, diags
 	}
 
 	model := &SubaccountData{
@@ -221,9 +221,9 @@ func SubaccountResourceValueFrom(ctx context.Context, plan SubaccountConfig, val
 		SerialNumber:       types.StringValue(value.Tunnel.SubaccountCertificate.SerialNumber),
 	}
 
-	certificate, err := types.ObjectValueFrom(ctx, SubaccountCertificateType, certificateObj)
-	if err.HasError() {
-		return SubaccountConfig{}, err
+	certificate, diags := types.ObjectValueFrom(ctx, SubaccountCertificateType, certificateObj)
+	if diags.HasError() {
+		return SubaccountConfig{}, diags
 	}
 
 	applicationConnectionsValues := []SubaccountApplicationConnectionsData{}
@@ -237,9 +237,9 @@ func SubaccountResourceValueFrom(ctx context.Context, plan SubaccountConfig, val
 		applicationConnectionsValues = append(applicationConnectionsValues, ac)
 	}
 
-	applicationConnections, err := types.ListValueFrom(ctx, SubaccountApplicationConnectionsType, applicationConnectionsValues)
-	if err.HasError() {
-		return SubaccountConfig{}, err
+	applicationConnections, diags := types.ListValueFrom(ctx, SubaccountApplicationConnectionsType, applicationConnectionsValues)
+	if diags.HasError() {
+		return SubaccountConfig{}, diags
 	}
 
 	serviceChannelsValues := []SubaccountServiceChannelsData{}
@@ -254,9 +254,9 @@ func SubaccountResourceValueFrom(ctx context.Context, plan SubaccountConfig, val
 		serviceChannelsValues = append(serviceChannelsValues, sc)
 	}
 
-	serviceChannels, err := types.ListValueFrom(ctx, SubaccountServiceChannelsType, serviceChannelsValues)
-	if err.HasError() {
-		return SubaccountConfig{}, err
+	serviceChannels, diags := types.ListValueFrom(ctx, SubaccountServiceChannelsType, serviceChannelsValues)
+	if diags.HasError() {
+		return SubaccountConfig{}, diags
 	}
 
 	tunnelObj := SubaccountTunnelData{
@@ -269,9 +269,9 @@ func SubaccountResourceValueFrom(ctx context.Context, plan SubaccountConfig, val
 		ServiceChannels:         serviceChannels,
 	}
 
-	tunnel, err := types.ObjectValueFrom(ctx, SubaccountTunnelType, tunnelObj)
-	if err.HasError() {
-		return SubaccountConfig{}, err
+	tunnel, diags := types.ObjectValueFrom(ctx, SubaccountTunnelType, tunnelObj)
+	if diags.HasError() {
+		return SubaccountConfig{}, diags
 	}
 
 	model := &SubaccountConfig{
@@ -297,9 +297,9 @@ func SubaccountUsingAuthResourceValueFrom(ctx context.Context, plan SubaccountUs
 		SerialNumber:       types.StringValue(value.Tunnel.SubaccountCertificate.SerialNumber),
 	}
 
-	certificate, err := types.ObjectValueFrom(ctx, SubaccountCertificateType, certificateObj)
-	if err.HasError() {
-		return SubaccountUsingAuthConfig{}, err
+	certificate, diags := types.ObjectValueFrom(ctx, SubaccountCertificateType, certificateObj)
+	if diags.HasError() {
+		return SubaccountUsingAuthConfig{}, diags
 	}
 
 	applicationConnectionsValues := []SubaccountApplicationConnectionsData{}
@@ -313,9 +313,9 @@ func SubaccountUsingAuthResourceValueFrom(ctx context.Context, plan SubaccountUs
 		applicationConnectionsValues = append(applicationConnectionsValues, ac)
 	}
 
-	applicationConnections, err := types.ListValueFrom(ctx, SubaccountApplicationConnectionsType, applicationConnectionsValues)
-	if err.HasError() {
-		return SubaccountUsingAuthConfig{}, err
+	applicationConnections, diags := types.ListValueFrom(ctx, SubaccountApplicationConnectionsType, applicationConnectionsValues)
+	if diags.HasError() {
+		return SubaccountUsingAuthConfig{}, diags
 	}
 
 	serviceChannelsValues := []SubaccountServiceChannelsData{}
@@ -330,9 +330,9 @@ func SubaccountUsingAuthResourceValueFrom(ctx context.Context, plan SubaccountUs
 		serviceChannelsValues = append(serviceChannelsValues, sc)
 	}
 
-	serviceChannels, err := types.ListValueFrom(ctx, SubaccountServiceChannelsType, serviceChannelsValues)
-	if err.HasError() {
-		return SubaccountUsingAuthConfig{}, err
+	serviceChannels, diags := types.ListValueFrom(ctx, SubaccountServiceChannelsType, serviceChannelsValues)
+	if diags.HasError() {
+		return SubaccountUsingAuthConfig{}, diags
 	}
 
 	tunnelObj := SubaccountTunnelData{
@@ -345,9 +345,9 @@ func SubaccountUsingAuthResourceValueFrom(ctx context.Context, plan SubaccountUs
 		ServiceChannels:         serviceChannels,
 	}
 
-	tunnel, err := types.ObjectValueFrom(ctx, SubaccountTunnelType, tunnelObj)
-	if err.HasError() {
-		return SubaccountUsingAuthConfig{}, err
+	tunnel, diags := types.ObjectValueFrom(ctx, SubaccountTunnelType, tunnelObj)
+	if diags.HasError() {
+		return SubaccountUsingAuthConfig{}, diags
 	}
 
 	model := &SubaccountUsingAuthConfig{

@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	apiobjects "github.com/SAP/terraform-provider-scc/internal/api/apiObjects"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -38,7 +39,7 @@ type SystemMappingResourcesConfig struct {
 	SystemMappingResources []SystemMappingResourceData `tfsdk:"system_mapping_resources"`
 }
 
-func SystemMappingResourceValueFrom(ctx context.Context, plan SystemMappingResourceConfig, value apiobjects.SystemMappingResource) (SystemMappingResourceConfig, error) {
+func SystemMappingResourceValueFrom(ctx context.Context, plan SystemMappingResourceConfig, value apiobjects.SystemMappingResource) (SystemMappingResourceConfig, diag.Diagnostics) {
 	model := &SystemMappingResourceConfig{
 		RegionHost:              plan.RegionHost,
 		Subaccount:              plan.Subaccount,
@@ -52,10 +53,10 @@ func SystemMappingResourceValueFrom(ctx context.Context, plan SystemMappingResou
 		Description:             types.StringValue(value.Description),
 	}
 
-	return *model, nil
+	return *model, diag.Diagnostics{}
 }
 
-func SystemMappingResourcesValueFrom(ctx context.Context, plan SystemMappingResourcesConfig, value apiobjects.SystemMappingResources) (SystemMappingResourcesConfig, error) {
+func SystemMappingResourcesValueFrom(ctx context.Context, plan SystemMappingResourcesConfig, value apiobjects.SystemMappingResources) (SystemMappingResourcesConfig, diag.Diagnostics) {
 	system_mapping_resources := []SystemMappingResourceData{}
 	for _, smr := range value.SystemMappingResources {
 		r := SystemMappingResourceData{
@@ -77,7 +78,7 @@ func SystemMappingResourcesValueFrom(ctx context.Context, plan SystemMappingReso
 		SystemMappingResources: system_mapping_resources,
 	}
 
-	return *model, nil
+	return *model, diag.Diagnostics{}
 }
 
 /*

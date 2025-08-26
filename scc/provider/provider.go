@@ -3,7 +3,6 @@ package provider
 import (
 	"context"
 	"encoding/pem"
-	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -13,6 +12,7 @@ import (
 	"github.com/SAP/terraform-provider-scc/internal/api"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
@@ -216,7 +216,7 @@ func parseInstanceURL(instanceURL string, resp *provider.ConfigureResponse) *url
 	return parsedURL
 }
 func createClient(httpClient *http.Client, parsedURL *url.URL, username, password, caCertificate, clientCertificate, clientKey string, resp *provider.ConfigureResponse) *api.RestApiClient {
-	client, err := api.NewRestApiClient(
+	client, diags := api.NewRestApiClient(
 		httpClient,
 		parsedURL,
 		username,
@@ -225,29 +225,31 @@ func createClient(httpClient *http.Client, parsedURL *url.URL, username, passwor
 		[]byte(clientCertificate),
 		[]byte(clientKey),
 	)
-	if err != nil {
+	if diags.HasError() {
 		resp.Diagnostics.AddError(
 			"Client Creation Failed",
-			fmt.Sprintf("Failed to create Cloud Connector client: %v", err),
+			fmt.Sprintf("Failed to create Cloud Connector client: %v", diags),
 		)
 		return nil
 	}
 	return client
 }
-func testProviderConnection(client *api.RestApiClient) error {
-	resp, err := client.GetRequest("/api/v1/connector/version")
-	if err != nil {
-		return fmt.Errorf("connection test failed: %w", err)
+func testProviderConnection(client *api.RestApiClient) diag.Diagnostics {
+	resp, diags := client.GetRequest("/api/v1/connector/version")
+	if diags.HasError() {
+		return diags
 	}
 	if cerr := resp.Body.Close(); cerr != nil {
-		return fmt.Errorf("failed to close response body: %w", cerr)
+		diags.AddError("Response Body Close Error", fmt.Sprintf("Failed to close response body: %v", cerr))
+		return diags
 	}
 
 	if resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden {
-		return fmt.Errorf("authentication rejected with status: %s", resp.Status)
+		diags.AddError("Authentication Failed", "The provided authentication details were rejected by the Cloud Connector instance. Please verify your credentials and try again.")
+		return diags
 	}
 
-	return nil
+	return diags
 }
 
 func validatePEMBlock(pemString, attribute, title string, resp *provider.ConfigureResponse) bool {
@@ -262,12 +264,14 @@ func validatePEMBlock(pemString, attribute, title string, resp *provider.Configu
 	return true
 }
 
-func validatePEM(data string) error {
+func validatePEM(data string) diag.Diagnostics {
+	var diags diag.Diagnostics
 	block, _ := pem.Decode([]byte(data))
 	if block == nil {
-		return errors.New("data is not a valid PEM block")
+		diags.AddError("Invalid PEM Block", "data is not a valid PEM block")
+		return diags
 	}
-	return nil
+	return diags
 }
 
 // DataSources defines the data sources implemented in the provider.

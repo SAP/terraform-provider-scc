@@ -101,15 +101,15 @@ func (d *DomainMappingsDataSource) Read(ctx context.Context, req datasource.Read
 	subaccount := data.Subaccount.ValueString()
 	endpoint := fmt.Sprintf("/api/v1/configuration/subaccounts/%s/%s/domainMappings", regionHost, subaccount)
 
-	err := requestAndUnmarshal(d.client, &respObj.DomainMappings, "GET", endpoint, nil, true)
-	if err != nil {
-		resp.Diagnostics.AddError(errMsgFetchDomainMappingsFailed, err.Error())
+	diags = requestAndUnmarshal(d.client, &respObj.DomainMappings, "GET", endpoint, nil, true)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	responseModel, err := DomainMappingsValueFrom(ctx, data, respObj)
-	if err != nil {
-		resp.Diagnostics.AddError(errMsgMapDomainMappingsFailed, fmt.Sprintf("%s", err))
+	responseModel, diags := DomainMappingsValueFrom(ctx, data, respObj)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 	diags = resp.State.Set(ctx, &responseModel)

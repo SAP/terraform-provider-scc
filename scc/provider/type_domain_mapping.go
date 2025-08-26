@@ -2,9 +2,9 @@ package provider
 
 import (
 	"context"
-	"fmt"
 
 	apiobjects "github.com/SAP/terraform-provider-scc/internal/api/apiObjects"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -26,7 +26,7 @@ type DomainMappingsConfig struct {
 	DomainMappings []DomainMapping `tfsdk:"domain_mappings"`
 }
 
-func DomainMappingsValueFrom(ctx context.Context, plan DomainMappingsConfig, value apiobjects.DomainMappings) (DomainMappingsConfig, error) {
+func DomainMappingsValueFrom(ctx context.Context, plan DomainMappingsConfig, value apiobjects.DomainMappings) (DomainMappingsConfig, diag.Diagnostics) {
 	domain_mappings := []DomainMapping{}
 	for _, mappings := range value.DomainMappings {
 		c := DomainMapping{
@@ -42,24 +42,26 @@ func DomainMappingsValueFrom(ctx context.Context, plan DomainMappingsConfig, val
 		DomainMappings: domain_mappings,
 	}
 
-	return *model, nil
+	return *model, diag.Diagnostics{}
 }
 
-func DomainMappingValueFrom(ctx context.Context, plan DomainMappingConfig, value apiobjects.DomainMapping) (DomainMappingConfig, error) {
+func DomainMappingValueFrom(ctx context.Context, plan DomainMappingConfig, value apiobjects.DomainMapping) (DomainMappingConfig, diag.Diagnostics) {
 	model := &DomainMappingConfig{
 		RegionHost:     plan.RegionHost,
 		Subaccount:     plan.Subaccount,
 		VirtualDomain:  types.StringValue(value.VirtualDomain),
 		InternalDomain: types.StringValue(value.InternalDomain),
 	}
-	return *model, nil
+	return *model, diag.Diagnostics{}
 }
 
-func GetDomainMapping(domainMappings apiobjects.DomainMappings, targetInternalDomain string) (*apiobjects.DomainMapping, error) {
+func GetDomainMapping(domainMappings apiobjects.DomainMappings, targetInternalDomain string) (*apiobjects.DomainMapping, diag.Diagnostics) {
+	var diags diag.Diagnostics
 	for _, mapping := range domainMappings.DomainMappings {
 		if mapping.InternalDomain == targetInternalDomain {
-			return &mapping, nil
+			return &mapping, diags
 		}
 	}
-	return nil, fmt.Errorf("%s", "mapping doesn't exist")
+	diags.AddError("Mapping doesn't exist", "The specified mapping doesn't exist.")
+	return nil, diags
 }

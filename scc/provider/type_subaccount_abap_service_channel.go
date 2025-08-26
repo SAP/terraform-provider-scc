@@ -60,9 +60,9 @@ func SubaccountABAPServiceChannelValueFrom(ctx context.Context, plan SubaccountA
 		ConnectedSinceTimeStamp: types.Int64Value(value.State.ConnectedSinceTimeStamp),
 	}
 
-	state, err := types.ObjectValueFrom(ctx, SubaccountABAPServiceChannelStateType, stateObj)
-	if err.HasError() {
-		return SubaccountABAPServiceChannelConfig{}, err
+	state, diags := types.ObjectValueFrom(ctx, SubaccountABAPServiceChannelStateType, stateObj)
+	if diags.HasError() {
+		return SubaccountABAPServiceChannelConfig{}, diags
 	}
 
 	model := &SubaccountABAPServiceChannelConfig{
@@ -91,9 +91,9 @@ func SubaccountABAPServiceChannelsValueFrom(ctx context.Context, plan Subaccount
 			ConnectedSinceTimeStamp: types.Int64Value(channel.State.ConnectedSinceTimeStamp),
 		}
 
-		state, err := types.ObjectValueFrom(ctx, SubaccountABAPServiceChannelStateType, stateObj)
-		if err.HasError() {
-			return SubaccountABAPServiceChannelsConfig{}, err
+		state, diags := types.ObjectValueFrom(ctx, SubaccountABAPServiceChannelStateType, stateObj)
+		if diags.HasError() {
+			return SubaccountABAPServiceChannelsConfig{}, diags
 		}
 
 		c := SubaccountABAPServiceChannel{

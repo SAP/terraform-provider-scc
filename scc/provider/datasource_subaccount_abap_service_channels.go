@@ -152,15 +152,15 @@ func (d *SubaccountABAPServiceChannelsDataSource) Read(ctx context.Context, req 
 
 	endpoint := endpoints.GetSubaccountServiceChannelBaseEndpoint(regionHost, subaccount, "ABAPCloud")
 
-	err := requestAndUnmarshal(d.client, &respObj.SubaccountABAPServiceChannels, "GET", endpoint, nil, true)
-	if err != nil {
-		resp.Diagnostics.AddError(errMsgFetchSubaccountABAPServiceChannelsFailed, err.Error())
+	diags = requestAndUnmarshal(d.client, &respObj.SubaccountABAPServiceChannels, "GET", endpoint, nil, true)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	responseModel, diags := SubaccountABAPServiceChannelsValueFrom(ctx, data, respObj)
-	if diags.HasError() {
-		resp.Diagnostics.AddError(errMsgMapSubaccountABAPServiceChannelsFailed, fmt.Sprintf("%s", diags))
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 

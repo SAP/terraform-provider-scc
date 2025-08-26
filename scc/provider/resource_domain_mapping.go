@@ -103,27 +103,27 @@ func (r *DomainMappingResource) Create(ctx context.Context, req resource.CreateR
 		"internalDomain": plan.InternalDomain.ValueString(),
 	}
 
-	err := requestAndUnmarshal(r.client, &respObj.DomainMappings, "POST", endpoint, planBody, false)
-	if err != nil {
-		resp.Diagnostics.AddError(errMsgAddDomainMappingFailed, err.Error())
+	diags = requestAndUnmarshal(r.client, &respObj.DomainMappings, "POST", endpoint, planBody, false)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	err = requestAndUnmarshal(r.client, &respObj.DomainMappings, "GET", endpoint, nil, true)
-	if err != nil {
-		resp.Diagnostics.AddError(errMsgFetchDomainMappingsFailed, err.Error())
+	diags = requestAndUnmarshal(r.client, &respObj.DomainMappings, "GET", endpoint, nil, true)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	mappingRespObj, err := GetDomainMapping(respObj, internalDomain)
-	if err != nil {
-		resp.Diagnostics.AddError(errMsgFetchDomainMappingFailed, fmt.Sprintf("%s", err))
+	mappingRespObj, diags := GetDomainMapping(respObj, internalDomain)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	responseModel, err := DomainMappingValueFrom(ctx, plan, *mappingRespObj)
-	if err != nil {
-		resp.Diagnostics.AddError(errMsgMapDomainMappingFailed, fmt.Sprintf("%s", err))
+	responseModel, diags := DomainMappingValueFrom(ctx, plan, *mappingRespObj)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -148,21 +148,21 @@ func (r *DomainMappingResource) Read(ctx context.Context, req resource.ReadReque
 	internalDomain := state.InternalDomain.ValueString()
 	endpoint := endpoints.GetDomainMappingBaseEndpoint(regionHost, subaccount)
 
-	err := requestAndUnmarshal(r.client, &respObj.DomainMappings, "GET", endpoint, nil, true)
-	if err != nil {
-		resp.Diagnostics.AddError(errMsgFetchDomainMappingFailed, err.Error())
+	diags = requestAndUnmarshal(r.client, &respObj.DomainMappings, "GET", endpoint, nil, true)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	mappingRespObj, err := GetDomainMapping(respObj, internalDomain)
-	if err != nil {
-		resp.Diagnostics.AddError(errMsgFetchDomainMappingFailed, fmt.Sprintf("%s", err))
+	mappingRespObj, diags := GetDomainMapping(respObj, internalDomain)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	responseModel, err := DomainMappingValueFrom(ctx, state, *mappingRespObj)
-	if err != nil {
-		resp.Diagnostics.AddError(errMsgMapDomainMappingFailed, fmt.Sprintf("%s", err))
+	responseModel, diags := DomainMappingValueFrom(ctx, state, *mappingRespObj)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -195,7 +195,7 @@ func (r *DomainMappingResource) Update(ctx context.Context, req resource.UpdateR
 
 	if (state.RegionHost.ValueString() != regionHost) ||
 		(state.Subaccount.ValueString() != subaccount) {
-		resp.Diagnostics.AddError(errMsgUpdateDomainMappingFailed, "Failed to update the cloud connector domain mapping due to mismatched configuration values.")
+		resp.Diagnostics.AddError("Error updating the cloud connector domain mapping", "Failed to update the cloud connector domain mapping due to mismatched configuration values.")
 		return
 	}
 	endpoint := endpoints.GetDomainMappingEndpoint(regionHost, subaccount, internalDomain)
@@ -205,29 +205,29 @@ func (r *DomainMappingResource) Update(ctx context.Context, req resource.UpdateR
 		"internalDomain": plan.InternalDomain.ValueString(),
 	}
 
-	err := requestAndUnmarshal(r.client, &respObj.DomainMappings, "PUT", endpoint, planBody, false)
-	if err != nil {
-		resp.Diagnostics.AddError(errMsgUpdateDomainMappingFailed, err.Error())
+	diags = requestAndUnmarshal(r.client, &respObj.DomainMappings, "PUT", endpoint, planBody, false)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	endpoint = endpoints.GetDomainMappingBaseEndpoint(regionHost, subaccount)
 
-	err = requestAndUnmarshal(r.client, &respObj.DomainMappings, "GET", endpoint, nil, true)
-	if err != nil {
-		resp.Diagnostics.AddError(errMsgFetchDomainMappingsFailed, err.Error())
+	diags = requestAndUnmarshal(r.client, &respObj.DomainMappings, "GET", endpoint, nil, true)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	mappingRespObj, err := GetDomainMapping(respObj, plan.InternalDomain.ValueString())
-	if err != nil {
-		resp.Diagnostics.AddError(errMsgFetchDomainMappingFailed, fmt.Sprintf("%s", err))
+	mappingRespObj, diags := GetDomainMapping(respObj, plan.InternalDomain.ValueString())
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	responseModel, err := DomainMappingValueFrom(ctx, plan, *mappingRespObj)
-	if err != nil {
-		resp.Diagnostics.AddError(errMsgMapDomainMappingFailed, fmt.Sprintf("%s", err))
+	responseModel, diags := DomainMappingValueFrom(ctx, plan, *mappingRespObj)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
@@ -252,15 +252,15 @@ func (r *DomainMappingResource) Delete(ctx context.Context, req resource.DeleteR
 	internalDomain := state.InternalDomain.ValueString()
 	endpoint := endpoints.GetDomainMappingEndpoint(regionHost, subaccount, internalDomain)
 
-	err := requestAndUnmarshal(r.client, &respObj, "DELETE", endpoint, nil, false)
-	if err != nil {
-		resp.Diagnostics.AddError(errMsgDeleteDomainMappingFailed, err.Error())
+	diags = requestAndUnmarshal(r.client, &respObj, "DELETE", endpoint, nil, false)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	responseModel, err := DomainMappingValueFrom(ctx, state, respObj)
-	if err != nil {
-		resp.Diagnostics.AddError(errMsgMapDomainMappingFailed, fmt.Sprintf("%s", err))
+	responseModel, diags := DomainMappingValueFrom(ctx, state, respObj)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 

@@ -148,15 +148,15 @@ func (d *SubaccountK8SServiceChannelsDataSource) Read(ctx context.Context, req d
 
 	endpoint := endpoints.GetSubaccountServiceChannelBaseEndpoint(regionHost, subaccount, "K8S")
 
-	err := requestAndUnmarshal(d.client, &respObj.SubaccountK8SServiceChannels, "GET", endpoint, nil, true)
-	if err != nil {
-		resp.Diagnostics.AddError(errMsgFetchSubaccountK8SServiceChannelsFailed, err.Error())
+	diags = requestAndUnmarshal(d.client, &respObj.SubaccountK8SServiceChannels, "GET", endpoint, nil, true)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	responseModel, diags := SubaccountK8SServiceChannelsValueFrom(ctx, data, respObj)
-	if diags.HasError() {
-		resp.Diagnostics.AddError(errMsgMapSubaccountK8SServiceChannelsFailed, fmt.Sprintf("%s", diags))
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 

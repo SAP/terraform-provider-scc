@@ -313,15 +313,15 @@ func (d *SystemMappingsDataSource) Read(ctx context.Context, req datasource.Read
 	subaccount := data.Subaccount.ValueString()
 	endpoint := endpoints.GetSystemMappingBaseEndpoint(regionHost, subaccount)
 
-	err := requestAndUnmarshal(d.client, &respObj.SystemMappings, "GET", endpoint, nil, true)
-	if err != nil {
-		resp.Diagnostics.AddError(errMsgFetchSystemMappingsFailed, err.Error())
+	diags = requestAndUnmarshal(d.client, &respObj.SystemMappings, "GET", endpoint, nil, true)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	responseModel, diags := SystemMappingsValueFrom(ctx, data, respObj)
-	if diags.HasError() {
-		resp.Diagnostics.AddError(errMsgMapSystemMappingFailed, fmt.Sprintf("%s", diags))
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 	diags = resp.State.Set(ctx, &responseModel)

@@ -196,15 +196,15 @@ func (d *SubaccountConfigurationDataSource) Read(ctx context.Context, req dataso
 	subaccount := data.Subaccount.ValueString()
 	endpoint := endpoints.GetSubaccountEndpoint(regionHost, subaccount)
 
-	err := requestAndUnmarshal(d.client, &respObj, "GET", endpoint, nil, true)
-	if err != nil {
-		resp.Diagnostics.AddError(errMsgFetchSubaccountFailed, err.Error())
+	diags = requestAndUnmarshal(d.client, &respObj, "GET", endpoint, nil, true)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	responseModel, diags := SubaccountDataSourceValueFrom(ctx, respObj)
-	if diags.HasError() {
-		resp.Diagnostics.AddError(errMsgMapSubaccountFailed, fmt.Sprintf("%s", diags))
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
