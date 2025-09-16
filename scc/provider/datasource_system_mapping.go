@@ -68,8 +68,8 @@ Note: In the UI, this attribute may appear with different names depending on the
 				Required: true,
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
-						regexp.MustCompile(`^[A-Za-z0-9.-]+$`),
-						"must contain only letters, numbers, dots, and dashes (no underscores recommended)",
+						regexp.MustCompile(`^[a-z0-9.-]+$`),
+						"must contain only lowercase letters, numbers, dots, and dashes (no underscores recommended)",
 					),
 				},
 			},
@@ -82,16 +82,13 @@ __UI Note:__ This attribute appears under different names depending on the proto
 * **RFC** → "Virtual Instance Number/ Virtual System ID"
 
 __Allowed formats:__
-* **Numeric (0–65535)** → for HTTP(S), TCP/TCPS, LDAP/LDAPS
-* **sapgwXX** or **sapgwXXs** → for RFC without load balancing
-* **33XX** → Classic RFC Port
-* **48XX** → Secure RFC Port`,
+* **Numeric (1–65535)** → for HTTP(S), TCP/TCPS, LDAP/LDAPS
+* **sapmsSID** → for RFC with load balancing
+* **sapgwXX** → for RFC without load balancing
+* **sapgwXXs** → for Secure RFC without load balancing`,
 				Required: true,
 				Validators: []validator.String{
-					stringvalidator.RegexMatches(
-						regexp.MustCompile(`^([0-9]{1,5}|sapgw[0-9]{2}|sapgw[0-9]{2}s|33[0-9]{2}|48[0-9]{2})$`),
-						"must be numeric (0–65535), sapgwXX, sapgwXXs, 33XX, or 48XX",
-					),
+					systemMapping.ValidatePort(),
 				},
 			},
 			"internal_host": schema.StringAttribute{
@@ -103,8 +100,8 @@ Note: In the UI, this attribute may appear with different names depending on the
 				Computed: true,
 				Validators: []validator.String{
 					stringvalidator.RegexMatches(
-						regexp.MustCompile(`^[A-Za-z0-9.-]+$`),
-						"must contain only letters, numbers, dots, and dashes (no underscores recommended)",
+						regexp.MustCompile(`^[a-z0-9.-]+$`),
+						"must contain only lowercase letters, numbers, dots, and dashes (no underscores recommended)",
 					),
 				},
 			},
@@ -116,16 +113,14 @@ __UI Note:__ This field may appear under different names in the Cloud Connector 
 				
 				
 __Allowed formats:__
-* **Numeric (0–65535)** → for HTTP(S), TCP/TCPS, LDAP/LDAPS
-* **sapgwXX** or **sapgwXXs** → for RFC without load balancing
-* **33XX** → Classic RFC Port
-* **48XX** → Secure RFC Port`,
+* **Numeric (1–65535)** → for HTTP(S), TCP/TCPS, LDAP/LDAPS
+* **sapmsSID** → for RFC with load balancing
+* **sapgwXX** → for RFC without load balancing
+* **sapgwXXs** → for Secure RFC without load balancing`,
+
 				Computed: true,
 				Validators: []validator.String{
-					stringvalidator.RegexMatches(
-						regexp.MustCompile(`^([0-9]{1,5}|sapgw[0-9]{2}|sapgw[0-9]{2}s|33[0-9]{2}|48[0-9]{2})$`),
-						"must be numeric (0–65535), sapgwXX, sapgwXXs, 33XX, or 48XX",
-					),
+					systemMapping.ValidatePort(),
 				},
 			},
 			"creation_date": schema.StringAttribute{
