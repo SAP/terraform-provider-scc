@@ -67,10 +67,10 @@ __UI Note:__ This field may appear under different names in the Cloud Connector 
 				
 				
 __Allowed formats:__
-* **Numeric (0–65535)** → for HTTP(S), TCP/TCPS, LDAP/LDAPS
-* **sapgwXX** or **sapgwXXs** → for RFC without load balancing
-* **33XX** → Classic RFC Port
-* **48XX** → Secure RFC Port
+* **Numeric (1–65535)** → for HTTP(S), TCP/TCPS, LDAP/LDAPS
+* **sapmsSID** → for RFC with load balancing
+* **sapgwXX** → for RFC without load balancing
+* **sapgwXXs** → for Secure RFC without load balancing
 - `protocol` (String) Protocol used when sending requests and receiving responses, which must be one of the following values:
   | protocol | description | 
   | --- | --- | 
@@ -99,10 +99,10 @@ __UI Note:__ This attribute appears under different names depending on the proto
 * **RFC** → "Virtual Instance Number/ Virtual System ID"
 
 __Allowed formats:__
-* **Numeric (0–65535)** → for HTTP(S), TCP/TCPS, LDAP/LDAPS
-* **sapgwXX** or **sapgwXXs** → for RFC without load balancing
-* **33XX** → Classic RFC Port
-* **48XX** → Secure RFC Port
+* **Numeric (1–65535)** → for HTTP(S), TCP/TCPS, LDAP/LDAPS
+* **sapmsSID** → for RFC with load balancing
+* **sapgwXX** → for RFC without load balancing
+* **sapgwXXs** → for Secure RFC without load balancing
 
 ### Optional
 
