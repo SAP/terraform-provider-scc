@@ -114,14 +114,14 @@ type SubaccountConfig struct {
 }
 
 type SubaccountUsingAuthConfig struct {
-	RegionHost          types.String `tfsdk:"region_host"`
-	Subaccount          types.String `tfsdk:"subaccount"`
-	AuthenticationData  types.String `tfsdk:"authentication_data"`
-	LocationID          types.String `tfsdk:"location_id"`
-	DisplayName         types.String `tfsdk:"display_name"`
-	Description         types.String `tfsdk:"description"`
-	Tunnel              types.Object `tfsdk:"tunnel"`
-	Connected           types.Bool   `tfsdk:"connected"`
+	RegionHost         types.String `tfsdk:"region_host"`
+	Subaccount         types.String `tfsdk:"subaccount"`
+	AuthenticationData types.String `tfsdk:"authentication_data"`
+	LocationID         types.String `tfsdk:"location_id"`
+	DisplayName        types.String `tfsdk:"display_name"`
+	Description        types.String `tfsdk:"description"`
+	Tunnel             types.Object `tfsdk:"tunnel"`
+	Connected          types.Bool   `tfsdk:"connected"`
 }
 
 func SubaccountsDataSourceValueFrom(value apiobjects.SubaccountsDataSource) (SubaccountsConfig, diag.Diagnostics) {
@@ -353,14 +353,14 @@ func SubaccountUsingAuthResourceValueFrom(ctx context.Context, plan SubaccountUs
 	}
 
 	model := &SubaccountUsingAuthConfig{
-		RegionHost:          types.StringValue(value.RegionHost),
-		Subaccount:          types.StringValue(value.Subaccount),
-		AuthenticationData:  plan.AuthenticationData,
-		LocationID:          types.StringValue(value.LocationID),
-		DisplayName:         types.StringValue(value.DisplayName),
-		Description:         types.StringValue(value.Description),
-		Tunnel:              tunnel,
-		Connected:           plan.Connected,
+		RegionHost:         types.StringValue(value.RegionHost),
+		Subaccount:         types.StringValue(value.Subaccount),
+		AuthenticationData: plan.AuthenticationData,
+		LocationID:         types.StringValue(value.LocationID),
+		DisplayName:        types.StringValue(value.DisplayName),
+		Description:        types.StringValue(value.Description),
+		Tunnel:             tunnel,
+		Connected:          plan.Connected,
 	}
 	return *model, diag.Diagnostics{}
 }

@@ -18,8 +18,8 @@ const (
 	actionUpdateRequest = "Update"
 )
 
-type FormattedTimes struct{
-	UTC types.String
+type FormattedTimes struct {
+	UTC          types.String
 	WithTimezone types.String
 }
 
@@ -156,7 +156,7 @@ func ConvertMillisToTimes(millis interface{}) FormattedTimes {
 	t := time.UnixMilli(ms).UTC()
 
 	return FormattedTimes{
-		UTC:    types.StringValue(t.Format("2006-01-02 15:04:05")),
+		UTC:          types.StringValue(t.Format("2006-01-02 15:04:05")),
 		WithTimezone: types.StringValue(t.Format("2006-01-02 15:04:05 -0700")),
 	}
 }

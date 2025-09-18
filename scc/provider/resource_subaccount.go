@@ -320,7 +320,7 @@ func (r *SubaccountResource) Read(ctx context.Context, req resource.ReadRequest,
 		return
 	}
 
-	shouldRenew:= shouldRenewCertificate(respObj.Tunnel.SubaccountCertificate.NotAfterTimeStamp, state.AutoRenewBeforeDays.ValueInt64())
+	shouldRenew := shouldRenewCertificate(respObj.Tunnel.SubaccountCertificate.NotAfterTimeStamp, state.AutoRenewBeforeDays.ValueInt64())
 
 	if shouldRenew {
 		renewedRespObj, diags := r.renewCertificate(state, regionHost, subaccount)
