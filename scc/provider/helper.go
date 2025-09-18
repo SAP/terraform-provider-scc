@@ -112,27 +112,6 @@ func requestAndUnmarshal[T any](client *api.RestApiClient, respObj *T, requestTy
 
 }
 
-// func ConvertIntMillisToTime(millis int64) types.String {
-// 	if millis == 0 {
-// 		return types.StringNull()
-// 	}
-// 	t := time.UnixMilli(millis).UTC()
-// 	return types.StringValue(t.Format("2006-01-02 15:04:05 -0700"))
-// }
-
-// func ConvertStringMillisToTime(millis string) types.String{
-// 	ms, err:= strconv.ParseInt(millis, 10, 64)
-// 	if err != nil {
-// 		return types.StringNull()
-// 	}
-
-// 	sec:= ms/1000
-
-// 	t:= time.Unix(sec, 0).UTC()
-
-// 	return types.StringValue(t.Format("2006-01-02 15:04:05"))
-// }
-
 func ConvertMillisToTimes(millis interface{}) FormattedTimes {
 	var ms int64
 	switch v := millis.(type) {
