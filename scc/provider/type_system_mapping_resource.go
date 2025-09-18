@@ -49,7 +49,7 @@ func SystemMappingResourceValueFrom(ctx context.Context, plan SystemMappingResou
 		Enabled:                 types.BoolValue(value.Enabled),
 		PathOnly:                types.BoolValue(value.PathOnly),
 		WebsocketUpgradeAllowed: types.BoolValue(value.WebsocketUpgradeAllowed),
-		CreationDate:            types.StringValue(value.CreationDate),
+		CreationDate:            ConvertMillisToTimes(value.CreationDate).UTC,
 		Description:             types.StringValue(value.Description),
 	}
 
@@ -64,7 +64,7 @@ func SystemMappingResourcesValueFrom(ctx context.Context, plan SystemMappingReso
 			Enabled:                 types.BoolValue(smr.Enabled),
 			PathOnly:                types.BoolValue(smr.PathOnly),
 			WebsocketUpgradeAllowed: types.BoolValue(smr.WebsocketUpgradeAllowed),
-			CreationDate:            types.StringValue(smr.CreationDate),
+			CreationDate:            ConvertMillisToTimes(smr.CreationDate).UTC,
 			Description:             types.StringValue(smr.Description),
 		}
 		system_mapping_resources = append(system_mapping_resources, r)

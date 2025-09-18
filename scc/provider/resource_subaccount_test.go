@@ -34,8 +34,9 @@ func TestResourceSubaccount(t *testing.T) {
 						resource.TestCheckResourceAttr("scc_subaccount.test", "cloud_password", user.CloudPassword),
 						resource.TestCheckResourceAttr("scc_subaccount.test", "description", "subaccount added via terraform tests"),
 						resource.TestCheckResourceAttr("scc_subaccount.test", "location_id", ""),
+						resource.TestCheckResourceAttr("scc_subaccount.test", "auto_renew_before_days", "14"),
 
-						resource.TestMatchResourceAttr("scc_subaccount.test", "tunnel.connected_since_time_stamp", regexValidTimeStamp),
+						resource.TestMatchResourceAttr("scc_subaccount.test", "tunnel.connected_since", regexValidTimeStamp),
 						resource.TestCheckResourceAttr("scc_subaccount.test", "tunnel.connections", "0"),
 						resource.TestCheckResourceAttr("scc_subaccount.test", "tunnel.state", "Connected"),
 						resource.TestCheckResourceAttr("scc_subaccount.test", "tunnel.user", user.CloudUsername),
@@ -44,8 +45,8 @@ func TestResourceSubaccount(t *testing.T) {
 						resource.TestCheckResourceAttr("scc_subaccount.test", "tunnel.service_channels.#", "0"),
 
 						resource.TestMatchResourceAttr("scc_subaccount.test", "tunnel.subaccount_certificate.issuer", regexp.MustCompile(`CN=.*?,OU=S.*?,O=.*?,L=.*?,C=.*?`)),
-						resource.TestMatchResourceAttr("scc_subaccount.test", "tunnel.subaccount_certificate.not_after_time_stamp", regexValidTimeStamp),
-						resource.TestMatchResourceAttr("scc_subaccount.test", "tunnel.subaccount_certificate.not_before_time_stamp", regexValidTimeStamp),
+						resource.TestMatchResourceAttr("scc_subaccount.test", "tunnel.subaccount_certificate.valid_to", regexValidTimeStamp),
+						resource.TestMatchResourceAttr("scc_subaccount.test", "tunnel.subaccount_certificate.valid_from", regexValidTimeStamp),
 						resource.TestMatchResourceAttr("scc_subaccount.test", "tunnel.subaccount_certificate.serial_number", regexValidSerialNumber),
 						resource.TestMatchResourceAttr("scc_subaccount.test", "tunnel.subaccount_certificate.subject_dn", regexp.MustCompile(`CN=.*?,L=.*?,OU=.*?,OU=.*?,O=.*?,C=.*?`)),
 					),
@@ -60,6 +61,7 @@ func TestResourceSubaccount(t *testing.T) {
 						"cloud_user",
 						"cloud_password",
 						"connected",
+						"auto_renew_before_days",
 					},
 				},
 				{

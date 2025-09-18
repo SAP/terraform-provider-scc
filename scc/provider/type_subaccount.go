@@ -19,20 +19,20 @@ type SubaccountData struct {
 }
 
 type SubaccountTunnelData struct {
-	State                   types.String `tfsdk:"state"`
-	ConnectedSinceTimeStamp types.Int64  `tfsdk:"connected_since_time_stamp"`
-	Connections             types.Int64  `tfsdk:"connections"`
-	SubaccountCertificate   types.Object `tfsdk:"subaccount_certificate"`
-	User                    types.String `tfsdk:"user"`
-	ApplicationConnections  types.List   `tfsdk:"application_connections"`
-	ServiceChannels         types.List   `tfsdk:"service_channels"`
+	State                  types.String `tfsdk:"state"`
+	ConnectedSince         types.String `tfsdk:"connected_since"`
+	Connections            types.Int64  `tfsdk:"connections"`
+	SubaccountCertificate  types.Object `tfsdk:"subaccount_certificate"`
+	User                   types.String `tfsdk:"user"`
+	ApplicationConnections types.List   `tfsdk:"application_connections"`
+	ServiceChannels        types.List   `tfsdk:"service_channels"`
 }
 
 var SubaccountTunnelType = map[string]attr.Type{
-	"state":                      types.StringType,
-	"connected_since_time_stamp": types.Int64Type,
-	"connections":                types.Int64Type,
-	"user":                       types.StringType,
+	"state":           types.StringType,
+	"connected_since": types.StringType,
+	"connections":     types.Int64Type,
+	"user":            types.StringType,
 	"subaccount_certificate": types.ObjectType{
 		AttrTypes: SubaccountCertificateType,
 	},
@@ -45,19 +45,19 @@ var SubaccountTunnelType = map[string]attr.Type{
 }
 
 type SubaccountCertificateData struct {
-	NotAfterTimeStamp  types.Int64  `tfsdk:"not_after_time_stamp"`
-	NotBeforeTimeStamp types.Int64  `tfsdk:"not_before_time_stamp"`
-	SubjectDN          types.String `tfsdk:"subject_dn"`
-	Issuer             types.String `tfsdk:"issuer"`
-	SerialNumber       types.String `tfsdk:"serial_number"`
+	ValidTo      types.String `tfsdk:"valid_to"`
+	ValidFrom    types.String `tfsdk:"valid_from"`
+	SubjectDN    types.String `tfsdk:"subject_dn"`
+	Issuer       types.String `tfsdk:"issuer"`
+	SerialNumber types.String `tfsdk:"serial_number"`
 }
 
 var SubaccountCertificateType = map[string]attr.Type{
-	"not_after_time_stamp":  types.Int64Type,
-	"not_before_time_stamp": types.Int64Type,
-	"subject_dn":            types.StringType,
-	"issuer":                types.StringType,
-	"serial_number":         types.StringType,
+	"valid_to":      types.StringType,
+	"valid_from":    types.StringType,
+	"subject_dn":    types.StringType,
+	"issuer":        types.StringType,
+	"serial_number": types.StringType,
 }
 
 type SubaccountApplicationConnectionsData struct {
@@ -101,26 +101,27 @@ type SubaccountsConfig struct {
 }
 
 type SubaccountConfig struct {
-	RegionHost    types.String `tfsdk:"region_host"`
-	Subaccount    types.String `tfsdk:"subaccount"`
-	CloudUser     types.String `tfsdk:"cloud_user"`
-	CloudPassword types.String `tfsdk:"cloud_password"`
-	LocationID    types.String `tfsdk:"location_id"`
-	DisplayName   types.String `tfsdk:"display_name"`
-	Description   types.String `tfsdk:"description"`
-	Tunnel        types.Object `tfsdk:"tunnel"`
-	Connected     types.Bool   `tfsdk:"connected"`
+	RegionHost          types.String `tfsdk:"region_host"`
+	Subaccount          types.String `tfsdk:"subaccount"`
+	CloudUser           types.String `tfsdk:"cloud_user"`
+	CloudPassword       types.String `tfsdk:"cloud_password"`
+	LocationID          types.String `tfsdk:"location_id"`
+	DisplayName         types.String `tfsdk:"display_name"`
+	Description         types.String `tfsdk:"description"`
+	Tunnel              types.Object `tfsdk:"tunnel"`
+	Connected           types.Bool   `tfsdk:"connected"`
+	AutoRenewBeforeDays types.Int64  `tfsdk:"auto_renew_before_days"`
 }
 
 type SubaccountUsingAuthConfig struct {
-	RegionHost         types.String `tfsdk:"region_host"`
-	Subaccount         types.String `tfsdk:"subaccount"`
-	AuthenticationData types.String `tfsdk:"authentication_data"`
-	LocationID         types.String `tfsdk:"location_id"`
-	DisplayName        types.String `tfsdk:"display_name"`
-	Description        types.String `tfsdk:"description"`
-	Tunnel             types.Object `tfsdk:"tunnel"`
-	Connected          types.Bool   `tfsdk:"connected"`
+	RegionHost          types.String `tfsdk:"region_host"`
+	Subaccount          types.String `tfsdk:"subaccount"`
+	AuthenticationData  types.String `tfsdk:"authentication_data"`
+	LocationID          types.String `tfsdk:"location_id"`
+	DisplayName         types.String `tfsdk:"display_name"`
+	Description         types.String `tfsdk:"description"`
+	Tunnel              types.Object `tfsdk:"tunnel"`
+	Connected           types.Bool   `tfsdk:"connected"`
 }
 
 func SubaccountsDataSourceValueFrom(value apiobjects.SubaccountsDataSource) (SubaccountsConfig, diag.Diagnostics) {
@@ -141,11 +142,11 @@ func SubaccountsDataSourceValueFrom(value apiobjects.SubaccountsDataSource) (Sub
 
 func SubaccountDataSourceValueFrom(ctx context.Context, value apiobjects.Subaccount) (SubaccountData, diag.Diagnostics) {
 	certificateObj := SubaccountCertificateData{
-		NotAfterTimeStamp:  types.Int64Value(value.Tunnel.SubaccountCertificate.NotAfterTimeStamp),
-		NotBeforeTimeStamp: types.Int64Value(value.Tunnel.SubaccountCertificate.NotBeforeTimeStamp),
-		SubjectDN:          types.StringValue(value.Tunnel.SubaccountCertificate.SubjectDN),
-		Issuer:             types.StringValue(value.Tunnel.SubaccountCertificate.Issuer),
-		SerialNumber:       types.StringValue(value.Tunnel.SubaccountCertificate.SerialNumber),
+		ValidTo:      ConvertMillisToTimes(value.Tunnel.SubaccountCertificate.NotAfterTimeStamp).WithTimezone,
+		ValidFrom:    ConvertMillisToTimes(value.Tunnel.SubaccountCertificate.NotBeforeTimeStamp).WithTimezone,
+		SubjectDN:    types.StringValue(value.Tunnel.SubaccountCertificate.SubjectDN),
+		Issuer:       types.StringValue(value.Tunnel.SubaccountCertificate.Issuer),
+		SerialNumber: types.StringValue(value.Tunnel.SubaccountCertificate.SerialNumber),
 	}
 
 	certificate, diags := types.ObjectValueFrom(ctx, SubaccountCertificateType, certificateObj)
@@ -187,13 +188,13 @@ func SubaccountDataSourceValueFrom(ctx context.Context, value apiobjects.Subacco
 	}
 
 	tunnelObj := SubaccountTunnelData{
-		State:                   types.StringValue(value.Tunnel.State),
-		ConnectedSinceTimeStamp: types.Int64Value(value.Tunnel.ConnectedSinceTimeStamp),
-		Connections:             types.Int64Value(value.Tunnel.Connections),
-		User:                    types.StringValue(value.Tunnel.User),
-		SubaccountCertificate:   certificate,
-		ApplicationConnections:  applicationConnections,
-		ServiceChannels:         serviceChannels,
+		State:                  types.StringValue(value.Tunnel.State),
+		ConnectedSince:         ConvertMillisToTimes(value.Tunnel.ConnectedSinceTimeStamp).WithTimezone,
+		Connections:            types.Int64Value(value.Tunnel.Connections),
+		User:                   types.StringValue(value.Tunnel.User),
+		SubaccountCertificate:  certificate,
+		ApplicationConnections: applicationConnections,
+		ServiceChannels:        serviceChannels,
 	}
 
 	tunnel, diags := types.ObjectValueFrom(ctx, SubaccountTunnelType, tunnelObj)
@@ -214,11 +215,11 @@ func SubaccountDataSourceValueFrom(ctx context.Context, value apiobjects.Subacco
 
 func SubaccountResourceValueFrom(ctx context.Context, plan SubaccountConfig, value apiobjects.SubaccountResource) (SubaccountConfig, diag.Diagnostics) {
 	certificateObj := SubaccountCertificateData{
-		NotAfterTimeStamp:  types.Int64Value(value.Tunnel.SubaccountCertificate.NotAfterTimeStamp),
-		NotBeforeTimeStamp: types.Int64Value(value.Tunnel.SubaccountCertificate.NotBeforeTimeStamp),
-		SubjectDN:          types.StringValue(value.Tunnel.SubaccountCertificate.SubjectDN),
-		Issuer:             types.StringValue(value.Tunnel.SubaccountCertificate.Issuer),
-		SerialNumber:       types.StringValue(value.Tunnel.SubaccountCertificate.SerialNumber),
+		ValidTo:      ConvertMillisToTimes(value.Tunnel.SubaccountCertificate.NotAfterTimeStamp).WithTimezone,
+		ValidFrom:    ConvertMillisToTimes(value.Tunnel.SubaccountCertificate.NotBeforeTimeStamp).WithTimezone,
+		SubjectDN:    types.StringValue(value.Tunnel.SubaccountCertificate.SubjectDN),
+		Issuer:       types.StringValue(value.Tunnel.SubaccountCertificate.Issuer),
+		SerialNumber: types.StringValue(value.Tunnel.SubaccountCertificate.SerialNumber),
 	}
 
 	certificate, diags := types.ObjectValueFrom(ctx, SubaccountCertificateType, certificateObj)
@@ -260,13 +261,13 @@ func SubaccountResourceValueFrom(ctx context.Context, plan SubaccountConfig, val
 	}
 
 	tunnelObj := SubaccountTunnelData{
-		State:                   types.StringValue(value.Tunnel.State),
-		ConnectedSinceTimeStamp: types.Int64Value(value.Tunnel.ConnectedSinceTimeStamp),
-		Connections:             types.Int64Value(value.Tunnel.Connections),
-		User:                    types.StringValue(value.Tunnel.User),
-		SubaccountCertificate:   certificate,
-		ApplicationConnections:  applicationConnections,
-		ServiceChannels:         serviceChannels,
+		State:                  types.StringValue(value.Tunnel.State),
+		ConnectedSince:         ConvertMillisToTimes(value.Tunnel.ConnectedSinceTimeStamp).WithTimezone,
+		Connections:            types.Int64Value(value.Tunnel.Connections),
+		User:                   types.StringValue(value.Tunnel.User),
+		SubaccountCertificate:  certificate,
+		ApplicationConnections: applicationConnections,
+		ServiceChannels:        serviceChannels,
 	}
 
 	tunnel, diags := types.ObjectValueFrom(ctx, SubaccountTunnelType, tunnelObj)
@@ -275,26 +276,27 @@ func SubaccountResourceValueFrom(ctx context.Context, plan SubaccountConfig, val
 	}
 
 	model := &SubaccountConfig{
-		RegionHost:    types.StringValue(value.RegionHost),
-		Subaccount:    types.StringValue(value.Subaccount),
-		LocationID:    types.StringValue(value.LocationID),
-		DisplayName:   types.StringValue(value.DisplayName),
-		Description:   types.StringValue(value.Description),
-		CloudUser:     plan.CloudUser,
-		CloudPassword: plan.CloudPassword,
-		Tunnel:        tunnel,
-		Connected:     plan.Connected,
+		RegionHost:          types.StringValue(value.RegionHost),
+		Subaccount:          types.StringValue(value.Subaccount),
+		LocationID:          types.StringValue(value.LocationID),
+		DisplayName:         types.StringValue(value.DisplayName),
+		Description:         types.StringValue(value.Description),
+		CloudUser:           plan.CloudUser,
+		CloudPassword:       plan.CloudPassword,
+		Tunnel:              tunnel,
+		Connected:           plan.Connected,
+		AutoRenewBeforeDays: plan.AutoRenewBeforeDays,
 	}
 	return *model, diag.Diagnostics{}
 }
 
 func SubaccountUsingAuthResourceValueFrom(ctx context.Context, plan SubaccountUsingAuthConfig, value apiobjects.SubaccountUsingAuthResource) (SubaccountUsingAuthConfig, diag.Diagnostics) {
 	certificateObj := SubaccountCertificateData{
-		NotAfterTimeStamp:  types.Int64Value(value.Tunnel.SubaccountCertificate.NotAfterTimeStamp),
-		NotBeforeTimeStamp: types.Int64Value(value.Tunnel.SubaccountCertificate.NotBeforeTimeStamp),
-		SubjectDN:          types.StringValue(value.Tunnel.SubaccountCertificate.SubjectDN),
-		Issuer:             types.StringValue(value.Tunnel.SubaccountCertificate.Issuer),
-		SerialNumber:       types.StringValue(value.Tunnel.SubaccountCertificate.SerialNumber),
+		ValidTo:      ConvertMillisToTimes(value.Tunnel.SubaccountCertificate.NotAfterTimeStamp).WithTimezone,
+		ValidFrom:    ConvertMillisToTimes(value.Tunnel.SubaccountCertificate.NotBeforeTimeStamp).WithTimezone,
+		SubjectDN:    types.StringValue(value.Tunnel.SubaccountCertificate.SubjectDN),
+		Issuer:       types.StringValue(value.Tunnel.SubaccountCertificate.Issuer),
+		SerialNumber: types.StringValue(value.Tunnel.SubaccountCertificate.SerialNumber),
 	}
 
 	certificate, diags := types.ObjectValueFrom(ctx, SubaccountCertificateType, certificateObj)
@@ -336,13 +338,13 @@ func SubaccountUsingAuthResourceValueFrom(ctx context.Context, plan SubaccountUs
 	}
 
 	tunnelObj := SubaccountTunnelData{
-		State:                   types.StringValue(value.Tunnel.State),
-		ConnectedSinceTimeStamp: types.Int64Value(value.Tunnel.ConnectedSinceTimeStamp),
-		Connections:             types.Int64Value(value.Tunnel.Connections),
-		User:                    types.StringValue(value.Tunnel.User),
-		SubaccountCertificate:   certificate,
-		ApplicationConnections:  applicationConnections,
-		ServiceChannels:         serviceChannels,
+		State:                  types.StringValue(value.Tunnel.State),
+		ConnectedSince:         ConvertMillisToTimes(value.Tunnel.ConnectedSinceTimeStamp).WithTimezone,
+		Connections:            types.Int64Value(value.Tunnel.Connections),
+		User:                   types.StringValue(value.Tunnel.User),
+		SubaccountCertificate:  certificate,
+		ApplicationConnections: applicationConnections,
+		ServiceChannels:        serviceChannels,
 	}
 
 	tunnel, diags := types.ObjectValueFrom(ctx, SubaccountTunnelType, tunnelObj)
@@ -351,14 +353,14 @@ func SubaccountUsingAuthResourceValueFrom(ctx context.Context, plan SubaccountUs
 	}
 
 	model := &SubaccountUsingAuthConfig{
-		RegionHost:         types.StringValue(value.RegionHost),
-		Subaccount:         types.StringValue(value.Subaccount),
-		AuthenticationData: plan.AuthenticationData,
-		LocationID:         types.StringValue(value.LocationID),
-		DisplayName:        types.StringValue(value.DisplayName),
-		Description:        types.StringValue(value.Description),
-		Tunnel:             tunnel,
-		Connected:          plan.Connected,
+		RegionHost:          types.StringValue(value.RegionHost),
+		Subaccount:          types.StringValue(value.Subaccount),
+		AuthenticationData:  plan.AuthenticationData,
+		LocationID:          types.StringValue(value.LocationID),
+		DisplayName:         types.StringValue(value.DisplayName),
+		Description:         types.StringValue(value.Description),
+		Tunnel:              tunnel,
+		Connected:           plan.Connected,
 	}
 	return *model, diag.Diagnostics{}
 }

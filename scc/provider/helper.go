@@ -5,15 +5,23 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
+	"time"
 
 	"github.com/SAP/terraform-provider-scc/internal/api"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 const (
 	actionCreateRequest = "Create"
 	actionUpdateRequest = "Update"
 )
+
+type FormattedTimes struct{
+	UTC types.String
+	WithTimezone types.String
+}
 
 func sendGetRequest(client *api.RestApiClient, endpoint string) (*http.Response, diag.Diagnostics) {
 	response, diags := client.GetRequest(endpoint)
@@ -102,4 +110,53 @@ func requestAndUnmarshal[T any](client *api.RestApiClient, respObj *T, requestTy
 
 	return diags
 
+}
+
+// func ConvertIntMillisToTime(millis int64) types.String {
+// 	if millis == 0 {
+// 		return types.StringNull()
+// 	}
+// 	t := time.UnixMilli(millis).UTC()
+// 	return types.StringValue(t.Format("2006-01-02 15:04:05 -0700"))
+// }
+
+// func ConvertStringMillisToTime(millis string) types.String{
+// 	ms, err:= strconv.ParseInt(millis, 10, 64)
+// 	if err != nil {
+// 		return types.StringNull()
+// 	}
+
+// 	sec:= ms/1000
+
+// 	t:= time.Unix(sec, 0).UTC()
+
+// 	return types.StringValue(t.Format("2006-01-02 15:04:05"))
+// }
+
+func ConvertMillisToTimes(millis interface{}) FormattedTimes {
+	var ms int64
+	switch v := millis.(type) {
+	case int64:
+		ms = v
+	case string:
+		parsed, err := strconv.ParseInt(v, 10, 64)
+		if err != nil {
+			return FormattedTimes{types.StringNull(), types.StringNull()}
+		}
+		ms = parsed
+	default:
+		return FormattedTimes{types.StringNull(), types.StringNull()}
+	}
+
+	if ms == 0 {
+		return FormattedTimes{types.StringNull(), types.StringNull()}
+	}
+
+	// Build time
+	t := time.UnixMilli(ms).UTC()
+
+	return FormattedTimes{
+		UTC:    types.StringValue(t.Format("2006-01-02 15:04:05")),
+		WithTimezone: types.StringValue(t.Format("2006-01-02 15:04:05 -0700")),
+	}
 }
