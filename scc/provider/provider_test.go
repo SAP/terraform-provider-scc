@@ -28,7 +28,7 @@ import (
 
 var (
 	regexpValidUUID        = uuidvalidator.UuidRegexp
-	regexValidTimeStamp    = regexp.MustCompile(`^\d{13}$`)
+	regexValidTimeStamp    = regexp.MustCompile(`^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}(?: \+\d{4})?$`)
 	regexValidSerialNumber = regexp.MustCompile(`^(?:[0-9a-fA-F]{2}:){14,}[0-9a-fA-F]{1,2}$`)
 )
 
@@ -220,12 +220,6 @@ func hookRedactSensitiveBody() func(i *cassette.Interaction) error {
 		}
 
 		if strings.Contains(i.Response.Body, "subaccountCertificate") {
-			reNotAfter := regexp.MustCompile(`"notAfterTimeStamp"\s*:\s*\d{13}`)
-			i.Response.Body = reNotAfter.ReplaceAllString(i.Response.Body, `"notAfterTimeStamp": 1111111111111`)
-
-			reNotBefore := regexp.MustCompile(`"notBeforeTimeStamp"\s*:\s*\d{13}`)
-			i.Response.Body = reNotBefore.ReplaceAllString(i.Response.Body, `"notBeforeTimeStamp": 1111111111111`)
-
 			reSubjectDN := regexp.MustCompile(`"subjectDN"\s*:\s*".*?"`)
 			i.Response.Body = reSubjectDN.ReplaceAllString(i.Response.Body, `"subjectDN": "CN=redacted,L=redacted,OU=redacted,OU=redacted,O=redacted,C=redacted"`)
 

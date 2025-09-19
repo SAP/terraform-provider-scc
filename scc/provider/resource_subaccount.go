@@ -4,16 +4,19 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/SAP/terraform-provider-scc/internal/api"
 	apiobjects "github.com/SAP/terraform-provider-scc/internal/api/apiObjects"
 	"github.com/SAP/terraform-provider-scc/internal/api/endpoints"
 	"github.com/SAP/terraform-provider-scc/validation/uuidvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
@@ -98,6 +101,15 @@ To recover, set connected = false, apply, and then set it back to true to retry 
 				Computed: true,
 				Default:  booldefault.StaticBool(true),
 			},
+			"auto_renew_before_days": schema.Int64Attribute{
+				MarkdownDescription: "Number of days before certificate expiration when the certificate should be renewed automatically. Minimum is 7 days, maximum is 45 days.",
+				Optional:            true,
+				Computed:            true,
+				Default:             int64default.StaticInt64(14),
+				Validators: []validator.Int64{
+					int64validator.Between(7, 45),
+				},
+			},
 			"tunnel": schema.SingleNestedAttribute{
 				MarkdownDescription: "Details of connection tunnel used by the subaccount.",
 				Computed:            true,
@@ -111,7 +123,7 @@ To recover, set connected = false, apply, and then set it back to true to retry 
 							getFormattedValueAsTableRow("`Disconnected`", "The tunnel was previously connected but is now intentionally or unintentionally disconnected."),
 						Computed: true,
 					},
-					"connected_since_time_stamp": schema.Int64Attribute{
+					"connected_since": schema.StringAttribute{
 						MarkdownDescription: "Timestamp of the start of the connection.",
 						Computed:            true,
 					},
@@ -123,11 +135,11 @@ To recover, set connected = false, apply, and then set it back to true to retry 
 						MarkdownDescription: "Information on the subaccount certificate such as validity period, issuer and subject DN.",
 						Computed:            true,
 						Attributes: map[string]schema.Attribute{
-							"not_after_time_stamp": schema.Int64Attribute{
+							"valid_to": schema.StringAttribute{
 								MarkdownDescription: "Timestamp of the end of the validity period.",
 								Computed:            true,
 							},
-							"not_before_time_stamp": schema.Int64Attribute{
+							"valid_from": schema.StringAttribute{
 								MarkdownDescription: "Timestamp of the beginning of the validity period.",
 								Computed:            true,
 							},
@@ -245,7 +257,6 @@ func (r *SubaccountResource) Create(ctx context.Context, req resource.CreateRequ
 	diags = requestAndUnmarshal(r.client, &respObj, "POST", endpoint, planBody, true)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
-		// resp.Diagnostics.AddError(errMsgAddSubaccountFailed, fmt.Sprintf("%s", diags))
 		return
 	}
 
@@ -307,6 +318,20 @@ func (r *SubaccountResource) Read(ctx context.Context, req resource.ReadRequest,
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
+	}
+
+	shouldRenew := shouldRenewCertificate(respObj.Tunnel.SubaccountCertificate.NotAfterTimeStamp, state.AutoRenewBeforeDays.ValueInt64())
+
+	if shouldRenew {
+		renewedRespObj, diags := r.renewCertificate(state, regionHost, subaccount)
+		resp.Diagnostics.Append(diags...)
+		if !resp.Diagnostics.HasError() && renewedRespObj != nil {
+			respObj = *renewedRespObj
+			resp.Diagnostics.AddWarning(
+				"Certificate Renewed",
+				fmt.Sprintf("The subaccount certificate was automatically renewed because it was due to expire within %d days.", state.AutoRenewBeforeDays.ValueInt64()),
+			)
+		}
 	}
 
 	if respObj.Tunnel.State == "Connected" {
@@ -384,6 +409,18 @@ func (r *SubaccountResource) Update(ctx context.Context, req resource.UpdateRequ
 		)
 	}
 
+	if shouldRenewCertificate(respObj.Tunnel.SubaccountCertificate.NotAfterTimeStamp, plan.AutoRenewBeforeDays.ValueInt64()) {
+		renewedRespObj, diags := r.renewCertificate(plan, regionHost, subaccount)
+		resp.Diagnostics.Append(diags...)
+		if !resp.Diagnostics.HasError() && renewedRespObj != nil {
+			respObj = *renewedRespObj
+			resp.Diagnostics.AddWarning(
+				"Certificate Renewed",
+				fmt.Sprintf("The subaccount certificate was automatically renewed during update because it was due to expire within %d days.", plan.AutoRenewBeforeDays.ValueInt64()),
+			)
+		}
+	}
+
 	if respObj.Tunnel.State == "Connected" {
 		// Trigger trust configuration sync for the subaccount without persisting to Terraform state
 		diags = r.syncTrustConfiguration(regionHost, subaccount, &respObj)
@@ -455,6 +492,32 @@ func (r *SubaccountResource) updateTunnelState(plan SubaccountConfig, connectedS
 	}
 
 	return diags
+}
+
+func shouldRenewCertificate(expiry, autoRenewBeforeDays int64) bool {
+	expiryTime := time.Unix(expiry/1000, 0)
+	renewalThreshold := time.Now().Add(time.Duration(autoRenewBeforeDays) * 24 * time.Hour)
+
+	return expiryTime.Before(renewalThreshold)
+}
+
+func (r *SubaccountResource) renewCertificate(plan SubaccountConfig, regionHost, subaccount string) (*apiobjects.SubaccountResource, diag.Diagnostics) {
+	var respObj apiobjects.SubaccountResource
+	var diags diag.Diagnostics
+
+	endpoint := endpoints.GetSubaccountEndpoint(regionHost, subaccount) + "/validity"
+
+	reqBody := map[string]any{
+		"user":     plan.CloudUser.ValueString(),
+		"password": plan.CloudPassword.ValueString(),
+	}
+
+	diags = requestAndUnmarshal(r.client, &respObj, "POST", endpoint, reqBody, true)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return &respObj, diags
 }
 
 func (r *SubaccountResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {

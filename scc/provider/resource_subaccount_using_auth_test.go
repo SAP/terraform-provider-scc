@@ -31,7 +31,7 @@ func TestResourceSubaccountUsingAuth(t *testing.T) {
 						resource.TestCheckResourceAttr("scc_subaccount_using_auth.test", "description", "subaccount added via terraform tests"),
 						resource.TestCheckResourceAttr("scc_subaccount_using_auth.test", "location_id", ""),
 
-						resource.TestMatchResourceAttr("scc_subaccount_using_auth.test", "tunnel.connected_since_time_stamp", regexValidTimeStamp),
+						resource.TestMatchResourceAttr("scc_subaccount_using_auth.test", "tunnel.connected_since", regexValidTimeStamp),
 						resource.TestCheckResourceAttr("scc_subaccount_using_auth.test", "tunnel.connections", "0"),
 						resource.TestCheckResourceAttr("scc_subaccount_using_auth.test", "tunnel.state", "Connected"),
 
@@ -39,8 +39,8 @@ func TestResourceSubaccountUsingAuth(t *testing.T) {
 						resource.TestCheckResourceAttr("scc_subaccount_using_auth.test", "tunnel.service_channels.#", "0"),
 
 						resource.TestMatchResourceAttr("scc_subaccount_using_auth.test", "tunnel.subaccount_certificate.issuer", regexp.MustCompile(`CN=.*?,OU=S.*?,O=.*?,L=.*?,C=.*?`)),
-						resource.TestMatchResourceAttr("scc_subaccount_using_auth.test", "tunnel.subaccount_certificate.not_after_time_stamp", regexValidTimeStamp),
-						resource.TestMatchResourceAttr("scc_subaccount_using_auth.test", "tunnel.subaccount_certificate.not_before_time_stamp", regexValidTimeStamp),
+						resource.TestMatchResourceAttr("scc_subaccount_using_auth.test", "tunnel.subaccount_certificate.valid_to", regexValidTimeStamp),
+						resource.TestMatchResourceAttr("scc_subaccount_using_auth.test", "tunnel.subaccount_certificate.valid_from", regexValidTimeStamp),
 						resource.TestMatchResourceAttr("scc_subaccount_using_auth.test", "tunnel.subaccount_certificate.serial_number", regexValidSerialNumber),
 						resource.TestMatchResourceAttr("scc_subaccount_using_auth.test", "tunnel.subaccount_certificate.subject_dn", regexp.MustCompile(`CN=.*?,L=.*?,OU=.*?,OU=.*?,O=.*?,C=.*?`)),
 					),
@@ -54,6 +54,7 @@ func TestResourceSubaccountUsingAuth(t *testing.T) {
 					ImportStateVerifyIgnore: []string{
 						"authentication_data",
 						"connected",
+						"auto_renew_before_days",
 					},
 				},
 				{
