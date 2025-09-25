@@ -77,7 +77,7 @@ __Further documentation:__
 							getFormattedValueAsTableRow("`Disconnected`", "The tunnel was previously connected but is now intentionally or unintentionally disconnected."),
 						Computed: true,
 					},
-					"connected_since_time_stamp": schema.Int64Attribute{
+					"connected_since": schema.StringAttribute{
 						MarkdownDescription: "Timestamp of the start of the connection.",
 						Computed:            true,
 					},
@@ -89,11 +89,11 @@ __Further documentation:__
 						MarkdownDescription: "Information on the subaccount certificate such as validity period, issuer and subject DN.",
 						Computed:            true,
 						Attributes: map[string]schema.Attribute{
-							"not_after_time_stamp": schema.Int64Attribute{
+							"valid_to": schema.StringAttribute{
 								MarkdownDescription: "Timestamp of the end of the validity period.",
 								Computed:            true,
 							},
-							"not_before_time_stamp": schema.Int64Attribute{
+							"valid_from": schema.StringAttribute{
 								MarkdownDescription: "Timestamp of the beginning of the validity period.",
 								Computed:            true,
 							},

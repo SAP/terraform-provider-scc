@@ -14,8 +14,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
@@ -66,10 +64,6 @@ is **not required** for updating optional attributes such as location_id, displa
 - If this value is updated, **the resource will be recreated**.`,
 				Required:  true,
 				Sensitive: true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-					stringplanmodifier.RequiresReplaceIfConfigured(),
-				},
 			},
 			"location_id": schema.StringAttribute{
 				MarkdownDescription: "Location identifier for the Cloud Connector instance.",
@@ -119,7 +113,7 @@ To recover, set connected = false, apply, and then set it back to true to retry 
 							getFormattedValueAsTableRow("`Disconnected`", "The tunnel was previously connected but is now intentionally or unintentionally disconnected."),
 						Computed: true,
 					},
-					"connected_since_time_stamp": schema.Int64Attribute{
+					"connected_since": schema.StringAttribute{
 						MarkdownDescription: "Timestamp of the start of the connection.",
 						Computed:            true,
 					},
@@ -131,11 +125,11 @@ To recover, set connected = false, apply, and then set it back to true to retry 
 						MarkdownDescription: "Information on the subaccount certificate such as validity period, issuer and subject DN.",
 						Computed:            true,
 						Attributes: map[string]schema.Attribute{
-							"not_after_time_stamp": schema.Int64Attribute{
+							"valid_to": schema.StringAttribute{
 								MarkdownDescription: "Timestamp of the end of the validity period.",
 								Computed:            true,
 							},
-							"not_before_time_stamp": schema.Int64Attribute{
+							"valid_from": schema.StringAttribute{
 								MarkdownDescription: "Timestamp of the beginning of the validity period.",
 								Computed:            true,
 							},
@@ -346,6 +340,12 @@ func (r *SubaccountUsingAuthResource) Update(ctx context.Context, req resource.U
 		return
 	}
 
+	diags := validateAuthDataInputs(plan, state)
+	resp.Diagnostics.Append(diags...)
+	if diags.HasError() {
+		return
+	}
+
 	regionHost := state.RegionHost.ValueString()
 	subaccount := state.Subaccount.ValueString()
 	endpoint := endpoints.GetSubaccountEndpoint(regionHost, subaccount)
@@ -356,7 +356,7 @@ func (r *SubaccountUsingAuthResource) Update(ctx context.Context, req resource.U
 		"description": plan.Description.ValueString(),
 	}
 
-	diags := requestAndUnmarshal(r.client, &respObj, "PUT", endpoint, updateBody, true)
+	diags = requestAndUnmarshal(r.client, &respObj, "PUT", endpoint, updateBody, true)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -467,6 +467,18 @@ func (r *SubaccountUsingAuthResource) updateTunnelState(plan SubaccountUsingAuth
 		return diags
 	}
 
+	return diags
+}
+
+func validateAuthDataInputs(plan, state SubaccountUsingAuthConfig) diag.Diagnostics {
+	var diags diag.Diagnostics
+	if plan.AuthenticationData.ValueString() != state.AuthenticationData.ValueString() {
+		diags.AddError(
+			"Update Failed",
+			"failed to update the cloud connector subaccount due to mismatched configuration values",
+		)
+		return diags
+	}
 	return diags
 }
 

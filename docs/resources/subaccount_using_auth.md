@@ -78,7 +78,7 @@ To recover, set connected = false, apply, and then set it back to true to retry 
 Read-Only:
 
 - `application_connections` (Attributes List) Array of connections to application instances. Each connection provides information about a specific application instance accessible through the cloud connector. (see [below for nested schema](#nestedatt--tunnel--application_connections))
-- `connected_since_time_stamp` (Number) Timestamp of the start of the connection.
+- `connected_since` (String) Timestamp of the start of the connection.
 - `connections` (Number) Number of subaccount connections.
 - `service_channels` (Attributes List) Type and state of the service channels used (types: HANA database, Virtual Machine or RFC) (see [below for nested schema](#nestedatt--tunnel--service_channels))
 - `state` (String) State of the tunnel. Possible values are: 
@@ -118,10 +118,10 @@ Read-Only:
 Read-Only:
 
 - `issuer` (String) Certificate authority (CA) that issued this certificate.
-- `not_after_time_stamp` (Number) Timestamp of the end of the validity period.
-- `not_before_time_stamp` (Number) Timestamp of the beginning of the validity period.
 - `serial_number` (String) Unique identifier for the certificate, typically assigned by the CA.
 - `subject_dn` (String) The subject distinguished name.
+- `valid_from` (String) Timestamp of the beginning of the validity period.
+- `valid_to` (String) Timestamp of the end of the validity period.
 
 ## Import
 
