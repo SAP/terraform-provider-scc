@@ -14,7 +14,7 @@ terraform {
   required_providers {
     scc = {
         source = "sap/scc"
-        version = "1.0.0-rc1"
+        version = "1.0.0"
     }
   }
 }
