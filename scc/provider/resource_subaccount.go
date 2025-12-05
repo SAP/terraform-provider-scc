@@ -447,9 +447,7 @@ func appendAndCheckErrors(diags *diag.Diagnostics, newDiags diag.Diagnostics) bo
 func validateUpdateInputs(plan, state SubaccountConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
 	if plan.RegionHost.ValueString() != state.RegionHost.ValueString() ||
-		plan.Subaccount.ValueString() != state.Subaccount.ValueString() ||
-		plan.CloudUser.ValueString() != state.CloudUser.ValueString() ||
-		plan.CloudPassword.ValueString() != state.CloudPassword.ValueString() {
+		plan.Subaccount.ValueString() != state.Subaccount.ValueString() {
 		diags.AddError(
 			"Update Failed",
 			"failed to update the cloud connector subaccount due to mismatched configuration values",
