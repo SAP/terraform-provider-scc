@@ -19,7 +19,7 @@
 		},
 		"codespaces": {}
 	},
-	"postCreateCommand": "cp ./config/provider-config.txt ~/.terraformrc",
+	"postCreateCommand": "cp ./config/provider-config-local.txt ~/.terraformrc",
 	"hostRequirements": {
 		"memory": "4gb"
 	},
