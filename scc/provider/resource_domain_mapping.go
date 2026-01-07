@@ -11,8 +11,10 @@ import (
 	"github.com/SAP/terraform-provider-scc/validation/uuidvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 var _ resource.Resource = &DomainMappingResource{}
@@ -23,6 +25,12 @@ func NewDomainMappingResource() resource.Resource {
 
 type DomainMappingResource struct {
 	client *api.RestApiClient
+}
+
+type domainMappingResourceIdentityModel struct {
+	Subaccount     types.String `tfsdk:"subaccount"`
+	RegionHost     types.String `tfsdk:"region_host"`
+	InternalDomain types.String `tfsdk:"internal_domain"`
 }
 
 func (r *DomainMappingResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -59,6 +67,22 @@ __Further documentation:__
 			"internal_domain": schema.StringAttribute{
 				MarkdownDescription: "Domain used on the on-premise side.",
 				Required:            true,
+			},
+		},
+	}
+}
+
+func (rs *DomainMappingResource) IdentitySchema(_ context.Context, _ resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
+	resp.IdentitySchema = identityschema.Schema{
+		Attributes: map[string]identityschema.Attribute{
+			"subaccount": identityschema.StringAttribute{
+				RequiredForImport: true,
+			},
+			"region_host": identityschema.StringAttribute{
+				RequiredForImport: true,
+			},
+			"internal_domain": identityschema.StringAttribute{
+				RequiredForImport: true,
 			},
 		},
 	}
@@ -132,6 +156,15 @@ func (r *DomainMappingResource) Create(ctx context.Context, req resource.CreateR
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	identity := domainMappingResourceIdentityModel{
+		Subaccount:     plan.Subaccount,
+		RegionHost:     plan.RegionHost,
+		InternalDomain: plan.InternalDomain,
+	}
+
+	diags = resp.Identity.Set(ctx, identity)
+	resp.Diagnostics.Append(diags...)
 }
 
 func (r *DomainMappingResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -171,6 +204,15 @@ func (r *DomainMappingResource) Read(ctx context.Context, req resource.ReadReque
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	identity := domainMappingResourceIdentityModel{
+		Subaccount:     state.Subaccount,
+		RegionHost:     state.RegionHost,
+		InternalDomain: state.InternalDomain,
+	}
+
+	diags = resp.Identity.Set(ctx, identity)
+	resp.Diagnostics.Append(diags...)
 }
 
 func (r *DomainMappingResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
@@ -236,6 +278,15 @@ func (r *DomainMappingResource) Update(ctx context.Context, req resource.UpdateR
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	identity := domainMappingResourceIdentityModel{
+		Subaccount:     plan.Subaccount,
+		RegionHost:     plan.RegionHost,
+		InternalDomain: plan.InternalDomain,
+	}
+
+	diags = resp.Identity.Set(ctx, identity)
+	resp.Diagnostics.Append(diags...)
 }
 
 func (r *DomainMappingResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -272,17 +323,32 @@ func (r *DomainMappingResource) Delete(ctx context.Context, req resource.DeleteR
 }
 
 func (rs *DomainMappingResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	idParts := strings.Split(req.ID, ",")
+	if req.ID != "" {
+		idParts := strings.Split(req.ID, ",")
 
-	if len(idParts) != 3 || idParts[0] == "" || idParts[1] == "" || idParts[2] == "" {
-		resp.Diagnostics.AddError(
-			"Unexpected Import Identifier",
-			fmt.Sprintf("Expected import identifier with format: region_host, subaccount, internal_domain. Got: %q", req.ID),
-		)
+		if len(idParts) != 3 || idParts[0] == "" || idParts[1] == "" || idParts[2] == "" {
+			resp.Diagnostics.AddError(
+				"Unexpected Import Identifier",
+				fmt.Sprintf("Expected import identifier with format: region_host, subaccount, internal_domain. Got: %q", req.ID),
+			)
+			return
+		}
+
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("region_host"), idParts[0])...)
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("subaccount"), idParts[1])...)
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("internal_domain"), idParts[2])...)
+
 		return
 	}
 
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("region_host"), idParts[0])...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("subaccount"), idParts[1])...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("internal_domain"), idParts[2])...)
+	var identity domainMappingResourceIdentityModel
+	diags := resp.Identity.Get(ctx, &identity)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("subaccount"), identity.Subaccount)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("region_host"), identity.RegionHost)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("internal_domain"), identity.InternalDomain)...)
 }
