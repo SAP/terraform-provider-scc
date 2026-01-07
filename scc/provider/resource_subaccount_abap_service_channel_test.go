@@ -6,6 +6,8 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/statecheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
@@ -43,6 +45,21 @@ func TestResourceSubaccountABAPServiceChannel(t *testing.T) {
 						resource.TestMatchResourceAttr("scc_subaccount_abap_service_channel.test", "state.connected_since_time_stamp", regexp.MustCompile(`^(0|\d{13})$`)),
 						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.test", "state.opened_connections", "1"),
 					),
+					ConfigStateChecks: []statecheck.StateCheck{
+						statecheck.ExpectIdentity(
+							"scc_subaccount_abap_service_channel.test",
+							map[string]knownvalue.Check{
+								"id": knownvalue.Int64Func(func(v int64) error {
+									if v <= 0 {
+										return fmt.Errorf("id should be positive, got %d", v)
+									}
+									return nil
+								}),
+								"region_host": knownvalue.StringExact(regionHost),
+								"subaccount":  knownvalue.StringRegexp(regexpValidUUID),
+							},
+						),
+					},
 				},
 				{
 					ResourceName:      "scc_subaccount_abap_service_channel.test",
@@ -91,6 +108,21 @@ func TestResourceSubaccountABAPServiceChannel(t *testing.T) {
 						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.test", "connections", "1"),
 						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.test", "enabled", "true"),
 					),
+					ConfigStateChecks: []statecheck.StateCheck{
+						statecheck.ExpectIdentity(
+							"scc_subaccount_abap_service_channel.test",
+							map[string]knownvalue.Check{
+								"id": knownvalue.Int64Func(func(v int64) error {
+									if v <= 0 {
+										return fmt.Errorf("id should be positive, got %d", v)
+									}
+									return nil
+								}),
+								"region_host": knownvalue.StringExact(regionHost),
+								"subaccount":  knownvalue.StringRegexp(regexpValidUUID),
+							},
+						),
+					},
 				},
 				// Update with mismatched configuration should throw error
 				{
