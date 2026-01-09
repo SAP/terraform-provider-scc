@@ -6,6 +6,8 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/statecheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
@@ -50,6 +52,15 @@ func TestResourceSubaccount(t *testing.T) {
 						resource.TestMatchResourceAttr("scc_subaccount.test", "tunnel.subaccount_certificate.serial_number", regexValidSerialNumber),
 						resource.TestMatchResourceAttr("scc_subaccount.test", "tunnel.subaccount_certificate.subject_dn", regexp.MustCompile(`CN=.*?,L=.*?,OU=.*?,OU=.*?,O=.*?,C=.*?`)),
 					),
+					ConfigStateChecks: []statecheck.StateCheck{
+						statecheck.ExpectIdentity(
+							"scc_subaccount.test",
+							map[string]knownvalue.Check{
+								"region_host": knownvalue.StringExact("cf.eu12.hana.ondemand.com"),
+								"subaccount":  knownvalue.StringRegexp(regexpValidUUID),
+							},
+						),
+					},
 				},
 				{
 					ResourceName:                         "scc_subaccount.test",
@@ -98,6 +109,15 @@ func TestResourceSubaccount(t *testing.T) {
 						resource.TestCheckResourceAttr("scc_subaccount.test", "description", "Initial description"),
 						resource.TestCheckResourceAttr("scc_subaccount.test", "display_name", "Initial Display Name"),
 					),
+					ConfigStateChecks: []statecheck.StateCheck{
+						statecheck.ExpectIdentity(
+							"scc_subaccount.test",
+							map[string]knownvalue.Check{
+								"region_host": knownvalue.StringExact("cf.eu12.hana.ondemand.com"),
+								"subaccount":  knownvalue.StringRegexp(regexpValidUUID),
+							},
+						),
+					},
 				},
 				// Update with mismatched configuration should throw error
 				{

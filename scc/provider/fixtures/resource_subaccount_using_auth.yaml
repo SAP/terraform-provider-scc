@@ -40,7 +40,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Fri, 22 Aug 2025 16:41:21 GMT
+                - Thu, 08 Jan 2026 05:10:52 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -50,10 +50,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 50e22efd-2cf8-4f81-7c58-6814c9dd2952
+                - 9e4b68c6-afc7-45cb-68aa-2d4c7e53c075
         status: 200 OK
         code: 200
-        duration: 1.092322668s
+        duration: 1.1375015s
     - id: 1
       request:
         proto: HTTP/1.1
@@ -93,7 +93,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Fri, 22 Aug 2025 16:41:22 GMT
+                - Thu, 08 Jan 2026 05:10:53 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -103,10 +103,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 88379599-2cd5-43d2-4f1f-b00b46545159
+                - 6efe5ae7-a6cb-4158-762f-40727af506d6
         status: 200 OK
         code: 200
-        duration: 343.964792ms
+        duration: 292.602208ms
     - id: 2
       request:
         proto: HTTP/1.1
@@ -138,14 +138,14 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"description":"subaccount added via terraform tests","displayName":"terraform-cloud-connector-subaccount-87pt0qgr","tunnel":{"state":"Connected","connectedSinceTimeStamp":1755880886660,"connections":0,"applicationConnections":[],"serviceChannels":[],"subaccountCertificate":{"notAfterTimeStamp": 1111111111111,"notBeforeTimeStamp": 1111111111111,"subjectDN": "CN=redacted,L=redacted,OU=redacted,OU=redacted,O=redacted,C=redacted","issuer": "CN=redacted,OU=SAP Cloud Platform Clients,O=redacted,L=redacted,C=redacted","serialNumber": "aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa"},"user":"cloud-user@example.com"},"_links":{"ABAPCloud-channels":{"href": "https://redacted.url/path"},"HANA-channels":{"href": "https://redacted.url/path"},"systemMappings":{"href": "https://redacted.url/path"},"self":{"href": "https://redacted.url/path"},"K8S-channels":{"href": "https://redacted.url/path"},"validity":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"},"VirtualMachine-channels":{"href": "https://redacted.url/path"},"domainMappings":{"href": "https://redacted.url/path"}},"regionHost":"cf.eu12.hana.ondemand.com","subaccount":"4916a705-273c-45a6-a2f0-08c234c7a23d","locationID":""}'
+        body: '{"description":"subaccount added via terraform tests","displayName":"terraform-cloud-connector-subaccount-87pt0qgr","tunnel":{"state":"Connected","connectedSinceTimeStamp":1767849057631,"connections":0,"applicationConnections":[],"serviceChannels":[],"subaccountCertificate":{"notAfterTimeStamp":1799385055000,"notBeforeTimeStamp":1767845455000,"subjectDN": "CN=redacted,L=redacted,OU=redacted,OU=redacted,O=redacted,C=redacted","issuer": "CN=redacted,OU=SAP Cloud Platform Clients,O=redacted,L=redacted,C=redacted","serialNumber": "aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa"},"user":"cloud-user@example.com"},"_links":{"ABAPCloud-channels":{"href": "https://redacted.url/path"},"HANA-channels":{"href": "https://redacted.url/path"},"systemMappings":{"href": "https://redacted.url/path"},"self":{"href": "https://redacted.url/path"},"K8S-channels":{"href": "https://redacted.url/path"},"validity":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"},"VirtualMachine-channels":{"href": "https://redacted.url/path"},"domainMappings":{"href": "https://redacted.url/path"}},"regionHost":"cf.eu12.hana.ondemand.com","subaccount":"4916a705-273c-45a6-a2f0-08c234c7a23d","locationID":""}'
         headers:
             Cache-Control:
                 - no-store
             Content-Type:
                 - application/json
             Date:
-                - Fri, 22 Aug 2025 16:41:26 GMT
+                - Thu, 08 Jan 2026 05:10:57 GMT
             Location:
                 - redacted
             Server:
@@ -159,10 +159,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - df407d09-4cb6-42c5-7f87-423b70f189b5
+                - 53dab740-d4e9-4099-6fe7-8fa4c1c6c444
         status: 201 Created
         code: 201
-        duration: 4.492220627s
+        duration: 4.637855418s
     - id: 3
       request:
         proto: HTTP/1.1
@@ -198,7 +198,7 @@ interactions:
             Cache-Control:
                 - no-store
             Date:
-                - Fri, 22 Aug 2025 16:41:27 GMT
+                - Thu, 08 Jan 2026 05:10:58 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -208,10 +208,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - ec7ea568-76ce-4e04-5591-6b8a4c7de588
+                - 055196b9-f524-4ece-79f4-bfecfad02e82
         status: 204 No Content
         code: 204
-        duration: 535.470458ms
+        duration: 784.438959ms
     - id: 4
       request:
         proto: HTTP/1.1
@@ -251,7 +251,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Fri, 22 Aug 2025 16:41:27 GMT
+                - Thu, 08 Jan 2026 05:10:58 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -261,10 +261,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 6c0e3e71-f6ec-4ba2-6893-95bb91a5c153
+                - f220b544-c01f-45fb-5a43-50deda84d03e
         status: 200 OK
         code: 200
-        duration: 275.050459ms
+        duration: 298.091167ms
     - id: 5
       request:
         proto: HTTP/1.1
@@ -304,7 +304,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Fri, 22 Aug 2025 16:41:27 GMT
+                - Thu, 08 Jan 2026 05:10:59 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -314,10 +314,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 7545b9e0-6a9d-40fa-6210-ef1ee183d276
+                - 1001d0ea-aedb-484a-7cd6-dca84fa2fc1e
         status: 200 OK
         code: 200
-        duration: 274.383334ms
+        duration: 293.187458ms
     - id: 6
       request:
         proto: HTTP/1.1
@@ -349,14 +349,14 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"description":"subaccount added via terraform tests","displayName":"terraform-cloud-connector-subaccount-87pt0qgr","tunnel":{"state":"Connected","connectedSinceTimeStamp":1755880886660,"connections":0,"applicationConnections":[],"serviceChannels":[],"subaccountCertificate":{"notAfterTimeStamp": 1111111111111,"notBeforeTimeStamp": 1111111111111,"subjectDN": "CN=redacted,L=redacted,OU=redacted,OU=redacted,O=redacted,C=redacted","issuer": "CN=redacted,OU=SAP Cloud Platform Clients,O=redacted,L=redacted,C=redacted","serialNumber": "aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa"},"user":"cloud-user@example.com"},"_links":{"ABAPCloud-channels":{"href": "https://redacted.url/path"},"HANA-channels":{"href": "https://redacted.url/path"},"systemMappings":{"href": "https://redacted.url/path"},"self":{"href": "https://redacted.url/path"},"K8S-channels":{"href": "https://redacted.url/path"},"validity":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"},"VirtualMachine-channels":{"href": "https://redacted.url/path"},"domainMappings":{"href": "https://redacted.url/path"}},"regionHost":"cf.eu12.hana.ondemand.com","subaccount":"4916a705-273c-45a6-a2f0-08c234c7a23d","locationID":""}'
+        body: '{"description":"subaccount added via terraform tests","displayName":"terraform-cloud-connector-subaccount-87pt0qgr","tunnel":{"state":"Connected","connectedSinceTimeStamp":1767849057631,"connections":0,"applicationConnections":[],"serviceChannels":[],"subaccountCertificate":{"notAfterTimeStamp":1799385055000,"notBeforeTimeStamp":1767845455000,"subjectDN": "CN=redacted,L=redacted,OU=redacted,OU=redacted,O=redacted,C=redacted","issuer": "CN=redacted,OU=SAP Cloud Platform Clients,O=redacted,L=redacted,C=redacted","serialNumber": "aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa"},"user":"cloud-user@example.com"},"_links":{"ABAPCloud-channels":{"href": "https://redacted.url/path"},"HANA-channels":{"href": "https://redacted.url/path"},"systemMappings":{"href": "https://redacted.url/path"},"self":{"href": "https://redacted.url/path"},"K8S-channels":{"href": "https://redacted.url/path"},"validity":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"},"VirtualMachine-channels":{"href": "https://redacted.url/path"},"domainMappings":{"href": "https://redacted.url/path"}},"regionHost":"cf.eu12.hana.ondemand.com","subaccount":"4916a705-273c-45a6-a2f0-08c234c7a23d","locationID":""}'
         headers:
             Cache-Control:
                 - no-store
             Content-Type:
                 - application/json
             Date:
-                - Fri, 22 Aug 2025 16:41:28 GMT
+                - Thu, 08 Jan 2026 05:10:59 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -368,10 +368,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 1eeb405f-cd55-41c9-5bc7-caf5a835b5c9
+                - 018c3a19-37c3-409d-6d95-88f2bff9448a
         status: 200 OK
         code: 200
-        duration: 299.812084ms
+        duration: 329.975292ms
     - id: 7
       request:
         proto: HTTP/1.1
@@ -407,7 +407,7 @@ interactions:
             Cache-Control:
                 - no-store
             Date:
-                - Fri, 22 Aug 2025 16:41:28 GMT
+                - Thu, 08 Jan 2026 05:11:00 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -417,10 +417,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 8d82ab43-9a95-4f57-5ad8-065f65108bc0
+                - b1076358-b20e-4dd3-573d-71be8747a7b7
         status: 204 No Content
         code: 204
-        duration: 555.958167ms
+        duration: 654.346083ms
     - id: 8
       request:
         proto: HTTP/1.1
@@ -460,7 +460,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Fri, 22 Aug 2025 16:41:29 GMT
+                - Thu, 08 Jan 2026 05:11:00 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -470,10 +470,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - e10d2692-620c-4906-5375-a9900f4bf6c5
+                - fd60bec7-d4f6-4f90-4aa5-c0c2b234df78
         status: 200 OK
         code: 200
-        duration: 275.728792ms
+        duration: 300.892167ms
     - id: 9
       request:
         proto: HTTP/1.1
@@ -505,14 +505,14 @@ interactions:
         trailer: {}
         content_length: -1
         uncompressed: true
-        body: '{"description":"subaccount added via terraform tests","displayName":"terraform-cloud-connector-subaccount-87pt0qgr","tunnel":{"state":"Connected","connectedSinceTimeStamp":1755880886660,"connections":0,"applicationConnections":[],"serviceChannels":[],"subaccountCertificate":{"notAfterTimeStamp": 1111111111111,"notBeforeTimeStamp": 1111111111111,"subjectDN": "CN=redacted,L=redacted,OU=redacted,OU=redacted,O=redacted,C=redacted","issuer": "CN=redacted,OU=SAP Cloud Platform Clients,O=redacted,L=redacted,C=redacted","serialNumber": "aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa"},"user":"cloud-user@example.com"},"_links":{"ABAPCloud-channels":{"href": "https://redacted.url/path"},"HANA-channels":{"href": "https://redacted.url/path"},"systemMappings":{"href": "https://redacted.url/path"},"self":{"href": "https://redacted.url/path"},"K8S-channels":{"href": "https://redacted.url/path"},"validity":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"},"VirtualMachine-channels":{"href": "https://redacted.url/path"},"domainMappings":{"href": "https://redacted.url/path"}},"regionHost":"cf.eu12.hana.ondemand.com","subaccount":"4916a705-273c-45a6-a2f0-08c234c7a23d","locationID":""}'
+        body: '{"description":"subaccount added via terraform tests","displayName":"terraform-cloud-connector-subaccount-87pt0qgr","tunnel":{"state":"Connected","connectedSinceTimeStamp":1767849057631,"connections":0,"applicationConnections":[],"serviceChannels":[],"subaccountCertificate":{"notAfterTimeStamp":1799385055000,"notBeforeTimeStamp":1767845455000,"subjectDN": "CN=redacted,L=redacted,OU=redacted,OU=redacted,O=redacted,C=redacted","issuer": "CN=redacted,OU=SAP Cloud Platform Clients,O=redacted,L=redacted,C=redacted","serialNumber": "aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa"},"user":"cloud-user@example.com"},"_links":{"ABAPCloud-channels":{"href": "https://redacted.url/path"},"HANA-channels":{"href": "https://redacted.url/path"},"systemMappings":{"href": "https://redacted.url/path"},"self":{"href": "https://redacted.url/path"},"K8S-channels":{"href": "https://redacted.url/path"},"validity":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"},"VirtualMachine-channels":{"href": "https://redacted.url/path"},"domainMappings":{"href": "https://redacted.url/path"}},"regionHost":"cf.eu12.hana.ondemand.com","subaccount":"4916a705-273c-45a6-a2f0-08c234c7a23d","locationID":""}'
         headers:
             Cache-Control:
                 - no-store
             Content-Type:
                 - application/json
             Date:
-                - Fri, 22 Aug 2025 16:41:29 GMT
+                - Thu, 08 Jan 2026 05:11:01 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -524,10 +524,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 518b3742-e4c7-42cb-7e58-4aef85b4f037
+                - c1f5ebb8-58f4-4cf0-49a2-ed59c1c48cde
         status: 200 OK
         code: 200
-        duration: 310.15075ms
+        duration: 327.553416ms
     - id: 10
       request:
         proto: HTTP/1.1
@@ -563,7 +563,7 @@ interactions:
             Cache-Control:
                 - no-store
             Date:
-                - Fri, 22 Aug 2025 16:41:30 GMT
+                - Thu, 08 Jan 2026 05:11:01 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -573,10 +573,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 86085193-7738-46fe-5fc2-e8717363c015
+                - 5d3cf70b-6617-4205-44ff-9b07ff5e08a5
         status: 204 No Content
         code: 204
-        duration: 563.350167ms
+        duration: 660.033542ms
     - id: 11
       request:
         proto: HTTP/1.1
@@ -616,7 +616,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Fri, 22 Aug 2025 16:41:30 GMT
+                - Thu, 08 Jan 2026 05:11:02 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -626,10 +626,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 4c4347f8-2728-4177-769d-c10e9dcbce4c
+                - 59f4ffeb-13ac-4d9c-653a-b36bacc928a9
         status: 200 OK
         code: 200
-        duration: 284.735208ms
+        duration: 291.677666ms
     - id: 12
       request:
         proto: HTTP/1.1
@@ -669,7 +669,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Fri, 22 Aug 2025 16:41:30 GMT
+                - Thu, 08 Jan 2026 05:11:02 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -679,10 +679,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - bb956080-df02-4328-514c-1bcfcbb3f666
+                - 0012a992-0edd-4a40-6382-c0741107f823
         status: 200 OK
         code: 200
-        duration: 277.036ms
+        duration: 288.142125ms
     - id: 13
       request:
         proto: HTTP/1.1
@@ -722,7 +722,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Fri, 22 Aug 2025 16:41:31 GMT
+                - Thu, 08 Jan 2026 05:11:02 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -732,10 +732,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 8f279694-35e4-4f59-7f82-eb8bd437dd35
+                - bb5caef3-6d4f-42e8-6d81-1574dc99645b
         status: 200 OK
         code: 200
-        duration: 280.948334ms
+        duration: 289.48725ms
     - id: 14
       request:
         proto: HTTP/1.1
@@ -775,7 +775,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Fri, 22 Aug 2025 16:41:31 GMT
+                - Thu, 08 Jan 2026 05:11:03 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -785,10 +785,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 700b72c7-9f12-4281-6ef2-758233a1c326
+                - 36a4182f-0c70-496c-7685-f8eda25fbc1a
         status: 200 OK
         code: 200
-        duration: 275.101875ms
+        duration: 290.13ms
     - id: 15
       request:
         proto: HTTP/1.1
@@ -824,7 +824,7 @@ interactions:
             Cache-Control:
                 - no-store
             Date:
-                - Fri, 22 Aug 2025 16:41:32 GMT
+                - Thu, 08 Jan 2026 05:11:04 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -834,7 +834,7 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 28d2bd4c-e6c3-4285-539f-2e7ca6ad7160
+                - c129442e-23c2-4186-7211-20ca896471e6
         status: 204 No Content
         code: 204
-        duration: 766.993751ms
+        duration: 798.045834ms

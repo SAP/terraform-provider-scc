@@ -12,9 +12,11 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 var _ resource.Resource = &SubaccountUsingAuthResource{}
@@ -25,6 +27,11 @@ func NewSubaccountUsingAuthResource() resource.Resource {
 
 type SubaccountUsingAuthResource struct {
 	client *api.RestApiClient
+}
+
+type subaccountUsingAuthResourceIdentityModel struct {
+	Subaccount types.String `tfsdk:"subaccount"`
+	RegionHost types.String `tfsdk:"region_host"`
 }
 
 func (r *SubaccountUsingAuthResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -201,6 +208,19 @@ To recover, set connected = false, apply, and then set it back to true to retry 
 	}
 }
 
+func (rs *SubaccountUsingAuthResource) IdentitySchema(_ context.Context, _ resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
+	resp.IdentitySchema = identityschema.Schema{
+		Attributes: map[string]identityschema.Attribute{
+			"subaccount": identityschema.StringAttribute{
+				RequiredForImport: true,
+			},
+			"region_host": identityschema.StringAttribute{
+				RequiredForImport: true,
+			},
+		},
+	}
+}
+
 func (r *SubaccountUsingAuthResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
@@ -285,6 +305,14 @@ func (r *SubaccountUsingAuthResource) Create(ctx context.Context, req resource.C
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	identity := subaccountUsingAuthResourceIdentityModel{
+		Subaccount: responseModel.Subaccount,
+		RegionHost: responseModel.RegionHost,
+	}
+
+	diags = resp.Identity.Set(ctx, identity)
+	resp.Diagnostics.Append(diags...)
 }
 
 func (r *SubaccountUsingAuthResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -326,6 +354,14 @@ func (r *SubaccountUsingAuthResource) Read(ctx context.Context, req resource.Rea
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	identity := subaccountUsingAuthResourceIdentityModel{
+		Subaccount: responseModel.Subaccount,
+		RegionHost: responseModel.RegionHost,
+	}
+
+	diags = resp.Identity.Set(ctx, identity)
+	resp.Diagnostics.Append(diags...)
 }
 
 func (r *SubaccountUsingAuthResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
@@ -396,6 +432,14 @@ func (r *SubaccountUsingAuthResource) Update(ctx context.Context, req resource.U
 	} else {
 		resp.Diagnostics.Append(resp.State.Set(ctx, responseModel)...)
 	}
+
+	identity := subaccountUsingAuthResourceIdentityModel{
+		Subaccount: responseModel.Subaccount,
+		RegionHost: responseModel.RegionHost,
+	}
+
+	diags = resp.Identity.Set(ctx, identity)
+	resp.Diagnostics.Append(diags...)
 }
 
 func appendAndCheckErrorsCopy(diags *diag.Diagnostics, newDiags diag.Diagnostics) bool {
@@ -483,16 +527,30 @@ func validateAuthDataInputs(plan, state SubaccountUsingAuthConfig) diag.Diagnost
 }
 
 func (rs *SubaccountUsingAuthResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	idParts := strings.Split(req.ID, ",")
+	if req.ID != "" {
+		idParts := strings.Split(req.ID, ",")
 
-	if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
-		resp.Diagnostics.AddError(
-			"Unexpected Import Identifier",
-			fmt.Sprintf("Expected import identifier with format: region_host, subaccount. Got: %q", req.ID),
-		)
+		if len(idParts) != 2 || idParts[0] == "" || idParts[1] == "" {
+			resp.Diagnostics.AddError(
+				"Unexpected Import Identifier",
+				fmt.Sprintf("Expected import identifier with format: region_host, subaccount. Got: %q", req.ID),
+			)
+			return
+		}
+
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("region_host"), idParts[0])...)
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("subaccount"), idParts[1])...)
+
 		return
 	}
 
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("region_host"), idParts[0])...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("subaccount"), idParts[1])...)
+	var identity subaccountUsingAuthResourceIdentityModel
+	diags := resp.Identity.Get(ctx, &identity)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("subaccount"), identity.Subaccount)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("region_host"), identity.RegionHost)...)
 }
