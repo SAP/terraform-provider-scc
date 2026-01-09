@@ -6,6 +6,8 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/statecheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
@@ -29,6 +31,16 @@ func TestResourceDomainMapping(t *testing.T) {
 						resource.TestCheckResourceAttr("scc_domain_mapping.test", "virtual_domain", "testtfvirtualdomain"),
 						resource.TestCheckResourceAttr("scc_domain_mapping.test", "internal_domain", "testtfinternaldomain"),
 					),
+					ConfigStateChecks: []statecheck.StateCheck{
+						statecheck.ExpectIdentity(
+							"scc_domain_mapping.test",
+							map[string]knownvalue.Check{
+								"internal_domain": knownvalue.StringExact("testtfinternaldomain"),
+								"region_host":     knownvalue.StringExact("cf.eu12.hana.ondemand.com"),
+								"subaccount":      knownvalue.StringRegexp(regexpValidUUID),
+							},
+						),
+					},
 				},
 				// Update with mismatched configuration should throw error
 				{
@@ -40,6 +52,16 @@ func TestResourceDomainMapping(t *testing.T) {
 					Check: resource.ComposeAggregateTestCheckFunc(
 						resource.TestCheckResourceAttr("scc_domain_mapping.test", "virtual_domain", "updatedtfvirtualdomain"),
 					),
+					ConfigStateChecks: []statecheck.StateCheck{
+						statecheck.ExpectIdentity(
+							"scc_domain_mapping.test",
+							map[string]knownvalue.Check{
+								"internal_domain": knownvalue.StringExact("testtfinternaldomain"),
+								"region_host":     knownvalue.StringExact("cf.eu12.hana.ondemand.com"),
+								"subaccount":      knownvalue.StringRegexp(regexpValidUUID),
+							},
+						),
+					},
 				},
 				{
 					ResourceName:                         "scc_domain_mapping.test",
