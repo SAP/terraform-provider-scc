@@ -11,8 +11,10 @@ import (
 	"github.com/SAP/terraform-provider-scc/validation/uuidvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 var _ resource.Resource = &SystemMappingResourceResource{}
@@ -23,6 +25,14 @@ func NewSystemMappingResourceResource() resource.Resource {
 
 type SystemMappingResourceResource struct {
 	client *api.RestApiClient
+}
+
+type systemMappingResourceResourceIdentityModel struct {
+	Subaccount  types.String `tfsdk:"subaccount"`
+	RegionHost  types.String `tfsdk:"region_host"`
+	VirtualHost types.String `tfsdk:"virtual_host"`
+	VirtualPort types.String `tfsdk:"virtual_port"`
+	URLPath     types.String `tfsdk:"url_path"`
 }
 
 func (r *SystemMappingResourceResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -98,6 +108,28 @@ __UI Equivalent:__ *Access Policy*
 	}
 }
 
+func (rs *SystemMappingResourceResource) IdentitySchema(_ context.Context, _ resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
+	resp.IdentitySchema = identityschema.Schema{
+		Attributes: map[string]identityschema.Attribute{
+			"subaccount": identityschema.StringAttribute{
+				RequiredForImport: true,
+			},
+			"region_host": identityschema.StringAttribute{
+				RequiredForImport: true,
+			},
+			"virtual_host": identityschema.StringAttribute{
+				RequiredForImport: true,
+			},
+			"virtual_port": identityschema.StringAttribute{
+				RequiredForImport: true,
+			},
+			"url_path": identityschema.StringAttribute{
+				RequiredForImport: true,
+			},
+		},
+	}
+}
+
 func (r *SystemMappingResourceResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
@@ -166,6 +198,17 @@ func (r *SystemMappingResourceResource) Create(ctx context.Context, req resource
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	identity := systemMappingResourceResourceIdentityModel{
+		Subaccount:  plan.Subaccount,
+		RegionHost:  plan.RegionHost,
+		VirtualHost: plan.VirtualHost,
+		VirtualPort: plan.VirtualPort,
+		URLPath:     plan.URLPath,
+	}
+
+	diags = resp.Identity.Set(ctx, identity)
+	resp.Diagnostics.Append(diags...)
 }
 
 func (r *SystemMappingResourceResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -201,6 +244,17 @@ func (r *SystemMappingResourceResource) Read(ctx context.Context, req resource.R
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	identity := systemMappingResourceResourceIdentityModel{
+		Subaccount:  state.Subaccount,
+		RegionHost:  state.RegionHost,
+		VirtualHost: state.VirtualHost,
+		VirtualPort: state.VirtualPort,
+		URLPath:     state.URLPath,
+	}
+
+	diags = resp.Identity.Set(ctx, identity)
+	resp.Diagnostics.Append(diags...)
 }
 
 func (r *SystemMappingResourceResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
@@ -265,6 +319,17 @@ func (r *SystemMappingResourceResource) Update(ctx context.Context, req resource
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	identity := systemMappingResourceResourceIdentityModel{
+		Subaccount:  plan.Subaccount,
+		RegionHost:  plan.RegionHost,
+		VirtualHost: plan.VirtualHost,
+		VirtualPort: plan.VirtualPort,
+		URLPath:     plan.URLPath,
+	}
+
+	diags = resp.Identity.Set(ctx, identity)
+	resp.Diagnostics.Append(diags...)
 }
 
 func (r *SystemMappingResourceResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -303,19 +368,37 @@ func (r *SystemMappingResourceResource) Delete(ctx context.Context, req resource
 }
 
 func (rs *SystemMappingResourceResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	idParts := strings.Split(req.ID, ",")
+	if req.ID != "" {
+		idParts := strings.Split(req.ID, ",")
 
-	if len(idParts) != 5 || idParts[0] == "" || idParts[1] == "" || idParts[2] == "" || idParts[3] == "" || idParts[4] == "" {
-		resp.Diagnostics.AddError(
-			"Unexpected Import Identifier",
-			fmt.Sprintf("Expected import identifier with format: region_host, subaccount, virtual_host, virtual_port, url_path. Got: %q", req.ID),
-		)
+		if len(idParts) != 5 || idParts[0] == "" || idParts[1] == "" || idParts[2] == "" || idParts[3] == "" || idParts[4] == "" {
+			resp.Diagnostics.AddError(
+				"Unexpected Import Identifier",
+				fmt.Sprintf("Expected import identifier with format: region_host, subaccount, virtual_host, virtual_port, url_path. Got: %q", req.ID),
+			)
+			return
+		}
+
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("region_host"), idParts[0])...)
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("subaccount"), idParts[1])...)
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("virtual_host"), idParts[2])...)
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("virtual_port"), idParts[3])...)
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("url_path"), idParts[4])...)
+
+		return
+
+	}
+
+	var identity systemMappingResourceResourceIdentityModel
+	diags := resp.Identity.Get(ctx, &identity)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("region_host"), idParts[0])...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("subaccount"), idParts[1])...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("virtual_host"), idParts[2])...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("virtual_port"), idParts[3])...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("url_path"), idParts[4])...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("region_host"), identity.RegionHost)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("subaccount"), identity.Subaccount)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("virtual_host"), identity.VirtualHost)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("virtual_port"), identity.VirtualPort)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("url_path"), identity.URLPath)...)
 }
