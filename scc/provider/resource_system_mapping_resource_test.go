@@ -6,6 +6,8 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/statecheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
@@ -27,6 +29,18 @@ func TestResourceSystemMappingResource(t *testing.T) {
 						resource.TestCheckResourceAttr("scc_system_mapping_resource.test", "description", "create resource"),
 						resource.TestCheckResourceAttr("scc_system_mapping_resource.test", "enabled", "true"),
 					),
+					ConfigStateChecks: []statecheck.StateCheck{
+						statecheck.ExpectIdentity(
+							"scc_system_mapping_resource.test",
+							map[string]knownvalue.Check{
+								"region_host":  knownvalue.StringExact("cf.eu12.hana.ondemand.com"),
+								"subaccount":   knownvalue.StringRegexp(regexpValidUUID),
+								"virtual_host": knownvalue.StringExact("testtfvirtualtesting"),
+								"virtual_port": knownvalue.StringExact("90"),
+								"url_path":     knownvalue.StringExact("/"),
+							},
+						),
+					},
 				},
 				// Update with mismatched configuration should throw error
 				{
@@ -40,6 +54,18 @@ func TestResourceSystemMappingResource(t *testing.T) {
 						resource.TestCheckResourceAttr("scc_system_mapping_resource.test", "description", "updated resource"),
 						resource.TestCheckResourceAttr("scc_system_mapping_resource.test", "enabled", "false"),
 					),
+					ConfigStateChecks: []statecheck.StateCheck{
+						statecheck.ExpectIdentity(
+							"scc_system_mapping_resource.test",
+							map[string]knownvalue.Check{
+								"region_host":  knownvalue.StringExact("cf.eu12.hana.ondemand.com"),
+								"subaccount":   knownvalue.StringRegexp(regexpValidUUID),
+								"virtual_host": knownvalue.StringExact("testtfvirtualtesting"),
+								"virtual_port": knownvalue.StringExact("90"),
+								"url_path":     knownvalue.StringExact("/"),
+							},
+						),
+					},
 				},
 				{
 					ResourceName:                         "scc_system_mapping_resource.test",
