@@ -55,6 +55,11 @@ func TestResourceSubaccountK8SServiceChannel(t *testing.T) {
 					},
 				},
 				{
+					ResourceName:    "scc_subaccount_k8s_service_channel.test",
+					ImportState:     true,
+					ImportStateKind: resource.ImportBlockWithResourceIdentity,
+				},
+				{
 					ResourceName:      "scc_subaccount_k8s_service_channel.test",
 					ImportState:       true,
 					ImportStateVerify: true,
