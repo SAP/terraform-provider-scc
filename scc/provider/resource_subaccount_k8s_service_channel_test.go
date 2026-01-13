@@ -6,6 +6,8 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/statecheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
@@ -41,6 +43,16 @@ func TestResourceSubaccountK8SServiceChannel(t *testing.T) {
 						resource.TestMatchResourceAttr("scc_subaccount_k8s_service_channel.test", "state.connected_since_time_stamp", regexp.MustCompile(`^(0|\d{13})$`)),
 						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.test", "state.opened_connections", "1"),
 					),
+					ConfigStateChecks: []statecheck.StateCheck{
+						statecheck.ExpectIdentity(
+							"scc_subaccount_k8s_service_channel.test",
+							map[string]knownvalue.Check{
+								"id":          knownvalue.NotNull(),
+								"region_host": knownvalue.StringExact("cf.eu12.hana.ondemand.com"),
+								"subaccount":  knownvalue.StringRegexp(regexpValidUUID),
+							},
+						),
+					},
 				},
 				{
 					ResourceName:      "scc_subaccount_k8s_service_channel.test",
@@ -86,6 +98,16 @@ func TestResourceSubaccountK8SServiceChannel(t *testing.T) {
 						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.test", "connections", "1"),
 						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.test", "enabled", "true"),
 					),
+					ConfigStateChecks: []statecheck.StateCheck{
+						statecheck.ExpectIdentity(
+							"scc_subaccount_k8s_service_channel.test",
+							map[string]knownvalue.Check{
+								"id":          knownvalue.NotNull(),
+								"region_host": knownvalue.StringExact("cf.eu12.hana.ondemand.com"),
+								"subaccount":  knownvalue.StringRegexp(regexpValidUUID),
+							},
+						),
+					},
 				},
 				// Update with mismatched configuration should throw error
 				{
@@ -99,6 +121,16 @@ func TestResourceSubaccountK8SServiceChannel(t *testing.T) {
 						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.test", "connections", "2"),
 						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.test", "enabled", "false"),
 					),
+					ConfigStateChecks: []statecheck.StateCheck{
+						statecheck.ExpectIdentity(
+							"scc_subaccount_k8s_service_channel.test",
+							map[string]knownvalue.Check{
+								"id":          knownvalue.NotNull(),
+								"region_host": knownvalue.StringExact("cf.eu12.hana.ondemand.com"),
+								"subaccount":  knownvalue.StringRegexp(regexpValidUUID),
+							},
+						),
+					},
 				},
 			},
 		})
