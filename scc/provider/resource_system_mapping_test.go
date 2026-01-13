@@ -6,6 +6,8 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/statecheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
@@ -36,6 +38,17 @@ func TestResourceSystemMapping(t *testing.T) {
 						resource.TestCheckResourceAttr("scc_system_mapping.test", "host_in_header", "VIRTUAL"),
 						resource.TestCheckResourceAttr("scc_system_mapping.test", "authentication_mode", "KERBEROS"),
 					),
+					ConfigStateChecks: []statecheck.StateCheck{
+						statecheck.ExpectIdentity(
+							"scc_system_mapping.test",
+							map[string]knownvalue.Check{
+								"region_host":  knownvalue.StringExact("cf.eu12.hana.ondemand.com"),
+								"subaccount":   knownvalue.StringRegexp(regexpValidUUID),
+								"virtual_host": knownvalue.StringExact("testtfvirtual"),
+								"virtual_port": knownvalue.StringExact("900"),
+							},
+						),
+					},
 				},
 				// Update with mismatched configuration should throw error
 				{
@@ -53,6 +66,17 @@ func TestResourceSystemMapping(t *testing.T) {
 						resource.TestCheckResourceAttr("scc_system_mapping.test", "host_in_header", "INTERNAL"),
 						resource.TestCheckResourceAttr("scc_system_mapping.test", "authentication_mode", "X509_GENERAL"),
 					),
+					ConfigStateChecks: []statecheck.StateCheck{
+						statecheck.ExpectIdentity(
+							"scc_system_mapping.test",
+							map[string]knownvalue.Check{
+								"region_host":  knownvalue.StringExact("cf.eu12.hana.ondemand.com"),
+								"subaccount":   knownvalue.StringRegexp(regexpValidUUID),
+								"virtual_host": knownvalue.StringExact("testtfvirtual"),
+								"virtual_port": knownvalue.StringExact("900"),
+							},
+						),
+					},
 				},
 
 				// IMPORT

@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
@@ -35,6 +36,13 @@ func NewSystemMappingResource() resource.Resource {
 
 type SystemMappingResource struct {
 	client *api.RestApiClient
+}
+
+type systemMappingResourceIdentityModel struct {
+	Subaccount  types.String `tfsdk:"subaccount"`
+	RegionHost  types.String `tfsdk:"region_host"`
+	VirtualHost types.String `tfsdk:"virtual_host"`
+	VirtualPort types.String `tfsdk:"virtual_port"`
 }
 
 func (r *SystemMappingResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -290,6 +298,25 @@ __Format rules:__
 	}
 }
 
+func (rs *SystemMappingResource) IdentitySchema(_ context.Context, _ resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
+	resp.IdentitySchema = identityschema.Schema{
+		Attributes: map[string]identityschema.Attribute{
+			"subaccount": identityschema.StringAttribute{
+				RequiredForImport: true,
+			},
+			"region_host": identityschema.StringAttribute{
+				RequiredForImport: true,
+			},
+			"virtual_host": identityschema.StringAttribute{
+				RequiredForImport: true,
+			},
+			"virtual_port": identityschema.StringAttribute{
+				RequiredForImport: true,
+			},
+		},
+	}
+}
+
 func (r *SystemMappingResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
@@ -351,6 +378,16 @@ func (r *SystemMappingResource) Create(ctx context.Context, req resource.CreateR
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	identity := systemMappingResourceIdentityModel{
+		Subaccount:  plan.Subaccount,
+		RegionHost:  plan.RegionHost,
+		VirtualHost: plan.VirtualHost,
+		VirtualPort: plan.VirtualPort,
+	}
+
+	diags = resp.Identity.Set(ctx, identity)
+	resp.Diagnostics.Append(diags...)
 }
 
 func (r *SystemMappingResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -385,6 +422,16 @@ func (r *SystemMappingResource) Read(ctx context.Context, req resource.ReadReque
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	identity := systemMappingResourceIdentityModel{
+		Subaccount:  state.Subaccount,
+		RegionHost:  state.RegionHost,
+		VirtualHost: state.VirtualHost,
+		VirtualPort: state.VirtualPort,
+	}
+
+	diags = resp.Identity.Set(ctx, identity)
+	resp.Diagnostics.Append(diags...)
 }
 
 func (r *SystemMappingResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
@@ -441,6 +488,16 @@ func (r *SystemMappingResource) Update(ctx context.Context, req resource.UpdateR
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	identity := systemMappingResourceIdentityModel{
+		Subaccount:  plan.Subaccount,
+		RegionHost:  plan.RegionHost,
+		VirtualHost: plan.VirtualHost,
+		VirtualPort: plan.VirtualPort,
+	}
+
+	diags = resp.Identity.Set(ctx, identity)
+	resp.Diagnostics.Append(diags...)
 }
 
 func (r *SystemMappingResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -532,18 +589,34 @@ func buildSystemMappingBody(ctx context.Context, action string, plan SystemMappi
 }
 
 func (rs *SystemMappingResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	idParts := strings.Split(req.ID, ",")
+	if req.ID != "" {
+		idParts := strings.Split(req.ID, ",")
 
-	if len(idParts) != 4 || idParts[0] == "" || idParts[1] == "" || idParts[2] == "" || idParts[3] == "" {
-		resp.Diagnostics.AddError(
-			"Unexpected Import Identifier",
-			fmt.Sprintf("Expected import identifier with format: region_host, subaccount, virtual_host, virtual_port. Got: %q", req.ID),
-		)
+		if len(idParts) != 4 || idParts[0] == "" || idParts[1] == "" || idParts[2] == "" || idParts[3] == "" {
+			resp.Diagnostics.AddError(
+				"Unexpected Import Identifier",
+				fmt.Sprintf("Expected import identifier with format: region_host, subaccount, virtual_host, virtual_port. Got: %q", req.ID),
+			)
+			return
+		}
+
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("region_host"), idParts[0])...)
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("subaccount"), idParts[1])...)
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("virtual_host"), idParts[2])...)
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("virtual_port"), idParts[3])...)
+
 		return
 	}
 
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("region_host"), idParts[0])...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("subaccount"), idParts[1])...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("virtual_host"), idParts[2])...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("virtual_port"), idParts[3])...)
+	var identity systemMappingResourceIdentityModel
+	diags := resp.Identity.Get(ctx, &identity)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("region_host"), identity.RegionHost)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("subaccount"), identity.Subaccount)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("virtual_host"), identity.VirtualHost)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("virtual_port"), identity.VirtualPort)...)
 }
