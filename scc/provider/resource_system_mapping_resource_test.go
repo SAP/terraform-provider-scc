@@ -75,6 +75,11 @@ func TestResourceSystemMappingResource(t *testing.T) {
 					ImportStateIdFunc:                    getImportStateForSystemMappingResource("scc_system_mapping_resource.test"),
 				},
 				{
+					ResourceName:    "scc_system_mapping_resource.test",
+					ImportState:     true,
+					ImportStateKind: resource.ImportBlockWithResourceIdentity,
+				},
+				{
 					ResourceName:  "scc_system_mapping_resource.test",
 					ImportState:   true,
 					ImportStateId: "cf.eu12.hana.ondemand.comd3bbbcd7-d5e0-483b-a524-6dee7205f8e8testtfvirtualtesting90/", // malformed ID

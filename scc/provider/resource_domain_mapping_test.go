@@ -71,6 +71,11 @@ func TestResourceDomainMapping(t *testing.T) {
 					ImportStateVerifyIdentifierAttribute: "internal_domain",
 				},
 				{
+					ResourceName:    "scc_domain_mapping.test",
+					ImportState:     true,
+					ImportStateKind: resource.ImportBlockWithResourceIdentity,
+				},
+				{
 					ResourceName:  "scc_domain_mapping.test",
 					ImportState:   true,
 					ImportStateId: "cf.eu12.hana.ondemand.comd3bbbcd7-d5e0-483b-a524-6dee7205f8e8testtfinternaldomain", // malformed ID

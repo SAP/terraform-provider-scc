@@ -88,6 +88,11 @@ func TestResourceSystemMapping(t *testing.T) {
 					ImportStateVerifyIdentifierAttribute: "virtual_host",
 				},
 				{
+					ResourceName:    "scc_system_mapping.test",
+					ImportState:     true,
+					ImportStateKind: resource.ImportBlockWithResourceIdentity,
+				},
+				{
 					ResourceName:  "scc_system_mapping.test",
 					ImportState:   true,
 					ImportStateId: "cf.eu12.hana.ondemand.comd3bbbcd7-d5e0-483b-a524-6dee7205f8e8testtfvirtual900", // malformed ID
