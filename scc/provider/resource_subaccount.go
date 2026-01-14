@@ -474,14 +474,6 @@ func (r *SubaccountResource) Update(ctx context.Context, req resource.UpdateRequ
 	} else {
 		resp.Diagnostics.Append(resp.State.Set(ctx, responseModel)...)
 	}
-
-	identity := subaccountResourceIdentityModel{
-		Subaccount: plan.Subaccount,
-		RegionHost: plan.RegionHost,
-	}
-
-	diags = resp.Identity.Set(ctx, identity)
-	resp.Diagnostics.Append(diags...)
 }
 
 func appendAndCheckErrors(diags *diag.Diagnostics, newDiags diag.Diagnostics) bool {

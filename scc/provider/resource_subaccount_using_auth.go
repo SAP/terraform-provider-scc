@@ -432,14 +432,6 @@ func (r *SubaccountUsingAuthResource) Update(ctx context.Context, req resource.U
 	} else {
 		resp.Diagnostics.Append(resp.State.Set(ctx, responseModel)...)
 	}
-
-	identity := subaccountUsingAuthResourceIdentityModel{
-		Subaccount: responseModel.Subaccount,
-		RegionHost: responseModel.RegionHost,
-	}
-
-	diags = resp.Identity.Set(ctx, identity)
-	resp.Diagnostics.Append(diags...)
 }
 
 func appendAndCheckErrorsCopy(diags *diag.Diagnostics, newDiags diag.Diagnostics) bool {
