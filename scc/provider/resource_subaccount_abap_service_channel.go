@@ -14,10 +14,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 var _ resource.Resource = &SubaccountABAPServiceChannelResource{}
@@ -28,6 +30,12 @@ func NewSubaccountABAPServiceChannelResource() resource.Resource {
 
 type SubaccountABAPServiceChannelResource struct {
 	client *api.RestApiClient
+}
+
+type subaccountABAPServiceChannelResourceIdentityModel struct {
+	Subaccount types.String `tfsdk:"subaccount"`
+	RegionHost types.String `tfsdk:"region_host"`
+	ID         types.Int64  `tfsdk:"id"`
 }
 
 func (r *SubaccountABAPServiceChannelResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -121,6 +129,22 @@ __Further documentation:__
 	}
 }
 
+func (rs *SubaccountABAPServiceChannelResource) IdentitySchema(_ context.Context, _ resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
+	resp.IdentitySchema = identityschema.Schema{
+		Attributes: map[string]identityschema.Attribute{
+			"subaccount": identityschema.StringAttribute{
+				RequiredForImport: true,
+			},
+			"region_host": identityschema.StringAttribute{
+				RequiredForImport: true,
+			},
+			"id": identityschema.Int64Attribute{
+				RequiredForImport: true,
+			},
+		},
+	}
+}
+
 func (r *SubaccountABAPServiceChannelResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 
 	if req.ProviderData == nil {
@@ -207,6 +231,15 @@ func (r *SubaccountABAPServiceChannelResource) Create(ctx context.Context, req r
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	identity := subaccountABAPServiceChannelResourceIdentityModel{
+		Subaccount: plan.Subaccount,
+		RegionHost: plan.RegionHost,
+		ID:         responseModel.ID,
+	}
+
+	diags = resp.Identity.Set(ctx, identity)
+	resp.Diagnostics.Append(diags...)
 }
 
 func (r *SubaccountABAPServiceChannelResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -240,6 +273,15 @@ func (r *SubaccountABAPServiceChannelResource) Read(ctx context.Context, req res
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	identity := subaccountABAPServiceChannelResourceIdentityModel{
+		Subaccount: state.Subaccount,
+		RegionHost: state.RegionHost,
+		ID:         state.ID,
+	}
+
+	diags = resp.Identity.Set(ctx, identity)
+	resp.Diagnostics.Append(diags...)
 }
 
 func (r *SubaccountABAPServiceChannelResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
@@ -380,27 +422,42 @@ func (r *SubaccountABAPServiceChannelResource) updateSubaccountABAPServiceChanne
 }
 
 func (rs *SubaccountABAPServiceChannelResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	idParts := strings.Split(req.ID, ",")
+	if req.ID != "" {
+		idParts := strings.Split(req.ID, ",")
 
-	if len(idParts) != 3 || idParts[0] == "" || idParts[1] == "" || idParts[2] == "" {
-		resp.Diagnostics.AddError(
-			"Unexpected Import Identifier",
-			fmt.Sprintf("Expected import identifier with format: region_host, subaccount, id. Got: %q", req.ID),
-		)
+		if len(idParts) != 3 || idParts[0] == "" || idParts[1] == "" || idParts[2] == "" {
+			resp.Diagnostics.AddError(
+				"Unexpected Import Identifier",
+				fmt.Sprintf("Expected import identifier with format: region_host, subaccount, id. Got: %q", req.ID),
+			)
+			return
+		}
+
+		intID, diags := strconv.Atoi(idParts[2])
+		if diags != nil {
+			resp.Diagnostics.AddError(
+				"Invalid ID Format",
+				fmt.Sprintf("The 'id' part must be an integer. Got: %q", idParts[2]),
+			)
+			return
+		}
+
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("region_host"), idParts[0])...)
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("subaccount"), idParts[1])...)
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), intID)...)
+
 		return
 	}
 
-	intID, diags := strconv.Atoi(idParts[2])
-	if diags != nil {
-		resp.Diagnostics.AddError(
-			"Invalid ID Format",
-			fmt.Sprintf("The 'id' part must be an integer. Got: %q", idParts[2]),
-		)
+	var identity subaccountABAPServiceChannelResourceIdentityModel
+	diags := resp.Identity.Get(ctx, &identity)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("region_host"), idParts[0])...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("subaccount"), idParts[1])...)
-	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), intID)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("subaccount"), identity.Subaccount)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("region_host"), identity.RegionHost)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), identity.ID)...)
 
 }
