@@ -13,6 +13,7 @@ description: |-
 ## Example Usage
 
 ```terraform
+# - This feature requires Terraform v1.14.0 or later
 list "scc_subaccount" "<label_name>" {
   # (Required) Provider instance to use
   provider = provider_name

@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
 	"github.com/hashicorp/terraform-plugin-testing/querycheck"
+	"github.com/hashicorp/terraform-plugin-testing/tfversion"
 )
 
 func TestListSubaccount(t *testing.T) {
@@ -21,7 +22,9 @@ func TestListSubaccount(t *testing.T) {
 
 		resource.UnitTest(t, resource.TestCase{
 			ProtoV6ProviderFactories: getTestProviders(rec.GetDefaultClient()),
-
+			TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+				tfversion.SkipBelow(tfversion.Version1_14_0),
+			},
 			Steps: []resource.TestStep{
 				{
 					Query:  true,
