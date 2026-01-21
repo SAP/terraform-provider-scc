@@ -209,44 +209,6 @@ func TestResourceSubaccount(t *testing.T) {
 			},
 		})
 	})
-
-	t.Run("error path - cloud user mandatory", func(t *testing.T) {
-		rec, user := setupVCR(t, "fixtures/resource_subaccount_err_wo_cloud_user")
-
-		if len(user.CloudUsername) == 0 || len(user.CloudPassword) == 0 {
-			t.Fatalf("Missing TF_VAR_cloud_user or TF_VAR_cloud_password for recording test fixtures")
-		}
-		defer stopQuietly(rec)
-		resource.Test(t, resource.TestCase{
-			IsUnitTest:               true,
-			ProtoV6ProviderFactories: getTestProviders(rec.GetDefaultClient()),
-			Steps: []resource.TestStep{
-				{
-					Config:      ResourceSubaccountWoUsername("test", "cf.eu12.hana.ondemand.com", "4916a705-273c-45a6-a2f0-08c234c7a23d", user.CloudPassword, "subaccount added via terraform tests"),
-					ExpectError: regexp.MustCompile(`The argument "cloud_user" is required, but no definition was found.`),
-				},
-			},
-		})
-	})
-
-	t.Run("error path - cloud password mandatory", func(t *testing.T) {
-		rec, user := setupVCR(t, "fixtures/resource_subaccount_err_wo_password")
-
-		if len(user.CloudUsername) == 0 || len(user.CloudPassword) == 0 {
-			t.Fatalf("Missing TF_VAR_cloud_user or TF_VAR_cloud_password for recording test fixtures")
-		}
-		defer stopQuietly(rec)
-		resource.Test(t, resource.TestCase{
-			IsUnitTest:               true,
-			ProtoV6ProviderFactories: getTestProviders(nil),
-			Steps: []resource.TestStep{
-				{
-					Config:      ResourceSubaccountWoPassword("test", "cf.eu12.hana.ondemand.com", "4916a705-273c-45a6-a2f0-08c234c7a23d", user.CloudUsername, "subaccount added via terraform tests"),
-					ExpectError: regexp.MustCompile(`The argument "cloud_password" is required, but no definition was found.`),
-				},
-			},
-		})
-	})
 }
 
 func ResourceSubaccount(datasourceName string, regionHost string, subaccount string, cloudUser string, cloudPassword string, description string) string {
@@ -281,28 +243,6 @@ func ResourceSubaccountWoID(datasourceName string, regionHost string, cloudUser 
     description= "%s"
 	}
 	`, datasourceName, regionHost, cloudUser, cloudPassword, description)
-}
-
-func ResourceSubaccountWoUsername(datasourceName string, regionHost string, subaccount string, cloudPassword string, description string) string {
-	return fmt.Sprintf(`
-	resource "scc_subaccount" "%s" {
-    region_host= "%s"
-    subaccount= "%s"
-    cloud_password= "%s" 
-    description= "%s"
-	}
-	`, datasourceName, regionHost, subaccount, cloudPassword, description)
-}
-
-func ResourceSubaccountWoPassword(datasourceName string, regionHost string, subaccount string, cloudUser string, description string) string {
-	return fmt.Sprintf(`
-	resource "scc_subaccount" "%s" {
-    region_host= "%s"
-    subaccount= "%s"
-    cloud_user= "%s"
-    description= "%s"
-	}
-	`, datasourceName, regionHost, subaccount, cloudUser, description)
 }
 
 func ResourceSubaccountUpdateWithDisplayName(datasourceName, regionHost, subaccount, cloudUser, cloudPassword, description, displayName string) string {

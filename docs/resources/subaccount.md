@@ -40,14 +40,22 @@ resource "scc_subaccount" "scc_sa" {
 
 ### Required
 
-- `cloud_password` (String, Sensitive) Password for the cloud user.
-- `cloud_user` (String) User for the specified subaccount and region host.
 - `region_host` (String) Region Host Name.
 - `subaccount` (String) The ID of the subaccount.
 
 ### Optional
 
 - `auto_renew_before_days` (Number) Number of days before certificate expiration when the certificate should be renewed automatically. Minimum is 7 days, maximum is 45 days.
+- `cloud_password` (String, Sensitive) Password for the cloud user.
+
+**Required when creating the resource.**
+
+This attribute is optional in the schema to support `terraform import`, but must be provided during creation and certificate renewal operations.
+- `cloud_user` (String) User for the specified subaccount and region host.
+
+**Required when creating the resource.**
+
+This attribute is optional in the schema to support `terraform import`, but must be provided during creation and certificate renewal operations.
 - `connected` (Boolean) Specifies whether the subaccount should be connected to the Cloud Connector.
 
 - **true** → attempts to establish a tunnel connection.

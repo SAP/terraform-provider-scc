@@ -276,16 +276,13 @@ func SubaccountResourceValueFrom(ctx context.Context, plan SubaccountConfig, val
 	}
 
 	model := &SubaccountConfig{
-		RegionHost:          types.StringValue(value.RegionHost),
-		Subaccount:          types.StringValue(value.Subaccount),
-		LocationID:          types.StringValue(value.LocationID),
-		DisplayName:         types.StringValue(value.DisplayName),
-		Description:         types.StringValue(value.Description),
-		CloudUser:           plan.CloudUser,
-		CloudPassword:       plan.CloudPassword,
-		Tunnel:              tunnel,
-		Connected:           plan.Connected,
-		AutoRenewBeforeDays: plan.AutoRenewBeforeDays,
+		RegionHost:  types.StringValue(value.RegionHost),
+		Subaccount:  types.StringValue(value.Subaccount),
+		LocationID:  types.StringValue(value.LocationID),
+		DisplayName: types.StringValue(value.DisplayName),
+		Description: types.StringValue(value.Description),
+		Tunnel:      tunnel,
+		Connected:   types.BoolValue(value.Tunnel.State == "Connected"),
 	}
 	return *model, diag.Diagnostics{}
 }
@@ -353,14 +350,13 @@ func SubaccountUsingAuthResourceValueFrom(ctx context.Context, plan SubaccountUs
 	}
 
 	model := &SubaccountUsingAuthConfig{
-		RegionHost:         types.StringValue(value.RegionHost),
-		Subaccount:         types.StringValue(value.Subaccount),
-		AuthenticationData: plan.AuthenticationData,
-		LocationID:         types.StringValue(value.LocationID),
-		DisplayName:        types.StringValue(value.DisplayName),
-		Description:        types.StringValue(value.Description),
-		Tunnel:             tunnel,
-		Connected:          plan.Connected,
+		RegionHost:  types.StringValue(value.RegionHost),
+		Subaccount:  types.StringValue(value.Subaccount),
+		LocationID:  types.StringValue(value.LocationID),
+		DisplayName: types.StringValue(value.DisplayName),
+		Description: types.StringValue(value.Description),
+		Tunnel:      tunnel,
+		Connected:   types.BoolValue(value.Tunnel.State == "Connected"),
 	}
 	return *model, diag.Diagnostics{}
 }
