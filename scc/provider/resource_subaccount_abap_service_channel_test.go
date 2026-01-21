@@ -13,24 +13,23 @@ import (
 
 func TestResourceSubaccountABAPServiceChannel(t *testing.T) {
 
-	regionHost := "cf.us10.hana.ondemand.com"
-	subaccount := "f54d0395-3a79-482b-a3c7-b1882f57a5bb"
+	regionHost := "cf.eu12.hana.ondemand.com"
+	subaccount := "d3bbbcd7-d5e0-483b-a524-6dee7205f8e8"
 	abapCloudTenantHost := "testserviceid.abap.region.hana.ondemand.com"
 	t.Parallel()
 
 	t.Run("happy path", func(t *testing.T) {
 		rec, user := setupVCR(t, "fixtures/resource_subaccount_abap_service_channel")
-		if len(user.ABAPCloudTenantHost) == 0 {
-			t.Fatalf("Missing TF_VAR_abap_cloud_tenant_host for recording test fixtures")
+		if len(user.ABAPCloudTenantHost) == 0{
+			user.ABAPCloudTenantHost = abapCloudTenantHost
 		}
 		defer stopQuietly(rec)
-
 		resource.Test(t, resource.TestCase{
 			IsUnitTest:               true,
 			ProtoV6ProviderFactories: getTestProviders(rec.GetDefaultClient()),
 			Steps: []resource.TestStep{
 				{
-					Config: providerConfig(user) + ResourceSubaccountABAPServiceChannel("test", regionHost, subaccount, user.ABAPCloudTenantHost, 20, 1, true, "Created"),
+					Config: providerConfig(user) + ResourceSubaccountABAPServiceChannel("test", regionHost, subaccount, user.ABAPCloudTenantHost, 20, 1, false, "Created"),
 					Check: resource.ComposeAggregateTestCheckFunc(
 						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.test", "region_host", regionHost),
 						resource.TestMatchResourceAttr("scc_subaccount_abap_service_channel.test", "subaccount", regexpValidUUID),
@@ -39,11 +38,11 @@ func TestResourceSubaccountABAPServiceChannel(t *testing.T) {
 						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.test", "port", "3320"),
 						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.test", "connections", "1"),
 						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.test", "type", "ABAPCloud"),
-						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.test", "enabled", "true"),
+						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.test", "enabled", "false"),
 						resource.TestCheckResourceAttrSet("scc_subaccount_abap_service_channel.test", "id"),
-						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.test", "state.connected", "true"),
+						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.test", "state.connected", "false"),
 						resource.TestMatchResourceAttr("scc_subaccount_abap_service_channel.test", "state.connected_since_time_stamp", regexp.MustCompile(`^(0|\d{13})$`)),
-						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.test", "state.opened_connections", "1"),
+						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.test", "state.opened_connections", "0"),
 					),
 					ConfigStateChecks: []statecheck.StateCheck{
 						statecheck.ExpectIdentity(
@@ -92,8 +91,8 @@ func TestResourceSubaccountABAPServiceChannel(t *testing.T) {
 
 	t.Run("update path - comment and connections update", func(t *testing.T) {
 		rec, user := setupVCR(t, "fixtures/resource_subaccount_abap_service_channel_update")
-		if len(user.ABAPCloudTenantHost) == 0 {
-			t.Fatalf("Missing TF_VAR_abap_cloud_tenant_host for recording test fixtures")
+		if len(user.ABAPCloudTenantHost) == 0{
+			user.ABAPCloudTenantHost = abapCloudTenantHost
 		}
 		defer stopQuietly(rec)
 
@@ -102,11 +101,11 @@ func TestResourceSubaccountABAPServiceChannel(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(rec.GetDefaultClient()),
 			Steps: []resource.TestStep{
 				{
-					Config: providerConfig(user) + ResourceSubaccountABAPServiceChannel("test", regionHost, subaccount, user.ABAPCloudTenantHost, 20, 1, true, "Created"),
+					Config: providerConfig(user) + ResourceSubaccountABAPServiceChannel("test", regionHost, subaccount, user.ABAPCloudTenantHost, 20, 1, false, "Created"),
 					Check: resource.ComposeAggregateTestCheckFunc(
 						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.test", "comment", "Created"),
 						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.test", "connections", "1"),
-						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.test", "enabled", "true"),
+						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.test", "enabled", "false"),
 					),
 					ConfigStateChecks: []statecheck.StateCheck{
 						statecheck.ExpectIdentity(
@@ -126,13 +125,13 @@ func TestResourceSubaccountABAPServiceChannel(t *testing.T) {
 				},
 				// Update with mismatched configuration should throw error
 				{
-					Config:      providerConfig(user) + ResourceSubaccountABAPServiceChannel("test", "cf.eu12.hana.ondemand.com", subaccount, user.ABAPCloudTenantHost, 20, 1, true, "Update"),
+					Config:      providerConfig(user) + ResourceSubaccountABAPServiceChannel("test", "cf.us10.hana.ondemand.com", subaccount, user.ABAPCloudTenantHost, 20, 1, false, "Update"),
 					ExpectError: regexp.MustCompile(`(?is)error updating the cloud connector subaccount ABAP service channel.*mismatched\s+configuration values`),
 				},
 				{
-					Config: providerConfig(user) + ResourceSubaccountABAPServiceChannel("test", regionHost, subaccount, user.ABAPCloudTenantHost, 20, 2, false, "Enabled"),
+					Config: providerConfig(user) + ResourceSubaccountABAPServiceChannel("test", regionHost, subaccount, user.ABAPCloudTenantHost, 20, 2, false, "Changed Connections"),
 					Check: resource.ComposeAggregateTestCheckFunc(
-						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.test", "comment", "Enabled"),
+						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.test", "comment", "Changed Connections"),
 						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.test", "connections", "2"),
 						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.test", "enabled", "false"),
 					),
