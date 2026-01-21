@@ -24,7 +24,6 @@ func NewSubaccountListResource() list.ListResource {
 	return &SubaccountListResource{}
 }
 
-// Metadata links the list resource to the managed resource type
 func (r *SubaccountListResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_subaccount" // must match managed resource
 }
@@ -70,24 +69,28 @@ func (r *SubaccountListResource) List(
 	endpoint := endpoints.GetSubaccountBaseEndpoint()
 
 	diags := requestAndUnmarshal(r.client, &respObj.Subaccounts, "GET", endpoint, nil, true)
-	if len(diags) > 0 {
-		stream.Results = func(push func(list.ListResult) bool) {
-			for _, d := range diags {
-				result := req.NewListResult(ctx)
-				result.Diagnostics.AddError("API Error", d.Summary())
-				push(result)
-			}
-		}
-
+	if diags.HasError() {
+		stream.Results = list.ListResultsStreamDiagnostics(diags)
 		return
 	}
 
 	stream.Results = func(push func(list.ListResult) bool) {
+		warned := false
+
 		for _, sa := range respObj.Subaccounts {
 			result := req.NewListResult(ctx)
 
 			_ = result.Identity.SetAttribute(ctx, path.Root("subaccount"), types.StringValue(sa.Subaccount))
 			_ = result.Identity.SetAttribute(ctx, path.Root("region_host"), types.StringValue(sa.RegionHost))
+
+			if !warned && req.IncludeResource {
+				result.Diagnostics.AddWarning(
+					"include_resource Not Supported",
+					"The include_resource option is not supported for this list resource.",
+				)
+
+				warned = true
+			}
 
 			if !push(result) {
 				return
