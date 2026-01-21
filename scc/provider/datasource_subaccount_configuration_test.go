@@ -26,7 +26,7 @@ func TestDataSourceSubaccount(t *testing.T) {
 						resource.TestCheckResourceAttr("data.scc_subaccount_configuration.test", "region_host", "cf.eu12.hana.ondemand.com"),
 						resource.TestMatchResourceAttr("data.scc_subaccount_configuration.test", "subaccount", regexpValidUUID),
 						resource.TestCheckResourceAttr("data.scc_subaccount_configuration.test", "display_name", "Terraform Subaccount Datasource"),
-						resource.TestCheckResourceAttr("data.scc_subaccount_configuration.test", "description", "This subaccount has all the configurations for data source."),
+						resource.TestCheckResourceAttr("data.scc_subaccount_configuration.test", "description", "Subaccount used for all data sources in Cloud Connector Instance. DO NOT DELETE!!!"),
 
 						resource.TestCheckResourceAttr("data.scc_subaccount_configuration.test", "tunnel.user", user.CloudUsername),
 						resource.TestCheckResourceAttr("data.scc_subaccount_configuration.test", "tunnel.state", "Connected"),
