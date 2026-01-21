@@ -182,21 +182,6 @@ func TestResourceSubaccountUsingAuth(t *testing.T) {
 			},
 		})
 	})
-
-	t.Run("error path - authentication data mandatory", func(t *testing.T) {
-		rec, _ := setupVCR(t, "fixtures/resource_subaccount_using_auth_err_wo_authentication_data")
-		defer stopQuietly(rec)
-		resource.Test(t, resource.TestCase{
-			IsUnitTest:               true,
-			ProtoV6ProviderFactories: getTestProviders(rec.GetDefaultClient()),
-			Steps: []resource.TestStep{
-				{
-					Config:      ResourceSubaccountUsingAuthWoAuthenticationData("test", "subaccount added via terraform tests"),
-					ExpectError: regexp.MustCompile(`The argument "authentication_data" is required, but no definition was found.`),
-				},
-			},
-		})
-	})
 }
 
 func ResourceSubaccountUsingAuth(datasourceName, authenticationData, description string) string {

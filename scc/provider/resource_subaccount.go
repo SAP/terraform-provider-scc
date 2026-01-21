@@ -18,6 +18,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
@@ -65,13 +68,27 @@ __Further documentation:__
 				},
 			},
 			"cloud_user": schema.StringAttribute{
-				MarkdownDescription: "User for the specified subaccount and region host.",
-				Required:            true,
+				MarkdownDescription: "User for the specified subaccount and region host.\n\n" +
+					"**Required when creating the resource.**\n\n" +
+					"This attribute is optional in the schema to support `terraform import`, " +
+					"but must be provided during creation and certificate renewal operations.",
+				Computed: true,
+				Optional: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"cloud_password": schema.StringAttribute{
-				MarkdownDescription: "Password for the cloud user.",
-				Sensitive:           true,
-				Required:            true,
+				MarkdownDescription: "Password for the cloud user.\n\n" +
+					"**Required when creating the resource.**\n\n" +
+					"This attribute is optional in the schema to support `terraform import`, " +
+					"but must be provided during creation and certificate renewal operations.",
+				Sensitive: true,
+				Computed:  true,
+				Optional:  true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+				},
 			},
 			"location_id": schema.StringAttribute{
 				MarkdownDescription: "Location identifier for the Cloud Connector instance.",
@@ -115,6 +132,9 @@ To recover, set connected = false, apply, and then set it back to true to retry 
 				Default:             int64default.StaticInt64(14),
 				Validators: []validator.Int64{
 					int64validator.Between(7, 45),
+				},
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
 				},
 			},
 			"tunnel": schema.SingleNestedAttribute{
@@ -259,6 +279,15 @@ func (r *SubaccountResource) Create(ctx context.Context, req resource.CreateRequ
 		return
 	}
 
+	if plan.CloudUser.IsNull() || plan.CloudUser.IsUnknown() ||
+		plan.CloudPassword.IsNull() || plan.CloudPassword.IsUnknown() {
+		resp.Diagnostics.AddError(
+			"Missing required credentials",
+			"`cloud_user` and `cloud_password` must be provided when creating a subaccount.",
+		)
+		return
+	}
+
 	regionHost := plan.RegionHost.ValueString()
 	subaccount := plan.Subaccount.ValueString()
 
@@ -313,6 +342,10 @@ func (r *SubaccountResource) Create(ctx context.Context, req resource.CreateRequ
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	responseModel.CloudUser = plan.CloudUser
+	responseModel.CloudPassword = plan.CloudPassword
+	responseModel.AutoRenewBeforeDays = plan.AutoRenewBeforeDays
 
 	diags = resp.State.Set(ctx, responseModel)
 	resp.Diagnostics.Append(diags...)
@@ -376,6 +409,15 @@ func (r *SubaccountResource) Read(ctx context.Context, req resource.ReadRequest,
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
+	}
+
+	responseModel.CloudUser = state.CloudUser
+	responseModel.CloudPassword = state.CloudPassword
+
+	if state.AutoRenewBeforeDays.IsNull() {
+		responseModel.AutoRenewBeforeDays = types.Int64Value(14)
+	} else {
+		responseModel.AutoRenewBeforeDays = state.AutoRenewBeforeDays
 	}
 
 	diags = resp.State.Set(ctx, &responseModel)
@@ -446,15 +488,17 @@ func (r *SubaccountResource) Update(ctx context.Context, req resource.UpdateRequ
 		)
 	}
 
-	if shouldRenewCertificate(respObj.Tunnel.SubaccountCertificate.NotAfterTimeStamp, plan.AutoRenewBeforeDays.ValueInt64()) {
-		renewedRespObj, diags := r.renewCertificate(plan, regionHost, subaccount)
-		resp.Diagnostics.Append(diags...)
-		if !resp.Diagnostics.HasError() && renewedRespObj != nil {
-			respObj = *renewedRespObj
-			resp.Diagnostics.AddWarning(
-				"Certificate Renewed",
-				fmt.Sprintf("The subaccount certificate was automatically renewed during update because it was due to expire within %d days.", plan.AutoRenewBeforeDays.ValueInt64()),
-			)
+	if !plan.AutoRenewBeforeDays.IsNull() && !plan.AutoRenewBeforeDays.IsUnknown() {
+		if shouldRenewCertificate(respObj.Tunnel.SubaccountCertificate.NotAfterTimeStamp, plan.AutoRenewBeforeDays.ValueInt64()) {
+			renewedRespObj, diags := r.renewCertificate(plan, regionHost, subaccount)
+			resp.Diagnostics.Append(diags...)
+			if !resp.Diagnostics.HasError() && renewedRespObj != nil {
+				respObj = *renewedRespObj
+				resp.Diagnostics.AddWarning(
+					"Certificate Renewed",
+					fmt.Sprintf("The subaccount certificate was automatically renewed during update because it was due to expire within %d days.", plan.AutoRenewBeforeDays.ValueInt64()),
+				)
+			}
 		}
 	}
 
@@ -471,9 +515,13 @@ func (r *SubaccountResource) Update(ctx context.Context, req resource.UpdateRequ
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
-	} else {
-		resp.Diagnostics.Append(resp.State.Set(ctx, responseModel)...)
 	}
+
+	responseModel.CloudUser = plan.CloudUser
+	responseModel.CloudPassword = plan.CloudPassword
+	responseModel.AutoRenewBeforeDays = plan.AutoRenewBeforeDays
+
+	resp.Diagnostics.Append(resp.State.Set(ctx, responseModel)...)
 }
 
 func appendAndCheckErrors(diags *diag.Diagnostics, newDiags diag.Diagnostics) bool {
@@ -569,18 +617,6 @@ func (r *SubaccountResource) Delete(ctx context.Context, req resource.DeleteRequ
 	endpoint := endpoints.GetSubaccountEndpoint(regionHost, subaccount)
 
 	diags = requestAndUnmarshal(r.client, &respObj, "DELETE", endpoint, nil, false)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	responseModel, diags := SubaccountResourceValueFrom(ctx, state, respObj)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	diags = resp.State.Set(ctx, responseModel)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return

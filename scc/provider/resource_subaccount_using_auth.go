@@ -62,14 +62,18 @@ __Further documentation:__
 				},
 			},
 			"authentication_data": schema.StringAttribute{
-				MarkdownDescription: `Subaccount authentication data, used instead of cloud_user, cloud_password, subaccount and region_host (as of version 2.17.0).
-This value must be downloaded from the subaccount and used within **5 minutes**, as it expires shortly after generation. It is used only during **resource creation** and 
-is **not required** for updating optional attributes such as location_id, display_name, description or tunnel.  
+				MarkdownDescription: `Subaccount authentication data, used instead of providing cloud_user, cloud_password, subaccount and region_host (as of version 2.17.0).
+				This attribute is defined as **optional** in the schema to support terraform import and updates to existing resources.
+				However, it is **required during resource creation** when using authentication-based onboarding.
+				This value must be downloaded from the subaccount and used within **5 minutes**, as it expires shortly after generation. 
+				It is used only during **resource creation**.  
 
 **Note:**  
 - This value **will be persisted** in the Terraform state file. It is the user's responsibility to keep the state file secure.  
-- If this value is updated, **the resource will be recreated**.`,
-				Required:  true,
+- Updating this value will **force resource recreation**.
+- This value is **not required** for updating optional attributes such as location_id, display_name, description or tunnel settings.`,
+				Optional:  true,
+				Computed:  true,
 				Sensitive: true,
 			},
 			"location_id": schema.StringAttribute{
@@ -249,6 +253,14 @@ func (r *SubaccountUsingAuthResource) Create(ctx context.Context, req resource.C
 		return
 	}
 
+	if plan.AuthenticationData.IsNull() || plan.AuthenticationData.IsUnknown() {
+		resp.Diagnostics.AddError(
+			"Missing required credentials",
+			"`authentication_data` must be provided when creating a subaccount.",
+		)
+		return
+	}
+
 	endpoint := endpoints.GetSubaccountBaseEndpoint()
 
 	planBody := map[string]any{
@@ -300,6 +312,8 @@ func (r *SubaccountUsingAuthResource) Create(ctx context.Context, req resource.C
 		return
 	}
 
+	responseModel.AuthenticationData = plan.AuthenticationData
+
 	diags = resp.State.Set(ctx, responseModel)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -348,6 +362,8 @@ func (r *SubaccountUsingAuthResource) Read(ctx context.Context, req resource.Rea
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	responseModel.AuthenticationData = state.AuthenticationData
 
 	diags = resp.State.Set(ctx, &responseModel)
 	resp.Diagnostics.Append(diags...)
@@ -429,9 +445,11 @@ func (r *SubaccountUsingAuthResource) Update(ctx context.Context, req resource.U
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
-	} else {
-		resp.Diagnostics.Append(resp.State.Set(ctx, responseModel)...)
 	}
+	responseModel.AuthenticationData = plan.AuthenticationData
+
+	resp.Diagnostics.Append(resp.State.Set(ctx, responseModel)...)
+
 }
 
 func appendAndCheckErrorsCopy(diags *diag.Diagnostics, newDiags diag.Diagnostics) bool {
@@ -464,18 +482,6 @@ func (r *SubaccountUsingAuthResource) Delete(ctx context.Context, req resource.D
 	endpoint := endpoints.GetSubaccountEndpoint(regionHost, subaccount)
 
 	diags = requestAndUnmarshal(r.client, &respObj, "DELETE", endpoint, nil, false)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	responseModel, diags := SubaccountUsingAuthResourceValueFrom(ctx, state, respObj)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	diags = resp.State.Set(ctx, responseModel)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
