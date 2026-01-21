@@ -20,7 +20,7 @@ func TestResourceSubaccountABAPServiceChannel(t *testing.T) {
 
 	t.Run("happy path", func(t *testing.T) {
 		rec, user := setupVCR(t, "fixtures/resource_subaccount_abap_service_channel")
-		if len(user.ABAPCloudTenantHost) == 0{
+		if len(user.ABAPCloudTenantHost) == 0 {
 			user.ABAPCloudTenantHost = abapCloudTenantHost
 		}
 		defer stopQuietly(rec)
@@ -61,6 +61,11 @@ func TestResourceSubaccountABAPServiceChannel(t *testing.T) {
 					},
 				},
 				{
+					ResourceName:    "scc_subaccount_abap_service_channel.test",
+					ImportState:     true,
+					ImportStateKind: resource.ImportBlockWithResourceIdentity,
+				},
+				{
 					ResourceName:      "scc_subaccount_abap_service_channel.test",
 					ImportState:       true,
 					ImportStateVerify: true,
@@ -91,7 +96,7 @@ func TestResourceSubaccountABAPServiceChannel(t *testing.T) {
 
 	t.Run("update path - comment and connections update", func(t *testing.T) {
 		rec, user := setupVCR(t, "fixtures/resource_subaccount_abap_service_channel_update")
-		if len(user.ABAPCloudTenantHost) == 0{
+		if len(user.ABAPCloudTenantHost) == 0 {
 			user.ABAPCloudTenantHost = abapCloudTenantHost
 		}
 		defer stopQuietly(rec)
