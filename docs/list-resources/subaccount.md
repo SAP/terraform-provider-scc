@@ -6,6 +6,10 @@ description: |-
   SAP Cloud Connector Subaccounts list resource.
   This list resource retrieves all subaccounts accessible via the configured
   SAP Cloud Connector instance.
+  Note: There is no dedicated list resource for
+  scc_subaccount_using_auth.
+  To discover or enumerate subaccounts, use the
+  scc_subaccount list resource.
 ---
 
 # scc_subaccount (List Resource)
@@ -14,6 +18,11 @@ SAP Cloud Connector **Subaccounts** list resource.
 
 This list resource retrieves all subaccounts accessible via the configured
 SAP Cloud Connector instance.
+
+**Note:** There is no dedicated list resource for
+**scc_subaccount_using_auth**.
+To discover or enumerate subaccounts, use the
+**scc_subaccount list resource**.
 
 ## Example Usage
 
@@ -48,5 +57,5 @@ list "scc_subaccount" "by_region" {
 
 - `region_host` (String) Filter subaccounts by region host.
 
-**Note:** If this attribute is omitted or set to an empty value, subaccounts
-from all regions are returned.
+**Note:** If this attribute is omitted or set to an empty value,
+subaccounts from all regions are returned.
