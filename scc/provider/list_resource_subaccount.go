@@ -90,7 +90,6 @@ func (r *SubaccountListResource) List(
 		filter  subaccountListFilterModel
 	)
 
-	// Read optional filters
 	if req.Config.Raw.IsFullyKnown() && !req.Config.Raw.IsNull() {
 		if diags := req.Config.Get(ctx, &filter); diags.HasError() {
 			stream.Results = list.ListResultsStreamDiagnostics(diags)
