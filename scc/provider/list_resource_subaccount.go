@@ -20,6 +20,10 @@ type SubaccountListResource struct {
 	client *api.RestApiClient
 }
 
+type subaccountListFilterModel struct {
+	RegionHost types.String `tfsdk:"region_host"`
+}
+
 func NewSubaccountListResource() list.ListResource {
 	return &SubaccountListResource{}
 }
@@ -54,8 +58,25 @@ func (r *SubaccountListResource) ListResourceConfigSchema(
 	req list.ListResourceSchemaRequest,
 	resp *list.ListResourceSchemaResponse,
 ) {
-	// Empty schema because API does not support filters
-	resp.Schema = schema.Schema{}
+	resp.Schema = schema.Schema{
+		MarkdownDescription: `
+SAP Cloud Connector **Subaccounts** list resource.
+
+This list resource retrieves all subaccounts accessible via the configured
+SAP Cloud Connector instance.
+`,
+		Attributes: map[string]schema.Attribute{
+			"region_host": schema.StringAttribute{
+				Optional: true,
+				MarkdownDescription: `
+Filter subaccounts by region host.
+
+**Note:** If this attribute is omitted or set to an empty value, subaccounts
+from all regions are returned.
+`,
+			},
+		},
+	}
 }
 
 // List streams all subaccounts from the API
@@ -64,7 +85,18 @@ func (r *SubaccountListResource) List(
 	req list.ListRequest,
 	stream *list.ListResultsStream,
 ) {
-	var respObj apiobjects.SubaccountsListResource
+	var (
+		respObj apiobjects.SubaccountsListResource
+		filter  subaccountListFilterModel
+	)
+
+	// Read optional filters
+	if req.Config.Raw.IsFullyKnown() && !req.Config.Raw.IsNull() {
+		if diags := req.Config.Get(ctx, &filter); diags.HasError() {
+			stream.Results = list.ListResultsStreamDiagnostics(diags)
+			return
+		}
+	}
 
 	endpoint := endpoints.GetSubaccountBaseEndpoint()
 
@@ -78,6 +110,13 @@ func (r *SubaccountListResource) List(
 		warned := false
 
 		for _, sa := range respObj.Subaccounts {
+
+			if !filter.RegionHost.IsNull() && filter.RegionHost.ValueString() != "" {
+				if sa.RegionHost != filter.RegionHost.ValueString() {
+					continue
+				}
+			}
+
 			result := req.NewListResult(ctx)
 
 			_ = result.Identity.SetAttribute(ctx, path.Root("subaccount"), types.StringValue(sa.Subaccount))
