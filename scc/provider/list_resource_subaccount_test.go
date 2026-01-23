@@ -2,6 +2,7 @@ package provider
 
 import (
 	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -80,6 +81,27 @@ func TestListSubaccount(t *testing.T) {
 			},
 		})
 	})
+
+	t.Run("error - invalid filter type", func(t *testing.T) {
+		resource.Test(t, resource.TestCase{
+			ProtoV6ProviderFactories: getTestProviders(nil),
+			Steps: []resource.TestStep{
+				{
+					Query: true,
+					Config: `
+						list "scc_subaccount" "test_err" {
+							provider = "scc"
+							config {
+								region_host = 12345 # This triggers the error in Config.Get
+							}
+						}`,
+					// This covers: if diags := req.Config.Get(ctx, &filter); diags.HasError()
+					ExpectError: regexp.MustCompile(`Invalid Attribute Value Type`),
+				},
+			},
+		})
+	})
+
 }
 
 func listSubaccountQueryConfig(lable, providerName string) string {
@@ -91,6 +113,7 @@ func listSubaccountQueryConfig(lable, providerName string) string {
 func listSubaccountQueryConfigWithFilter(lable, providerName, regionHost string) string {
 	return fmt.Sprintf(`list "scc_subaccount" "%s" {
                provider = "%s"
+			   include_resource = true
 			   config {
 			    region_host="%s"
 			   }
