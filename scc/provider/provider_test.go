@@ -314,6 +314,39 @@ func TestSCCProvider_AllDataSources(t *testing.T) {
 	assert.ElementsMatch(t, expectedDataSources, registeredDataSources)
 }
 
+func TestSCCProvider_ListResources(t *testing.T) {
+	ctx := context.Background()
+
+	expected := []string{
+		"scc_subaccount",
+	}
+
+	p := New()
+
+	listProvider, ok := p.(provider.ProviderWithListResources)
+	if !ok {
+		t.Fatalf("provider does not implement ProviderWithListResources")
+	}
+
+	var registered []string
+
+	for _, listResourceFunc := range listProvider.ListResources(ctx) {
+		var resp resource.MetadataResponse
+
+		listResourceFunc().Metadata(
+			ctx,
+			resource.MetadataRequest{
+				ProviderTypeName: "scc",
+			},
+			&resp,
+		)
+
+		registered = append(registered, resp.TypeName)
+	}
+
+	assert.ElementsMatch(t, expected, registered)
+}
+
 func TestSCCProvider_MissingURL(t *testing.T) {
 	var resp provider.ConfigureResponse
 	ok := validateConfig("", "admin", "pass", "", "", "", &resp)

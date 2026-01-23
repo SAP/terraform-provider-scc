@@ -1,0 +1,110 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: https://redacted.instance.url
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/json
+        url: https://redacted.instance.url/api/v1/connector/version
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 20
+        uncompressed: false
+        body: '{"version":"2.18.2"}'
+        headers:
+            Cache-Control:
+                - max-age=3600
+            Content-Length:
+                - "20"
+            Content-Type:
+                - application/json
+            Date:
+                - Thu, 22 Jan 2026 05:08:50 GMT
+            Server:
+                - nginx/1.27.4
+            Set-Cookie:
+                - redacted
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            X-Csrf-Token:
+                - redacted
+            X-Vcap-Request-Id:
+                - aa1d261d-987b-4e16-6e31-134b96b6c609
+        status: 200 OK
+        code: 200
+        duration: 1.483659459s
+    - id: 1
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: https://redacted.instance.url
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/json
+        url: https://redacted.instance.url/api/v1/configuration/subaccounts
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding:
+            - chunked
+        trailer: {}
+        content_length: -1
+        uncompressed: true
+        body: '[{"_links":{"ABAPCloud-channels":{"href": "https://redacted.url/path"},"HANA-channels":{"href": "https://redacted.url/path"},"systemMappings":{"href": "https://redacted.url/path"},"self":{"href": "https://redacted.url/path"},"K8S-channels":{"href": "https://redacted.url/path"},"validity":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"},"VirtualMachine-channels":{"href": "https://redacted.url/path"},"domainMappings":{"href": "https://redacted.url/path"}},"regionHost":"cf.eu12.hana.ondemand.com","subaccount":"304492be-5f0f-4bb0-8f59-c982107bc878","locationID":""},{"_links":{"ABAPCloud-channels":{"href": "https://redacted.url/path"},"HANA-channels":{"href": "https://redacted.url/path"},"systemMappings":{"href": "https://redacted.url/path"},"self":{"href": "https://redacted.url/path"},"K8S-channels":{"href": "https://redacted.url/path"},"validity":{"href": "https://redacted.url/path"},"state":{"href": "https://redacted.url/path"},"VirtualMachine-channels":{"href": "https://redacted.url/path"},"domainMappings":{"href": "https://redacted.url/path"}},"regionHost":"cf.eu12.hana.ondemand.com","subaccount":"d3bbbcd7-d5e0-483b-a524-6dee7205f8e8","locationID":""}]'
+        headers:
+            Cache-Control:
+                - no-store
+            Content-Type:
+                - application/json
+            Date:
+                - Thu, 22 Jan 2026 05:08:50 GMT
+            Server:
+                - nginx/1.27.4
+            Set-Cookie:
+                - redacted
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            Vary:
+                - accept-encoding
+            X-Csrf-Token:
+                - redacted
+            X-Vcap-Request-Id:
+                - bdc2dfe8-29c3-41f1-7ced-21289ffd79da
+        status: 200 OK
+        code: 200
+        duration: 295.57125ms
