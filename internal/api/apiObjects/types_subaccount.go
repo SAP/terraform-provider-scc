@@ -19,6 +19,10 @@ type SubaccountsDataSource struct {
 	Subaccounts []Subaccounts `json:"subaccounts"`
 }
 
+type SubaccountsListResource struct {
+	Subaccounts []Subaccounts `json:"subaccounts"`
+}
+
 type SubaccountCertificate struct {
 	NotAfterTimeStamp  int64  `json:"notAfterTimeStamp"`
 	NotBeforeTimeStamp int64  `json:"notBeforeTimeStamp"`

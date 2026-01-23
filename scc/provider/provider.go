@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/list"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
@@ -22,7 +23,7 @@ import (
 )
 
 var (
-	_ provider.Provider = &cloudConnectorProvider{}
+	_ provider.ProviderWithListResources = &cloudConnectorProvider{}
 )
 
 func New() provider.Provider {
@@ -145,6 +146,7 @@ func (c *cloudConnectorProvider) Configure(ctx context.Context, req provider.Con
 
 	resp.DataSourceData = client
 	resp.ResourceData = client
+	resp.ListResourceData = client
 }
 
 func resolveAttributes(config cloudConnectorProviderData) (string, string, string, string, string, string) {
@@ -302,5 +304,12 @@ func (c *cloudConnectorProvider) Resources(_ context.Context) []func() resource.
 		NewDomainMappingResource,
 		NewSubaccountK8SServiceChannelResource,
 		NewSubaccountABAPServiceChannelResource,
+	}
+}
+
+// ListResources defines the ListResources implemented in the provider.
+func (p *cloudConnectorProvider) ListResources(_ context.Context) []func() list.ListResource {
+	return []func() list.ListResource{
+		NewSubaccountListResource, // your new list resource
 	}
 }
