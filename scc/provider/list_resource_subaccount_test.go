@@ -84,6 +84,7 @@ func TestListSubaccount(t *testing.T) {
 
 	t.Run("error - invalid filter type", func(t *testing.T) {
 		resource.Test(t, resource.TestCase{
+			IsUnitTest:               true,
 			ProtoV6ProviderFactories: getTestProviders(nil),
 			TerraformVersionChecks: []tfversion.TerraformVersionCheck{
 				tfversion.SkipBelow(tfversion.Version1_14_0),
@@ -91,15 +92,15 @@ func TestListSubaccount(t *testing.T) {
 			Steps: []resource.TestStep{
 				{
 					Query: true,
-					Config: `
+					Config: providerConfig(User{}) + `
 						list "scc_subaccount" "test_err" {
-							provider = "scc"
+							provider = scc
 							config {
 								region_host = 12345 # This triggers the error in Config.Get
 							}
 						}`,
 					// This covers: if diags := req.Config.Get(ctx, &filter); diags.HasError()
-					ExpectError: regexp.MustCompile(`Invalid Attribute Value Type`),
+					ExpectError: regexp.MustCompile(`Invalid Attribute Value Match`),
 				},
 			},
 		})
