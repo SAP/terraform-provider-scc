@@ -85,6 +85,9 @@ func TestListSubaccount(t *testing.T) {
 	t.Run("error - invalid filter type", func(t *testing.T) {
 		resource.Test(t, resource.TestCase{
 			ProtoV6ProviderFactories: getTestProviders(nil),
+			TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+				tfversion.SkipBelow(tfversion.Version1_14_0),
+			},
 			Steps: []resource.TestStep{
 				{
 					Query: true,
