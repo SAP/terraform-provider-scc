@@ -6,7 +6,7 @@ list "scc_domain_mapping" "<label_name>" {
   # (Required) Provider instance to use
   provider = provider_name
 
-  # (Required) Filter configuration defined by the provider
+  # Filter configuration defined by the provider
   config {
     # Provider-specific filter arguments...
   }
@@ -17,6 +17,7 @@ list "scc_domain_mapping" "<label_name>" {
 list "scc_domain_mapping" "all" {
   provider = scc
 
+  # (Required)
   config {
     region_host = "cf.us10.hana.ondemand.com"
     subaccount  = "3ecb7280-c7d4-4db6-b7da-7af3cdb13505"
@@ -29,6 +30,7 @@ list "scc_domain_mapping" "with_resource" {
   provider = scc
   include_resource = true
 
+  # (Required)
   config {
     region_host = "cf.us10.hana.ondemand.com"
     subaccount  = "3ecb7280-c7d4-4db6-b7da-7af3cdb13505"

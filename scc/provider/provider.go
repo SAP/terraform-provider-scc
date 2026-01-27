@@ -310,6 +310,7 @@ func (c *cloudConnectorProvider) Resources(_ context.Context) []func() resource.
 // ListResources defines the ListResources implemented in the provider.
 func (p *cloudConnectorProvider) ListResources(_ context.Context) []func() list.ListResource {
 	return []func() list.ListResource{
-		NewSubaccountListResource, // your new list resource
+		NewSubaccountListResource,
+		NewDomainMappingListResource,
 	}
 }
