@@ -171,3 +171,47 @@ func SystemMappingValueFrom(ctx context.Context, plan SystemMappingConfig, value
 
 	return *model, diag.Diagnostics{}
 }
+
+func MapToSystemMappingListModel(ctx context.Context, filter systemMappingListResourceFilterModel, value apiobjects.SystemMapping) (*SystemMappingConfig, diag.Diagnostics) {
+	blacklistedUsersValue := []SystemMappingBlacklistedUsersData{}
+	for _, user := range value.BlacklistedUsers {
+		bl := SystemMappingBlacklistedUsersData{
+			Client: types.StringValue(user.Client),
+			User:   types.StringValue(user.User),
+		}
+		blacklistedUsersValue = append(blacklistedUsersValue, bl)
+	}
+	blacklistedUsers, diags := types.ListValueFrom(ctx, SystemMappingBlacklistedUsersType, blacklistedUsersValue)
+	if diags.HasError() {
+		return &SystemMappingConfig{}, diags
+	}
+
+	allowedClients, diags := types.ListValueFrom(ctx, types.StringType, value.AllowedClients)
+	if diags.HasError() {
+		return &SystemMappingConfig{}, diags
+	}
+
+	model := &SystemMappingConfig{
+		RegionHost:            filter.RegionHost,
+		Subaccount:            filter.Subaccount,
+		VirtualHost:           types.StringValue(value.VirtualHost),
+		VirtualPort:           types.StringValue(value.VirtualPort),
+		InternalHost:          types.StringValue(value.InternalHost),
+		InternalPort:          types.StringValue(value.InternalPort),
+		CreationDate:          ConvertMillisToTimes(value.CreationDate).UTC,
+		Protocol:              types.StringValue(value.Protocol),
+		BackendType:           types.StringValue(value.BackendType),
+		AuthenticationMode:    types.StringValue(value.AuthenticationMode),
+		HostInHeader:          types.StringValue(value.HostInHeader),
+		Sid:                   types.StringValue(value.Sid),
+		TotalResourcesCount:   types.Int64Value(value.TotalResourcesCount),
+		EnabledResourcesCount: types.Int64Value(value.EnabledResourcesCount),
+		Description:           types.StringValue(value.Description),
+		SAPRouter:             types.StringValue(value.SAPRouter),
+		SNCPartnerName:        types.StringValue(value.SNCPartnerName),
+		AllowedClients:        allowedClients,
+		BlacklistedUsers:      blacklistedUsers,
+	}
+
+	return model, diag.Diagnostics{}
+}
