@@ -13,8 +13,8 @@ import (
 
 func TestResourceSubaccountABAPServiceChannel(t *testing.T) {
 
-	regionHost := "cf.eu12.hana.ondemand.com"
-	subaccount := "d3bbbcd7-d5e0-483b-a524-6dee7205f8e8"
+	regionHost:= "cf.eu12.hana.ondemand.com"
+	subaccount:= "9f7390c8-f201-4b2d-b751-04c0a63c2671"
 	abapCloudTenantHost := "testserviceid.abap.region.hana.ondemand.com"
 	t.Parallel()
 
@@ -29,24 +29,24 @@ func TestResourceSubaccountABAPServiceChannel(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(rec.GetDefaultClient()),
 			Steps: []resource.TestStep{
 				{
-					Config: providerConfig(user) + ResourceSubaccountABAPServiceChannel("test", regionHost, subaccount, user.ABAPCloudTenantHost, 20, 1, false, "Created"),
+					Config: providerConfig(user) + ResourceSubaccountABAPServiceChannel("scc_abap_sc", regionHost, subaccount, user.ABAPCloudTenantHost, 20, 1, false, "Created"),
 					Check: resource.ComposeAggregateTestCheckFunc(
-						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.test", "region_host", regionHost),
-						resource.TestMatchResourceAttr("scc_subaccount_abap_service_channel.test", "subaccount", regexpValidUUID),
-						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.test", "abap_cloud_tenant_host", user.ABAPCloudTenantHost),
-						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.test", "instance_number", "20"),
-						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.test", "port", "3320"),
-						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.test", "connections", "1"),
-						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.test", "type", "ABAPCloud"),
-						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.test", "enabled", "false"),
-						resource.TestCheckResourceAttrSet("scc_subaccount_abap_service_channel.test", "id"),
-						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.test", "state.connected", "false"),
-						resource.TestMatchResourceAttr("scc_subaccount_abap_service_channel.test", "state.connected_since_time_stamp", regexp.MustCompile(`^(0|\d{13})$`)),
-						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.test", "state.opened_connections", "0"),
+						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.scc_abap_sc", "region_host", regionHost),
+						resource.TestMatchResourceAttr("scc_subaccount_abap_service_channel.scc_abap_sc", "subaccount", regexpValidUUID),
+						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.scc_abap_sc", "abap_cloud_tenant_host", user.ABAPCloudTenantHost),
+						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.scc_abap_sc", "instance_number", "20"),
+						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.scc_abap_sc", "port", "3320"),
+						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.scc_abap_sc", "connections", "1"),
+						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.scc_abap_sc", "type", "ABAPCloud"),
+						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.scc_abap_sc", "enabled", "false"),
+						resource.TestCheckResourceAttrSet("scc_subaccount_abap_service_channel.scc_abap_sc", "id"),
+						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.scc_abap_sc", "state.connected", "false"),
+						resource.TestMatchResourceAttr("scc_subaccount_abap_service_channel.scc_abap_sc", "state.connected_since_time_stamp", regexp.MustCompile(`^(0|\d{13})$`)),
+						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.scc_abap_sc", "state.opened_connections", "0"),
 					),
 					ConfigStateChecks: []statecheck.StateCheck{
 						statecheck.ExpectIdentity(
-							"scc_subaccount_abap_service_channel.test",
+							"scc_subaccount_abap_service_channel.scc_abap_sc",
 							map[string]knownvalue.Check{
 								"id": knownvalue.Int64Func(func(v int64) error {
 									if v <= 0 {
@@ -61,30 +61,30 @@ func TestResourceSubaccountABAPServiceChannel(t *testing.T) {
 					},
 				},
 				{
-					ResourceName:    "scc_subaccount_abap_service_channel.test",
+					ResourceName:    "scc_subaccount_abap_service_channel.scc_abap_sc",
 					ImportState:     true,
 					ImportStateKind: resource.ImportBlockWithResourceIdentity,
 				},
 				{
-					ResourceName:      "scc_subaccount_abap_service_channel.test",
+					ResourceName:      "scc_subaccount_abap_service_channel.scc_abap_sc",
 					ImportState:       true,
 					ImportStateVerify: true,
-					ImportStateIdFunc: getImportStateForSubaccountABAPServiceChannel("scc_subaccount_abap_service_channel.test"),
+					ImportStateIdFunc: getImportStateForSubaccountABAPServiceChannel("scc_subaccount_abap_service_channel.scc_abap_sc"),
 				},
 				{
-					ResourceName:  "scc_subaccount_abap_service_channel.test",
+					ResourceName:  "scc_subaccount_abap_service_channel.scc_abap_sc",
 					ImportState:   true,
 					ImportStateId: regionHost + subaccount + "1", // malformed ID
 					ExpectError:   regexp.MustCompile(`(?is)Expected import identifier with format:.*id.*Got:`),
 				},
 				{
-					ResourceName:  "scc_subaccount_abap_service_channel.test",
+					ResourceName:  "scc_subaccount_abap_service_channel.scc_abap_sc",
 					ImportState:   true,
 					ImportStateId: regionHost + "," + subaccount + ",1" + ",extra",
 					ExpectError:   regexp.MustCompile(`(?is)Expected import identifier with format:.*id.*Got:`),
 				},
 				{
-					ResourceName:  "scc_subaccount_abap_service_channel.test",
+					ResourceName:  "scc_subaccount_abap_service_channel.scc_abap_sc",
 					ImportState:   true,
 					ImportStateId: regionHost + "," + subaccount + ",not-an-int",
 					ExpectError:   regexp.MustCompile(`(?is)The 'id' part must be an integer.*Got:.*not-an-int`),
@@ -106,15 +106,15 @@ func TestResourceSubaccountABAPServiceChannel(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(rec.GetDefaultClient()),
 			Steps: []resource.TestStep{
 				{
-					Config: providerConfig(user) + ResourceSubaccountABAPServiceChannel("test", regionHost, subaccount, user.ABAPCloudTenantHost, 20, 1, false, "Created"),
+					Config: providerConfig(user) + ResourceSubaccountABAPServiceChannel("scc_abap_sc", regionHost, subaccount, user.ABAPCloudTenantHost, 20, 1, false, "Created"),
 					Check: resource.ComposeAggregateTestCheckFunc(
-						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.test", "comment", "Created"),
-						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.test", "connections", "1"),
-						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.test", "enabled", "false"),
+						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.scc_abap_sc", "comment", "Created"),
+						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.scc_abap_sc", "connections", "1"),
+						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.scc_abap_sc", "enabled", "false"),
 					),
 					ConfigStateChecks: []statecheck.StateCheck{
 						statecheck.ExpectIdentity(
-							"scc_subaccount_abap_service_channel.test",
+							"scc_subaccount_abap_service_channel.scc_abap_sc",
 							map[string]knownvalue.Check{
 								"id": knownvalue.Int64Func(func(v int64) error {
 									if v <= 0 {
@@ -130,15 +130,15 @@ func TestResourceSubaccountABAPServiceChannel(t *testing.T) {
 				},
 				// Update with mismatched configuration should throw error
 				{
-					Config:      providerConfig(user) + ResourceSubaccountABAPServiceChannel("test", "cf.us10.hana.ondemand.com", subaccount, user.ABAPCloudTenantHost, 20, 1, false, "Update"),
+					Config:      providerConfig(user) + ResourceSubaccountABAPServiceChannel("scc_abap_sc", "cf.us10.hana.ondemand.com", subaccount, user.ABAPCloudTenantHost, 20, 1, false, "Update"),
 					ExpectError: regexp.MustCompile(`(?is)error updating the cloud connector subaccount ABAP service channel.*mismatched\s+configuration values`),
 				},
 				{
-					Config: providerConfig(user) + ResourceSubaccountABAPServiceChannel("test", regionHost, subaccount, user.ABAPCloudTenantHost, 20, 2, false, "Changed Connections"),
+					Config: providerConfig(user) + ResourceSubaccountABAPServiceChannel("scc_abap_sc", regionHost, subaccount, user.ABAPCloudTenantHost, 20, 2, false, "Changed Connections"),
 					Check: resource.ComposeAggregateTestCheckFunc(
-						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.test", "comment", "Changed Connections"),
-						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.test", "connections", "2"),
-						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.test", "enabled", "false"),
+						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.scc_abap_sc", "comment", "Changed Connections"),
+						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.scc_abap_sc", "connections", "2"),
+						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.scc_abap_sc", "enabled", "false"),
 					),
 				},
 			},
@@ -151,7 +151,7 @@ func TestResourceSubaccountABAPServiceChannel(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      ResourceSubaccountABAPServiceChannelWoRegionHost("test", subaccount, abapCloudTenantHost, 20, 1),
+					Config:      ResourceSubaccountABAPServiceChannelWoRegionHost("scc_abap_sc", subaccount, abapCloudTenantHost, 20, 1),
 					ExpectError: regexp.MustCompile(`(?s)The argument\s+"region_host"\s+is required, but no definition was\s+found\.`),
 				},
 			},
@@ -164,7 +164,7 @@ func TestResourceSubaccountABAPServiceChannel(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      ResourceSubaccountABAPServiceChannelWoSubaccount("test", regionHost, abapCloudTenantHost, 20, 1),
+					Config:      ResourceSubaccountABAPServiceChannelWoSubaccount("scc_abap_sc", regionHost, abapCloudTenantHost, 20, 1),
 					ExpectError: regexp.MustCompile(`(?s)The argument\s+"subaccount"\s+(is required, but no definition was\s+found|value must be a valid UUID)`),
 				},
 			},
@@ -177,7 +177,7 @@ func TestResourceSubaccountABAPServiceChannel(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      ResourceSubaccountABAPServiceChannelWoABAPCloudTenantHost("test", regionHost, subaccount, 20, 1),
+					Config:      ResourceSubaccountABAPServiceChannelWoABAPCloudTenantHost("scc_abap_sc", regionHost, subaccount, 20, 1),
 					ExpectError: regexp.MustCompile(`(?s)The argument\s+"abap_cloud_tenant_host"\s+is required, but no definition was\s+found\.`),
 				},
 			},
@@ -190,7 +190,7 @@ func TestResourceSubaccountABAPServiceChannel(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      ResourceSubaccountABAPServiceChannelWoInstanceNumber("test", regionHost, subaccount, abapCloudTenantHost, 1),
+					Config:      ResourceSubaccountABAPServiceChannelWoInstanceNumber("scc_abap_sc", regionHost, subaccount, abapCloudTenantHost, 1),
 					ExpectError: regexp.MustCompile(`(?s)The argument\s+"instance_number"\s+is required, but no definition was\s+found\.`),
 				},
 			},
@@ -203,7 +203,7 @@ func TestResourceSubaccountABAPServiceChannel(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      ResourceSubaccountABAPServiceChannelWoConnections("test", regionHost, subaccount, abapCloudTenantHost, 20),
+					Config:      ResourceSubaccountABAPServiceChannelWoConnections("scc_abap_sc", regionHost, subaccount, abapCloudTenantHost, 20),
 					ExpectError: regexp.MustCompile(`(?s)The argument\s+"connections"\s+is required, but no definition was\s+found\.`),
 				},
 			},

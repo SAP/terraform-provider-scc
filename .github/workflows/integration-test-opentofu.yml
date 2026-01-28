@@ -51,7 +51,7 @@ jobs:
       SCC_USERNAME: ${{ secrets.SCC_USERNAME }}
       SCC_PASSWORD: ${{ secrets.SCC_PASSWORD }}
       SCC_INSTANCE_URL: ${{ secrets.SCC_INSTANCE_URL }}
-      TF_VAR_subaccount: ${{ secrets.SUBACCOUNT_ID }}
+      TF_VAR_subaccount: ${{ secrets.INTEGRATION_SUBACCOUNT_ID }}
       TF_VAR_cloud_user: ${{ secrets.CLOUD_USER }}
       TF_VAR_cloud_password: ${{ secrets.CLOUD_PASSWORD }}
 
