@@ -47,7 +47,7 @@ resource "scc_subaccount_k8s_service_channel" "scc_k8s_sc" {
   k8s_cluster_host = var.k8s_cluster_host
   k8s_service_id   = var.k8s_service_id
   local_port       = var.local_port
-  connnections     = 1
+  connections      = 1
   enabled          = false
 }
 
@@ -56,6 +56,6 @@ resource "scc_subaccount_abap_service_channel" "scc_abap_sc" {
   subaccount             = scc_subaccount.scc_sa.subaccount
   abap_cloud_tenant_host = var.abap_cloud_tenant_host
   instance_number        = 11
-  connnections           = 1
+  connections            = 1
   enabled                = false
 }
