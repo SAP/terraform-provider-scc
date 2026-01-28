@@ -46,7 +46,7 @@ resource "scc_subaccount_k8s_service_channel" "scc_k8s_sc" {
   subaccount       = scc_subaccount.scc_sa.subaccount
   k8s_cluster_host = var.k8s_cluster_host
   k8s_service_id   = var.k8s_service_id
-  local_port       = var.local_port
+  local_port       = 4000
   connections      = 1
   enabled          = false
 }
