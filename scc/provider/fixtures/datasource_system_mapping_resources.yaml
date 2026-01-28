@@ -31,7 +31,7 @@ interactions:
         trailer: {}
         content_length: 20
         uncompressed: false
-        body: '{"version":"2.18.1"}'
+        body: '{"version":"2.18.2"}'
         headers:
             Cache-Control:
                 - max-age=3600
@@ -40,7 +40,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 06 Aug 2025 07:56:54 GMT
+                - Tue, 27 Jan 2026 07:30:38 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -50,10 +50,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 6816b8f6-d2aa-4025-7288-3ffd827c9489
+                - 978069d7-8591-4692-53d2-72b80183c29d
         status: 200 OK
         code: 200
-        duration: 850.315376ms
+        duration: 805.452501ms
     - id: 1
       request:
         proto: HTTP/1.1
@@ -74,7 +74,7 @@ interactions:
                 - redacted
             Content-Type:
                 - application/json
-        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/304492be-5f0f-4bb0-8f59-c982107bc878/systemMappings/testterraformvirtual:900/resources
+        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/1de4ab49-1b7b-47ca-89bb-0a4d9da1d057/systemMappings/testterraformvirtual:900/resources
         method: GET
       response:
         proto: HTTP/1.1
@@ -84,7 +84,7 @@ interactions:
         trailer: {}
         content_length: 141
         uncompressed: false
-        body: '[{"id":"/","enabled":true,"exactMatchOnly":true,"websocketUpgradeAllowed":false,"creationDate":"1753339216377","description":"","_links":{}}]'
+        body: '[{"id":"/","enabled":true,"exactMatchOnly":true,"websocketUpgradeAllowed":false,"creationDate":"1769494232901","description":"","_links":{}}]'
         headers:
             Cache-Control:
                 - no-store
@@ -93,7 +93,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 06 Aug 2025 07:56:54 GMT
+                - Tue, 27 Jan 2026 07:30:38 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -103,10 +103,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 711761bb-2d99-4d0a-59aa-abe0beefdf9a
+                - 373f9b13-158d-4343-4dee-75f09deb41a8
         status: 200 OK
         code: 200
-        duration: 321.870917ms
+        duration: 252.693876ms
     - id: 2
       request:
         proto: HTTP/1.1
@@ -137,7 +137,7 @@ interactions:
         trailer: {}
         content_length: 20
         uncompressed: false
-        body: '{"version":"2.18.1"}'
+        body: '{"version":"2.18.2"}'
         headers:
             Cache-Control:
                 - max-age=3600
@@ -146,7 +146,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 06 Aug 2025 07:56:54 GMT
+                - Tue, 27 Jan 2026 07:30:39 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -156,10 +156,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 2c933a05-5e60-4604-49e1-f83d5737fb8e
+                - 628aae44-82d4-4ba1-4968-494f77d98505
         status: 200 OK
         code: 200
-        duration: 260.059167ms
+        duration: 251.152334ms
     - id: 3
       request:
         proto: HTTP/1.1
@@ -190,7 +190,7 @@ interactions:
         trailer: {}
         content_length: 20
         uncompressed: false
-        body: '{"version":"2.18.1"}'
+        body: '{"version":"2.18.2"}'
         headers:
             Cache-Control:
                 - max-age=3600
@@ -199,7 +199,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 06 Aug 2025 07:56:55 GMT
+                - Tue, 27 Jan 2026 07:30:39 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -209,10 +209,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 072c4d93-c7ba-4c20-7ab2-d559be1d9aea
+                - f814a2b1-6b77-4e9b-6562-1b2a2cc2ed1d
         status: 200 OK
         code: 200
-        duration: 260.370833ms
+        duration: 252.688459ms
     - id: 4
       request:
         proto: HTTP/1.1
@@ -233,7 +233,7 @@ interactions:
                 - redacted
             Content-Type:
                 - application/json
-        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/304492be-5f0f-4bb0-8f59-c982107bc878/systemMappings/testterraformvirtual:900/resources
+        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/1de4ab49-1b7b-47ca-89bb-0a4d9da1d057/systemMappings/testterraformvirtual:900/resources
         method: GET
       response:
         proto: HTTP/1.1
@@ -243,7 +243,7 @@ interactions:
         trailer: {}
         content_length: 141
         uncompressed: false
-        body: '[{"id":"/","enabled":true,"exactMatchOnly":true,"websocketUpgradeAllowed":false,"creationDate":"1753339216377","description":"","_links":{}}]'
+        body: '[{"id":"/","enabled":true,"exactMatchOnly":true,"websocketUpgradeAllowed":false,"creationDate":"1769494232901","description":"","_links":{}}]'
         headers:
             Cache-Control:
                 - no-store
@@ -252,7 +252,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 06 Aug 2025 07:56:55 GMT
+                - Tue, 27 Jan 2026 07:30:39 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -262,10 +262,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - c9ad7ba1-8e5b-4bfc-5d50-5f97b7bda8d0
+                - 21e6ff89-dba6-4469-7286-62df628ea5cf
         status: 200 OK
         code: 200
-        duration: 260.326666ms
+        duration: 254.511875ms
     - id: 5
       request:
         proto: HTTP/1.1
@@ -296,7 +296,7 @@ interactions:
         trailer: {}
         content_length: 20
         uncompressed: false
-        body: '{"version":"2.18.1"}'
+        body: '{"version":"2.18.2"}'
         headers:
             Cache-Control:
                 - max-age=3600
@@ -305,7 +305,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 06 Aug 2025 07:56:55 GMT
+                - Tue, 27 Jan 2026 07:30:40 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -315,10 +315,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 250ac0a8-8176-46d2-73fb-b484bbfacc88
+                - 48c044aa-bcc6-4f64-6796-a8b3c694371e
         status: 200 OK
         code: 200
-        duration: 260.389083ms
+        duration: 248.433417ms
     - id: 6
       request:
         proto: HTTP/1.1
@@ -339,7 +339,7 @@ interactions:
                 - redacted
             Content-Type:
                 - application/json
-        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/304492be-5f0f-4bb0-8f59-c982107bc878/systemMappings/testterraformvirtual:900/resources
+        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/1de4ab49-1b7b-47ca-89bb-0a4d9da1d057/systemMappings/testterraformvirtual:900/resources
         method: GET
       response:
         proto: HTTP/1.1
@@ -349,7 +349,7 @@ interactions:
         trailer: {}
         content_length: 141
         uncompressed: false
-        body: '[{"id":"/","enabled":true,"exactMatchOnly":true,"websocketUpgradeAllowed":false,"creationDate":"1753339216377","description":"","_links":{}}]'
+        body: '[{"id":"/","enabled":true,"exactMatchOnly":true,"websocketUpgradeAllowed":false,"creationDate":"1769494232901","description":"","_links":{}}]'
         headers:
             Cache-Control:
                 - no-store
@@ -358,7 +358,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 06 Aug 2025 07:56:55 GMT
+                - Tue, 27 Jan 2026 07:30:40 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -368,10 +368,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 4fccf113-43a4-407a-4bb4-5988b2bf5c57
+                - 57e54ceb-c05b-41ce-65af-564520632b96
         status: 200 OK
         code: 200
-        duration: 416.381626ms
+        duration: 252.051042ms
     - id: 7
       request:
         proto: HTTP/1.1
@@ -402,7 +402,7 @@ interactions:
         trailer: {}
         content_length: 20
         uncompressed: false
-        body: '{"version":"2.18.1"}'
+        body: '{"version":"2.18.2"}'
         headers:
             Cache-Control:
                 - max-age=3600
@@ -411,7 +411,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 06 Aug 2025 07:56:56 GMT
+                - Tue, 27 Jan 2026 07:30:40 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -421,7 +421,7 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 4660d3ca-4dfb-44ea-5138-38189d12ee50
+                - cf572e24-7721-43e9-49cb-eb2e45ccfd24
         status: 200 OK
         code: 200
-        duration: 262.988333ms
+        duration: 313.853166ms

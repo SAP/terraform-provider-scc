@@ -31,7 +31,7 @@ interactions:
         trailer: {}
         content_length: 20
         uncompressed: false
-        body: '{"version":"2.18.1"}'
+        body: '{"version":"2.18.2"}'
         headers:
             Cache-Control:
                 - max-age=3600
@@ -40,7 +40,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Thu, 21 Aug 2025 12:27:24 GMT
+                - Tue, 27 Jan 2026 07:30:51 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -50,10 +50,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 31b6f618-7f51-42fc-5b58-88e4f800533e
+                - 13181814-d688-48ae-667b-47b2419c2734
         status: 200 OK
         code: 200
-        duration: 988.182667ms
+        duration: 818.690874ms
     - id: 1
       request:
         proto: HTTP/1.1
@@ -74,7 +74,7 @@ interactions:
                 - redacted
             Content-Type:
                 - application/json
-        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/304492be-5f0f-4bb0-8f59-c982107bc878/systemMappings
+        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/1de4ab49-1b7b-47ca-89bb-0a4d9da1d057/systemMappings
         method: GET
       response:
         proto: HTTP/1.1
@@ -82,18 +82,18 @@ interactions:
         proto_minor: 1
         transfer_encoding: []
         trailer: {}
-        content_length: 824
+        content_length: 822
         uncompressed: false
-        body: '[{"virtualHost":"testterraformvirtual","virtualPort":"900","localHost":"testterraforminternal","localPort":"900","creationDate":"1753339203115","protocol":"HTTP","backendType":"abapSys","hostInHeader":"VIRTUAL","sid":"","totalResourcesCount":1,"enabledResourcesCount":1,"authenticationMode":"KERBEROS","description":"","allowedClients":[],"blacklistedUsers":[],"_links":{"self":{"href": "https://redacted.url/path"},"resources":{"href": "https://redacted.url/path"}}}]'
+        body: '[{"virtualHost":"testterraformvirtual","virtualPort":"900","localHost":"testterraforminternal","localPort":"900","creationDate":"1769494227921","protocol":"HTTP","backendType":"abapSys","hostInHeader":"VIRTUAL","sid":"","totalResourcesCount":1,"enabledResourcesCount":1,"authenticationMode":"KERBEROS","description":"","allowedClients":[],"blacklistedUsers":[],"_links":{"self":{"href": "https://redacted.url/path"},"resources":{"href": "https://redacted.url/path"}}}]'
         headers:
             Cache-Control:
                 - no-store
             Content-Length:
-                - "824"
+                - "822"
             Content-Type:
                 - application/json
             Date:
-                - Thu, 21 Aug 2025 12:27:25 GMT
+                - Tue, 27 Jan 2026 07:30:52 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -103,10 +103,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 26c0e02d-8e98-43d4-70af-af26dabfcb0b
+                - 87f07ebc-7733-41c7-5188-67b329c4d93a
         status: 200 OK
         code: 200
-        duration: 297.459876ms
+        duration: 276.996875ms
     - id: 2
       request:
         proto: HTTP/1.1
@@ -137,7 +137,7 @@ interactions:
         trailer: {}
         content_length: 20
         uncompressed: false
-        body: '{"version":"2.18.1"}'
+        body: '{"version":"2.18.2"}'
         headers:
             Cache-Control:
                 - max-age=3600
@@ -146,7 +146,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Thu, 21 Aug 2025 12:27:25 GMT
+                - Tue, 27 Jan 2026 07:30:52 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -156,10 +156,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - de764e8c-6182-427c-5b3e-fdd2bf53522d
+                - 7d1dc57f-df58-4b68-79ae-e899a3d79bfe
         status: 200 OK
         code: 200
-        duration: 267.566916ms
+        duration: 252.56475ms
     - id: 3
       request:
         proto: HTTP/1.1
@@ -190,7 +190,7 @@ interactions:
         trailer: {}
         content_length: 20
         uncompressed: false
-        body: '{"version":"2.18.1"}'
+        body: '{"version":"2.18.2"}'
         headers:
             Cache-Control:
                 - max-age=3600
@@ -199,7 +199,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Thu, 21 Aug 2025 12:27:25 GMT
+                - Tue, 27 Jan 2026 07:30:52 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -209,10 +209,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - d1a88c7e-e6e1-4518-6533-3c0076ca81c5
+                - 32301307-40d8-4e8c-54f5-74aa5c1a90f5
         status: 200 OK
         code: 200
-        duration: 272.677709ms
+        duration: 409.803708ms
     - id: 4
       request:
         proto: HTTP/1.1
@@ -233,7 +233,7 @@ interactions:
                 - redacted
             Content-Type:
                 - application/json
-        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/304492be-5f0f-4bb0-8f59-c982107bc878/systemMappings
+        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/1de4ab49-1b7b-47ca-89bb-0a4d9da1d057/systemMappings
         method: GET
       response:
         proto: HTTP/1.1
@@ -241,18 +241,18 @@ interactions:
         proto_minor: 1
         transfer_encoding: []
         trailer: {}
-        content_length: 824
+        content_length: 822
         uncompressed: false
-        body: '[{"virtualHost":"testterraformvirtual","virtualPort":"900","localHost":"testterraforminternal","localPort":"900","creationDate":"1753339203115","protocol":"HTTP","backendType":"abapSys","hostInHeader":"VIRTUAL","sid":"","totalResourcesCount":1,"enabledResourcesCount":1,"authenticationMode":"KERBEROS","description":"","allowedClients":[],"blacklistedUsers":[],"_links":{"self":{"href": "https://redacted.url/path"},"resources":{"href": "https://redacted.url/path"}}}]'
+        body: '[{"virtualHost":"testterraformvirtual","virtualPort":"900","localHost":"testterraforminternal","localPort":"900","creationDate":"1769494227921","protocol":"HTTP","backendType":"abapSys","hostInHeader":"VIRTUAL","sid":"","totalResourcesCount":1,"enabledResourcesCount":1,"authenticationMode":"KERBEROS","description":"","allowedClients":[],"blacklistedUsers":[],"_links":{"self":{"href": "https://redacted.url/path"},"resources":{"href": "https://redacted.url/path"}}}]'
         headers:
             Cache-Control:
                 - no-store
             Content-Length:
-                - "824"
+                - "822"
             Content-Type:
                 - application/json
             Date:
-                - Thu, 21 Aug 2025 12:27:26 GMT
+                - Tue, 27 Jan 2026 07:30:53 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -262,10 +262,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 19e9673b-2cde-4076-62f4-8b4a6ea967dc
+                - 99d83203-f13c-472a-5f04-1f6256ee80e3
         status: 200 OK
         code: 200
-        duration: 275.146542ms
+        duration: 260.670416ms
     - id: 5
       request:
         proto: HTTP/1.1
@@ -296,7 +296,7 @@ interactions:
         trailer: {}
         content_length: 20
         uncompressed: false
-        body: '{"version":"2.18.1"}'
+        body: '{"version":"2.18.2"}'
         headers:
             Cache-Control:
                 - max-age=3600
@@ -305,7 +305,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Thu, 21 Aug 2025 12:27:26 GMT
+                - Tue, 27 Jan 2026 07:30:53 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -315,10 +315,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 9c2b824e-a844-431b-60ec-2da331b9ff1e
+                - 8f8a0ba3-8d4a-4e03-46f4-6a34b2f9d2d7
         status: 200 OK
         code: 200
-        duration: 268.328625ms
+        duration: 252.532708ms
     - id: 6
       request:
         proto: HTTP/1.1
@@ -339,7 +339,7 @@ interactions:
                 - redacted
             Content-Type:
                 - application/json
-        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/304492be-5f0f-4bb0-8f59-c982107bc878/systemMappings
+        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/1de4ab49-1b7b-47ca-89bb-0a4d9da1d057/systemMappings
         method: GET
       response:
         proto: HTTP/1.1
@@ -347,18 +347,18 @@ interactions:
         proto_minor: 1
         transfer_encoding: []
         trailer: {}
-        content_length: 824
+        content_length: 822
         uncompressed: false
-        body: '[{"virtualHost":"testterraformvirtual","virtualPort":"900","localHost":"testterraforminternal","localPort":"900","creationDate":"1753339203115","protocol":"HTTP","backendType":"abapSys","hostInHeader":"VIRTUAL","sid":"","totalResourcesCount":1,"enabledResourcesCount":1,"authenticationMode":"KERBEROS","description":"","allowedClients":[],"blacklistedUsers":[],"_links":{"self":{"href": "https://redacted.url/path"},"resources":{"href": "https://redacted.url/path"}}}]'
+        body: '[{"virtualHost":"testterraformvirtual","virtualPort":"900","localHost":"testterraforminternal","localPort":"900","creationDate":"1769494227921","protocol":"HTTP","backendType":"abapSys","hostInHeader":"VIRTUAL","sid":"","totalResourcesCount":1,"enabledResourcesCount":1,"authenticationMode":"KERBEROS","description":"","allowedClients":[],"blacklistedUsers":[],"_links":{"self":{"href": "https://redacted.url/path"},"resources":{"href": "https://redacted.url/path"}}}]'
         headers:
             Cache-Control:
                 - no-store
             Content-Length:
-                - "824"
+                - "822"
             Content-Type:
                 - application/json
             Date:
-                - Thu, 21 Aug 2025 12:27:26 GMT
+                - Tue, 27 Jan 2026 07:30:53 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -368,10 +368,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - bfc309fe-b337-422d-4f4e-3a41b81e2fd5
+                - fe8b6c51-293f-45ac-5211-7982618588ef
         status: 200 OK
         code: 200
-        duration: 272.205792ms
+        duration: 323.021292ms
     - id: 7
       request:
         proto: HTTP/1.1
@@ -402,7 +402,7 @@ interactions:
         trailer: {}
         content_length: 20
         uncompressed: false
-        body: '{"version":"2.18.1"}'
+        body: '{"version":"2.18.2"}'
         headers:
             Cache-Control:
                 - max-age=3600
@@ -411,7 +411,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Thu, 21 Aug 2025 12:27:27 GMT
+                - Tue, 27 Jan 2026 07:30:54 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -421,7 +421,7 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 6524b07a-d666-4d47-67f5-c3d93abb6102
+                - 73c68ba7-0fb4-4959-6f42-4c62e84ee93b
         status: 200 OK
         code: 200
-        duration: 268.939666ms
+        duration: 265.264583ms

@@ -9,7 +9,12 @@ import (
 )
 
 func TestDataSourceSystemMapping(t *testing.T) {
-
+	regionHost:= "cf.eu12.hana.ondemand.com"
+	subaccount:= "1de4ab49-1b7b-47ca-89bb-0a4d9da1d057"
+	virtualHost:= "testterraformvirtual"
+	virtualPort:= "900"
+	internalHost:= "testterraforminternal"
+	internalPort:= "900"
 	t.Parallel()
 
 	t.Run("happy path", func(t *testing.T) {
@@ -21,25 +26,25 @@ func TestDataSourceSystemMapping(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(rec.GetDefaultClient()),
 			Steps: []resource.TestStep{
 				{
-					Config: providerConfig(user) + DataSourceSystemMapping("test", "cf.eu12.hana.ondemand.com", "304492be-5f0f-4bb0-8f59-c982107bc878", "testterraformvirtual", "900"),
+					Config: providerConfig(user) + DataSourceSystemMapping("scc_sm", regionHost, subaccount, virtualHost, virtualPort),
 					Check: resource.ComposeAggregateTestCheckFunc(
-						resource.TestCheckResourceAttr("data.scc_system_mapping.test", "region_host", "cf.eu12.hana.ondemand.com"),
-						resource.TestMatchResourceAttr("data.scc_system_mapping.test", "subaccount", regexpValidUUID),
+						resource.TestCheckResourceAttr("data.scc_system_mapping.scc_sm", "region_host", regionHost),
+						resource.TestMatchResourceAttr("data.scc_system_mapping.scc_sm", "subaccount", regexpValidUUID),
 
-						resource.TestCheckResourceAttr("data.scc_system_mapping.test", "virtual_host", "testterraformvirtual"),
-						resource.TestCheckResourceAttr("data.scc_system_mapping.test", "virtual_port", "900"),
-						resource.TestCheckResourceAttr("data.scc_system_mapping.test", "internal_host", "testterraforminternal"),
-						resource.TestCheckResourceAttr("data.scc_system_mapping.test", "internal_port", "900"),
-						resource.TestMatchResourceAttr("data.scc_system_mapping.test", "creation_date", regexValidTimeStamp),
-						resource.TestCheckResourceAttr("data.scc_system_mapping.test", "protocol", "HTTP"),
-						resource.TestCheckResourceAttr("data.scc_system_mapping.test", "backend_type", "abapSys"),
-						resource.TestCheckResourceAttr("data.scc_system_mapping.test", "authentication_mode", "KERBEROS"),
-						resource.TestCheckResourceAttr("data.scc_system_mapping.test", "host_in_header", "VIRTUAL"),
-						resource.TestCheckResourceAttr("data.scc_system_mapping.test", "sid", ""),
-						resource.TestCheckResourceAttr("data.scc_system_mapping.test", "total_resources_count", "1"),
-						resource.TestCheckResourceAttr("data.scc_system_mapping.test", "enabled_resources_count", "1"),
-						resource.TestCheckResourceAttr("data.scc_system_mapping.test", "description", ""),
-						resource.TestCheckResourceAttr("data.scc_system_mapping.test", "sap_router", ""),
+						resource.TestCheckResourceAttr("data.scc_system_mapping.scc_sm", "virtual_host", virtualHost),
+						resource.TestCheckResourceAttr("data.scc_system_mapping.scc_sm", "virtual_port", virtualPort),
+						resource.TestCheckResourceAttr("data.scc_system_mapping.scc_sm", "internal_host", internalHost),
+						resource.TestCheckResourceAttr("data.scc_system_mapping.scc_sm", "internal_port", internalPort),
+						resource.TestMatchResourceAttr("data.scc_system_mapping.scc_sm", "creation_date", regexValidTimeStamp),
+						resource.TestCheckResourceAttr("data.scc_system_mapping.scc_sm", "protocol", "HTTP"),
+						resource.TestCheckResourceAttr("data.scc_system_mapping.scc_sm", "backend_type", "abapSys"),
+						resource.TestCheckResourceAttr("data.scc_system_mapping.scc_sm", "authentication_mode", "KERBEROS"),
+						resource.TestCheckResourceAttr("data.scc_system_mapping.scc_sm", "host_in_header", "VIRTUAL"),
+						resource.TestCheckResourceAttr("data.scc_system_mapping.scc_sm", "sid", ""),
+						resource.TestCheckResourceAttr("data.scc_system_mapping.scc_sm", "total_resources_count", "1"),
+						resource.TestCheckResourceAttr("data.scc_system_mapping.scc_sm", "enabled_resources_count", "1"),
+						resource.TestCheckResourceAttr("data.scc_system_mapping.scc_sm", "description", ""),
+						resource.TestCheckResourceAttr("data.scc_system_mapping.scc_sm", "sap_router", ""),
 					),
 				},
 			},
@@ -53,7 +58,7 @@ func TestDataSourceSystemMapping(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      DataSourceSystemMappingWoRegionHost("test", "304492be-5f0f-4bb0-8f59-c982107bc878", "testterraformvirtual", "900"),
+					Config:      DataSourceSystemMappingWoRegionHost("scc_sm", subaccount, virtualHost, virtualPort),
 					ExpectError: regexp.MustCompile(`The argument "region_host" is required, but no definition was found.`),
 				},
 			},
@@ -66,7 +71,7 @@ func TestDataSourceSystemMapping(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      DataSourceSystemMappingWoSubaccount("test", "cf.eu12.hana.ondemand.com", "testterraformvirtual", "900"),
+					Config:      DataSourceSystemMappingWoSubaccount("scc_sm", regionHost, virtualHost, virtualPort),
 					ExpectError: regexp.MustCompile(`The argument "subaccount" is required, but no definition was found.`),
 				},
 			},
@@ -79,7 +84,7 @@ func TestDataSourceSystemMapping(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      DataSourceSystemMappingWoVirtualHost("test", "cf.eu12.hana.ondemand.com", "304492be-5f0f-4bb0-8f59-c982107bc878", "900"),
+					Config:      DataSourceSystemMappingWoVirtualHost("scc_sm", regionHost, subaccount, virtualPort),
 					ExpectError: regexp.MustCompile(`The argument "virtual_host" is required, but no definition was found.`),
 				},
 			},
@@ -92,7 +97,7 @@ func TestDataSourceSystemMapping(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      DataSourceSystemMappingWoVirtualPort("test", "cf.eu12.hana.ondemand.com", "304492be-5f0f-4bb0-8f59-c982107bc878", "testterraformvirtual"),
+					Config:      DataSourceSystemMappingWoVirtualPort("scc_sm", regionHost, subaccount, virtualHost),
 					ExpectError: regexp.MustCompile(`The argument "virtual_port" is required, but no definition was found.`),
 				},
 			},
