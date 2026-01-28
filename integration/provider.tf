@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     scc = {
-        source = "sap/scc"
+      source = "sap/scc"
     }
   }
 }
