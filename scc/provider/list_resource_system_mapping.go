@@ -7,12 +7,10 @@ import (
 	"github.com/SAP/terraform-provider-scc/internal/api"
 	apiobjects "github.com/SAP/terraform-provider-scc/internal/api/apiObjects"
 	"github.com/SAP/terraform-provider-scc/internal/api/endpoints"
-	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/list"
 	"github.com/hashicorp/terraform-plugin-framework/list/schema"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -23,10 +21,8 @@ type SystemMappingListResource struct {
 }
 
 type systemMappingListResourceFilterModel struct {
-	RegionHost  types.String `tfsdk:"region_host"`
-	Subaccount  types.String `tfsdk:"subaccount"`
-	VirtualHost types.String `tfsdk:"virtual_host"`
-	VirtualPort types.String `tfsdk:"virtual_port"`
+	RegionHost types.String `tfsdk:"region_host"`
+	Subaccount types.String `tfsdk:"subaccount"`
 }
 
 func NewSystemMappingListResource() list.ListResource {
@@ -66,9 +62,8 @@ func (r *SystemMappingListResource) ListResourceConfigSchema(
 	resp.Schema = schema.Schema{
 		MarkdownDescription: `
 SAP Cloud Connector **System Mapping** list resource.
-This list resource retrieves system mappings for a specific region host and subaccount. 
-It can be filtered to a specific system by providing both the virtual host and virtual port.
-`,
+
+This list resource retrieves system mappings for a specific region host and subaccount.`,
 		Attributes: map[string]schema.Attribute{
 			"region_host": schema.StringAttribute{
 				MarkdownDescription: "The host URL of the region (e.g., `cf.eu12.hana.ondemand.com`).",
@@ -77,20 +72,6 @@ It can be filtered to a specific system by providing both the virtual host and v
 			"subaccount": schema.StringAttribute{
 				MarkdownDescription: "The GUID of the SAP subaccount.",
 				Required:            true,
-			},
-			"virtual_host": schema.StringAttribute{
-				MarkdownDescription: "The virtual host name used in the system mapping. If provided, `virtual_port` must also be specified.",
-				Optional:            true,
-				Validators: []validator.String{
-					stringvalidator.AlsoRequires(path.MatchRoot("virtual_port")),
-				},
-			},
-			"virtual_port": schema.StringAttribute{
-				MarkdownDescription: "The virtual port used in the system mapping. If provided, `virtual_host` must also be specified.",
-				Optional:            true,
-				Validators: []validator.String{
-					stringvalidator.AlsoRequires(path.MatchRoot("virtual_host")),
-				},
 			},
 		},
 	}
@@ -112,19 +93,10 @@ func (r *SystemMappingListResource) List(
 		return
 	}
 
-	if !filter.VirtualHost.IsNull() && !filter.VirtualPort.IsNull() {
-		endpoint = endpoints.GetSystemMappingEndpoint(
-			filter.RegionHost.ValueString(),
-			filter.Subaccount.ValueString(),
-			filter.VirtualHost.ValueString(),
-			filter.VirtualPort.ValueString(),
-		)
-	} else {
-		endpoint = endpoints.GetSystemMappingBaseEndpoint(
-			filter.RegionHost.ValueString(),
-			filter.Subaccount.ValueString(),
-		)
-	}
+	endpoint = endpoints.GetSystemMappingBaseEndpoint(
+		filter.RegionHost.ValueString(),
+		filter.Subaccount.ValueString(),
+	)
 
 	diags := requestAndUnmarshal(r.client, &respObj.SystemMappings, "GET", endpoint, nil, true)
 	if diags.HasError() {

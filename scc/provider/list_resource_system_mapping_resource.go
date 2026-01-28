@@ -64,6 +64,7 @@ func (r *SystemMappingResourceListResource) ListResourceConfigSchema(
 	resp.Schema = schema.Schema{
 		MarkdownDescription: `
 SAP Cloud Connector **System Mapping Resource** list resource.
+
 This list resource retrieves system mappings resource for a specific region host, subaccount, virtual_host and virtual_port.
 `,
 		Attributes: map[string]schema.Attribute{
