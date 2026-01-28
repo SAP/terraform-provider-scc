@@ -90,11 +90,9 @@ func (r *DomainMappingListResource) List(
 		filter  domainMappingListFilterModel
 	)
 
-	if req.Config.Raw.IsFullyKnown() && !req.Config.Raw.IsNull() {
-		if diags := req.Config.Get(ctx, &filter); diags.HasError() {
-			stream.Results = list.ListResultsStreamDiagnostics(diags)
-			return
-		}
+	if diags := req.Config.Get(ctx, &filter); diags.HasError() {
+		stream.Results = list.ListResultsStreamDiagnostics(diags)
+		return
 	}
 
 	endpoint := fmt.Sprintf("/api/v1/configuration/subaccounts/%s/%s/domainMappings", filter.RegionHost.ValueString(), filter.Subaccount.ValueString())
