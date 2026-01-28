@@ -26,29 +26,29 @@ func TestResourceSubaccountUsingAuth(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(rec.GetDefaultClient()),
 			Steps: []resource.TestStep{
 				{
-					Config: providerConfig(user) + ResourceSubaccountUsingAuth("test", user.CloudAuthenticationData, "subaccount added via terraform tests"),
+					Config: providerConfig(user) + ResourceSubaccountUsingAuth("scc_sa_auth", user.CloudAuthenticationData, "subaccount added via terraform tests"),
 					Check: resource.ComposeAggregateTestCheckFunc(
-						resource.TestCheckResourceAttr("scc_subaccount_using_auth.test", "region_host", "cf.eu12.hana.ondemand.com"),
-						resource.TestMatchResourceAttr("scc_subaccount_using_auth.test", "subaccount", regexpValidUUID),
-						resource.TestCheckResourceAttr("scc_subaccount_using_auth.test", "description", "subaccount added via terraform tests"),
-						resource.TestCheckResourceAttr("scc_subaccount_using_auth.test", "location_id", ""),
+						resource.TestCheckResourceAttr("scc_subaccount_using_auth.scc_sa_auth", "region_host", "cf.eu12.hana.ondemand.com"),
+						resource.TestMatchResourceAttr("scc_subaccount_using_auth.scc_sa_auth", "subaccount", regexpValidUUID),
+						resource.TestCheckResourceAttr("scc_subaccount_using_auth.scc_sa_auth", "description", "subaccount added via terraform tests"),
+						resource.TestCheckResourceAttr("scc_subaccount_using_auth.scc_sa_auth", "location_id", ""),
 
-						resource.TestMatchResourceAttr("scc_subaccount_using_auth.test", "tunnel.connected_since", regexValidTimeStamp),
-						resource.TestCheckResourceAttr("scc_subaccount_using_auth.test", "tunnel.connections", "0"),
-						resource.TestCheckResourceAttr("scc_subaccount_using_auth.test", "tunnel.state", "Connected"),
+						resource.TestMatchResourceAttr("scc_subaccount_using_auth.scc_sa_auth", "tunnel.connected_since", regexValidTimeStamp),
+						resource.TestCheckResourceAttr("scc_subaccount_using_auth.scc_sa_auth", "tunnel.connections", "0"),
+						resource.TestCheckResourceAttr("scc_subaccount_using_auth.scc_sa_auth", "tunnel.state", "Connected"),
 
-						resource.TestCheckResourceAttr("scc_subaccount_using_auth.test", "tunnel.application_connections.#", "0"),
-						resource.TestCheckResourceAttr("scc_subaccount_using_auth.test", "tunnel.service_channels.#", "0"),
+						resource.TestCheckResourceAttr("scc_subaccount_using_auth.scc_sa_auth", "tunnel.application_connections.#", "0"),
+						resource.TestCheckResourceAttr("scc_subaccount_using_auth.scc_sa_auth", "tunnel.service_channels.#", "0"),
 
-						resource.TestMatchResourceAttr("scc_subaccount_using_auth.test", "tunnel.subaccount_certificate.issuer", regexp.MustCompile(`CN=.*?,OU=S.*?,O=.*?,L=.*?,C=.*?`)),
-						resource.TestMatchResourceAttr("scc_subaccount_using_auth.test", "tunnel.subaccount_certificate.valid_to", regexValidTimeStamp),
-						resource.TestMatchResourceAttr("scc_subaccount_using_auth.test", "tunnel.subaccount_certificate.valid_from", regexValidTimeStamp),
-						resource.TestMatchResourceAttr("scc_subaccount_using_auth.test", "tunnel.subaccount_certificate.serial_number", regexValidSerialNumber),
-						resource.TestMatchResourceAttr("scc_subaccount_using_auth.test", "tunnel.subaccount_certificate.subject_dn", regexp.MustCompile(`CN=.*?,L=.*?,OU=.*?,OU=.*?,O=.*?,C=.*?`)),
+						resource.TestMatchResourceAttr("scc_subaccount_using_auth.scc_sa_auth", "tunnel.subaccount_certificate.issuer", regexp.MustCompile(`CN=.*?,OU=S.*?,O=.*?,L=.*?,C=.*?`)),
+						resource.TestMatchResourceAttr("scc_subaccount_using_auth.scc_sa_auth", "tunnel.subaccount_certificate.valid_to", regexValidTimeStamp),
+						resource.TestMatchResourceAttr("scc_subaccount_using_auth.scc_sa_auth", "tunnel.subaccount_certificate.valid_from", regexValidTimeStamp),
+						resource.TestMatchResourceAttr("scc_subaccount_using_auth.scc_sa_auth", "tunnel.subaccount_certificate.serial_number", regexValidSerialNumber),
+						resource.TestMatchResourceAttr("scc_subaccount_using_auth.scc_sa_auth", "tunnel.subaccount_certificate.subject_dn", regexp.MustCompile(`CN=.*?,L=.*?,OU=.*?,OU=.*?,O=.*?,C=.*?`)),
 					),
 					ConfigStateChecks: []statecheck.StateCheck{
 						statecheck.ExpectIdentity(
-							"scc_subaccount_using_auth.test",
+							"scc_subaccount_using_auth.scc_sa_auth",
 							map[string]knownvalue.Check{
 								"region_host": knownvalue.StringExact("cf.eu12.hana.ondemand.com"),
 								"subaccount":  knownvalue.StringRegexp(regexpValidUUID),
@@ -57,10 +57,10 @@ func TestResourceSubaccountUsingAuth(t *testing.T) {
 					},
 				},
 				{
-					ResourceName:                         "scc_subaccount_using_auth.test",
+					ResourceName:                         "scc_subaccount_using_auth.scc_sa_auth",
 					ImportState:                          true,
 					ImportStateVerify:                    true,
-					ImportStateIdFunc:                    getImportStateForSubaccountUsingAuth("scc_subaccount_using_auth.test"),
+					ImportStateIdFunc:                    getImportStateForSubaccountUsingAuth("scc_subaccount_using_auth.scc_sa_auth"),
 					ImportStateVerifyIdentifierAttribute: "subaccount",
 					ImportStateVerifyIgnore: []string{
 						"authentication_data",
@@ -69,15 +69,15 @@ func TestResourceSubaccountUsingAuth(t *testing.T) {
 					},
 				},
 				{
-					ResourceName:  "scc_subaccount_using_auth.test",
+					ResourceName:  "scc_subaccount_using_auth.scc_sa_auth",
 					ImportState:   true,
-					ImportStateId: "cf.eu12.hana.ondemand.com4916a705-273c-45a6-a2f0-08c234c7a23d", // malformed ID
+					ImportStateId: "cf.eu12.hana.ondemand.comb1799d1c-ce91-4cd4-8b6e-dc8f4eaf0ad9", // malformed ID
 					ExpectError:   regexp.MustCompile(`(?is)Expected import identifier with format:.*subaccount.*Got:`),
 				},
 				{
-					ResourceName:  "scc_subaccount_using_auth.test",
+					ResourceName:  "scc_subaccount_using_auth.scc_sa_auth",
 					ImportState:   true,
-					ImportStateId: "cf.eu12.hana.ondemand.com,4916a705-273c-45a6-a2f0-08c234c7a23d,extra",
+					ImportStateId: "cf.eu12.hana.ondemand.com,b1799d1c-ce91-4cd4-8b6e-dc8f4eaf0ad9,extra",
 					ExpectError:   regexp.MustCompile(`(?is)Expected import identifier with format:.*subaccount.*Got:`),
 				},
 			},
@@ -97,21 +97,21 @@ func TestResourceSubaccountUsingAuth(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(rec.GetDefaultClient()),
 			Steps: []resource.TestStep{
 				{
-					Config: providerConfig(user) + ResourceSubaccountUsingAuthUpdateWithDisplayName("test", user.CloudAuthenticationData, "Initial description", "Initial Display Name"),
+					Config: providerConfig(user) + ResourceSubaccountUsingAuthUpdateWithDisplayName("scc_sa_auth", user.CloudAuthenticationData, "Initial description", "Initial Display Name"),
 					Check: resource.ComposeAggregateTestCheckFunc(
-						resource.TestCheckResourceAttr("scc_subaccount_using_auth.test", "description", "Initial description"),
-						resource.TestCheckResourceAttr("scc_subaccount_using_auth.test", "display_name", "Initial Display Name"),
+						resource.TestCheckResourceAttr("scc_subaccount_using_auth.scc_sa_auth", "description", "Initial description"),
+						resource.TestCheckResourceAttr("scc_subaccount_using_auth.scc_sa_auth", "display_name", "Initial Display Name"),
 					),
 				},
 				{
-					Config: providerConfig(user) + ResourceSubaccountUsingAuthUpdateWithDisplayName("test", user.CloudAuthenticationData, "Updated description", "Updated Display Name"),
+					Config: providerConfig(user) + ResourceSubaccountUsingAuthUpdateWithDisplayName("scc_sa_auth", user.CloudAuthenticationData, "Updated description", "Updated Display Name"),
 					Check: resource.ComposeAggregateTestCheckFunc(
-						resource.TestCheckResourceAttr("scc_subaccount_using_auth.test", "description", "Updated description"),
-						resource.TestCheckResourceAttr("scc_subaccount_using_auth.test", "display_name", "Updated Display Name"),
+						resource.TestCheckResourceAttr("scc_subaccount_using_auth.scc_sa_auth", "description", "Updated description"),
+						resource.TestCheckResourceAttr("scc_subaccount_using_auth.scc_sa_auth", "display_name", "Updated Display Name"),
 					),
 					ConfigStateChecks: []statecheck.StateCheck{
 						statecheck.ExpectIdentity(
-							"scc_subaccount_using_auth.test",
+							"scc_subaccount_using_auth.scc_sa_auth",
 							map[string]knownvalue.Check{
 								"region_host": knownvalue.StringExact("cf.eu12.hana.ondemand.com"),
 								"subaccount":  knownvalue.StringRegexp(regexpValidUUID),
@@ -135,13 +135,13 @@ func TestResourceSubaccountUsingAuth(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(rec.GetDefaultClient()),
 			Steps: []resource.TestStep{
 				{
-					Config: providerConfig(user) + ResourceSubaccountUsingAuthWithTunnelState("test", user.CloudAuthenticationData, "Testing tunnel connected", true),
+					Config: providerConfig(user) + ResourceSubaccountUsingAuthWithTunnelState("scc_sa_auth", user.CloudAuthenticationData, "Testing tunnel connected", true),
 					Check: resource.ComposeAggregateTestCheckFunc(
-						resource.TestCheckResourceAttr("scc_subaccount_using_auth.test", "tunnel.state", "Connected"),
+						resource.TestCheckResourceAttr("scc_subaccount_using_auth.scc_sa_auth", "tunnel.state", "Connected"),
 					),
 					ConfigStateChecks: []statecheck.StateCheck{
 						statecheck.ExpectIdentity(
-							"scc_subaccount_using_auth.test",
+							"scc_subaccount_using_auth.scc_sa_auth",
 							map[string]knownvalue.Check{
 								"region_host": knownvalue.StringExact("cf.eu12.hana.ondemand.com"),
 								"subaccount":  knownvalue.StringRegexp(regexpValidUUID),
@@ -150,13 +150,13 @@ func TestResourceSubaccountUsingAuth(t *testing.T) {
 					},
 				},
 				{
-					Config: providerConfig(user) + ResourceSubaccountUsingAuthWithTunnelState("test", user.CloudAuthenticationData, "Testing tunnel disconnected", false),
+					Config: providerConfig(user) + ResourceSubaccountUsingAuthWithTunnelState("scc_sa_auth", user.CloudAuthenticationData, "Testing tunnel disconnected", false),
 					Check: resource.ComposeAggregateTestCheckFunc(
-						resource.TestCheckResourceAttr("scc_subaccount_using_auth.test", "tunnel.state", "Disconnected"),
+						resource.TestCheckResourceAttr("scc_subaccount_using_auth.scc_sa_auth", "tunnel.state", "Disconnected"),
 					),
 					ConfigStateChecks: []statecheck.StateCheck{
 						statecheck.ExpectIdentity(
-							"scc_subaccount_using_auth.test",
+							"scc_subaccount_using_auth.scc_sa_auth",
 							map[string]knownvalue.Check{
 								"region_host": knownvalue.StringExact("cf.eu12.hana.ondemand.com"),
 								"subaccount":  knownvalue.StringRegexp(regexpValidUUID),
@@ -165,13 +165,13 @@ func TestResourceSubaccountUsingAuth(t *testing.T) {
 					},
 				},
 				{
-					Config: providerConfig(user) + ResourceSubaccountUsingAuthWithTunnelState("test", user.CloudAuthenticationData, "Testing tunnel reconnected", true),
+					Config: providerConfig(user) + ResourceSubaccountUsingAuthWithTunnelState("scc_sa_auth", user.CloudAuthenticationData, "Testing tunnel reconnected", true),
 					Check: resource.ComposeAggregateTestCheckFunc(
-						resource.TestCheckResourceAttr("scc_subaccount_using_auth.test", "tunnel.state", "Connected"),
+						resource.TestCheckResourceAttr("scc_subaccount_using_auth.scc_sa_auth", "tunnel.state", "Connected"),
 					),
 					ConfigStateChecks: []statecheck.StateCheck{
 						statecheck.ExpectIdentity(
-							"scc_subaccount_using_auth.test",
+							"scc_subaccount_using_auth.scc_sa_auth",
 							map[string]knownvalue.Check{
 								"region_host": knownvalue.StringExact("cf.eu12.hana.ondemand.com"),
 								"subaccount":  knownvalue.StringRegexp(regexpValidUUID),

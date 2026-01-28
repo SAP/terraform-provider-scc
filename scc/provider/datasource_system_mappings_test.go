@@ -9,7 +9,12 @@ import (
 )
 
 func TestDataSourceSystemMappings(t *testing.T) {
-
+	regionHost:= "cf.eu12.hana.ondemand.com"
+	subaccount:= "1de4ab49-1b7b-47ca-89bb-0a4d9da1d057"
+	virtualHost:= "testterraformvirtual"
+	virtualPort:= "900"
+	internalHost:= "testterraforminternal"
+	internalPort:= "900"
 	t.Parallel()
 
 	t.Run("happy path", func(t *testing.T) {
@@ -21,26 +26,26 @@ func TestDataSourceSystemMappings(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(rec.GetDefaultClient()),
 			Steps: []resource.TestStep{
 				{
-					Config: providerConfig(user) + DataSourceSystemMappings("test", "cf.eu12.hana.ondemand.com", "304492be-5f0f-4bb0-8f59-c982107bc878"),
+					Config: providerConfig(user) + DataSourceSystemMappings("scc_sms", regionHost, subaccount),
 					Check: resource.ComposeAggregateTestCheckFunc(
-						resource.TestCheckResourceAttr("data.scc_system_mappings.test", "region_host", "cf.eu12.hana.ondemand.com"),
-						resource.TestMatchResourceAttr("data.scc_system_mappings.test", "subaccount", regexpValidUUID),
+						resource.TestCheckResourceAttr("data.scc_system_mappings.scc_sms", "region_host", regionHost),
+						resource.TestMatchResourceAttr("data.scc_system_mappings.scc_sms", "subaccount", regexpValidUUID),
 
-						resource.TestCheckResourceAttr("data.scc_system_mappings.test", "system_mappings.#", "1"),
-						resource.TestCheckResourceAttr("data.scc_system_mappings.test", "system_mappings.0.virtual_host", "testterraformvirtual"),
-						resource.TestCheckResourceAttr("data.scc_system_mappings.test", "system_mappings.0.virtual_port", "900"),
-						resource.TestCheckResourceAttr("data.scc_system_mappings.test", "system_mappings.0.internal_host", "testterraforminternal"),
-						resource.TestCheckResourceAttr("data.scc_system_mappings.test", "system_mappings.0.internal_port", "900"),
-						resource.TestMatchResourceAttr("data.scc_system_mappings.test", "system_mappings.0.creation_date", regexValidTimeStamp),
-						resource.TestCheckResourceAttr("data.scc_system_mappings.test", "system_mappings.0.protocol", "HTTP"),
-						resource.TestCheckResourceAttr("data.scc_system_mappings.test", "system_mappings.0.backend_type", "abapSys"),
-						resource.TestCheckResourceAttr("data.scc_system_mappings.test", "system_mappings.0.authentication_mode", "KERBEROS"),
-						resource.TestCheckResourceAttr("data.scc_system_mappings.test", "system_mappings.0.host_in_header", "VIRTUAL"),
-						resource.TestCheckResourceAttr("data.scc_system_mappings.test", "system_mappings.0.sid", ""),
-						resource.TestCheckResourceAttr("data.scc_system_mappings.test", "system_mappings.0.total_resources_count", "1"),
-						resource.TestCheckResourceAttr("data.scc_system_mappings.test", "system_mappings.0.enabled_resources_count", "1"),
-						resource.TestCheckResourceAttr("data.scc_system_mappings.test", "system_mappings.0.description", ""),
-						resource.TestCheckResourceAttr("data.scc_system_mappings.test", "system_mappings.0.sap_router", ""),
+						resource.TestCheckResourceAttr("data.scc_system_mappings.scc_sms", "system_mappings.#", "1"),
+						resource.TestCheckResourceAttr("data.scc_system_mappings.scc_sms", "system_mappings.0.virtual_host", virtualHost),
+						resource.TestCheckResourceAttr("data.scc_system_mappings.scc_sms", "system_mappings.0.virtual_port", virtualPort),
+						resource.TestCheckResourceAttr("data.scc_system_mappings.scc_sms", "system_mappings.0.internal_host", internalHost),
+						resource.TestCheckResourceAttr("data.scc_system_mappings.scc_sms", "system_mappings.0.internal_port", internalPort),
+						resource.TestMatchResourceAttr("data.scc_system_mappings.scc_sms", "system_mappings.0.creation_date", regexValidTimeStamp),
+						resource.TestCheckResourceAttr("data.scc_system_mappings.scc_sms", "system_mappings.0.protocol", "HTTP"),
+						resource.TestCheckResourceAttr("data.scc_system_mappings.scc_sms", "system_mappings.0.backend_type", "abapSys"),
+						resource.TestCheckResourceAttr("data.scc_system_mappings.scc_sms", "system_mappings.0.authentication_mode", "KERBEROS"),
+						resource.TestCheckResourceAttr("data.scc_system_mappings.scc_sms", "system_mappings.0.host_in_header", "VIRTUAL"),
+						resource.TestCheckResourceAttr("data.scc_system_mappings.scc_sms", "system_mappings.0.sid", ""),
+						resource.TestCheckResourceAttr("data.scc_system_mappings.scc_sms", "system_mappings.0.total_resources_count", "1"),
+						resource.TestCheckResourceAttr("data.scc_system_mappings.scc_sms", "system_mappings.0.enabled_resources_count", "1"),
+						resource.TestCheckResourceAttr("data.scc_system_mappings.scc_sms", "system_mappings.0.description", ""),
+						resource.TestCheckResourceAttr("data.scc_system_mappings.scc_sms", "system_mappings.0.sap_router", ""),
 					),
 				},
 			},
@@ -54,7 +59,7 @@ func TestDataSourceSystemMappings(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      DataSourceSystemMappingsWoRegionHost("test", "304492be-5f0f-4bb0-8f59-c982107bc878"),
+					Config:      DataSourceSystemMappingsWoRegionHost("scc_sms", subaccount),
 					ExpectError: regexp.MustCompile(`The argument "region_host" is required, but no definition was found.`),
 				},
 			},
@@ -67,7 +72,7 @@ func TestDataSourceSystemMappings(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      DataSourceSystemMappingsWoSubaccount("test", "cf.eu12.hana.ondemand.com"),
+					Config:      DataSourceSystemMappingsWoSubaccount("scc_sms", regionHost),
 					ExpectError: regexp.MustCompile(`The argument "subaccount" is required, but no definition was found.`),
 				},
 			},

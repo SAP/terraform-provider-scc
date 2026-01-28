@@ -31,7 +31,7 @@ interactions:
         trailer: {}
         content_length: 20
         uncompressed: false
-        body: '{"version":"2.18.1"}'
+        body: '{"version":"2.18.2"}'
         headers:
             Cache-Control:
                 - max-age=3600
@@ -40,7 +40,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 14 Jan 2026 04:08:57 GMT
+                - Tue, 27 Jan 2026 07:37:26 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -50,10 +50,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 58b9afd1-8652-4323-6cd5-88dc9fb7b529
+                - f25c3023-0782-4748-5bed-b8ab41918596
         status: 200 OK
         code: 200
-        duration: 1.130186959s
+        duration: 829.087584ms
     - id: 1
       request:
         proto: HTTP/1.1
@@ -84,7 +84,7 @@ interactions:
         trailer: {}
         content_length: 20
         uncompressed: false
-        body: '{"version":"2.18.1"}'
+        body: '{"version":"2.18.2"}'
         headers:
             Cache-Control:
                 - max-age=3600
@@ -93,7 +93,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 14 Jan 2026 04:08:57 GMT
+                - Tue, 27 Jan 2026 07:37:26 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -103,10 +103,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 994c4757-18af-4aed-479e-30d613952ff8
+                - ba5cef52-0f35-4fcd-4a1d-2fb9d312779f
         status: 200 OK
         code: 200
-        duration: 285.543958ms
+        duration: 254.388792ms
     - id: 2
       request:
         proto: HTTP/1.1
@@ -127,7 +127,7 @@ interactions:
                 - redacted
             Content-Type:
                 - application/json
-        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/domainMappings
+        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/9f7390c8-f201-4b2d-b751-04c0a63c2671/domainMappings
         method: POST
       response:
         proto: HTTP/1.1
@@ -144,7 +144,7 @@ interactions:
             Content-Length:
                 - "0"
             Date:
-                - Wed, 14 Jan 2026 04:08:57 GMT
+                - Tue, 27 Jan 2026 07:37:26 GMT
             Location:
                 - redacted
             Server:
@@ -156,10 +156,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - ee89c551-169d-446f-76ac-6f18668706a4
+                - 1cef24d2-c81f-4f9c-72f9-8989626e6361
         status: 201 Created
         code: 201
-        duration: 401.173ms
+        duration: 262.1315ms
     - id: 3
       request:
         proto: HTTP/1.1
@@ -180,7 +180,7 @@ interactions:
                 - redacted
             Content-Type:
                 - application/json
-        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/domainMappings
+        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/9f7390c8-f201-4b2d-b751-04c0a63c2671/domainMappings
         method: GET
       response:
         proto: HTTP/1.1
@@ -188,18 +188,18 @@ interactions:
         proto_minor: 1
         transfer_encoding: []
         trailer: {}
-        content_length: 306
+        content_length: 305
         uncompressed: false
         body: '[{"virtualDomain":"testtfvirtualdomain","internalDomain":"testtfinternaldomain","_links":{"self":{"href": "https://redacted.url/path"}}}]'
         headers:
             Cache-Control:
                 - no-store
             Content-Length:
-                - "306"
+                - "305"
             Content-Type:
                 - application/json
             Date:
-                - Wed, 14 Jan 2026 04:08:58 GMT
+                - Tue, 27 Jan 2026 07:37:26 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -209,10 +209,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 30f3b926-d05a-4d76-42e5-1488a4b24a07
+                - a26c1d30-6747-4557-60b0-f4067ec167d0
         status: 200 OK
         code: 200
-        duration: 310.956667ms
+        duration: 261.762833ms
     - id: 4
       request:
         proto: HTTP/1.1
@@ -243,7 +243,7 @@ interactions:
         trailer: {}
         content_length: 20
         uncompressed: false
-        body: '{"version":"2.18.1"}'
+        body: '{"version":"2.18.2"}'
         headers:
             Cache-Control:
                 - max-age=3600
@@ -252,7 +252,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 14 Jan 2026 04:08:58 GMT
+                - Tue, 27 Jan 2026 07:37:27 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -262,10 +262,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 67ba3c99-914f-493f-5d41-e8c81fcc746f
+                - 4c9ca5f5-f2f1-4477-6d5b-6456e8466234
         status: 200 OK
         code: 200
-        duration: 271.914583ms
+        duration: 339.131958ms
     - id: 5
       request:
         proto: HTTP/1.1
@@ -296,7 +296,7 @@ interactions:
         trailer: {}
         content_length: 20
         uncompressed: false
-        body: '{"version":"2.18.1"}'
+        body: '{"version":"2.18.2"}'
         headers:
             Cache-Control:
                 - max-age=3600
@@ -305,7 +305,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 14 Jan 2026 04:08:58 GMT
+                - Tue, 27 Jan 2026 07:37:27 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -315,10 +315,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - de126fb4-aa6b-4f3e-69d7-5e2ff46c45a6
+                - 16e659ed-4610-4e36-451d-813227794dcb
         status: 200 OK
         code: 200
-        duration: 269.140084ms
+        duration: 285.589459ms
     - id: 6
       request:
         proto: HTTP/1.1
@@ -339,7 +339,7 @@ interactions:
                 - redacted
             Content-Type:
                 - application/json
-        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/domainMappings
+        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/9f7390c8-f201-4b2d-b751-04c0a63c2671/domainMappings
         method: GET
       response:
         proto: HTTP/1.1
@@ -347,18 +347,18 @@ interactions:
         proto_minor: 1
         transfer_encoding: []
         trailer: {}
-        content_length: 306
+        content_length: 305
         uncompressed: false
         body: '[{"virtualDomain":"testtfvirtualdomain","internalDomain":"testtfinternaldomain","_links":{"self":{"href": "https://redacted.url/path"}}}]'
         headers:
             Cache-Control:
                 - no-store
             Content-Length:
-                - "306"
+                - "305"
             Content-Type:
                 - application/json
             Date:
-                - Wed, 14 Jan 2026 04:08:59 GMT
+                - Tue, 27 Jan 2026 07:37:27 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -368,10 +368,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - be355f32-45be-4df9-7c97-9d874b3b8f4e
+                - ccf5e45a-777c-4bb8-63e8-c4f27f1db427
         status: 200 OK
         code: 200
-        duration: 266.965458ms
+        duration: 263.931833ms
     - id: 7
       request:
         proto: HTTP/1.1
@@ -402,7 +402,7 @@ interactions:
         trailer: {}
         content_length: 20
         uncompressed: false
-        body: '{"version":"2.18.1"}'
+        body: '{"version":"2.18.2"}'
         headers:
             Cache-Control:
                 - max-age=3600
@@ -411,7 +411,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 14 Jan 2026 04:08:59 GMT
+                - Tue, 27 Jan 2026 07:37:28 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -421,10 +421,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - ed27f013-babf-4f2f-61eb-6998de981910
+                - 7aa722d1-da4a-4289-4c04-370e0b4b9b60
         status: 200 OK
         code: 200
-        duration: 267.681709ms
+        duration: 259.454875ms
     - id: 8
       request:
         proto: HTTP/1.1
@@ -445,7 +445,7 @@ interactions:
                 - redacted
             Content-Type:
                 - application/json
-        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/domainMappings
+        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/9f7390c8-f201-4b2d-b751-04c0a63c2671/domainMappings
         method: GET
       response:
         proto: HTTP/1.1
@@ -453,18 +453,18 @@ interactions:
         proto_minor: 1
         transfer_encoding: []
         trailer: {}
-        content_length: 306
+        content_length: 305
         uncompressed: false
         body: '[{"virtualDomain":"testtfvirtualdomain","internalDomain":"testtfinternaldomain","_links":{"self":{"href": "https://redacted.url/path"}}}]'
         headers:
             Cache-Control:
                 - no-store
             Content-Length:
-                - "306"
+                - "305"
             Content-Type:
                 - application/json
             Date:
-                - Wed, 14 Jan 2026 04:08:59 GMT
+                - Tue, 27 Jan 2026 07:37:28 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -474,10 +474,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 0432e505-2c61-436a-56d7-2a7e03ec5921
+                - b175203f-efe1-4968-7cb5-9ef97464bfa9
         status: 200 OK
         code: 200
-        duration: 267.440958ms
+        duration: 259.61275ms
     - id: 9
       request:
         proto: HTTP/1.1
@@ -508,7 +508,7 @@ interactions:
         trailer: {}
         content_length: 20
         uncompressed: false
-        body: '{"version":"2.18.1"}'
+        body: '{"version":"2.18.2"}'
         headers:
             Cache-Control:
                 - max-age=3600
@@ -517,7 +517,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 14 Jan 2026 04:09:00 GMT
+                - Tue, 27 Jan 2026 07:37:28 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -527,10 +527,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 7c5cc5f2-5d1d-452d-7e9d-841d8951987d
+                - b432fac8-0b31-4598-79a4-1cfbd566411d
         status: 200 OK
         code: 200
-        duration: 267.944167ms
+        duration: 434.064542ms
     - id: 10
       request:
         proto: HTTP/1.1
@@ -561,7 +561,7 @@ interactions:
         trailer: {}
         content_length: 20
         uncompressed: false
-        body: '{"version":"2.18.1"}'
+        body: '{"version":"2.18.2"}'
         headers:
             Cache-Control:
                 - max-age=3600
@@ -570,7 +570,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 14 Jan 2026 04:09:00 GMT
+                - Tue, 27 Jan 2026 07:37:29 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -580,10 +580,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - a67c27f3-066e-4421-5d2a-1d788fd64f30
+                - 88f84b54-6693-4790-6206-4552d8f4cd20
         status: 200 OK
         code: 200
-        duration: 339.596083ms
+        duration: 262.88225ms
     - id: 11
       request:
         proto: HTTP/1.1
@@ -604,7 +604,7 @@ interactions:
                 - redacted
             Content-Type:
                 - application/json
-        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/domainMappings
+        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/9f7390c8-f201-4b2d-b751-04c0a63c2671/domainMappings
         method: GET
       response:
         proto: HTTP/1.1
@@ -612,18 +612,18 @@ interactions:
         proto_minor: 1
         transfer_encoding: []
         trailer: {}
-        content_length: 306
+        content_length: 305
         uncompressed: false
         body: '[{"virtualDomain":"testtfvirtualdomain","internalDomain":"testtfinternaldomain","_links":{"self":{"href": "https://redacted.url/path"}}}]'
         headers:
             Cache-Control:
                 - no-store
             Content-Length:
-                - "306"
+                - "305"
             Content-Type:
                 - application/json
             Date:
-                - Wed, 14 Jan 2026 04:09:00 GMT
+                - Tue, 27 Jan 2026 07:37:29 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -633,10 +633,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 61b77676-731b-4634-4d00-1f16eeebc873
+                - 4ba91faf-4a1d-4a10-754d-4f4698970ec9
         status: 200 OK
         code: 200
-        duration: 304.001458ms
+        duration: 390.388125ms
     - id: 12
       request:
         proto: HTTP/1.1
@@ -667,7 +667,7 @@ interactions:
         trailer: {}
         content_length: 20
         uncompressed: false
-        body: '{"version":"2.18.1"}'
+        body: '{"version":"2.18.2"}'
         headers:
             Cache-Control:
                 - max-age=3600
@@ -676,7 +676,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 14 Jan 2026 04:09:01 GMT
+                - Tue, 27 Jan 2026 07:37:30 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -686,10 +686,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - fee16fb6-b24a-45b2-5914-d3d81a382238
+                - 14483a96-ef8a-43df-7f43-7f000bdac270
         status: 200 OK
         code: 200
-        duration: 350.331959ms
+        duration: 264.341416ms
     - id: 13
       request:
         proto: HTTP/1.1
@@ -710,7 +710,7 @@ interactions:
                 - redacted
             Content-Type:
                 - application/json
-        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/domainMappings/testtfinternaldomain
+        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/9f7390c8-f201-4b2d-b751-04c0a63c2671/domainMappings/testtfinternaldomain
         method: PUT
       response:
         proto: HTTP/1.1
@@ -725,7 +725,7 @@ interactions:
             Cache-Control:
                 - no-store
             Date:
-                - Wed, 14 Jan 2026 04:09:01 GMT
+                - Tue, 27 Jan 2026 07:37:30 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -735,10 +735,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 8b5f0e5d-1594-4a3d-6fd1-771a81cfebac
+                - 599657c6-5339-41ec-6a3e-168f28a40781
         status: 204 No Content
         code: 204
-        duration: 429.944375ms
+        duration: 259.575625ms
     - id: 14
       request:
         proto: HTTP/1.1
@@ -759,7 +759,7 @@ interactions:
                 - redacted
             Content-Type:
                 - application/json
-        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/domainMappings
+        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/9f7390c8-f201-4b2d-b751-04c0a63c2671/domainMappings
         method: GET
       response:
         proto: HTTP/1.1
@@ -767,18 +767,18 @@ interactions:
         proto_minor: 1
         transfer_encoding: []
         trailer: {}
-        content_length: 309
+        content_length: 308
         uncompressed: false
         body: '[{"virtualDomain":"updatedtfvirtualdomain","internalDomain":"testtfinternaldomain","_links":{"self":{"href": "https://redacted.url/path"}}}]'
         headers:
             Cache-Control:
                 - no-store
             Content-Length:
-                - "309"
+                - "308"
             Content-Type:
                 - application/json
             Date:
-                - Wed, 14 Jan 2026 04:09:01 GMT
+                - Tue, 27 Jan 2026 07:37:30 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -788,10 +788,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - c0cc6a34-3980-4712-610b-53bd77510d76
+                - a158aed9-771e-469c-4b24-a38bd1b1446f
         status: 200 OK
         code: 200
-        duration: 272.208333ms
+        duration: 280.914626ms
     - id: 15
       request:
         proto: HTTP/1.1
@@ -822,7 +822,7 @@ interactions:
         trailer: {}
         content_length: 20
         uncompressed: false
-        body: '{"version":"2.18.1"}'
+        body: '{"version":"2.18.2"}'
         headers:
             Cache-Control:
                 - max-age=3600
@@ -831,7 +831,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 14 Jan 2026 04:09:02 GMT
+                - Tue, 27 Jan 2026 07:37:30 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -841,10 +841,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 39421834-3b4b-45b1-4b71-ee362a09326d
+                - ef536ddb-a0bb-484a-6e9c-c089ca9a0c25
         status: 200 OK
         code: 200
-        duration: 265.967084ms
+        duration: 260.457042ms
     - id: 16
       request:
         proto: HTTP/1.1
@@ -875,7 +875,7 @@ interactions:
         trailer: {}
         content_length: 20
         uncompressed: false
-        body: '{"version":"2.18.1"}'
+        body: '{"version":"2.18.2"}'
         headers:
             Cache-Control:
                 - max-age=3600
@@ -884,7 +884,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 14 Jan 2026 04:09:02 GMT
+                - Tue, 27 Jan 2026 07:37:31 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -894,10 +894,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 104ef30b-5276-4579-78fa-e2b6b2acf40d
+                - 439fa541-1d06-4893-7bd5-376348638b0f
         status: 200 OK
         code: 200
-        duration: 321.054709ms
+        duration: 294.138501ms
     - id: 17
       request:
         proto: HTTP/1.1
@@ -918,7 +918,7 @@ interactions:
                 - redacted
             Content-Type:
                 - application/json
-        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/domainMappings
+        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/9f7390c8-f201-4b2d-b751-04c0a63c2671/domainMappings
         method: GET
       response:
         proto: HTTP/1.1
@@ -926,18 +926,18 @@ interactions:
         proto_minor: 1
         transfer_encoding: []
         trailer: {}
-        content_length: 309
+        content_length: 308
         uncompressed: false
         body: '[{"virtualDomain":"updatedtfvirtualdomain","internalDomain":"testtfinternaldomain","_links":{"self":{"href": "https://redacted.url/path"}}}]'
         headers:
             Cache-Control:
                 - no-store
             Content-Length:
-                - "309"
+                - "308"
             Content-Type:
                 - application/json
             Date:
-                - Wed, 14 Jan 2026 04:09:02 GMT
+                - Tue, 27 Jan 2026 07:37:31 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -947,10 +947,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - e48a35fa-99b7-4fa8-4786-2b5466990a83
+                - 494e0e6d-b931-4798-7d49-401afb220409
         status: 200 OK
         code: 200
-        duration: 301.020834ms
+        duration: 330.391708ms
     - id: 18
       request:
         proto: HTTP/1.1
@@ -981,7 +981,7 @@ interactions:
         trailer: {}
         content_length: 20
         uncompressed: false
-        body: '{"version":"2.18.1"}'
+        body: '{"version":"2.18.2"}'
         headers:
             Cache-Control:
                 - max-age=3600
@@ -990,7 +990,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 14 Jan 2026 04:09:03 GMT
+                - Tue, 27 Jan 2026 07:37:32 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -1000,10 +1000,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - e86e9e72-3e05-41f5-5ec4-f759ffaac230
+                - cd980d35-7b90-4cd8-7d9d-80449e0a2466
         status: 200 OK
         code: 200
-        duration: 311.16475ms
+        duration: 342.647417ms
     - id: 19
       request:
         proto: HTTP/1.1
@@ -1024,7 +1024,7 @@ interactions:
                 - redacted
             Content-Type:
                 - application/json
-        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/domainMappings
+        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/9f7390c8-f201-4b2d-b751-04c0a63c2671/domainMappings
         method: GET
       response:
         proto: HTTP/1.1
@@ -1032,18 +1032,18 @@ interactions:
         proto_minor: 1
         transfer_encoding: []
         trailer: {}
-        content_length: 309
+        content_length: 308
         uncompressed: false
         body: '[{"virtualDomain":"updatedtfvirtualdomain","internalDomain":"testtfinternaldomain","_links":{"self":{"href": "https://redacted.url/path"}}}]'
         headers:
             Cache-Control:
                 - no-store
             Content-Length:
-                - "309"
+                - "308"
             Content-Type:
                 - application/json
             Date:
-                - Wed, 14 Jan 2026 04:09:03 GMT
+                - Tue, 27 Jan 2026 07:37:32 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -1053,10 +1053,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 917f62b1-97fc-444d-55ad-e4a314039974
+                - 9b68006e-5934-4cea-5415-a0d9c385cec2
         status: 200 OK
         code: 200
-        duration: 300.089542ms
+        duration: 268.78975ms
     - id: 20
       request:
         proto: HTTP/1.1
@@ -1087,7 +1087,7 @@ interactions:
         trailer: {}
         content_length: 20
         uncompressed: false
-        body: '{"version":"2.18.1"}'
+        body: '{"version":"2.18.2"}'
         headers:
             Cache-Control:
                 - max-age=3600
@@ -1096,7 +1096,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 14 Jan 2026 04:09:04 GMT
+                - Tue, 27 Jan 2026 07:37:32 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -1106,10 +1106,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - d14316d8-062a-4af6-67a4-cb4ece2989b8
+                - 42c3529c-0b9b-45b1-5888-1a8aa52e1fa1
         status: 200 OK
         code: 200
-        duration: 318.819417ms
+        duration: 253.546625ms
     - id: 21
       request:
         proto: HTTP/1.1
@@ -1130,7 +1130,7 @@ interactions:
                 - redacted
             Content-Type:
                 - application/json
-        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/domainMappings
+        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/9f7390c8-f201-4b2d-b751-04c0a63c2671/domainMappings
         method: GET
       response:
         proto: HTTP/1.1
@@ -1138,18 +1138,18 @@ interactions:
         proto_minor: 1
         transfer_encoding: []
         trailer: {}
-        content_length: 309
+        content_length: 308
         uncompressed: false
         body: '[{"virtualDomain":"updatedtfvirtualdomain","internalDomain":"testtfinternaldomain","_links":{"self":{"href": "https://redacted.url/path"}}}]'
         headers:
             Cache-Control:
                 - no-store
             Content-Length:
-                - "309"
+                - "308"
             Content-Type:
                 - application/json
             Date:
-                - Wed, 14 Jan 2026 04:09:04 GMT
+                - Tue, 27 Jan 2026 07:37:32 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -1159,10 +1159,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 48fe4d43-f9a7-479a-68bb-dbee0c6280b7
+                - 9396fe61-c45f-45cf-4cf9-8418e8638dfa
         status: 200 OK
         code: 200
-        duration: 268.545292ms
+        duration: 260.901958ms
     - id: 22
       request:
         proto: HTTP/1.1
@@ -1193,7 +1193,7 @@ interactions:
         trailer: {}
         content_length: 20
         uncompressed: false
-        body: '{"version":"2.18.1"}'
+        body: '{"version":"2.18.2"}'
         headers:
             Cache-Control:
                 - max-age=3600
@@ -1202,7 +1202,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 14 Jan 2026 04:09:04 GMT
+                - Tue, 27 Jan 2026 07:37:33 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -1212,10 +1212,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - b737be2c-2f94-475d-73c9-58f9f788de6b
+                - 49b19de0-d6dd-48b7-4b35-dc79b09472c5
         status: 200 OK
         code: 200
-        duration: 265.561084ms
+        duration: 293.748667ms
     - id: 23
       request:
         proto: HTTP/1.1
@@ -1246,7 +1246,7 @@ interactions:
         trailer: {}
         content_length: 20
         uncompressed: false
-        body: '{"version":"2.18.1"}'
+        body: '{"version":"2.18.2"}'
         headers:
             Cache-Control:
                 - max-age=3600
@@ -1255,7 +1255,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 14 Jan 2026 04:09:05 GMT
+                - Tue, 27 Jan 2026 07:37:33 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -1265,10 +1265,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - fcd919ce-fc76-4b77-51fc-d8002b613e4d
+                - bca504b3-7398-4f32-6e5b-5c9901629608
         status: 200 OK
         code: 200
-        duration: 286.135625ms
+        duration: 257.078417ms
     - id: 24
       request:
         proto: HTTP/1.1
@@ -1299,7 +1299,7 @@ interactions:
         trailer: {}
         content_length: 20
         uncompressed: false
-        body: '{"version":"2.18.1"}'
+        body: '{"version":"2.18.2"}'
         headers:
             Cache-Control:
                 - max-age=3600
@@ -1308,7 +1308,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 14 Jan 2026 04:09:05 GMT
+                - Tue, 27 Jan 2026 07:37:34 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -1318,10 +1318,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - c11e5c58-b262-4870-72d8-4c6584e89556
+                - aa8159b7-5663-4533-5ae5-19d10a477cc2
         status: 200 OK
         code: 200
-        duration: 304.07575ms
+        duration: 265.416126ms
     - id: 25
       request:
         proto: HTTP/1.1
@@ -1352,7 +1352,7 @@ interactions:
         trailer: {}
         content_length: 20
         uncompressed: false
-        body: '{"version":"2.18.1"}'
+        body: '{"version":"2.18.2"}'
         headers:
             Cache-Control:
                 - max-age=3600
@@ -1361,7 +1361,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 14 Jan 2026 04:09:05 GMT
+                - Tue, 27 Jan 2026 07:37:34 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -1371,10 +1371,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - cb2c3d5d-96c5-4b2f-5eb2-cdb84995cbd7
+                - c3618533-e2b4-41f2-4075-a989117c1e35
         status: 200 OK
         code: 200
-        duration: 330.917417ms
+        duration: 433.425875ms
     - id: 26
       request:
         proto: HTTP/1.1
@@ -1395,7 +1395,7 @@ interactions:
                 - redacted
             Content-Type:
                 - application/json
-        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/d3bbbcd7-d5e0-483b-a524-6dee7205f8e8/domainMappings/testtfinternaldomain
+        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/9f7390c8-f201-4b2d-b751-04c0a63c2671/domainMappings/testtfinternaldomain
         method: DELETE
       response:
         proto: HTTP/1.1
@@ -1410,7 +1410,7 @@ interactions:
             Cache-Control:
                 - no-store
             Date:
-                - Wed, 14 Jan 2026 04:09:06 GMT
+                - Tue, 27 Jan 2026 07:37:34 GMT
             Server:
                 - nginx/1.27.4
             Set-Cookie:
@@ -1420,7 +1420,7 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - a85bc044-dfc0-485f-4c16-740db00fe0c5
+                - 427e53f7-09b2-4e10-56c1-d040ee055786
         status: 204 No Content
         code: 204
-        duration: 378.270041ms
+        duration: 257.101417ms

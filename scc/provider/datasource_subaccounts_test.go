@@ -21,13 +21,13 @@ func TestDataSourceSubaccounts(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(rec.GetDefaultClient()),
 			Steps: []resource.TestStep{
 				{
-					Config: providerConfig(user) + DataSourceSubaccounts("test"),
+					Config: providerConfig(user) + DataSourceSubaccounts("scc_sas"),
 					Check: resource.ComposeAggregateTestCheckFunc(
 						resource.ComposeTestCheckFunc(
 							func(s *terraform.State) error {
-								rs, ok := s.RootModule().Resources["data.scc_subaccounts.test"]
+								rs, ok := s.RootModule().Resources["data.scc_subaccounts.scc_sas"]
 								if !ok {
-									return fmt.Errorf("Not found: %s", "data.scc_subaccounts.test")
+									return fmt.Errorf("Not found: %s", "data.scc_subaccounts.scc_sas")
 								}
 
 								subaccounts := rs.Primary.Attributes["subaccounts.#"]
@@ -37,9 +37,9 @@ func TestDataSourceSubaccounts(t *testing.T) {
 								return nil
 							},
 						),
-						resource.TestMatchResourceAttr("data.scc_subaccounts.test", "subaccounts.0.subaccount", regexpValidUUID),
-						resource.TestCheckResourceAttr("data.scc_subaccounts.test", "subaccounts.0.region_host", "cf.eu12.hana.ondemand.com"),
-						resource.TestCheckResourceAttr("data.scc_subaccounts.test", "subaccounts.0.location_id", ""),
+						resource.TestMatchResourceAttr("data.scc_subaccounts.scc_sas", "subaccounts.0.subaccount", regexpValidUUID),
+						resource.TestCheckResourceAttr("data.scc_subaccounts.scc_sas", "subaccounts.0.region_host", "cf.eu12.hana.ondemand.com"),
+						resource.TestCheckResourceAttr("data.scc_subaccounts.scc_sas", "subaccounts.0.location_id", ""),
 					),
 				},
 			},
