@@ -18,9 +18,7 @@ func TestListDomainMapping(t *testing.T) {
 
 	t.Run("happy path", func(t *testing.T) {
 		rec, user := setupVCR(t, "fixtures/list_resource_domain_mapping")
-		if user.CloudUsername == "" || user.CloudPassword == "" {
-			t.Fatalf("Missing TF_VAR_cloud_user or TF_VAR_cloud_password")
-		}
+
 		defer stopQuietly(rec)
 
 		resource.Test(t, resource.TestCase{
@@ -32,13 +30,13 @@ func TestListDomainMapping(t *testing.T) {
 			Steps: []resource.TestStep{
 				{
 					Query:  true,
-					Config: providerConfig(user) + listDomainMappingQueryConfig("test", "scc", "cf.eu12.hana.ondemand.com", "304492be-5f0f-4bb0-8f59-c982107bc878"),
+					Config: providerConfig(user) + listDomainMappingQueryConfig("scc_dm", "scc", "cf.eu12.hana.ondemand.com", "304492be-5f0f-4bb0-8f59-c982107bc878"),
 
 					QueryResultChecks: []querycheck.QueryResultCheck{
-						querycheck.ExpectLength("scc_domain_mapping.test", 1),
+						querycheck.ExpectLength("scc_domain_mapping.scc_dm", 1),
 
 						querycheck.ExpectIdentity(
-							"scc_domain_mapping.test",
+							"scc_domain_mapping.scc_dm",
 							map[string]knownvalue.Check{
 								"region_host":     knownvalue.StringExact("cf.eu12.hana.ondemand.com"),
 								"subaccount":      knownvalue.StringRegexp(regexpValidUUID),
@@ -50,13 +48,13 @@ func TestListDomainMapping(t *testing.T) {
 				// Verify list results contain full resource schema data
 				{
 					Query:  true,
-					Config: providerConfig(user) + listDomainMappingQueryConfigWithIncludeResource("test", "scc", "cf.eu12.hana.ondemand.com", "304492be-5f0f-4bb0-8f59-c982107bc878"),
+					Config: providerConfig(user) + listDomainMappingQueryConfigWithIncludeResource("scc_dm", "scc", "cf.eu12.hana.ondemand.com", "304492be-5f0f-4bb0-8f59-c982107bc878"),
 
 					QueryResultChecks: []querycheck.QueryResultCheck{
-						querycheck.ExpectLength("scc_domain_mapping.test", 1),
+						querycheck.ExpectLength("scc_domain_mapping.scc_dm", 1),
 
 						querycheck.ExpectIdentity(
-							"scc_domain_mapping.test",
+							"scc_domain_mapping.scc_dm",
 							map[string]knownvalue.Check{
 								"region_host":     knownvalue.StringExact("cf.eu12.hana.ondemand.com"),
 								"subaccount":      knownvalue.StringRegexp(regexpValidUUID),
@@ -66,7 +64,7 @@ func TestListDomainMapping(t *testing.T) {
 
 						// Resource data check (ONLY because include_resource = true)
 						querycheck.ExpectResourceKnownValues(
-							"scc_domain_mapping.test",
+							"scc_domain_mapping.scc_dm",
 							queryfilter.ByResourceIdentity(map[string]knownvalue.Check{
 								"region_host":     knownvalue.StringExact("cf.eu12.hana.ondemand.com"),
 								"subaccount":      knownvalue.StringExact("304492be-5f0f-4bb0-8f59-c982107bc878"),
@@ -99,9 +97,7 @@ func TestListDomainMapping(t *testing.T) {
 
 	t.Run("error path - subaccount not found", func(t *testing.T) {
 		rec, user := setupVCR(t, "fixtures/list_resource_domain_mapping_error_subaccount_not_found")
-		if user.CloudUsername == "" || user.CloudPassword == "" {
-			t.Fatalf("Missing TF_VAR_cloud_user or TF_VAR_cloud_password")
-		}
+
 		defer stopQuietly(rec)
 
 		resource.Test(t, resource.TestCase{
@@ -115,7 +111,7 @@ func TestListDomainMapping(t *testing.T) {
 					Query: true,
 					Config: providerConfig(user) +
 						listDomainMappingQueryConfig(
-							"test",
+							"scc_dm",
 							"scc",
 							"cf.eu12.hana.ondemand.com",
 							"224492be-5f0f-4bb0-8f59-c982107bc878",

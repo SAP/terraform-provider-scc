@@ -15,9 +15,7 @@ func TestListSubaccount(t *testing.T) {
 
 	t.Run("happy path - without any filter", func(t *testing.T) {
 		rec, user := setupVCR(t, "fixtures/list_resource_subaccount")
-		if user.CloudUsername == "" || user.CloudPassword == "" {
-			t.Fatalf("Missing TF_VAR_cloud_user or TF_VAR_cloud_password")
-		}
+
 		defer stopQuietly(rec)
 
 		resource.Test(t, resource.TestCase{
@@ -29,13 +27,13 @@ func TestListSubaccount(t *testing.T) {
 			Steps: []resource.TestStep{
 				{
 					Query:  true,
-					Config: providerConfig(user) + listSubaccountQueryConfig("test", "scc"),
+					Config: providerConfig(user) + listSubaccountQueryConfig("scc_sa", "scc"),
 
 					QueryResultChecks: []querycheck.QueryResultCheck{
-						querycheck.ExpectLength("scc_subaccount.test", 2),
+						querycheck.ExpectLength("scc_subaccount.scc_sa", 2),
 
 						querycheck.ExpectIdentity(
-							"scc_subaccount.test",
+							"scc_subaccount.scc_sa",
 							map[string]knownvalue.Check{
 								"region_host": knownvalue.StringExact("cf.eu12.hana.ondemand.com"),
 								"subaccount":  knownvalue.StringRegexp(regexpValidUUID),
@@ -43,7 +41,7 @@ func TestListSubaccount(t *testing.T) {
 						),
 
 						querycheck.ExpectIdentity(
-							"scc_subaccount.test",
+							"scc_subaccount.scc_sa",
 							map[string]knownvalue.Check{
 								"region_host": knownvalue.StringExact("cf.eu12.hana.ondemand.com"),
 								"subaccount":  knownvalue.StringRegexp(regexpValidUUID),
@@ -57,9 +55,7 @@ func TestListSubaccount(t *testing.T) {
 
 	t.Run("happy path - with region_host filter", func(t *testing.T) {
 		rec, user := setupVCR(t, "fixtures/list_resource_subaccount_with_filter")
-		if user.CloudUsername == "" || user.CloudPassword == "" {
-			t.Fatalf("Missing TF_VAR_cloud_user or TF_VAR_cloud_password")
-		}
+
 		defer stopQuietly(rec)
 
 		resource.Test(t, resource.TestCase{
@@ -71,10 +67,10 @@ func TestListSubaccount(t *testing.T) {
 			Steps: []resource.TestStep{
 				{
 					Query:  true,
-					Config: providerConfig(user) + listSubaccountQueryConfigWithFilter("test", "scc", "cf.us10.hana.ondemand.com"),
+					Config: providerConfig(user) + listSubaccountQueryConfigWithFilter("scc_sa", "scc", "cf.us10.hana.ondemand.com"),
 
 					QueryResultChecks: []querycheck.QueryResultCheck{
-						querycheck.ExpectLength("scc_subaccount.test", 0),
+						querycheck.ExpectLength("scc_subaccount.scc_sa", 0),
 					},
 				},
 			},
