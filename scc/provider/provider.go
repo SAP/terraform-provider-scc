@@ -311,6 +311,7 @@ func (c *cloudConnectorProvider) Resources(_ context.Context) []func() resource.
 func (p *cloudConnectorProvider) ListResources(_ context.Context) []func() list.ListResource {
 	return []func() list.ListResource{
 		NewSubaccountListResource,
+		NewDomainMappingListResource,
 		NewSystemMappingListResource,
 		NewSystemMappingResourceListResource,
 		NewSubaccountABAPServiceChannelListResource,

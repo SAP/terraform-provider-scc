@@ -15,9 +15,7 @@ func TestListSubaccount(t *testing.T) {
 
 	t.Run("happy path - without any filter", func(t *testing.T) {
 		rec, user := setupVCR(t, "fixtures/list_resource_subaccount")
-		if user.CloudUsername == "" || user.CloudPassword == "" {
-			t.Fatalf("Missing TF_VAR_cloud_user or TF_VAR_cloud_password")
-		}
+
 		defer stopQuietly(rec)
 
 		resource.Test(t, resource.TestCase{
@@ -57,9 +55,7 @@ func TestListSubaccount(t *testing.T) {
 
 	t.Run("happy path - with region_host filter", func(t *testing.T) {
 		rec, user := setupVCR(t, "fixtures/list_resource_subaccount_with_filter")
-		if user.CloudUsername == "" || user.CloudPassword == "" {
-			t.Fatalf("Missing TF_VAR_cloud_user or TF_VAR_cloud_password")
-		}
+
 		defer stopQuietly(rec)
 
 		resource.Test(t, resource.TestCase{
