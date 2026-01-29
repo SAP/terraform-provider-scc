@@ -9,8 +9,8 @@ import (
 )
 
 func TestDataSourceSubaccountABAPServiceChannels(t *testing.T) {
-	regionHost:= "cf.eu12.hana.ondemand.com"
-	subaccount:= "1de4ab49-1b7b-47ca-89bb-0a4d9da1d057"
+	regionHost := "cf.eu12.hana.ondemand.com"
+	subaccount := "1de4ab49-1b7b-47ca-89bb-0a4d9da1d057"
 	t.Parallel()
 
 	t.Run("happy path", func(t *testing.T) {

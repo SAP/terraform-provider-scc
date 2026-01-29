@@ -313,5 +313,7 @@ func (p *cloudConnectorProvider) ListResources(_ context.Context) []func() list.
 		NewSubaccountListResource,
 		NewSystemMappingListResource,
 		NewSystemMappingResourceListResource,
+		NewSubaccountABAPServiceChannelListResource,
+		NewSubaccountK8SServiceChannelListResource,
 	}
 }
