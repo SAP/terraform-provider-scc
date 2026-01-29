@@ -12,10 +12,10 @@ import (
 )
 
 func TestResourceDomainMapping(t *testing.T) {
-	regionHost:= "cf.eu12.hana.ondemand.com"
-	subaccount:= "9f7390c8-f201-4b2d-b751-04c0a63c2671"
-	virtualDomain:= "testtfvirtualdomain"
-	internalDomain:= "testtfinternaldomain"
+	regionHost := "cf.eu12.hana.ondemand.com"
+	subaccount := "9f7390c8-f201-4b2d-b751-04c0a63c2671"
+	virtualDomain := "testtfvirtualdomain"
+	internalDomain := "testtfinternaldomain"
 	t.Parallel()
 
 	t.Run("happy path", func(t *testing.T) {

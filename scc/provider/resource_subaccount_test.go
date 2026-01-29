@@ -213,7 +213,7 @@ func TestResourceSubaccount(t *testing.T) {
 	t.Run("error path - cloud_user mandatory", func(t *testing.T) {
 		rec, user := setupVCR(t, "fixtures/resource_subaccount_err_wo_cloud_user")
 		defer stopQuietly(rec)
-	
+
 		resource.Test(t, resource.TestCase{
 			IsUnitTest:               true,
 			ProtoV6ProviderFactories: getTestProviders(rec.GetDefaultClient()),
@@ -227,17 +227,17 @@ func TestResourceSubaccount(t *testing.T) {
 			},
 		})
 	})
-	
+
 	t.Run("error path - cloud_password mandatory", func(t *testing.T) {
 		rec, user := setupVCR(t, "fixtures/resource_subaccount_err_wo_cloud_password")
 		defer stopQuietly(rec)
-	
+
 		resource.Test(t, resource.TestCase{
 			IsUnitTest:               true,
 			ProtoV6ProviderFactories: getTestProviders(rec.GetDefaultClient()),
 			Steps: []resource.TestStep{
 				{
-					Config: providerConfig(user) + ResourceSubaccountWoCloudPassword("scc_sa", regionHost, subaccount, user.CloudPassword, "missing cloud password",),
+					Config: providerConfig(user) + ResourceSubaccountWoCloudPassword("scc_sa", regionHost, subaccount, user.CloudPassword, "missing cloud password"),
 					ExpectError: regexp.MustCompile(
 						`Missing required credentials`,
 					),
@@ -302,7 +302,6 @@ func ResourceSubaccountWoCloudPassword(datasourceName, regionHost, subaccount, c
 	}
 	`, datasourceName, regionHost, subaccount, cloudUser, description)
 }
-
 
 func ResourceSubaccountUpdateWithDisplayName(datasourceName, regionHost, subaccount, cloudUser, cloudPassword, description, displayName string) string {
 	return fmt.Sprintf(`

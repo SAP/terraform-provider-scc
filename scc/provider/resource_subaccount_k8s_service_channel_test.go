@@ -12,10 +12,10 @@ import (
 )
 
 func TestResourceSubaccountK8SServiceChannel(t *testing.T) {
-	regionHost:= "cf.eu12.hana.ondemand.com"
-	subaccount:= "9f7390c8-f201-4b2d-b751-04c0a63c2671"
+	regionHost := "cf.eu12.hana.ondemand.com"
+	subaccount := "9f7390c8-f201-4b2d-b751-04c0a63c2671"
 	k8ClusterHost := "testclusterhost"
-	k8ServiceID:= "testserviceid"
+	k8ServiceID := "testserviceid"
 	t.Parallel()
 
 	t.Run("happy path", func(t *testing.T) {
@@ -23,8 +23,8 @@ func TestResourceSubaccountK8SServiceChannel(t *testing.T) {
 		if len(user.K8SCluster) == 0 {
 			user.K8SCluster = k8ClusterHost
 		}
-		
-		if len(user.K8SService) == 0{
+
+		if len(user.K8SService) == 0 {
 			user.K8SService = k8ServiceID
 		}
 		defer stopQuietly(rec)
@@ -99,8 +99,8 @@ func TestResourceSubaccountK8SServiceChannel(t *testing.T) {
 		if len(user.K8SCluster) == 0 {
 			user.K8SCluster = k8ClusterHost
 		}
-		
-		if len(user.K8SService) == 0{
+
+		if len(user.K8SService) == 0 {
 			user.K8SService = k8ServiceID
 		}
 		defer stopQuietly(rec)
