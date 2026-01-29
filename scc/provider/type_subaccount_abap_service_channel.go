@@ -118,3 +118,32 @@ func SubaccountABAPServiceChannelsValueFrom(ctx context.Context, plan Subaccount
 
 	return *model, nil
 }
+
+func SubaccountABAPServiceChannelListValueFrom(ctx context.Context, filter subaccountABAPServiceChannelListResourceFilterModel, value apiobjects.SubaccountABAPServiceChannel) (*SubaccountABAPServiceChannelConfig, diag.Diagnostics) {
+	stateObj := SubaccountABAPServiceChannelStateData{
+		Connected:               types.BoolValue(value.State.Connected),
+		OpenedConnections:       types.Int64Value(value.State.OpenedConnections),
+		ConnectedSinceTimeStamp: types.Int64Value(value.State.ConnectedSinceTimeStamp),
+	}
+
+	state, diags := types.ObjectValueFrom(ctx, SubaccountABAPServiceChannelStateType, stateObj)
+	if diags.HasError() {
+		return &SubaccountABAPServiceChannelConfig{}, diags
+	}
+
+	listRes := &SubaccountABAPServiceChannelConfig{
+		RegionHost:          filter.RegionHost,
+		Subaccount:          filter.Subaccount,
+		ABAPCloudTenantHost: types.StringValue(value.ABAPCloudTenantHost),
+		InstanceNumber:      types.Int64Value(value.InstanceNumber),
+		ID:                  types.Int64Value(value.ID),
+		Type:                types.StringValue(value.Type),
+		Port:                types.Int64Value(value.Port),
+		Enabled:             types.BoolValue(value.Enabled),
+		Connections:         types.Int64Value(value.Connections),
+		Comment:             types.StringValue(value.Comment),
+		State:               state,
+	}
+
+	return listRes, nil
+}
