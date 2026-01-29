@@ -81,6 +81,23 @@ func SystemMappingResourcesValueFrom(ctx context.Context, plan SystemMappingReso
 	return *model, diag.Diagnostics{}
 }
 
+func MapToSystemMappingResourceListModel(ctx context.Context, filter systemMappingResourceListResourceFilterModel, value apiobjects.SystemMappingResource) (*SystemMappingResourceConfig, diag.Diagnostics) {
+	sysMapRes := &SystemMappingResourceConfig{
+		RegionHost:              filter.RegionHost,
+		Subaccount:              filter.Subaccount,
+		VirtualHost:             filter.VirtualHost,
+		VirtualPort:             filter.VirtualPort,
+		URLPath:                 types.StringValue(value.URLPath),
+		Enabled:                 types.BoolValue(value.Enabled),
+		PathOnly:                types.BoolValue(value.PathOnly),
+		WebsocketUpgradeAllowed: types.BoolValue(value.WebsocketUpgradeAllowed),
+		CreationDate:            ConvertMillisToTimes(value.CreationDate).UTC,
+		Description:             types.StringValue(value.Description),
+	}
+
+	return sysMapRes, diag.Diagnostics{}
+}
+
 /*
 CreateEncodedResourceID encodes the given resource ID to make it safe for use in a URI path.
 

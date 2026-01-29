@@ -320,6 +320,10 @@ func TestSCCProvider_ListResources(t *testing.T) {
 	expected := []string{
 		"scc_subaccount",
 		"scc_domain_mapping",
+		"scc_system_mapping_resource",
+		"scc_system_mapping",
+		"scc_subaccount_k8s_service_channel",
+		"scc_subaccount_abap_service_channel",
 	}
 
 	p := New()

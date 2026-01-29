@@ -118,3 +118,32 @@ func SubaccountK8SServiceChannelsValueFrom(ctx context.Context, plan SubaccountK
 
 	return *model, nil
 }
+
+func SubaccountK8SServiceChannelListValueFrom(ctx context.Context, filter subaccountK8SServiceChannelListResourceFilterModel, value apiobjects.SubaccountK8SServiceChannel) (*SubaccountK8SServiceChannelConfig, diag.Diagnostics) {
+	stateObj := SubaccountK8SServiceChannelStateData{
+		Connected:               types.BoolValue(value.State.Connected),
+		OpenedConnections:       types.Int64Value(value.State.OpenedConnections),
+		ConnectedSinceTimeStamp: types.Int64Value(value.State.ConnectedSinceTimeStamp),
+	}
+
+	state, diags := types.ObjectValueFrom(ctx, SubaccountK8SServiceChannelStateType, stateObj)
+	if diags.HasError() {
+		return &SubaccountK8SServiceChannelConfig{}, diags
+	}
+
+	listRes := &SubaccountK8SServiceChannelConfig{
+		RegionHost:     filter.RegionHost,
+		Subaccount:     filter.Subaccount,
+		K8SClusterHost: types.StringValue(value.K8SClusterHost),
+		K8SServiceID:   types.StringValue(value.K8SServiceID),
+		ID:             types.Int64Value(value.ID),
+		Type:           types.StringValue(value.Type),
+		LocalPort:      types.Int64Value(value.LocalPort),
+		Enabled:        types.BoolValue(value.Enabled),
+		Connections:    types.Int64Value(value.Connections),
+		Description:    types.StringValue(value.Description),
+		State:          state,
+	}
+
+	return listRes, nil
+}

@@ -78,19 +78,19 @@ func TestListSubaccount(t *testing.T) {
 	})
 }
 
-func listSubaccountQueryConfig(lable, providerName string) string {
+func listSubaccountQueryConfig(label, providerName string) string {
 	return fmt.Sprintf(`list "scc_subaccount" "%s" {
                provider = "%s"
 			   include_resource = true
-             }`, lable, providerName)
+             }`, label, providerName)
 }
 
-func listSubaccountQueryConfigWithFilter(lable, providerName, regionHost string) string {
+func listSubaccountQueryConfigWithFilter(label, providerName, regionHost string) string {
 	return fmt.Sprintf(`list "scc_subaccount" "%s" {
                provider = "%s"
 			   include_resource = true
 			   config {
 			    region_host="%s"
 			   }
-             }`, lable, providerName, regionHost)
+             }`, label, providerName, regionHost)
 }

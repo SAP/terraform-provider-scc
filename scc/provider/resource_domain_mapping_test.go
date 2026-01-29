@@ -12,7 +12,10 @@ import (
 )
 
 func TestResourceDomainMapping(t *testing.T) {
-
+	regionHost := "cf.eu12.hana.ondemand.com"
+	subaccount := "9f7390c8-f201-4b2d-b751-04c0a63c2671"
+	virtualDomain := "testtfvirtualdomain"
+	internalDomain := "testtfinternaldomain"
 	t.Parallel()
 
 	t.Run("happy path", func(t *testing.T) {
@@ -24,19 +27,19 @@ func TestResourceDomainMapping(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(rec.GetDefaultClient()),
 			Steps: []resource.TestStep{
 				{
-					Config: providerConfig(user) + ResourceDomainMapping("test", "cf.eu12.hana.ondemand.com", "d3bbbcd7-d5e0-483b-a524-6dee7205f8e8", "testtfvirtualdomain", "testtfinternaldomain"),
+					Config: providerConfig(user) + ResourceDomainMapping("scc_dm", regionHost, subaccount, virtualDomain, internalDomain),
 					Check: resource.ComposeAggregateTestCheckFunc(
-						resource.TestCheckResourceAttr("scc_domain_mapping.test", "region_host", "cf.eu12.hana.ondemand.com"),
-						resource.TestMatchResourceAttr("scc_domain_mapping.test", "subaccount", regexpValidUUID),
-						resource.TestCheckResourceAttr("scc_domain_mapping.test", "virtual_domain", "testtfvirtualdomain"),
-						resource.TestCheckResourceAttr("scc_domain_mapping.test", "internal_domain", "testtfinternaldomain"),
+						resource.TestCheckResourceAttr("scc_domain_mapping.scc_dm", "region_host", regionHost),
+						resource.TestMatchResourceAttr("scc_domain_mapping.scc_dm", "subaccount", regexpValidUUID),
+						resource.TestCheckResourceAttr("scc_domain_mapping.scc_dm", "virtual_domain", virtualDomain),
+						resource.TestCheckResourceAttr("scc_domain_mapping.scc_dm", "internal_domain", internalDomain),
 					),
 					ConfigStateChecks: []statecheck.StateCheck{
 						statecheck.ExpectIdentity(
-							"scc_domain_mapping.test",
+							"scc_domain_mapping.scc_dm",
 							map[string]knownvalue.Check{
-								"internal_domain": knownvalue.StringExact("testtfinternaldomain"),
-								"region_host":     knownvalue.StringExact("cf.eu12.hana.ondemand.com"),
+								"internal_domain": knownvalue.StringExact(internalDomain),
+								"region_host":     knownvalue.StringExact(regionHost),
 								"subaccount":      knownvalue.StringRegexp(regexpValidUUID),
 							},
 						),
@@ -44,45 +47,45 @@ func TestResourceDomainMapping(t *testing.T) {
 				},
 				// Update with mismatched configuration should throw error
 				{
-					Config:      providerConfig(user) + ResourceDomainMapping("test", "cf.us10.hana.ondemand.com", "d3bbbcd7-d5e0-483b-a524-6dee7205f8e8", "updatedtfvirtualdomain", "testtfinternaldomain"),
+					Config:      providerConfig(user) + ResourceDomainMapping("scc_dm", "cf.us10.hana.ondemand.com", subaccount, "updatedtfvirtualdomain", internalDomain),
 					ExpectError: regexp.MustCompile(`(?is)error updating the cloud connector domain mapping.*mismatched\s+configuration values`),
 				},
 				{
-					Config: providerConfig(user) + ResourceDomainMapping("test", "cf.eu12.hana.ondemand.com", "d3bbbcd7-d5e0-483b-a524-6dee7205f8e8", "updatedtfvirtualdomain", "testtfinternaldomain"),
+					Config: providerConfig(user) + ResourceDomainMapping("scc_dm", regionHost, subaccount, "updatedtfvirtualdomain", internalDomain),
 					Check: resource.ComposeAggregateTestCheckFunc(
-						resource.TestCheckResourceAttr("scc_domain_mapping.test", "virtual_domain", "updatedtfvirtualdomain"),
+						resource.TestCheckResourceAttr("scc_domain_mapping.scc_dm", "virtual_domain", "updatedtfvirtualdomain"),
 					),
 					ConfigStateChecks: []statecheck.StateCheck{
 						statecheck.ExpectIdentity(
-							"scc_domain_mapping.test",
+							"scc_domain_mapping.scc_dm",
 							map[string]knownvalue.Check{
-								"internal_domain": knownvalue.StringExact("testtfinternaldomain"),
-								"region_host":     knownvalue.StringExact("cf.eu12.hana.ondemand.com"),
+								"internal_domain": knownvalue.StringExact(internalDomain),
+								"region_host":     knownvalue.StringExact(regionHost),
 								"subaccount":      knownvalue.StringRegexp(regexpValidUUID),
 							},
 						),
 					},
 				},
 				{
-					ResourceName:                         "scc_domain_mapping.test",
+					ResourceName:                         "scc_domain_mapping.scc_dm",
 					ImportState:                          true,
 					ImportStateVerify:                    true,
-					ImportStateIdFunc:                    getImportStateForSubaccountEntitlement("scc_domain_mapping.test"),
+					ImportStateIdFunc:                    getImportStateForSubaccountEntitlement("scc_domain_mapping.scc_dm"),
 					ImportStateVerifyIdentifierAttribute: "internal_domain",
 				},
 				{
-					ResourceName:    "scc_domain_mapping.test",
+					ResourceName:    "scc_domain_mapping.scc_dm",
 					ImportState:     true,
 					ImportStateKind: resource.ImportBlockWithResourceIdentity,
 				},
 				{
-					ResourceName:  "scc_domain_mapping.test",
+					ResourceName:  "scc_domain_mapping.scc_dm",
 					ImportState:   true,
 					ImportStateId: "cf.eu12.hana.ondemand.comd3bbbcd7-d5e0-483b-a524-6dee7205f8e8testtfinternaldomain", // malformed ID
 					ExpectError:   regexp.MustCompile(`(?is)Expected import identifier with format:.*internal_domain.*Got:`),
 				},
 				{
-					ResourceName:  "scc_domain_mapping.test",
+					ResourceName:  "scc_domain_mapping.scc_dm",
 					ImportState:   true,
 					ImportStateId: "cf.eu12.hana.ondemand.com,d3bbbcd7-d5e0-483b-a524-6dee7205f8e8,testtfinternaldomain,extra",
 					ExpectError:   regexp.MustCompile(`(?is)Expected import identifier with format:.*internal_domain.*Got:`),
@@ -97,7 +100,7 @@ func TestResourceDomainMapping(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      ResourceDomainMappingWoRegionHost("test", "d3bbbcd7-d5e0-483b-a524-6dee7205f8e8", "testtfvirtualdomain", "testtfinternaldomain"),
+					Config:      ResourceDomainMappingWoRegionHost("scc_dm", subaccount, virtualDomain, internalDomain),
 					ExpectError: regexp.MustCompile(`The argument "region_host" is required, but no definition was found.`),
 				},
 			},
@@ -110,7 +113,7 @@ func TestResourceDomainMapping(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      ResourceDomainMappingWoSubaccount("test", "cf.eu12.hana.ondemand.com", "testtfvirtualdomain", "testtfinternaldomain"),
+					Config:      ResourceDomainMappingWoSubaccount("scc_dm", regionHost, virtualDomain, internalDomain),
 					ExpectError: regexp.MustCompile(`The argument "subaccount" is required, but no definition was found.`),
 				},
 			},
@@ -123,7 +126,7 @@ func TestResourceDomainMapping(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      ResourceDomainMappingWoInternalDomain("test", "cf.eu12.hana.ondemand.com", "d3bbbcd7-d5e0-483b-a524-6dee7205f8e8", "testtfvirtualdomain"),
+					Config:      ResourceDomainMappingWoInternalDomain("scc_dm", regionHost, subaccount, virtualDomain),
 					ExpectError: regexp.MustCompile(`The argument "internal_domain" is required, but no definition was found.`),
 				},
 			},
@@ -136,7 +139,7 @@ func TestResourceDomainMapping(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      ResourceDomainMappingWoVirtualDomain("test", "cf.eu12.hana.ondemand.com", "d3bbbcd7-d5e0-483b-a524-6dee7205f8e8", "testtfinternaldomain"),
+					Config:      ResourceDomainMappingWoVirtualDomain("scc_dm", regionHost, subaccount, internalDomain),
 					ExpectError: regexp.MustCompile(`The argument "virtual_domain" is required, but no definition was found.`),
 				},
 			},

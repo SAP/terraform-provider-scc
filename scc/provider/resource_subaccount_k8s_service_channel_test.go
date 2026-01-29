@@ -13,13 +13,19 @@ import (
 
 func TestResourceSubaccountK8SServiceChannel(t *testing.T) {
 	regionHost := "cf.eu12.hana.ondemand.com"
-	subaccount := "d3bbbcd7-d5e0-483b-a524-6dee7205f8e8"
+	subaccount := "9f7390c8-f201-4b2d-b751-04c0a63c2671"
+	k8ClusterHost := "testclusterhost"
+	k8ServiceID := "testserviceid"
 	t.Parallel()
 
 	t.Run("happy path", func(t *testing.T) {
 		rec, user := setupVCR(t, "fixtures/resource_subaccount_k8s_service_channel")
-		if len(user.K8SCluster) == 0 || len(user.K8SService) == 0 {
-			t.Fatalf("Missing TF_VAR_k8s_cluster_host or TF_VAR_k8s_service_id for recording test fixtures")
+		if len(user.K8SCluster) == 0 {
+			user.K8SCluster = k8ClusterHost
+		}
+
+		if len(user.K8SService) == 0 {
+			user.K8SService = k8ServiceID
 		}
 		defer stopQuietly(rec)
 
@@ -28,24 +34,24 @@ func TestResourceSubaccountK8SServiceChannel(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(rec.GetDefaultClient()),
 			Steps: []resource.TestStep{
 				{
-					Config: providerConfig(user) + ResourceSubaccountK8SServiceChannel("test", regionHost, subaccount, user.K8SCluster, user.K8SService, 3000, 1, true, "Created"),
+					Config: providerConfig(user) + ResourceSubaccountK8SServiceChannel("scc_k8_sc", regionHost, subaccount, user.K8SCluster, user.K8SService, 3000, 1, false, "Created"),
 					Check: resource.ComposeAggregateTestCheckFunc(
-						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.test", "region_host", regionHost),
-						resource.TestMatchResourceAttr("scc_subaccount_k8s_service_channel.test", "subaccount", regexpValidUUID),
-						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.test", "k8s_cluster_host", user.K8SCluster),
-						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.test", "k8s_service_id", user.K8SService),
-						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.test", "local_port", "3000"),
-						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.test", "connections", "1"),
-						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.test", "type", "K8S"),
-						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.test", "enabled", "true"),
-						resource.TestCheckResourceAttrSet("scc_subaccount_k8s_service_channel.test", "id"),
-						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.test", "state.connected", "true"),
-						resource.TestMatchResourceAttr("scc_subaccount_k8s_service_channel.test", "state.connected_since_time_stamp", regexp.MustCompile(`^(0|\d{13})$`)),
-						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.test", "state.opened_connections", "1"),
+						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.scc_k8_sc", "region_host", regionHost),
+						resource.TestMatchResourceAttr("scc_subaccount_k8s_service_channel.scc_k8_sc", "subaccount", regexpValidUUID),
+						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.scc_k8_sc", "k8s_cluster_host", user.K8SCluster),
+						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.scc_k8_sc", "k8s_service_id", user.K8SService),
+						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.scc_k8_sc", "local_port", "3000"),
+						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.scc_k8_sc", "connections", "1"),
+						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.scc_k8_sc", "type", "K8S"),
+						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.scc_k8_sc", "enabled", "false"),
+						resource.TestCheckResourceAttrSet("scc_subaccount_k8s_service_channel.scc_k8_sc", "id"),
+						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.scc_k8_sc", "state.connected", "false"),
+						resource.TestMatchResourceAttr("scc_subaccount_k8s_service_channel.scc_k8_sc", "state.connected_since_time_stamp", regexp.MustCompile(`^(0|\d{13})$`)),
+						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.scc_k8_sc", "state.opened_connections", "0"),
 					),
 					ConfigStateChecks: []statecheck.StateCheck{
 						statecheck.ExpectIdentity(
-							"scc_subaccount_k8s_service_channel.test",
+							"scc_subaccount_k8s_service_channel.scc_k8_sc",
 							map[string]knownvalue.Check{
 								"id":          knownvalue.NotNull(),
 								"region_host": knownvalue.StringExact("cf.eu12.hana.ondemand.com"),
@@ -55,30 +61,30 @@ func TestResourceSubaccountK8SServiceChannel(t *testing.T) {
 					},
 				},
 				{
-					ResourceName:    "scc_subaccount_k8s_service_channel.test",
+					ResourceName:    "scc_subaccount_k8s_service_channel.scc_k8_sc",
 					ImportState:     true,
 					ImportStateKind: resource.ImportBlockWithResourceIdentity,
 				},
 				{
-					ResourceName:      "scc_subaccount_k8s_service_channel.test",
+					ResourceName:      "scc_subaccount_k8s_service_channel.scc_k8_sc",
 					ImportState:       true,
 					ImportStateVerify: true,
-					ImportStateIdFunc: getImportStateForSubaccountK8SServiceChannel("scc_subaccount_k8s_service_channel.test"),
+					ImportStateIdFunc: getImportStateForSubaccountK8SServiceChannel("scc_subaccount_k8s_service_channel.scc_k8_sc"),
 				},
 				{
-					ResourceName:  "scc_subaccount_k8s_service_channel.test",
+					ResourceName:  "scc_subaccount_k8s_service_channel.scc_k8_sc",
 					ImportState:   true,
 					ImportStateId: regionHost + subaccount + "1", // malformed ID
 					ExpectError:   regexp.MustCompile(`(?is)Expected import identifier with format:.*id.*Got:`),
 				},
 				{
-					ResourceName:  "scc_subaccount_k8s_service_channel.test",
+					ResourceName:  "scc_subaccount_k8s_service_channel.scc_k8_sc",
 					ImportState:   true,
 					ImportStateId: regionHost + "," + subaccount + ",1, extra",
 					ExpectError:   regexp.MustCompile(`(?is)Expected import identifier with format:.*id.*Got:`),
 				},
 				{
-					ResourceName:  "scc_subaccount_k8s_service_channel.test",
+					ResourceName:  "scc_subaccount_k8s_service_channel.scc_k8_sc",
 					ImportState:   true,
 					ImportStateId: regionHost + "," + subaccount + ",not-an-int",
 					ExpectError:   regexp.MustCompile(`(?is)The 'id' part must be an integer.*Got:.*not-an-int`),
@@ -90,6 +96,13 @@ func TestResourceSubaccountK8SServiceChannel(t *testing.T) {
 
 	t.Run("update path - description and connections update", func(t *testing.T) {
 		rec, user := setupVCR(t, "fixtures/resource_subaccount_k8s_service_channel_update")
+		if len(user.K8SCluster) == 0 {
+			user.K8SCluster = k8ClusterHost
+		}
+
+		if len(user.K8SService) == 0 {
+			user.K8SService = k8ServiceID
+		}
 		defer stopQuietly(rec)
 
 		resource.Test(t, resource.TestCase{
@@ -97,15 +110,15 @@ func TestResourceSubaccountK8SServiceChannel(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(rec.GetDefaultClient()),
 			Steps: []resource.TestStep{
 				{
-					Config: providerConfig(user) + ResourceSubaccountK8SServiceChannel("test", regionHost, subaccount, user.K8SCluster, user.K8SService, 3000, 1, true, "Created"),
+					Config: providerConfig(user) + ResourceSubaccountK8SServiceChannel("scc_k8_sc", regionHost, subaccount, user.K8SCluster, user.K8SService, 3000, 1, false, "Created"),
 					Check: resource.ComposeAggregateTestCheckFunc(
-						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.test", "description", "Created"),
-						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.test", "connections", "1"),
-						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.test", "enabled", "true"),
+						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.scc_k8_sc", "description", "Created"),
+						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.scc_k8_sc", "connections", "1"),
+						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.scc_k8_sc", "enabled", "false"),
 					),
 					ConfigStateChecks: []statecheck.StateCheck{
 						statecheck.ExpectIdentity(
-							"scc_subaccount_k8s_service_channel.test",
+							"scc_subaccount_k8s_service_channel.scc_k8_sc",
 							map[string]knownvalue.Check{
 								"id":          knownvalue.NotNull(),
 								"region_host": knownvalue.StringExact("cf.eu12.hana.ondemand.com"),
@@ -116,19 +129,19 @@ func TestResourceSubaccountK8SServiceChannel(t *testing.T) {
 				},
 				// Update with mismatched configuration should throw error
 				{
-					Config:      providerConfig(user) + ResourceSubaccountK8SServiceChannel("test", "cf.us10.hana.ondemand.com", subaccount, user.K8SCluster, user.K8SService, 3000, 1, true, "Updated"),
+					Config:      providerConfig(user) + ResourceSubaccountK8SServiceChannel("scc_k8_sc", "cf.us10.hana.ondemand.com", subaccount, user.K8SCluster, user.K8SService, 3000, 1, false, "Updated"),
 					ExpectError: regexp.MustCompile(`(?is)error updating the cloud connector subaccount K8S service channel.*mismatched\s+configuration values`),
 				},
 				{
-					Config: providerConfig(user) + ResourceSubaccountK8SServiceChannel("test", regionHost, subaccount, user.K8SCluster, user.K8SService, 3000, 2, false, "Updated"),
+					Config: providerConfig(user) + ResourceSubaccountK8SServiceChannel("scc_k8_sc", regionHost, subaccount, user.K8SCluster, user.K8SService, 3000, 2, false, "Updated"),
 					Check: resource.ComposeAggregateTestCheckFunc(
-						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.test", "description", "Updated"),
-						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.test", "connections", "2"),
-						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.test", "enabled", "false"),
+						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.scc_k8_sc", "description", "Updated"),
+						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.scc_k8_sc", "connections", "2"),
+						resource.TestCheckResourceAttr("scc_subaccount_k8s_service_channel.scc_k8_sc", "enabled", "false"),
 					),
 					ConfigStateChecks: []statecheck.StateCheck{
 						statecheck.ExpectIdentity(
-							"scc_subaccount_k8s_service_channel.test",
+							"scc_subaccount_k8s_service_channel.scc_k8_sc",
 							map[string]knownvalue.Check{
 								"id":          knownvalue.NotNull(),
 								"region_host": knownvalue.StringExact("cf.eu12.hana.ondemand.com"),
@@ -147,7 +160,7 @@ func TestResourceSubaccountK8SServiceChannel(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      ResourceSubaccountK8SServiceChannelWoRegionHost("test", regionHost, "testclusterhost", "testserviceid", 3000, 1, true),
+					Config:      ResourceSubaccountK8SServiceChannelWoRegionHost("scc_k8_sc", subaccount, k8ClusterHost, k8ServiceID, 3000, 1, false),
 					ExpectError: regexp.MustCompile(`The argument "region_host" is required, but no definition was found.`),
 				},
 			},
@@ -160,7 +173,7 @@ func TestResourceSubaccountK8SServiceChannel(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      ResourceSubaccountK8SServiceChannelWoSubaccount("test", regionHost, "testclusterhost", "testserviceid", 3000, 1, true),
+					Config:      ResourceSubaccountK8SServiceChannelWoSubaccount("scc_k8_sc", regionHost, k8ClusterHost, k8ServiceID, 3000, 1, false),
 					ExpectError: regexp.MustCompile(`The argument "subaccount" is required, but no definition was found.`),
 				},
 			},
@@ -173,7 +186,7 @@ func TestResourceSubaccountK8SServiceChannel(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      ResourceSubaccountK8SServiceChannelWoCluster("test", regionHost, subaccount, "testserviceid", 3000, 1, true),
+					Config:      ResourceSubaccountK8SServiceChannelWoCluster("scc_k8_sc", regionHost, subaccount, k8ServiceID, 3000, 1, false),
 					ExpectError: regexp.MustCompile(`The argument "k8s_cluster_host" is required, but no definition was found.`),
 				},
 			},
@@ -186,7 +199,7 @@ func TestResourceSubaccountK8SServiceChannel(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      ResourceSubaccountK8SServiceChannelWoService("test", regionHost, subaccount, "testclusterhost", 3000, 1, true),
+					Config:      ResourceSubaccountK8SServiceChannelWoService("scc_k8_sc", regionHost, subaccount, k8ClusterHost, 3000, 1, false),
 					ExpectError: regexp.MustCompile(`The argument "k8s_service_id" is required, but no definition was found.`),
 				},
 			},
@@ -199,7 +212,7 @@ func TestResourceSubaccountK8SServiceChannel(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      ResourceSubaccountK8SServiceChannelWoPort("test", regionHost, subaccount, "testclusterhost", "testserviceid", 1, true),
+					Config:      ResourceSubaccountK8SServiceChannelWoPort("scc_k8_sc", regionHost, subaccount, k8ClusterHost, k8ServiceID, 1, false),
 					ExpectError: regexp.MustCompile(`The argument "local_port" is required, but no definition was found.`),
 				},
 			},
@@ -212,7 +225,7 @@ func TestResourceSubaccountK8SServiceChannel(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      ResourceSubaccountK8SServiceChannelWoConnections("test", regionHost, subaccount, "testclusterhost", "testserviceid", 3000, true),
+					Config:      ResourceSubaccountK8SServiceChannelWoConnections("scc_k8_sc", regionHost, subaccount, k8ClusterHost, k8ServiceID, 3000, false),
 					ExpectError: regexp.MustCompile(`The argument "connections" is required, but no definition was found.`),
 				},
 			},

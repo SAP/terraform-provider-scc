@@ -9,7 +9,8 @@ import (
 )
 
 func TestDataSourceSubaccount(t *testing.T) {
-
+	regionHost := "cf.eu12.hana.ondemand.com"
+	subaccount := "1de4ab49-1b7b-47ca-89bb-0a4d9da1d057"
 	t.Parallel()
 
 	t.Run("happy path", func(t *testing.T) {
@@ -21,24 +22,24 @@ func TestDataSourceSubaccount(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(rec.GetDefaultClient()),
 			Steps: []resource.TestStep{
 				{
-					Config: providerConfig(user) + DataSourceSubaccountConfiguration("test", "cf.eu12.hana.ondemand.com", "304492be-5f0f-4bb0-8f59-c982107bc878"),
+					Config: providerConfig(user) + DataSourceSubaccountConfiguration("scc_sa", regionHost, subaccount),
 					Check: resource.ComposeAggregateTestCheckFunc(
-						resource.TestCheckResourceAttr("data.scc_subaccount_configuration.test", "region_host", "cf.eu12.hana.ondemand.com"),
-						resource.TestMatchResourceAttr("data.scc_subaccount_configuration.test", "subaccount", regexpValidUUID),
-						resource.TestCheckResourceAttr("data.scc_subaccount_configuration.test", "display_name", "Terraform Subaccount Datasource"),
-						resource.TestCheckResourceAttr("data.scc_subaccount_configuration.test", "description", "Subaccount used for all data sources in Cloud Connector Instance. DO NOT DELETE!!!"),
+						resource.TestCheckResourceAttr("data.scc_subaccount_configuration.scc_sa", "region_host", regionHost),
+						resource.TestMatchResourceAttr("data.scc_subaccount_configuration.scc_sa", "subaccount", regexpValidUUID),
+						resource.TestCheckResourceAttr("data.scc_subaccount_configuration.scc_sa", "display_name", "Terraform Subaccount Datasource"),
+						resource.TestCheckResourceAttr("data.scc_subaccount_configuration.scc_sa", "description", "Subaccount used for all data sources in Cloud Connector Instance. DO NOT DELETE!!!"),
 
-						resource.TestCheckResourceAttr("data.scc_subaccount_configuration.test", "tunnel.user", user.CloudUsername),
-						resource.TestCheckResourceAttr("data.scc_subaccount_configuration.test", "tunnel.state", "Connected"),
-						resource.TestMatchResourceAttr("data.scc_subaccount_configuration.test", "tunnel.connected_since", regexValidTimeStamp),
-						resource.TestCheckResourceAttr("data.scc_subaccount_configuration.test", "tunnel.connections", "0"),
-						resource.TestCheckResourceAttr("data.scc_subaccount_configuration.test", "tunnel.application_connections.#", "0"),
-						resource.TestCheckResourceAttr("data.scc_subaccount_configuration.test", "tunnel.service_channels.#", "0"),
-						resource.TestMatchResourceAttr("data.scc_subaccount_configuration.test", "tunnel.subaccount_certificate.valid_to", regexValidTimeStamp),
-						resource.TestMatchResourceAttr("data.scc_subaccount_configuration.test", "tunnel.subaccount_certificate.valid_from", regexValidTimeStamp),
-						resource.TestMatchResourceAttr("data.scc_subaccount_configuration.test", "tunnel.subaccount_certificate.subject_dn", regexp.MustCompile(`CN=.*?,L=.*?,OU=.*?,OU=.*?,O=.*?,C=.*?`)),
-						resource.TestMatchResourceAttr("data.scc_subaccount_configuration.test", "tunnel.subaccount_certificate.issuer", regexp.MustCompile(`CN=.*?,OU=S.*?,O=.*?,L=.*?,C=.*?`)),
-						resource.TestMatchResourceAttr("data.scc_subaccount_configuration.test", "tunnel.subaccount_certificate.serial_number", regexValidSerialNumber),
+						resource.TestCheckResourceAttr("data.scc_subaccount_configuration.scc_sa", "tunnel.user", user.CloudUsername),
+						resource.TestCheckResourceAttr("data.scc_subaccount_configuration.scc_sa", "tunnel.state", "Connected"),
+						resource.TestMatchResourceAttr("data.scc_subaccount_configuration.scc_sa", "tunnel.connected_since", regexValidTimeStamp),
+						resource.TestCheckResourceAttr("data.scc_subaccount_configuration.scc_sa", "tunnel.connections", "0"),
+						resource.TestCheckResourceAttr("data.scc_subaccount_configuration.scc_sa", "tunnel.application_connections.#", "0"),
+						resource.TestCheckResourceAttr("data.scc_subaccount_configuration.scc_sa", "tunnel.service_channels.#", "0"),
+						resource.TestMatchResourceAttr("data.scc_subaccount_configuration.scc_sa", "tunnel.subaccount_certificate.valid_to", regexValidTimeStamp),
+						resource.TestMatchResourceAttr("data.scc_subaccount_configuration.scc_sa", "tunnel.subaccount_certificate.valid_from", regexValidTimeStamp),
+						resource.TestMatchResourceAttr("data.scc_subaccount_configuration.scc_sa", "tunnel.subaccount_certificate.subject_dn", regexp.MustCompile(`CN=.*?,L=.*?,OU=.*?,OU=.*?,O=.*?,C=.*?`)),
+						resource.TestMatchResourceAttr("data.scc_subaccount_configuration.scc_sa", "tunnel.subaccount_certificate.issuer", regexp.MustCompile(`CN=.*?,OU=S.*?,O=.*?,L=.*?,C=.*?`)),
+						resource.TestMatchResourceAttr("data.scc_subaccount_configuration.scc_sa", "tunnel.subaccount_certificate.serial_number", regexValidSerialNumber),
 					),
 				},
 			},
@@ -52,7 +53,7 @@ func TestDataSourceSubaccount(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      DataSourceSubaccountConfigurationWoRegionHost("test", "304492be-5f0f-4bb0-8f59-c982107bc878"),
+					Config:      DataSourceSubaccountConfigurationWoRegionHost("scc_sa", subaccount),
 					ExpectError: regexp.MustCompile(`The argument "region_host" is required, but no definition was found.`),
 				},
 			},
@@ -65,7 +66,7 @@ func TestDataSourceSubaccount(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      DataSourceSubaccountConfigurationWoSubaccount("test", "cf.eu12.hana.ondemand.com"),
+					Config:      DataSourceSubaccountConfigurationWoSubaccount("scc_sa", regionHost),
 					ExpectError: regexp.MustCompile(`The argument "subaccount" is required, but no definition was found.`),
 				},
 			},

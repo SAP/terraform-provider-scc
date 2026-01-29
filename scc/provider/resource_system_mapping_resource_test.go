@@ -12,7 +12,10 @@ import (
 )
 
 func TestResourceSystemMappingResource(t *testing.T) {
-
+	regionHost := "cf.eu12.hana.ondemand.com"
+	subaccount := "9f7390c8-f201-4b2d-b751-04c0a63c2671"
+	virtualHost := "testtfvirtualtesting"
+	virtualPort := "90"
 	t.Parallel()
 
 	t.Run("happy path", func(t *testing.T) {
@@ -24,19 +27,19 @@ func TestResourceSystemMappingResource(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(rec.GetDefaultClient()),
 			Steps: []resource.TestStep{
 				{
-					Config: providerConfig(user) + ResourceSystemMappingResource("test", "cf.eu12.hana.ondemand.com", "d3bbbcd7-d5e0-483b-a524-6dee7205f8e8", "testtfvirtualtesting", "90", "/", "create resource", true),
+					Config: providerConfig(user) + ResourceSystemMappingResource("scc_smr", regionHost, subaccount, virtualHost, virtualPort, "/", "create resource", true),
 					Check: resource.ComposeAggregateTestCheckFunc(
-						resource.TestCheckResourceAttr("scc_system_mapping_resource.test", "description", "create resource"),
-						resource.TestCheckResourceAttr("scc_system_mapping_resource.test", "enabled", "true"),
+						resource.TestCheckResourceAttr("scc_system_mapping_resource.scc_smr", "description", "create resource"),
+						resource.TestCheckResourceAttr("scc_system_mapping_resource.scc_smr", "enabled", "true"),
 					),
 					ConfigStateChecks: []statecheck.StateCheck{
 						statecheck.ExpectIdentity(
-							"scc_system_mapping_resource.test",
+							"scc_system_mapping_resource.scc_smr",
 							map[string]knownvalue.Check{
-								"region_host":  knownvalue.StringExact("cf.eu12.hana.ondemand.com"),
+								"region_host":  knownvalue.StringExact(regionHost),
 								"subaccount":   knownvalue.StringRegexp(regexpValidUUID),
-								"virtual_host": knownvalue.StringExact("testtfvirtualtesting"),
-								"virtual_port": knownvalue.StringExact("90"),
+								"virtual_host": knownvalue.StringExact(virtualHost),
+								"virtual_port": knownvalue.StringExact(virtualPort),
 								"url_path":     knownvalue.StringExact("/"),
 							},
 						),
@@ -44,51 +47,51 @@ func TestResourceSystemMappingResource(t *testing.T) {
 				},
 				// Update with mismatched configuration should throw error
 				{
-					Config:      providerConfig(user) + ResourceSystemMappingResource("test", "cf.us10.hana.ondemand.com", "d3bbbcd7-d5e0-483b-a524-6dee7205f8e8", "testtfvirtualtesting", "90", "/", "create resource", true),
+					Config:      providerConfig(user) + ResourceSystemMappingResource("scc_smr", "cf.us10.hana.ondemand.com", subaccount, virtualHost, virtualPort, "/", "create resource", true),
 					ExpectError: regexp.MustCompile(`(?is)error updating the cloud connector system mapping resource.*mismatched\s+configuration values`),
 				},
 				{
 					// 🚀 This is the update step
-					Config: providerConfig(user) + ResourceSystemMappingResource("test", "cf.eu12.hana.ondemand.com", "d3bbbcd7-d5e0-483b-a524-6dee7205f8e8", "testtfvirtualtesting", "90", "/", "updated resource", false),
+					Config: providerConfig(user) + ResourceSystemMappingResource("scc_smr", regionHost, subaccount, virtualHost, virtualPort, "/", "updated resource", false),
 					Check: resource.ComposeAggregateTestCheckFunc(
-						resource.TestCheckResourceAttr("scc_system_mapping_resource.test", "description", "updated resource"),
-						resource.TestCheckResourceAttr("scc_system_mapping_resource.test", "enabled", "false"),
+						resource.TestCheckResourceAttr("scc_system_mapping_resource.scc_smr", "description", "updated resource"),
+						resource.TestCheckResourceAttr("scc_system_mapping_resource.scc_smr", "enabled", "false"),
 					),
 					ConfigStateChecks: []statecheck.StateCheck{
 						statecheck.ExpectIdentity(
-							"scc_system_mapping_resource.test",
+							"scc_system_mapping_resource.scc_smr",
 							map[string]knownvalue.Check{
-								"region_host":  knownvalue.StringExact("cf.eu12.hana.ondemand.com"),
+								"region_host":  knownvalue.StringExact(regionHost),
 								"subaccount":   knownvalue.StringRegexp(regexpValidUUID),
-								"virtual_host": knownvalue.StringExact("testtfvirtualtesting"),
-								"virtual_port": knownvalue.StringExact("90"),
+								"virtual_host": knownvalue.StringExact(virtualHost),
+								"virtual_port": knownvalue.StringExact(virtualPort),
 								"url_path":     knownvalue.StringExact("/"),
 							},
 						),
 					},
 				},
 				{
-					ResourceName:                         "scc_system_mapping_resource.test",
+					ResourceName:                         "scc_system_mapping_resource.scc_smr",
 					ImportState:                          true,
 					ImportStateVerify:                    true,
 					ImportStateVerifyIdentifierAttribute: "region_host",
-					ImportStateIdFunc:                    getImportStateForSystemMappingResource("scc_system_mapping_resource.test"),
+					ImportStateIdFunc:                    getImportStateForSystemMappingResource("scc_system_mapping_resource.scc_smr"),
 				},
 				{
-					ResourceName:    "scc_system_mapping_resource.test",
+					ResourceName:    "scc_system_mapping_resource.scc_smr",
 					ImportState:     true,
 					ImportStateKind: resource.ImportBlockWithResourceIdentity,
 				},
 				{
-					ResourceName:  "scc_system_mapping_resource.test",
+					ResourceName:  "scc_system_mapping_resource.scc_smr",
 					ImportState:   true,
-					ImportStateId: "cf.eu12.hana.ondemand.comd3bbbcd7-d5e0-483b-a524-6dee7205f8e8testtfvirtualtesting90/", // malformed ID
+					ImportStateId: "cf.eu12.hana.ondemand.com9f7390c8-f201-4b2d-b751-04c0a63c2671testtfvirtualtesting90/", // malformed ID
 					ExpectError:   regexp.MustCompile(`(?is)Expected import identifier with format:.*url_path.*Got:`),
 				},
 				{
-					ResourceName:  "scc_system_mapping_resource.test",
+					ResourceName:  "scc_system_mapping_resource.scc_smr",
 					ImportState:   true,
-					ImportStateId: "cf.eu12.hana.ondemand.com,d3bbbcd7-d5e0-483b-a524-6dee7205f8e8,testtfvirtualtesting,90,/,extra",
+					ImportStateId: "cf.eu12.hana.ondemand.com,9f7390c8-f201-4b2d-b751-04c0a63c2671,testtfvirtualtesting,90,/,extra",
 					ExpectError:   regexp.MustCompile(`(?is)Expected import identifier with format:.*url_path.*Got:`),
 				},
 			},
@@ -101,7 +104,7 @@ func TestResourceSystemMappingResource(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      ResourceSystemMappingResourceWoRegionHost("test", "d3bbbcd7-d5e0-483b-a524-6dee7205f8e8", "testtfvirtualtesting", "90", "/", "create resource", true),
+					Config:      ResourceSystemMappingResourceWoRegionHost("scc_smr", subaccount, virtualHost, virtualPort, "/", "create resource", true),
 					ExpectError: regexp.MustCompile(`The argument "region_host" is required, but no definition was found.`),
 				},
 			},
@@ -114,7 +117,7 @@ func TestResourceSystemMappingResource(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      ResourceSystemMappingResourceWoSubaccount("test", "cf.eu12.hana.ondemand.com", "testtfvirtualtesting", "90", "/", "create resource", true),
+					Config:      ResourceSystemMappingResourceWoSubaccount("scc_smr", regionHost, virtualHost, virtualPort, "/", "create resource", true),
 					ExpectError: regexp.MustCompile(`The argument "subaccount" is required, but no definition was found.`),
 				},
 			},
@@ -127,7 +130,7 @@ func TestResourceSystemMappingResource(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      ResourceSystemMappingResourceWoVirtualHost("test", "cf.eu12.hana.ondemand.com", "d3bbbcd7-d5e0-483b-a524-6dee7205f8e8", "90", "/", "create resource", true),
+					Config:      ResourceSystemMappingResourceWoVirtualHost("scc_smr", regionHost, subaccount, virtualPort, "/", "create resource", true),
 					ExpectError: regexp.MustCompile(`The argument "virtual_host" is required, but no definition was found.`),
 				},
 			},
@@ -140,7 +143,7 @@ func TestResourceSystemMappingResource(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      ResourceSystemMappingResourceWoVirtualPort("test", "cf.eu12.hana.ondemand.com", "d3bbbcd7-d5e0-483b-a524-6dee7205f8e8", "testtfvirtualtesting", "/", "create resource", true),
+					Config:      ResourceSystemMappingResourceWoVirtualPort("scc_smr", regionHost, subaccount, virtualHost, "/", "create resource", true),
 					ExpectError: regexp.MustCompile(`The argument "virtual_port" is required, but no definition was found.`),
 				},
 			},
@@ -153,7 +156,7 @@ func TestResourceSystemMappingResource(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      ResourceSystemMappingResourceWoURLPath("test", "cf.eu12.hana.ondemand.com", "d3bbbcd7-d5e0-483b-a524-6dee7205f8e8", "testtfvirtualtesting", "90", "create resource", true),
+					Config:      ResourceSystemMappingResourceWoURLPath("scc_smr", regionHost, subaccount, virtualHost, virtualPort, "create resource", true),
 					ExpectError: regexp.MustCompile(`The argument "url_path" is required, but no definition was found.`),
 				},
 			},

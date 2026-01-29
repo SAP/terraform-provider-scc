@@ -12,7 +12,12 @@ import (
 )
 
 func TestResourceSystemMapping(t *testing.T) {
-
+	regionHost := "cf.eu12.hana.ondemand.com"
+	subaccount := "9f7390c8-f201-4b2d-b751-04c0a63c2671"
+	virtualHost := "testtfvirtual"
+	virtualPort := "900"
+	internalHost := "testtfvirtual"
+	internalPort := "900"
 	t.Parallel()
 
 	t.Run("happy path", func(t *testing.T) {
@@ -25,55 +30,55 @@ func TestResourceSystemMapping(t *testing.T) {
 			Steps: []resource.TestStep{
 				// CREATE
 				{
-					Config: providerConfig(user) + ResourceSystemMapping("test", "cf.eu12.hana.ondemand.com", "d3bbbcd7-d5e0-483b-a524-6dee7205f8e8", "testtfvirtual", "900", "testtfinternal", "900", "HTTP", "abapSys", "VIRTUAL", "KERBEROS"),
+					Config: providerConfig(user) + ResourceSystemMapping("scc_sm", regionHost, subaccount, virtualHost, virtualPort, internalHost, internalPort, "HTTP", "abapSys", "VIRTUAL", "KERBEROS"),
 					Check: resource.ComposeAggregateTestCheckFunc(
-						resource.TestCheckResourceAttr("scc_system_mapping.test", "region_host", "cf.eu12.hana.ondemand.com"),
-						resource.TestCheckResourceAttr("scc_system_mapping.test", "subaccount", "d3bbbcd7-d5e0-483b-a524-6dee7205f8e8"),
-						resource.TestCheckResourceAttr("scc_system_mapping.test", "virtual_host", "testtfvirtual"),
-						resource.TestCheckResourceAttr("scc_system_mapping.test", "virtual_port", "900"),
-						resource.TestCheckResourceAttr("scc_system_mapping.test", "internal_host", "testtfinternal"),
-						resource.TestCheckResourceAttr("scc_system_mapping.test", "internal_port", "900"),
-						resource.TestCheckResourceAttr("scc_system_mapping.test", "protocol", "HTTP"),
-						resource.TestCheckResourceAttr("scc_system_mapping.test", "backend_type", "abapSys"),
-						resource.TestCheckResourceAttr("scc_system_mapping.test", "host_in_header", "VIRTUAL"),
-						resource.TestCheckResourceAttr("scc_system_mapping.test", "authentication_mode", "KERBEROS"),
+						resource.TestCheckResourceAttr("scc_system_mapping.scc_sm", "region_host", regionHost),
+						resource.TestCheckResourceAttr("scc_system_mapping.scc_sm", "subaccount", subaccount),
+						resource.TestCheckResourceAttr("scc_system_mapping.scc_sm", "virtual_host", virtualHost),
+						resource.TestCheckResourceAttr("scc_system_mapping.scc_sm", "virtual_port", virtualPort),
+						resource.TestCheckResourceAttr("scc_system_mapping.scc_sm", "internal_host", internalHost),
+						resource.TestCheckResourceAttr("scc_system_mapping.scc_sm", "internal_port", internalPort),
+						resource.TestCheckResourceAttr("scc_system_mapping.scc_sm", "protocol", "HTTP"),
+						resource.TestCheckResourceAttr("scc_system_mapping.scc_sm", "backend_type", "abapSys"),
+						resource.TestCheckResourceAttr("scc_system_mapping.scc_sm", "host_in_header", "VIRTUAL"),
+						resource.TestCheckResourceAttr("scc_system_mapping.scc_sm", "authentication_mode", "KERBEROS"),
 					),
 					ConfigStateChecks: []statecheck.StateCheck{
 						statecheck.ExpectIdentity(
-							"scc_system_mapping.test",
+							"scc_system_mapping.scc_sm",
 							map[string]knownvalue.Check{
-								"region_host":  knownvalue.StringExact("cf.eu12.hana.ondemand.com"),
+								"region_host":  knownvalue.StringExact(regionHost),
 								"subaccount":   knownvalue.StringRegexp(regexpValidUUID),
-								"virtual_host": knownvalue.StringExact("testtfvirtual"),
-								"virtual_port": knownvalue.StringExact("900"),
+								"virtual_host": knownvalue.StringExact(virtualHost),
+								"virtual_port": knownvalue.StringExact(virtualPort),
 							},
 						),
 					},
 				},
 				// Update with mismatched configuration should throw error
 				{
-					Config:      providerConfig(user) + ResourceSystemMapping("test", "cf.us10.hana.ondemand.com", "d3bbbcd7-d5e0-483b-a524-6dee7205f8e8", "testtfvirtual", "900", "testtfinternal", "900", "HTTP", "abapSys", "VIRTUAL", "KERBEROS"),
+					Config:      providerConfig(user) + ResourceSystemMapping("scc_sm", "cf.us10.hana.ondemand.com", subaccount, virtualHost, virtualPort, internalHost, internalPort, "HTTP", "abapSys", "VIRTUAL", "KERBEROS"),
 					ExpectError: regexp.MustCompile(`(?is)error updating the cloud connector system mapping.*mismatched\s+configuration values`),
 				},
 				// UPDATE
 				{
-					Config: providerConfig(user) + ResourceSystemMapping("test", "cf.eu12.hana.ondemand.com", "d3bbbcd7-d5e0-483b-a524-6dee7205f8e8", "testtfvirtual", "900", "updatedlocal", "905", "HTTPS", "hana", "INTERNAL", "X509_GENERAL"),
+					Config: providerConfig(user) + ResourceSystemMapping("scc_sm", regionHost, subaccount, virtualHost, virtualPort, "updatedlocal", "905", "HTTPS", "hana", "INTERNAL", "X509_GENERAL"),
 					Check: resource.ComposeAggregateTestCheckFunc(
-						resource.TestCheckResourceAttr("scc_system_mapping.test", "internal_host", "updatedlocal"),
-						resource.TestCheckResourceAttr("scc_system_mapping.test", "internal_port", "905"),
-						resource.TestCheckResourceAttr("scc_system_mapping.test", "protocol", "HTTPS"),
-						resource.TestCheckResourceAttr("scc_system_mapping.test", "backend_type", "hana"),
-						resource.TestCheckResourceAttr("scc_system_mapping.test", "host_in_header", "INTERNAL"),
-						resource.TestCheckResourceAttr("scc_system_mapping.test", "authentication_mode", "X509_GENERAL"),
+						resource.TestCheckResourceAttr("scc_system_mapping.scc_sm", "internal_host", "updatedlocal"),
+						resource.TestCheckResourceAttr("scc_system_mapping.scc_sm", "internal_port", "905"),
+						resource.TestCheckResourceAttr("scc_system_mapping.scc_sm", "protocol", "HTTPS"),
+						resource.TestCheckResourceAttr("scc_system_mapping.scc_sm", "backend_type", "hana"),
+						resource.TestCheckResourceAttr("scc_system_mapping.scc_sm", "host_in_header", "INTERNAL"),
+						resource.TestCheckResourceAttr("scc_system_mapping.scc_sm", "authentication_mode", "X509_GENERAL"),
 					),
 					ConfigStateChecks: []statecheck.StateCheck{
 						statecheck.ExpectIdentity(
-							"scc_system_mapping.test",
+							"scc_system_mapping.scc_sm",
 							map[string]knownvalue.Check{
-								"region_host":  knownvalue.StringExact("cf.eu12.hana.ondemand.com"),
+								"region_host":  knownvalue.StringExact(regionHost),
 								"subaccount":   knownvalue.StringRegexp(regexpValidUUID),
-								"virtual_host": knownvalue.StringExact("testtfvirtual"),
-								"virtual_port": knownvalue.StringExact("900"),
+								"virtual_host": knownvalue.StringExact(virtualHost),
+								"virtual_port": knownvalue.StringExact(virtualPort),
 							},
 						),
 					},
@@ -81,27 +86,27 @@ func TestResourceSystemMapping(t *testing.T) {
 
 				// IMPORT
 				{
-					ResourceName:                         "scc_system_mapping.test",
+					ResourceName:                         "scc_system_mapping.scc_sm",
 					ImportState:                          true,
 					ImportStateVerify:                    true,
-					ImportStateIdFunc:                    getImportStateForSystemMapping("scc_system_mapping.test"),
+					ImportStateIdFunc:                    getImportStateForSystemMapping("scc_system_mapping.scc_sm"),
 					ImportStateVerifyIdentifierAttribute: "virtual_host",
 				},
 				{
-					ResourceName:    "scc_system_mapping.test",
+					ResourceName:    "scc_system_mapping.scc_sm",
 					ImportState:     true,
 					ImportStateKind: resource.ImportBlockWithResourceIdentity,
 				},
 				{
-					ResourceName:  "scc_system_mapping.test",
+					ResourceName:  "scc_system_mapping.scc_sm",
 					ImportState:   true,
-					ImportStateId: "cf.eu12.hana.ondemand.comd3bbbcd7-d5e0-483b-a524-6dee7205f8e8testtfvirtual900", // malformed ID
+					ImportStateId: "cf.eu12.hana.ondemand.com9f7390c8-f201-4b2d-b751-04c0a63c2671testtfvirtual900", // malformed ID
 					ExpectError:   regexp.MustCompile(`(?is)Expected import identifier with format:.*virtual_port.*Got:`),
 				},
 				{
-					ResourceName:  "scc_system_mapping.test",
+					ResourceName:  "scc_system_mapping.scc_sm",
 					ImportState:   true,
-					ImportStateId: "cf.eu12.hana.ondemand.com,d3bbbcd7-d5e0-483b-a524-6dee7205f8e8,testtfvirtual,900,extra",
+					ImportStateId: "cf.eu12.hana.ondemand.com,9f7390c8-f201-4b2d-b751-04c0a63c2671,testtfvirtual,900,extra",
 					ExpectError:   regexp.MustCompile(`(?is)Expected import identifier with format:.*virtual_port.*Got:`),
 				},
 			},
@@ -114,7 +119,7 @@ func TestResourceSystemMapping(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      ResourceSystemMappingWoRegionHost("test", "d3bbbcd7-d5e0-483b-a524-6dee7205f8e8", "testtfvirtual", "900", "testtfinternal", "900", "HTTP", "abapSys", "VIRTUAL", "KERBEROS"),
+					Config:      ResourceSystemMappingWoRegionHost("scc_sm", subaccount, virtualHost, virtualPort, internalHost, internalPort, "HTTP", "abapSys", "VIRTUAL", "KERBEROS"),
 					ExpectError: regexp.MustCompile(`The argument "region_host" is required, but no definition was found.`),
 				},
 			},
@@ -127,7 +132,7 @@ func TestResourceSystemMapping(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      ResourceSystemMappingWoSubaccount("test", "cf.eu12.hana.ondemand.com", "testtfvirtual", "900", "testtfinternal", "900", "HTTP", "abapSys", "VIRTUAL", "KERBEROS"),
+					Config:      ResourceSystemMappingWoSubaccount("scc_sm", regionHost, virtualHost, virtualPort, internalHost, internalPort, "HTTP", "abapSys", "VIRTUAL", "KERBEROS"),
 					ExpectError: regexp.MustCompile(`The argument "subaccount" is required, but no definition was found.`),
 				},
 			},
@@ -140,7 +145,7 @@ func TestResourceSystemMapping(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      ResourceSystemMappingWoVirtualHost("test", "cf.eu12.hana.ondemand.com", "d3bbbcd7-d5e0-483b-a524-6dee7205f8e8", "900", "testtfinternal", "900", "HTTP", "abapSys", "VIRTUAL", "KERBEROS"),
+					Config:      ResourceSystemMappingWoVirtualHost("scc_sm", regionHost, subaccount, virtualPort, internalHost, internalPort, "HTTP", "abapSys", "VIRTUAL", "KERBEROS"),
 					ExpectError: regexp.MustCompile(`The argument "virtual_host" is required, but no definition was found.`),
 				},
 			},
@@ -153,7 +158,7 @@ func TestResourceSystemMapping(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      ResourceSystemMappingWoVirtualPort("test", "cf.eu12.hana.ondemand.com", "d3bbbcd7-d5e0-483b-a524-6dee7205f8e8", "testtfvirtual", "testtfinternal", "900", "HTTP", "abapSys", "VIRTUAL", "KERBEROS"),
+					Config:      ResourceSystemMappingWoVirtualPort("scc_sm", regionHost, subaccount, virtualHost, internalHost, internalPort, "HTTP", "abapSys", "VIRTUAL", "KERBEROS"),
 					ExpectError: regexp.MustCompile(`The argument "virtual_port" is required, but no definition was found.`),
 				},
 			},
@@ -166,7 +171,7 @@ func TestResourceSystemMapping(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      ResourceSystemMappingWoInternalHost("test", "cf.eu12.hana.ondemand.com", "d3bbbcd7-d5e0-483b-a524-6dee7205f8e8", "testtfvirtual", "900", "900", "HTTP", "abapSys", "VIRTUAL", "KERBEROS"),
+					Config:      ResourceSystemMappingWoInternalHost("scc_sm", regionHost, subaccount, virtualHost, virtualPort, internalPort, "HTTP", "abapSys", "VIRTUAL", "KERBEROS"),
 					ExpectError: regexp.MustCompile(`The argument "internal_host" is required, but no definition was found.`),
 				},
 			},
@@ -179,7 +184,7 @@ func TestResourceSystemMapping(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      ResourceSystemMappingWoInternalPort("test", "cf.eu12.hana.ondemand.com", "d3bbbcd7-d5e0-483b-a524-6dee7205f8e8", "testtfvirtual", "900", "testtfinternal", "HTTP", "abapSys", "VIRTUAL", "KERBEROS"),
+					Config:      ResourceSystemMappingWoInternalPort("scc_sm", regionHost, subaccount, virtualHost, virtualPort, internalHost, "HTTP", "abapSys", "VIRTUAL", "KERBEROS"),
 					ExpectError: regexp.MustCompile(`The argument "internal_port" is required, but no definition was found.`),
 				},
 			},
@@ -192,7 +197,7 @@ func TestResourceSystemMapping(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      ResourceSystemMappingWoProtocol("test", "cf.eu12.hana.ondemand.com", "d3bbbcd7-d5e0-483b-a524-6dee7205f8e8", "testtfvirtual", "900", "testtfinternal", "900", "abapSys", "VIRTUAL", "KERBEROS"),
+					Config:      ResourceSystemMappingWoProtocol("scc_sm", regionHost, subaccount, virtualHost, virtualPort, internalHost, internalPort, "abapSys", "VIRTUAL", "KERBEROS"),
 					ExpectError: regexp.MustCompile(`The argument "protocol" is required, but no definition was found.`),
 				},
 			},
@@ -205,7 +210,7 @@ func TestResourceSystemMapping(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      ResourceSystemMappingWoBackendType("test", "cf.eu12.hana.ondemand.com", "d3bbbcd7-d5e0-483b-a524-6dee7205f8e8", "testtfvirtual", "900", "testtfinternal", "900", "HTTP", "VIRTUAL", "KERBEROS"),
+					Config:      ResourceSystemMappingWoBackendType("scc_sm", regionHost, subaccount, virtualHost, virtualPort, internalHost, internalPort, "HTTP", "VIRTUAL", "KERBEROS"),
 					ExpectError: regexp.MustCompile(`The argument "backend_type" is required, but no definition was found.`),
 				},
 			},

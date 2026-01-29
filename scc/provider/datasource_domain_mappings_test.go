@@ -9,7 +9,10 @@ import (
 )
 
 func TestDataSourceDomainMappings(t *testing.T) {
-
+	regionHost := "cf.eu12.hana.ondemand.com"
+	subaccount := "1de4ab49-1b7b-47ca-89bb-0a4d9da1d057"
+	virtualDomain := "testterraformvirtualdomain"
+	internalDomain := "testterraforminternaldomain"
 	t.Parallel()
 
 	t.Run("happy path", func(t *testing.T) {
@@ -21,14 +24,14 @@ func TestDataSourceDomainMappings(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(rec.GetDefaultClient()),
 			Steps: []resource.TestStep{
 				{
-					Config: providerConfig(user) + DataSourceDomainMappings("mappings", "cf.eu12.hana.ondemand.com", "304492be-5f0f-4bb0-8f59-c982107bc878"),
+					Config: providerConfig(user) + DataSourceDomainMappings("scc_dms", regionHost, subaccount),
 					Check: resource.ComposeAggregateTestCheckFunc(
-						resource.TestCheckResourceAttr("data.scc_domain_mappings.mappings", "region_host", "cf.eu12.hana.ondemand.com"),
-						resource.TestMatchResourceAttr("data.scc_domain_mappings.mappings", "subaccount", regexpValidUUID),
+						resource.TestCheckResourceAttr("data.scc_domain_mappings.scc_dms", "region_host", regionHost),
+						resource.TestMatchResourceAttr("data.scc_domain_mappings.scc_dms", "subaccount", regexpValidUUID),
 
-						resource.TestCheckResourceAttr("data.scc_domain_mappings.mappings", "domain_mappings.#", "1"),
-						resource.TestCheckResourceAttr("data.scc_domain_mappings.mappings", "domain_mappings.0.virtual_domain", "testterraformvirtualdomain"),
-						resource.TestCheckResourceAttr("data.scc_domain_mappings.mappings", "domain_mappings.0.internal_domain", "testterraforminternaldomain"),
+						resource.TestCheckResourceAttr("data.scc_domain_mappings.scc_dms", "domain_mappings.#", "1"),
+						resource.TestCheckResourceAttr("data.scc_domain_mappings.scc_dms", "domain_mappings.0.virtual_domain", virtualDomain),
+						resource.TestCheckResourceAttr("data.scc_domain_mappings.scc_dms", "domain_mappings.0.internal_domain", internalDomain),
 					),
 				},
 			},
@@ -42,7 +45,7 @@ func TestDataSourceDomainMappings(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      DataSourceDomainMappingsWoRegionHost("mappings", "304492be-5f0f-4bb0-8f59-c982107bc878"),
+					Config:      DataSourceDomainMappingsWoRegionHost("scc_dms", subaccount),
 					ExpectError: regexp.MustCompile(`The argument "region_host" is required, but no definition was found.`),
 				},
 			},
@@ -55,7 +58,7 @@ func TestDataSourceDomainMappings(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      DataSourceDomainMappingsWoSubaccount("mappings", "cf.eu12.hana.ondemand.com"),
+					Config:      DataSourceDomainMappingsWoSubaccount("scc_dms", regionHost),
 					ExpectError: regexp.MustCompile(`The argument "subaccount" is required, but no definition was found.`),
 				},
 			},

@@ -9,9 +9,8 @@ import (
 )
 
 func TestDataSourceSubaccountABAPServiceChannels(t *testing.T) {
-
 	regionHost := "cf.eu12.hana.ondemand.com"
-	subaccount := "304492be-5f0f-4bb0-8f59-c982107bc878"
+	subaccount := "1de4ab49-1b7b-47ca-89bb-0a4d9da1d057"
 	t.Parallel()
 
 	t.Run("happy path", func(t *testing.T) {
@@ -23,22 +22,22 @@ func TestDataSourceSubaccountABAPServiceChannels(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(rec.GetDefaultClient()),
 			Steps: []resource.TestStep{
 				{
-					Config: providerConfig(user) + DataSourceSubaccountABAPServiceChannels("scc_scs", regionHost, subaccount),
+					Config: providerConfig(user) + DataSourceSubaccountABAPServiceChannels("scc_abap_scs", regionHost, subaccount),
 					Check: resource.ComposeAggregateTestCheckFunc(
-						resource.TestCheckResourceAttr("data.scc_subaccount_abap_service_channels.scc_scs", "region_host", "cf.eu12.hana.ondemand.com"),
-						resource.TestMatchResourceAttr("data.scc_subaccount_abap_service_channels.scc_scs", "subaccount", regexpValidUUID),
+						resource.TestCheckResourceAttr("data.scc_subaccount_abap_service_channels.scc_abap_scs", "region_host", "cf.eu12.hana.ondemand.com"),
+						resource.TestMatchResourceAttr("data.scc_subaccount_abap_service_channels.scc_abap_scs", "subaccount", regexpValidUUID),
 
-						resource.TestCheckResourceAttr("data.scc_subaccount_abap_service_channels.scc_scs", "subaccount_abap_service_channels.#", "1"),
-						resource.TestCheckResourceAttrSet("data.scc_subaccount_abap_service_channels.scc_scs", "subaccount_abap_service_channels.0.abap_cloud_tenant_host"),
-						resource.TestCheckResourceAttr("data.scc_subaccount_abap_service_channels.scc_scs", "subaccount_abap_service_channels.0.instance_number", "50"),
-						resource.TestCheckResourceAttr("data.scc_subaccount_abap_service_channels.scc_scs", "subaccount_abap_service_channels.0.port", "3350"),
-						resource.TestCheckResourceAttr("data.scc_subaccount_abap_service_channels.scc_scs", "subaccount_abap_service_channels.0.connections", "1"),
-						resource.TestCheckResourceAttr("data.scc_subaccount_abap_service_channels.scc_scs", "subaccount_abap_service_channels.0.type", "ABAPCloud"),
-						resource.TestCheckResourceAttr("data.scc_subaccount_abap_service_channels.scc_scs", "subaccount_abap_service_channels.0.enabled", "false"),
-						resource.TestCheckResourceAttrSet("data.scc_subaccount_abap_service_channels.scc_scs", "subaccount_abap_service_channels.0.id"),
-						resource.TestCheckResourceAttr("data.scc_subaccount_abap_service_channels.scc_scs", "subaccount_abap_service_channels.0.state.connected", "false"),
-						resource.TestMatchResourceAttr("data.scc_subaccount_abap_service_channels.scc_scs", "subaccount_abap_service_channels.0.state.connected_since_time_stamp", regexp.MustCompile(`^(0|\d{13})$`)),
-						resource.TestCheckResourceAttr("data.scc_subaccount_abap_service_channels.scc_scs", "subaccount_abap_service_channels.0.state.opened_connections", "0"),
+						resource.TestCheckResourceAttr("data.scc_subaccount_abap_service_channels.scc_abap_scs", "subaccount_abap_service_channels.#", "1"),
+						resource.TestCheckResourceAttrSet("data.scc_subaccount_abap_service_channels.scc_abap_scs", "subaccount_abap_service_channels.0.abap_cloud_tenant_host"),
+						resource.TestCheckResourceAttr("data.scc_subaccount_abap_service_channels.scc_abap_scs", "subaccount_abap_service_channels.0.instance_number", "50"),
+						resource.TestCheckResourceAttr("data.scc_subaccount_abap_service_channels.scc_abap_scs", "subaccount_abap_service_channels.0.port", "3350"),
+						resource.TestCheckResourceAttr("data.scc_subaccount_abap_service_channels.scc_abap_scs", "subaccount_abap_service_channels.0.connections", "1"),
+						resource.TestCheckResourceAttr("data.scc_subaccount_abap_service_channels.scc_abap_scs", "subaccount_abap_service_channels.0.type", "ABAPCloud"),
+						resource.TestCheckResourceAttr("data.scc_subaccount_abap_service_channels.scc_abap_scs", "subaccount_abap_service_channels.0.enabled", "false"),
+						resource.TestCheckResourceAttrSet("data.scc_subaccount_abap_service_channels.scc_abap_scs", "subaccount_abap_service_channels.0.id"),
+						resource.TestCheckResourceAttr("data.scc_subaccount_abap_service_channels.scc_abap_scs", "subaccount_abap_service_channels.0.state.connected", "false"),
+						resource.TestMatchResourceAttr("data.scc_subaccount_abap_service_channels.scc_abap_scs", "subaccount_abap_service_channels.0.state.connected_since_time_stamp", regexp.MustCompile(`^(0|\d{13})$`)),
+						resource.TestCheckResourceAttr("data.scc_subaccount_abap_service_channels.scc_abap_scs", "subaccount_abap_service_channels.0.state.opened_connections", "0"),
 					),
 				},
 			},

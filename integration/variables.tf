@@ -54,3 +54,21 @@ variable "internal_domain" {
   description = "The internal domain name of the system as known within the private network."
   default     = "ecc60.mycompany.corp"
 }
+
+variable "k8s_cluster_host" {
+  type        = string
+  description = "Host name to access the Kubernetes cluster."
+  default     = "integration_test_cluster_host"
+}
+
+variable "k8s_service_id" {
+  type        = string
+  description = "Host name providing the service inside of Kubernetes cluster."
+  default     = "integration_test_service_id"
+}
+
+variable "abap_cloud_tenant_host" {
+  type        = string
+  description = "Host name to access the Host of ABAP Cloud Tenant."
+  default     = "integration_test_abap_cloud_tenant_host"
+}
