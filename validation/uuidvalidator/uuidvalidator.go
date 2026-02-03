@@ -7,34 +7,22 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
-var (
-	// UUID format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-	uuidRegexp = `[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}`
-
-	uuidCompiledRegexp = regexp.MustCompile(`^` + uuidRegexp + `$`)
-
-	// SAP BTP short subaccount ID
-	// Exactly 8 lowercase alphanumeric characters, starting with a letter
-	subaccountShortRegexp = `[a-z][a-z0-9]{7}`
-
-	// Accepts either a UUID or a SAP BTP short subaccount ID
-	validSubaccountRegexp = regexp.MustCompile(
-		`^(` + uuidRegexp + `|` + subaccountShortRegexp + `)$`,
-	)
+// UuidRegexp matches:
+// - Standard UUID format: 8-4-4-4-12 (hex with hyphens)
+// - SAP subaccount ID format: [a-z] + 8 hex characters (e.g. xf014edd7)
+var UuidRegexp = regexp.MustCompile(
+	`^(?:` +
+		`[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}` +
+		`|` +
+		`[a-z][0-9a-fA-F]{8}` +
+	`)$`,
 )
 
-// ValidUUID validates that the value is a UUID
+// ValidUUID validates that the string attribute value is either
+// a standard UUID or a SAP subaccount ID
 func ValidUUID() validator.String {
 	return stringvalidator.RegexMatches(
-		uuidCompiledRegexp,
-		"value must be a valid UUID",
-	)
-}
-
-// ValidSubaccountID validates that the value is either a UUID or a SAP BTP short subaccount ID
-func ValidSubaccountID() validator.String {
-	return stringvalidator.RegexMatches(
-		validSubaccountRegexp,
-		"value must be a valid UUID or a valid SAP BTP short subaccount ID",
+		UuidRegexp,
+		"value must be a valid UUID or SAP subaccount id ([a-z]########)",
 	)
 }
