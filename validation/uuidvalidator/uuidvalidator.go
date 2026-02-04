@@ -7,9 +7,22 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
-var UuidRegexp = regexp.MustCompile(`^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$`)
+// UuidRegexp matches:
+// - Standard UUID format: 8-4-4-4-12 (hex with hyphens)
+// - SAP subaccount ID format: [a-z] + 8 hex characters (e.g. xf014edd7)
+var UuidRegexp = regexp.MustCompile(
+	`^(?:` +
+		`[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}` +
+		`|` +
+		`[a-z][0-9a-fA-F]{8}` +
+	`)$`,
+)
 
-// ValidUUID checks that the String held in the attribute is a valid UUID
+// ValidUUID validates that the string attribute value is either
+// a standard UUID or a SAP subaccount ID
 func ValidUUID() validator.String {
-	return stringvalidator.RegexMatches(UuidRegexp, "value must be a valid UUID")
+	return stringvalidator.RegexMatches(
+		UuidRegexp,
+		"value must be a valid UUID or SAP subaccount id ([a-z]########)",
+	)
 }
