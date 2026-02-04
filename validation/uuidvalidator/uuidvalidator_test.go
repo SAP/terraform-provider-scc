@@ -2,13 +2,14 @@ package uuidvalidator
 
 import (
 	"context"
+	"strings"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-func TestUUIDValidator(t *testing.T) {
+func TestValidUUIDValidator(t *testing.T) {
 	t.Parallel()
 
 	type testCase struct {
@@ -17,16 +18,28 @@ func TestUUIDValidator(t *testing.T) {
 	}
 
 	testCases := map[string]testCase{
-		"simple-match-lowercase": {
+		"simple-uuid-match-lowercase": {
 			in:        types.StringValue("dd005d8b-1fee-4e6b-b6ff-cb9a197b7fe0"),
 			expErrors: 0,
 		},
-		"simple-match-uppercase": {
+		"simple-uuid-match-uppercase": {
 			in:        types.StringValue("6AA64C2F-38C1-49A9-B2E8-CF9FEA769B7F"),
 			expErrors: 0,
 		},
-		"simple-mismatch": {
+		"simple-uuid-mismatch": {
 			in:        types.StringValue("sth-which-is-not-a-uuid"),
+			expErrors: 1,
+		},
+		"simple-sap-subaccount-id-match-lowercase": {
+			in:        types.StringValue("xf014edd7"),
+			expErrors: 0,
+		},
+		"simple-sap-subaccount-id-match-uppercase": {
+			in:        types.StringValue("xa1B2c3D4"),
+			expErrors: 0,
+		},
+		"simple-sap-subaccount-id-mismatch": {
+			in:        types.StringValue("X1234567"),
 			expErrors: 1,
 		},
 		"skip-validation-on-null": {
@@ -59,6 +72,15 @@ func TestUUIDValidator(t *testing.T) {
 			if test.expErrors == 0 && res.Diagnostics.HasError() {
 				t.Fatalf("expected no error(s), got %d: %v", res.Diagnostics.ErrorsCount(), res.Diagnostics)
 			}
+
+			if test.expErrors > 0 {
+				diag := res.Diagnostics.Errors()[0]
+				if !strings.Contains(diag.Detail(), "UUID") &&
+					!strings.Contains(diag.Detail(), "subaccount") {
+					t.Fatalf("unexpected error message: %s", diag.Detail())
+				}
+			}
+
 		})
 	}
 }
