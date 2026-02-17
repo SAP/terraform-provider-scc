@@ -22,7 +22,7 @@ func TestDataSourceSubaccountABAPServiceChannel(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(rec.GetDefaultClient()),
 			Steps: []resource.TestStep{
 				{
-					Config: providerConfig(user) + DataSourceSubaccountABAPServiceChannel("scc_abap_sc", regionHost, subaccount, 3),
+					Config: providerConfig(user) + DataSourceSubaccountABAPServiceChannel("scc_abap_sc", regionHost, subaccount, 1),
 					Check: resource.ComposeAggregateTestCheckFunc(
 						resource.TestCheckResourceAttr("data.scc_subaccount_abap_service_channel.scc_abap_sc", "region_host", regionHost),
 						resource.TestMatchResourceAttr("data.scc_subaccount_abap_service_channel.scc_abap_sc", "subaccount", regexpValidUUID),

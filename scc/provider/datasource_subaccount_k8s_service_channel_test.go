@@ -22,7 +22,7 @@ func TestDataSourceSubaccountK8SServiceChannel(t *testing.T) {
 			ProtoV6ProviderFactories: getTestProviders(rec.GetDefaultClient()),
 			Steps: []resource.TestStep{
 				{
-					Config: providerConfig(user) + DataSourceSubaccountK8SServiceChannel("scc_k8s_sc", regionHost, subaccount, 4),
+					Config: providerConfig(user) + DataSourceSubaccountK8SServiceChannel("scc_k8s_sc", regionHost, subaccount, 2),
 					Check: resource.ComposeAggregateTestCheckFunc(
 						resource.TestCheckResourceAttr("data.scc_subaccount_k8s_service_channel.scc_k8s_sc", "region_host", regionHost),
 						resource.TestMatchResourceAttr("data.scc_subaccount_k8s_service_channel.scc_k8s_sc", "subaccount", regexpValidUUID),
