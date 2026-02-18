@@ -126,6 +126,7 @@ func setupVCR(t *testing.T, cassetteName string) (*recorder.Recorder, User) {
 	rec.AddHook(hookRedactSensitiveCredentials(), recorder.BeforeSaveHook)
 	rec.AddHook(hookRedactBodyLinks(), recorder.BeforeSaveHook)
 	rec.AddHook(hookRedactSensitiveBody(), recorder.BeforeSaveHook)
+	rec.AddHook(hookRedactBinaryCertificate(), recorder.BeforeSaveHook)
 
 	return rec, user
 }
@@ -230,11 +231,38 @@ func hookRedactSensitiveBody() func(i *cassette.Interaction) error {
 			i.Response.Body = reSerial.ReplaceAllString(i.Response.Body, `"serialNumber": "aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa"`)
 		}
 
+		if strings.Contains(i.Response.Body, "subjectDN") {
+			reSubjectDN := regexp.MustCompile(`"subjectDN"\s*:\s*".*?"`)
+			i.Response.Body = reSubjectDN.ReplaceAllString(i.Response.Body, `"subjectDN": "CN=redacted,L=redacted,OU=redacted,OU=redacted,O=redacted,C=redacted"`)
+		}
+
+		if strings.Contains(i.Response.Body, "issuer") {
+			reIssuer := regexp.MustCompile(`"issuer"\s*:\s*".*?"`)
+			i.Response.Body = reIssuer.ReplaceAllString(i.Response.Body, `"issuer": "CN=redacted,OU=SAP Cloud Platform Clients,O=redacted,L=redacted,C=redacted"`)
+		}
+
+		if strings.Contains(i.Response.Body, "serialNumber") {
+			reSerial := regexp.MustCompile(`"serialNumber"\s*:\s*"(?:[0-9a-fA-F]{2}:){15}[0-9a-fA-F]{2}"`)
+			i.Response.Body = reSerial.ReplaceAllString(i.Response.Body, `"serialNumber": "aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa"`)
+		}
+
 		if strings.Contains(i.Response.Body, "tunnel") {
 			reUser := regexp.MustCompile(`"user"\s*:\s*".*?"`)
 			i.Response.Body = reUser.ReplaceAllString(i.Response.Body, `"user":"`+redactedTestUser.CloudUsername+`"`)
 		}
 
+		return nil
+	}
+}
+
+func hookRedactBinaryCertificate() func(i *cassette.Interaction) error {
+	return func(i *cassette.Interaction) error {
+		// Detect SCC certificate binary response
+		if strings.Contains(strings.ToLower(i.Response.Headers.Get("Content-Type")), "octet-stream") ||
+			strings.Contains(strings.ToLower(i.Response.Headers.Get("Content-Disposition")), "ca_certificate.der") {
+
+			i.Response.Body = "REDACTED_BINARY_CERTIFICATE"
+		}
 		return nil
 	}
 }
@@ -298,6 +326,7 @@ func TestSCCProvider_AllDataSources(t *testing.T) {
 		"scc_subaccount_k8s_service_channels",
 		"scc_subaccount_abap_service_channel",
 		"scc_subaccount_abap_service_channels",
+		"scc_ca_certificate",
 	}
 
 	ctx := context.Background()

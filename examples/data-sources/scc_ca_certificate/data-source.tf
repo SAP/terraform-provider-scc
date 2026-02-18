@@ -1,0 +1,1 @@
+data "scc_ca_certificate" "ca_certificate" {}

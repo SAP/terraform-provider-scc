@@ -299,3 +299,25 @@ func createCertAuthClient(serverURL string, serverCACert, clientCert, clientKey 
 
 	return NewRestApiClient(nil, baseURL, "", "", serverCACert, clientCert, clientKey)
 }
+
+func TestRestApiClient_DoRequest_BinaryResponse(t *testing.T) {
+	handler := http.NewServeMux()
+	handler.HandleFunc("/cert", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/pkix-cert")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte{0x01, 0x02, 0x03})
+	})
+
+	server := httptest.NewServer(handler)
+	defer server.Close()
+
+	client, diags := createBasicAuthClient(server.URL)
+	require.False(t, diags.HasError())
+
+	resp, diags := client.DoRequest(http.MethodGet, "/cert", nil, "application/pkix-cert")
+
+	require.False(t, diags.HasError())
+	body, _ := io.ReadAll(resp.Body)
+	assert.Equal(t, []byte{0x01, 0x02, 0x03}, body)
+}
+
