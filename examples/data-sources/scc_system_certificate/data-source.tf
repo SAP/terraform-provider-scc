@@ -1,0 +1,1 @@
+data "scc_system_certficate" "system_certificate" {}

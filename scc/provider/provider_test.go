@@ -326,6 +326,7 @@ func TestSCCProvider_AllDataSources(t *testing.T) {
 		"scc_subaccount_k8s_service_channels",
 		"scc_subaccount_abap_service_channel",
 		"scc_subaccount_abap_service_channels",
+		"scc_system_certificate",
 		"scc_ca_certificate",
 	}
 
