@@ -139,3 +139,26 @@ func ConvertMillisToTimes(millis interface{}) FormattedTimes {
 		WithTimezone: types.StringValue(t.Format("2006-01-02 15:04:05 -0700")),
 	}
 }
+
+func GetCertificateBinary(client *api.RestApiClient, endpoint string) ([]byte, diag.Diagnostics) {
+	response, diags := client.DoRequest(http.MethodGet, endpoint, nil, "application/pkix-cert")
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	defer func() {
+		if err := response.Body.Close(); err != nil {
+			diags.AddWarning(
+				"Failed to Close Response Body",
+				fmt.Sprintf("error closing response body: %v", err),
+			)
+		}
+	}()
+
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		diags.AddError("Failed to Read Response Body", fmt.Sprintf("failed to read response body: %v", err))
+		return nil, diags
+	}
+	return body, diags
+}
