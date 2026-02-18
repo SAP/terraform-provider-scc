@@ -3,6 +3,7 @@ package systemMapping
 import (
 	"context"
 	"fmt"
+	"slices"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -12,10 +13,8 @@ import (
 func validateListProtocol(protocol string, allowed []string) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	for _, p := range allowed {
-		if protocol == p {
-			return diags // valid
-		}
+	if slices.Contains(allowed, protocol) {
+		return diags // valid
 	}
 
 	diags.AddAttributeError(

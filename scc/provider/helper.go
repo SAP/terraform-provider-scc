@@ -112,7 +112,7 @@ func requestAndUnmarshal[T any](client *api.RestApiClient, respObj *T, requestTy
 
 }
 
-func ConvertMillisToTimes(millis interface{}) FormattedTimes {
+func ConvertMillisToTimes(millis any) FormattedTimes {
 	var ms int64
 	switch v := millis.(type) {
 	case int64:

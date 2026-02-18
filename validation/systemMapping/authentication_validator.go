@@ -3,6 +3,7 @@ package systemMapping
 import (
 	"context"
 	"fmt"
+	"slices"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -28,13 +29,7 @@ func validateAuthenticationMode(protocol, authMode string) diag.Diagnostics {
 		return diags
 	}
 
-	isValid := false
-	for _, v := range validValues {
-		if authMode == v {
-			isValid = true
-			break
-		}
-	}
+	isValid := slices.Contains(validValues, authMode)
 
 	if !isValid {
 		diags.AddAttributeError(
