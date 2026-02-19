@@ -291,6 +291,7 @@ func (c *cloudConnectorProvider) DataSources(_ context.Context) []func() datasou
 		NewSubaccountK8SServiceChannelsDataSource,
 		NewSubaccountABAPServiceChannelDataSource,
 		NewSubaccountABAPServiceChannelsDataSource,
+		NewSystemCertificateDataSource,
 		NewCACertificateDataSource,
 	}
 }

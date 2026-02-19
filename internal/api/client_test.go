@@ -320,4 +320,3 @@ func TestRestApiClient_DoRequest_BinaryResponse(t *testing.T) {
 	body, _ := io.ReadAll(resp.Body)
 	assert.Equal(t, []byte{0x01, 0x02, 0x03}, body)
 }
-
