@@ -1,1 +1,1 @@
-data "scc_system_certficate" "system_certificate" {}
+data "scc_system_certificate" "system_certificate" {}
