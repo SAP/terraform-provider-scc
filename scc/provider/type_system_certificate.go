@@ -10,23 +10,23 @@ import (
 
 type SystemCertificateConfig struct {
 	SubjectDN       *CertificateSubjectDNConfig `tfsdk:"subject_dn"`
-	Issuer          types.String `tfsdk:"issuer"`
-	ValidFrom       types.String `tfsdk:"valid_from"`
-	ValidTo         types.String `tfsdk:"valid_to"`
-	SerialNumber    types.String `tfsdk:"serial_number"`
-	SubjectAltNames types.String `tfsdk:"subject_alternative_names"`
-	CertificatePEM  types.String `tfsdk:"certificate_pem"`
+	Issuer          types.String                `tfsdk:"issuer"`
+	ValidFrom       types.String                `tfsdk:"valid_from"`
+	ValidTo         types.String                `tfsdk:"valid_to"`
+	SerialNumber    types.String                `tfsdk:"serial_number"`
+	SubjectAltNames types.String                `tfsdk:"subject_alternative_names"`
+	CertificatePEM  types.String                `tfsdk:"certificate_pem"`
 }
 
 type SystemCertificateSelfSignedResourceConfig struct {
-	Type           types.String                      `tfsdk:"type"`
-	KeySize        types.Int64                       `tfsdk:"key_size"`
+	Type           types.String                `tfsdk:"type"`
+	KeySize        types.Int64                 `tfsdk:"key_size"`
 	SubjectDN      *CertificateSubjectDNConfig `tfsdk:"subject_dn"`
-	Issuer         types.String                      `tfsdk:"issuer"`
-	ValidFrom      types.String                      `tfsdk:"valid_from"`
-	ValidTo        types.String                      `tfsdk:"valid_to"`
-	SerialNumber   types.String                      `tfsdk:"serial_number"`
-	CertificatePEM types.String                      `tfsdk:"certificate_pem"`
+	Issuer         types.String                `tfsdk:"issuer"`
+	ValidFrom      types.String                `tfsdk:"valid_from"`
+	ValidTo        types.String                `tfsdk:"valid_to"`
+	SerialNumber   types.String                `tfsdk:"serial_number"`
+	CertificatePEM types.String                `tfsdk:"certificate_pem"`
 }
 
 func SystemCertificateDataSourceValueFrom(ctx context.Context, value apiobjects.SystemCertificate, pemBytes []byte) (SystemCertificateConfig, diag.Diagnostics) {
@@ -60,7 +60,7 @@ func SystemCertificateSelfSignedResourceValueFrom(ctx context.Context, value api
 		CertificatePEM: types.StringValue(string(pemBytes)),
 	}
 
-	if existingDN != nil{
+	if existingDN != nil {
 		model.SubjectDN = existingDN
 	} else if value.SubjectDN != "" {
 		model.SubjectDN = parseSubjectDN(value.SubjectDN)

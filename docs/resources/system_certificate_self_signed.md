@@ -4,11 +4,9 @@ subcategory: ""
 description: |-
   Creates and manages a Self-Signed System Certificate in SAP Cloud Connector.
   Supports:
-  • Self-signed certificates• Uploading signed certificate chain• Uploading PKCS#12 certificates
+  • Self-signed certificates
   Further documentation:
   https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/system-certificate-apis#create-a-self-signed-system-certificate-(master-only)
-  https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/system-certificate-apis#upload-a-signed-certificate-chain-as-system-certificate-(master-only)
-  https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/system-certificate-apis#upload-a-pkcs#12-certificate-as-system-certificate-(master-only)
 ---
 
 # scc_system_certificate_self_signed (Resource)
@@ -16,14 +14,10 @@ description: |-
 Creates and manages a **Self-Signed System Certificate** in SAP Cloud Connector.
 		
 **Supports:**
-• Self-signed certificates  
-• Uploading signed certificate chain  
-• Uploading PKCS#12 certificates
+• Self-signed certificates
 
 __Further documentation:__
 <https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/system-certificate-apis#create-a-self-signed-system-certificate-(master-only)>
-<https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/system-certificate-apis#upload-a-signed-certificate-chain-as-system-certificate-(master-only)>
-<https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/system-certificate-apis#upload-a-pkcs#12-certificate-as-system-certificate-(master-only)>
 
 ## Example Usage
 

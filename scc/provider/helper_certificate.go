@@ -50,7 +50,6 @@ func BuildSubjectDN(subjectDN *CertificateSubjectDNConfig) string {
 	return strings.Join(parts, ",")
 }
 
-
 func parseSubjectDN(dn string) *CertificateSubjectDNConfig {
 	result := &CertificateSubjectDNConfig{
 		CommonName:         types.StringNull(),

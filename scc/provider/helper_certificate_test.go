@@ -143,9 +143,9 @@ func TestBuildSubjectDN_EmptyOptionalFieldsIgnored(t *testing.T) {
 
 func TestBuildSubjectDN_SpacesTrimmed(t *testing.T) {
 	subject := &CertificateSubjectDNConfig{
-		CommonName: types.StringValue(" testCert "),
+		CommonName:   types.StringValue(" testCert "),
 		Organization: types.StringValue(" SAP "),
-		Country: types.StringValue(" IN "),
+		Country:      types.StringValue(" IN "),
 	}
 
 	result := BuildSubjectDN(subject)
@@ -155,11 +155,11 @@ func TestBuildSubjectDN_SpacesTrimmed(t *testing.T) {
 
 func TestBuildSubjectDN_FieldOrder(t *testing.T) {
 	subject := &CertificateSubjectDNConfig{
-		CommonName:         types.StringValue("cert"),
-		Country:            types.StringValue("IN"),
-		Organization:       types.StringValue("SAP"),
-		Email:              types.StringValue("a@sap.com"),
-		Locality:           types.StringValue("BLR"),
+		CommonName:   types.StringValue("cert"),
+		Country:      types.StringValue("IN"),
+		Organization: types.StringValue("SAP"),
+		Email:        types.StringValue("a@sap.com"),
+		Locality:     types.StringValue("BLR"),
 	}
 
 	result := BuildSubjectDN(subject)
@@ -170,8 +170,8 @@ func TestBuildSubjectDN_FieldOrder(t *testing.T) {
 
 func TestBuildSubjectDN_OptionalFieldsNull(t *testing.T) {
 	subject := &CertificateSubjectDNConfig{
-		CommonName: types.StringValue("cert"),
-		Email:      types.StringNull(),
+		CommonName:   types.StringValue("cert"),
+		Email:        types.StringNull(),
 		Organization: types.StringNull(),
 	}
 
@@ -182,7 +182,7 @@ func TestBuildSubjectDN_OptionalFieldsNull(t *testing.T) {
 
 func TestBuildSubjectDN_SpecialCharacters(t *testing.T) {
 	subject := &CertificateSubjectDNConfig{
-		CommonName: types.StringValue("test-cert_123"),
+		CommonName:   types.StringValue("test-cert_123"),
 		Organization: types.StringValue("SAP-SE"),
 	}
 
@@ -193,9 +193,9 @@ func TestBuildSubjectDN_SpecialCharacters(t *testing.T) {
 
 func TestBuildSubjectDN_RoundTrip(t *testing.T) {
 	input := &CertificateSubjectDNConfig{
-		CommonName:         types.StringValue("testCert"),
-		Organization:       types.StringValue("SAP"),
-		Country:            types.StringValue("IN"),
+		CommonName:   types.StringValue("testCert"),
+		Organization: types.StringValue("SAP"),
+		Country:      types.StringValue("IN"),
 	}
 
 	dn := BuildSubjectDN(input)

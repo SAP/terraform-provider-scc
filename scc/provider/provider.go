@@ -254,7 +254,7 @@ func testProviderConnection(client *api.RestApiClient) diag.Diagnostics {
 }
 
 func validatePEMBlock(pemString, attribute, title string, resp *provider.ConfigureResponse) bool {
-	diags := validatePEMCertificate(pemString)
+	diags := validatePEMData(pemString)
 	if diags.HasError() {
 		for _, d := range diags {
 			resp.Diagnostics.AddAttributeError(

@@ -40,14 +40,10 @@ func (r *SystemCertificateSelfSignedResource) Schema(ctx context.Context, req re
 		MarkdownDescription: `Creates and manages a **Self-Signed System Certificate** in SAP Cloud Connector.
 		
 **Supports:**
-• Self-signed certificates  
-• Uploading signed certificate chain  
-• Uploading PKCS#12 certificates
+• Self-signed certificates
 
 __Further documentation:__
-<https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/system-certificate-apis#create-a-self-signed-system-certificate-(master-only)>
-<https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/system-certificate-apis#upload-a-signed-certificate-chain-as-system-certificate-(master-only)>
-<https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/system-certificate-apis#upload-a-pkcs#12-certificate-as-system-certificate-(master-only)>`,
+<https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/system-certificate-apis#create-a-self-signed-system-certificate-(master-only)>`,
 		Attributes: map[string]schema.Attribute{
 			"type": schema.StringAttribute{
 				MarkdownDescription: "Certificate type. Allowed values: `selfsigned`",
@@ -89,26 +85,63 @@ __Further documentation:__
 					"email": schema.StringAttribute{
 						MarkdownDescription: "Email address associated with the certificate subject.",
 						Optional:            true,
+						Validators: []validator.String{
+							stringvalidator.RegexMatches(
+								regexp.MustCompile(`^[^,=\\]+$`),
+								"EMAIL must not contain ',', '=', or '\\'",
+							),
+						},
 					},
 					"l": schema.StringAttribute{
 						MarkdownDescription: "Locality (L) of the certificate subject, such as a city or town.",
 						Optional:            true,
+						Validators: []validator.String{
+							stringvalidator.RegexMatches(
+								regexp.MustCompile(`^[^,=\\]+$`),
+								"L must not contain ',', '=', or '\\'",
+							),
+						},
 					},
 					"ou": schema.StringAttribute{
 						MarkdownDescription: "Organizational Unit (OU) of the certificate subject, representing a department or division within an organization.",
 						Optional:            true,
+						Validators: []validator.String{
+							stringvalidator.RegexMatches(
+								regexp.MustCompile(`^[^,=\\]+$`),
+								"OU must not contain ',', '=', or '\\'",
+							),
+						},
 					},
 					"o": schema.StringAttribute{
 						MarkdownDescription: "Organization (O) of the certificate subject, representing the name of the organization.",
 						Optional:            true,
+						Validators: []validator.String{
+							stringvalidator.RegexMatches(
+								regexp.MustCompile(`^[^,=\\]+$`),
+								"O must not contain ',', '=', or '\\'",
+							),
+						},
 					},
 					"st": schema.StringAttribute{
 						MarkdownDescription: "State or Province (ST) of the certificate subject.",
 						Optional:            true,
+						Validators: []validator.String{
+							stringvalidator.RegexMatches(
+								regexp.MustCompile(`^[^,=\\]+$`),
+								"ST must not contain ',', '=', or '\\'",
+							),
+						},
 					},
 					"c": schema.StringAttribute{
 						MarkdownDescription: "Country (C) of the certificate subject, typically represented as a two-letter ISO country code.",
 						Optional:            true,
+						Validators: []validator.String{
+							stringvalidator.LengthBetween(2,2),
+							stringvalidator.RegexMatches(
+								regexp.MustCompile(`^[^,=\\]+$`),
+								"C must not contain ',', '=', or '\\'",
+							),
+						},
 					},
 				},
 			},
@@ -223,7 +256,7 @@ func (r *SystemCertificateSelfSignedResource) Create(ctx context.Context, req re
 		Bytes: certBytes,
 	})
 
-	certDiags := validatePEMCertificate(string(pemBytes))
+	certDiags := validatePEMData(string(pemBytes))
 	resp.Diagnostics.Append(certDiags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -275,7 +308,7 @@ func (r *SystemCertificateSelfSignedResource) Read(ctx context.Context, req reso
 		Bytes: certBytes,
 	})
 
-	certDiags := validatePEMCertificate(string(pemBytes))
+	certDiags := validatePEMData(string(pemBytes))
 	resp.Diagnostics.Append(certDiags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -286,7 +319,7 @@ func (r *SystemCertificateSelfSignedResource) Read(ctx context.Context, req reso
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	
+
 	responseModel.Type = state.Type
 	responseModel.KeySize = state.KeySize
 

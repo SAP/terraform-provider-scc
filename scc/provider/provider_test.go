@@ -458,7 +458,7 @@ func TestSCCProvider_NoAuth(t *testing.T) {
 }
 
 func TestSCCProvider_InvalidPEM(t *testing.T) {
-	diags := validatePEMCertificate("not-a-valid-pem")
+	diags := validatePEMData("not-a-valid-pem")
 	assert.True(t, diags.HasError(), "Expected diagnostics to contain error for invalid PEM")
 	assert.Equal(t, "Invalid PEM Block", diags[0].Summary())
 }
@@ -475,7 +475,7 @@ zj0EAwIDSAAwRQIgTTb7LtqRQon2OHxMOyuvl+e8FQZXzSH14Yc7u9s9n9ICIQDE
 CEGH5OML6z7C7oCSys7ce4GkTbtJ4rNZoxVOxFwPvA==
 -----END CERTIFICATE-----`
 
-	diags := validatePEMCertificate(dummyPEM)
+	diags := validatePEMData(dummyPEM)
 	assert.False(t, diags.HasError(), "expected no error diagnostics for valid PEM")
 	assert.Len(t, diags, 0)
 }
