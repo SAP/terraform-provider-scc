@@ -4,12 +4,15 @@ import (
 	"context"
 	"encoding/pem"
 	"fmt"
+	"regexp"
 
 	"github.com/SAP/terraform-provider-scc/internal/api"
 	apiobjects "github.com/SAP/terraform-provider-scc/internal/api/apiObjects"
 	"github.com/SAP/terraform-provider-scc/internal/api/endpoints"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 var _ datasource.DataSource = &CACertificateDataSource{}
@@ -45,9 +48,46 @@ __Further documentation:__
 				MarkdownDescription: "Timestamp of the beginning of the validity period.",
 				Computed:            true,
 			},
-			"subject_dn": schema.StringAttribute{
-				MarkdownDescription: "Subject Distinguished Name (DN) of the CA certificate, identifying the certificate authority.",
+			"subject_dn": schema.SingleNestedAttribute{
+				MarkdownDescription: "Subject Distinguished Name (DN) of the issuing **Certificate Authority (CA)** certificate.",
 				Computed:            true,
+				Attributes: map[string]schema.Attribute{
+					"cn": schema.StringAttribute{
+						MarkdownDescription: "Common Name (CN) of the CA certificate, typically representing the CA name.",
+						Computed:            true,
+						Validators: []validator.String{
+							stringvalidator.LengthAtLeast(1),
+							stringvalidator.RegexMatches(
+								regexp.MustCompile(`^[^,=\\]+$`),
+								"CN must not contain ',', '=', or '\\'",
+							),
+						},
+					},
+					"email": schema.StringAttribute{
+						MarkdownDescription: "Email address associated with the CA subject.",
+						Computed:            true,
+					},
+					"l": schema.StringAttribute{
+						MarkdownDescription: "Locality (L) of the CA subject, such as a city or town.",
+						Computed:            true,
+					},
+					"ou": schema.StringAttribute{
+						MarkdownDescription: "Organizational Unit (OU) of the CA subject, representing a department or division within an organization.",
+						Computed:            true,
+					},
+					"o": schema.StringAttribute{
+						MarkdownDescription: "Organization (O) of the CA subject, representing the name of the organization.",
+						Computed:            true,
+					},
+					"st": schema.StringAttribute{
+						MarkdownDescription: "State or Province (ST) of the CA subject.",
+						Computed:            true,
+					},
+					"c": schema.StringAttribute{
+						MarkdownDescription: "Country (C) of the CA subject, typically represented as a two-letter ISO country code.",
+						Computed:            true,
+					},
+				},
 			},
 			"issuer": schema.StringAttribute{
 				MarkdownDescription: "Distinguished Name (DN) of the issuing Certificate Authority. For self-signed root CAs, this is the same as the subject.",

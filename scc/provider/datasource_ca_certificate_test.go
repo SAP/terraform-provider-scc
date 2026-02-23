@@ -22,7 +22,7 @@ func TestDataSourceCACertificate(t *testing.T) {
 				{
 					Config: providerConfig(user) + DataSourceCACertificate("scc_ca_cert"),
 					Check: resource.ComposeAggregateTestCheckFunc(
-						resource.TestMatchResourceAttr("data.scc_ca_certificate.scc_ca_cert", "subject_dn", regexp.MustCompile(`CN=.*?(,.*)?`)),
+						resource.TestCheckResourceAttrSet("data.scc_ca_certificate.scc_ca_cert", "subject_dn.cn"),
 						resource.TestMatchResourceAttr("data.scc_ca_certificate.scc_ca_cert", "issuer", regexp.MustCompile(`CN=.*?(,.*)?`)),
 						resource.TestMatchResourceAttr("data.scc_ca_certificate.scc_ca_cert", "valid_from", regexValidTimeStamp),
 						resource.TestMatchResourceAttr("data.scc_ca_certificate.scc_ca_cert", "valid_to", regexValidTimeStamp),

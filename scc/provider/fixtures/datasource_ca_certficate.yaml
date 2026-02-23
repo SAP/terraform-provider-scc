@@ -19,8 +19,6 @@ interactions:
                 - '*/*'
             Authorization:
                 - redacted
-            Content-Type:
-                - application/json
         url: https://redacted.instance.url/api/v1/connector/version
         method: GET
       response:
@@ -40,7 +38,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 18 Feb 2026 10:07:33 GMT
+                - Mon, 23 Feb 2026 10:53:46 GMT
             Server:
                 - nginx/1.27.5
             Set-Cookie:
@@ -50,10 +48,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - bc65d03f-0adf-4bc0-7c85-83160c6f2a1a
+                - d85a7c5a-8cd1-4c73-7ddd-94bb32968f5a
         status: 200 OK
         code: 200
-        duration: 864.304042ms
+        duration: 799.495542ms
     - id: 1
       request:
         proto: HTTP/1.1
@@ -72,8 +70,6 @@ interactions:
                 - '*/*'
             Authorization:
                 - redacted
-            Content-Type:
-                - application/json
         url: https://redacted.instance.url/api/v1/configuration/connector/onPremise/ppCaCertificate
         method: GET
       response:
@@ -84,7 +80,7 @@ interactions:
         trailer: {}
         content_length: 182
         uncompressed: false
-        body: '{"notAfterTimeStamp":1802940739000,"notBeforeTimeStamp":1771404139000,"subjectDN": "CN=redacted,L=redacted,OU=redacted,OU=redacted,O=redacted,C=redacted","issuer": "CN=redacted,OU=SAP Cloud Platform Clients,O=redacted,L=redacted,C=redacted","serialNumber": "aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa"}'
+        body: '{"notAfterTimeStamp":1803379492000,"notBeforeTimeStamp":1771842892000,"subjectDN": "CN=redacted,L=redacted,OU=redacted,OU=redacted,O=redacted,C=redacted","issuer": "CN=redacted,OU=redacted,O=redacted,L=redacted,C=redacted","serialNumber": "aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa"}'
         headers:
             Cache-Control:
                 - no-store
@@ -93,7 +89,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 18 Feb 2026 10:07:34 GMT
+                - Mon, 23 Feb 2026 10:53:46 GMT
             Server:
                 - nginx/1.27.5
             Set-Cookie:
@@ -103,10 +99,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 5d409634-1f20-45fd-7068-a0b6732280f3
+                - dc6d1901-ec32-4484-69ec-b4ee32c1fd5b
         status: 200 OK
         code: 200
-        duration: 350.097542ms
+        duration: 276.035166ms
     - id: 2
       request:
         proto: HTTP/1.1
@@ -125,8 +121,6 @@ interactions:
                 - application/pkix-cert
             Authorization:
                 - redacted
-            Content-Type:
-                - application/json
         url: https://redacted.instance.url/api/v1/configuration/connector/onPremise/ppCaCertificate
         method: GET
       response:
@@ -135,7 +129,7 @@ interactions:
         proto_minor: 1
         transfer_encoding: []
         trailer: {}
-        content_length: 1237
+        content_length: 726
         uncompressed: false
         body: REDACTED_BINARY_CERTIFICATE
         headers:
@@ -144,11 +138,11 @@ interactions:
             Content-Disposition:
                 - attachment;filename="ca_certificate.der"
             Content-Length:
-                - "1237"
+                - "726"
             Content-Type:
                 - application/octet-stream
             Date:
-                - Wed, 18 Feb 2026 10:07:34 GMT
+                - Mon, 23 Feb 2026 10:53:47 GMT
             Server:
                 - nginx/1.27.5
             Set-Cookie:
@@ -158,10 +152,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - d3afa7ba-a11e-4ea2-5eb5-792337bf01a9
+                - 48c469ef-40a8-4f2f-72b8-85a11e97593f
         status: 200 OK
         code: 200
-        duration: 258.55ms
+        duration: 279.2155ms
     - id: 3
       request:
         proto: HTTP/1.1
@@ -180,8 +174,6 @@ interactions:
                 - '*/*'
             Authorization:
                 - redacted
-            Content-Type:
-                - application/json
         url: https://redacted.instance.url/api/v1/connector/version
         method: GET
       response:
@@ -201,7 +193,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 18 Feb 2026 10:07:34 GMT
+                - Mon, 23 Feb 2026 10:53:47 GMT
             Server:
                 - nginx/1.27.5
             Set-Cookie:
@@ -211,10 +203,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 6bc676da-a6db-4386-5d11-b592941ca2f3
+                - f082d36e-7106-43db-73c0-14821810bb8f
         status: 200 OK
         code: 200
-        duration: 261.085917ms
+        duration: 281.388083ms
     - id: 4
       request:
         proto: HTTP/1.1
@@ -233,8 +225,6 @@ interactions:
                 - '*/*'
             Authorization:
                 - redacted
-            Content-Type:
-                - application/json
         url: https://redacted.instance.url/api/v1/connector/version
         method: GET
       response:
@@ -254,7 +244,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 18 Feb 2026 10:07:35 GMT
+                - Mon, 23 Feb 2026 10:53:47 GMT
             Server:
                 - nginx/1.27.5
             Set-Cookie:
@@ -264,10 +254,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 849db543-66df-4bd3-45d7-35c2d1b9f08a
+                - 721158c5-a9ee-4634-7708-3db23a2cb735
         status: 200 OK
         code: 200
-        duration: 254.410208ms
+        duration: 277.814625ms
     - id: 5
       request:
         proto: HTTP/1.1
@@ -286,8 +276,6 @@ interactions:
                 - '*/*'
             Authorization:
                 - redacted
-            Content-Type:
-                - application/json
         url: https://redacted.instance.url/api/v1/configuration/connector/onPremise/ppCaCertificate
         method: GET
       response:
@@ -298,7 +286,7 @@ interactions:
         trailer: {}
         content_length: 182
         uncompressed: false
-        body: '{"notAfterTimeStamp":1802940739000,"notBeforeTimeStamp":1771404139000,"subjectDN": "CN=redacted,L=redacted,OU=redacted,OU=redacted,O=redacted,C=redacted","issuer": "CN=redacted,OU=SAP Cloud Platform Clients,O=redacted,L=redacted,C=redacted","serialNumber": "aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa"}'
+        body: '{"notAfterTimeStamp":1803379492000,"notBeforeTimeStamp":1771842892000,"subjectDN": "CN=redacted,L=redacted,OU=redacted,OU=redacted,O=redacted,C=redacted","issuer": "CN=redacted,OU=redacted,O=redacted,L=redacted,C=redacted","serialNumber": "aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa"}'
         headers:
             Cache-Control:
                 - no-store
@@ -307,7 +295,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 18 Feb 2026 10:07:35 GMT
+                - Mon, 23 Feb 2026 10:53:48 GMT
             Server:
                 - nginx/1.27.5
             Set-Cookie:
@@ -317,10 +305,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - b94c7bc5-1416-474f-5dda-4eb2832dd45e
+                - 25f3af8b-9272-4fd4-43ef-42e6e09c5390
         status: 200 OK
         code: 200
-        duration: 256.673292ms
+        duration: 281.1995ms
     - id: 6
       request:
         proto: HTTP/1.1
@@ -339,8 +327,6 @@ interactions:
                 - application/pkix-cert
             Authorization:
                 - redacted
-            Content-Type:
-                - application/json
         url: https://redacted.instance.url/api/v1/configuration/connector/onPremise/ppCaCertificate
         method: GET
       response:
@@ -349,7 +335,7 @@ interactions:
         proto_minor: 1
         transfer_encoding: []
         trailer: {}
-        content_length: 1237
+        content_length: 726
         uncompressed: false
         body: REDACTED_BINARY_CERTIFICATE
         headers:
@@ -358,11 +344,11 @@ interactions:
             Content-Disposition:
                 - attachment;filename="ca_certificate.der"
             Content-Length:
-                - "1237"
+                - "726"
             Content-Type:
                 - application/octet-stream
             Date:
-                - Wed, 18 Feb 2026 10:07:35 GMT
+                - Mon, 23 Feb 2026 10:53:48 GMT
             Server:
                 - nginx/1.27.5
             Set-Cookie:
@@ -372,10 +358,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 5c808fd3-f61a-400c-75e3-b1f131f51af3
+                - 7bb1e12a-d2ad-4776-7e3a-399056daa39f
         status: 200 OK
         code: 200
-        duration: 264.168834ms
+        duration: 280.051917ms
     - id: 7
       request:
         proto: HTTP/1.1
@@ -394,8 +380,6 @@ interactions:
                 - '*/*'
             Authorization:
                 - redacted
-            Content-Type:
-                - application/json
         url: https://redacted.instance.url/api/v1/connector/version
         method: GET
       response:
@@ -415,7 +399,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 18 Feb 2026 10:07:36 GMT
+                - Mon, 23 Feb 2026 10:53:48 GMT
             Server:
                 - nginx/1.27.5
             Set-Cookie:
@@ -425,10 +409,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 3f2e1192-dffc-4eff-7375-ad45116cf7c7
+                - 75b93add-ee54-49eb-60e4-6bdae347ce1d
         status: 200 OK
         code: 200
-        duration: 347.038ms
+        duration: 281.868459ms
     - id: 8
       request:
         proto: HTTP/1.1
@@ -447,8 +431,6 @@ interactions:
                 - '*/*'
             Authorization:
                 - redacted
-            Content-Type:
-                - application/json
         url: https://redacted.instance.url/api/v1/configuration/connector/onPremise/ppCaCertificate
         method: GET
       response:
@@ -459,7 +441,7 @@ interactions:
         trailer: {}
         content_length: 182
         uncompressed: false
-        body: '{"notAfterTimeStamp":1802940739000,"notBeforeTimeStamp":1771404139000,"subjectDN": "CN=redacted,L=redacted,OU=redacted,OU=redacted,O=redacted,C=redacted","issuer": "CN=redacted,OU=SAP Cloud Platform Clients,O=redacted,L=redacted,C=redacted","serialNumber": "aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa"}'
+        body: '{"notAfterTimeStamp":1803379492000,"notBeforeTimeStamp":1771842892000,"subjectDN": "CN=redacted,L=redacted,OU=redacted,OU=redacted,O=redacted,C=redacted","issuer": "CN=redacted,OU=redacted,O=redacted,L=redacted,C=redacted","serialNumber": "aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa"}'
         headers:
             Cache-Control:
                 - no-store
@@ -468,7 +450,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 18 Feb 2026 10:07:36 GMT
+                - Mon, 23 Feb 2026 10:53:49 GMT
             Server:
                 - nginx/1.27.5
             Set-Cookie:
@@ -478,10 +460,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 92e0c275-0c7d-409c-7274-9f6295055330
+                - 5b7d7b6b-0c56-417b-6179-7bca753faee0
         status: 200 OK
         code: 200
-        duration: 260.590958ms
+        duration: 276.053958ms
     - id: 9
       request:
         proto: HTTP/1.1
@@ -500,8 +482,6 @@ interactions:
                 - application/pkix-cert
             Authorization:
                 - redacted
-            Content-Type:
-                - application/json
         url: https://redacted.instance.url/api/v1/configuration/connector/onPremise/ppCaCertificate
         method: GET
       response:
@@ -510,7 +490,7 @@ interactions:
         proto_minor: 1
         transfer_encoding: []
         trailer: {}
-        content_length: 1237
+        content_length: 726
         uncompressed: false
         body: REDACTED_BINARY_CERTIFICATE
         headers:
@@ -519,11 +499,11 @@ interactions:
             Content-Disposition:
                 - attachment;filename="ca_certificate.der"
             Content-Length:
-                - "1237"
+                - "726"
             Content-Type:
                 - application/octet-stream
             Date:
-                - Wed, 18 Feb 2026 10:07:36 GMT
+                - Mon, 23 Feb 2026 10:53:49 GMT
             Server:
                 - nginx/1.27.5
             Set-Cookie:
@@ -533,10 +513,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 899cb1c7-c6dd-4391-55b6-f864e9eaf336
+                - 86cb7bae-655d-4bbe-4a5f-2a44a2a6fd7c
         status: 200 OK
         code: 200
-        duration: 270.713709ms
+        duration: 284.431042ms
     - id: 10
       request:
         proto: HTTP/1.1
@@ -555,8 +535,6 @@ interactions:
                 - '*/*'
             Authorization:
                 - redacted
-            Content-Type:
-                - application/json
         url: https://redacted.instance.url/api/v1/connector/version
         method: GET
       response:
@@ -576,7 +554,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 18 Feb 2026 10:07:36 GMT
+                - Mon, 23 Feb 2026 10:53:49 GMT
             Server:
                 - nginx/1.27.5
             Set-Cookie:
@@ -586,7 +564,7 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 8e5bab6d-e26c-4e5e-7405-f4285eaba953
+                - 4a3d03c2-e521-4696-56a7-2e06fb413b5c
         status: 200 OK
         code: 200
-        duration: 252.154209ms
+        duration: 276.931792ms
