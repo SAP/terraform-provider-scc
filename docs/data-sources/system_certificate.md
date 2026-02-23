@@ -36,6 +36,19 @@ data "scc_system_certificate" "system_certificate" {}
 - `issuer` (String) Certificate authority (CA) that issued this certificate.
 - `serial_number` (String) Unique identifier for the certificate, typically assigned by the CA.
 - `subject_alternative_names` (String) List of Subject Alternative Names (SANs) included in the certificate, such as DNS names, IP addresses, or email addresses.
-- `subject_dn` (String) Subject Distinguished Name (DN) of the certificate, identifying the certificate owner.
+- `subject_dn` (Attributes) Subject Distinguished Name (DN) of the certificate, identifying the certificate owner. (see [below for nested schema](#nestedatt--subject_dn))
 - `valid_from` (String) Timestamp of the beginning of the validity period.
 - `valid_to` (String) Timestamp of the end of the validity period.
+
+<a id="nestedatt--subject_dn"></a>
+### Nested Schema for `subject_dn`
+
+Read-Only:
+
+- `c` (String) Country (C) of the certificate subject, typically represented as a two-letter ISO country code.
+- `cn` (String) Common Name (CN) of the certificate, typically representing the domain name or identifier for which the certificate is issued.
+- `email` (String) Email address associated with the certificate subject.
+- `l` (String) Locality (L) of the certificate subject, such as a city or town.
+- `o` (String) Organization (O) of the certificate subject, representing the name of the organization.
+- `ou` (String) Organizational Unit (OU) of the certificate subject, representing a department or division within an organization.
+- `st` (String) State or Province (ST) of the certificate subject.
