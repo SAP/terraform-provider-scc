@@ -162,7 +162,6 @@ func GetCertificateBinary(client *api.RestApiClient, endpoint string) ([]byte, d
 	return body, diags
 }
 
-func validatePEMCertificate(data string) diag.Diagnostics {
 func validatePEMData(data string) diag.Diagnostics {
 	var diags diag.Diagnostics
 

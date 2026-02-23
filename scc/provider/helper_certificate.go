@@ -61,7 +61,7 @@ func parseSubjectDN(dn string) *CertificateSubjectDNConfig {
 		Country:            types.StringNull(),
 	}
 
-	for _, part := range strings.Split(dn, ",") {
+	for part := range strings.SplitSeq(dn, ",") {
 		part = strings.TrimSpace(part)
 
 		kv := strings.SplitN(part, "=", 2)
