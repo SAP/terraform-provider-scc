@@ -2,7 +2,6 @@ package provider
 
 import (
 	"context"
-	"encoding/pem"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -255,25 +254,18 @@ func testProviderConnection(client *api.RestApiClient) diag.Diagnostics {
 }
 
 func validatePEMBlock(pemString, attribute, title string, resp *provider.ConfigureResponse) bool {
-	if err := validatePEM(pemString); err != nil {
-		resp.Diagnostics.AddAttributeError(
-			path.Root(attribute),
-			fmt.Sprintf("Invalid %s", title),
-			fmt.Sprintf("The provided %s is not a valid PEM-encoded block.", title),
-		)
+	diags := validatePEMCertificate(pemString)
+	if diags.HasError() {
+		for _, d := range diags {
+			resp.Diagnostics.AddAttributeError(
+				path.Root(attribute),
+				fmt.Sprintf("Invalid %s", title),
+				d.Detail(),
+			)
+		}
 		return false
 	}
 	return true
-}
-
-func validatePEM(data string) diag.Diagnostics {
-	var diags diag.Diagnostics
-	block, _ := pem.Decode([]byte(data))
-	if block == nil {
-		diags.AddError("Invalid PEM Block", "data is not a valid PEM block")
-		return diags
-	}
-	return diags
 }
 
 // DataSources defines the data sources implemented in the provider.
@@ -306,6 +298,7 @@ func (c *cloudConnectorProvider) Resources(_ context.Context) []func() resource.
 		NewDomainMappingResource,
 		NewSubaccountK8SServiceChannelResource,
 		NewSubaccountABAPServiceChannelResource,
+		NewSystemCertificateSelfSignedResource,
 	}
 }
 
