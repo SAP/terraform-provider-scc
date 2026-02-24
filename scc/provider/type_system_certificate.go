@@ -29,8 +29,6 @@ type SystemCertificateSelfSignedResourceConfig struct {
 	CertificatePEM types.String `tfsdk:"certificate_pem"`
 }
 
-}
-
 func SystemCertificateDataSourceValueFrom(ctx context.Context, value apiobjects.SystemCertificate, pemBytes []byte) (SystemCertificateConfig, diag.Diagnostics) {
 	subjectAltNames := types.StringNull()
 
