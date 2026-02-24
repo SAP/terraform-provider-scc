@@ -205,3 +205,32 @@ func TestBuildSubjectDN_RoundTrip(t *testing.T) {
 	assert.Equal(t, input.Organization, parsed.Organization)
 	assert.Equal(t, input.Country, parsed.Country)
 }
+
+func TestParseSubjectDN_EmptyPartsIgnored(t *testing.T) {
+	dn := "CN=test,,O=SAP, ,C=IN"
+
+	result := parseSubjectDN(dn)
+
+	assert.Equal(t, types.StringValue("test"), result.CommonName)
+	assert.Equal(t, types.StringValue("SAP"), result.Organization)
+	assert.Equal(t, types.StringValue("IN"), result.Country)
+}
+
+func TestParseSubjectDN_DuplicateCN_LastWins(t *testing.T) {
+	dn := "CN=one,CN=two"
+
+	result := parseSubjectDN(dn)
+
+	assert.Equal(t, types.StringValue("two"), result.CommonName)
+}
+
+func TestBuildSubjectDN_UnknownValuesIgnored(t *testing.T) {
+	subject := &CertificateSubjectDNConfig{
+		CommonName: types.StringValue("cert"),
+		Email:      types.StringUnknown(),
+	}
+
+	result := BuildSubjectDN(subject)
+
+	assert.Equal(t, "CN=cert", result)
+}

@@ -136,7 +136,7 @@ func ConvertMillisToTimes(millis any) FormattedTimes {
 }
 
 func GetCertificateBinary(client *api.RestApiClient, endpoint string) ([]byte, diag.Diagnostics) {
-	response, diags := client.DoRequest(http.MethodGet, endpoint, nil, "application/pkix-cert")
+	response, diags := client.DoRequest(http.MethodGet, endpoint, nil, "application/pkix-cert", "")
 	if diags.HasError() {
 		return nil, diags
 	}

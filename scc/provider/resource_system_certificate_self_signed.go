@@ -41,6 +41,9 @@ func (r *SystemCertificateSelfSignedResource) Schema(ctx context.Context, req re
 **Supports:**
 • Self-signed certificates
 
+**Note:**
+Any change to key_size or subject_dn forces replacement since SAP Cloud Connector supports only one system certificate.
+
 __Further documentation:__
 <https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/system-certificate-apis#create-a-self-signed-system-certificate-(master-only)>`,
 		Attributes: map[string]schema.Attribute{
@@ -126,7 +129,7 @@ __Further documentation:__
 						MarkdownDescription: "Country (C) of the certificate subject, typically represented as a two-letter ISO country code.",
 						Optional:            true,
 						Validators: []validator.String{
-							stringvalidator.LengthBetween(2,2),
+							stringvalidator.LengthBetween(2, 2),
 							stringvalidator.RegexMatches(
 								regexp.MustCompile(`^[^,=\\]+$`),
 								"C must not contain ',', '=', or '\\'",
@@ -203,15 +206,21 @@ func (r *SystemCertificateSelfSignedResource) Create(ctx context.Context, req re
 		return
 	}
 
-	if plan.SubjectDN == nil || plan.SubjectDN.CommonName.IsNull() {
+	if plan.SubjectDN.IsNull() || plan.SubjectDN.IsUnknown() {
 		resp.Diagnostics.AddError(
-			"Missing Required Subject DN",
+			"Missing Subject DN",
 			"Subject DN with a non-empty Common Name (CN) is required to create a self-signed certificate.",
 		)
 		return
 	}
 
-	subjectDN := BuildSubjectDN(plan.SubjectDN)
+	dnStruct, diags := ExpandSubjectDN(ctx, plan.SubjectDN)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	subjectDN := BuildSubjectDN(dnStruct)
 	planBody := map[string]any{
 		"type":      "selfsigned",
 		"keySize":   plan.KeySize.ValueInt64(),
@@ -252,7 +261,7 @@ func (r *SystemCertificateSelfSignedResource) Create(ctx context.Context, req re
 		return
 	}
 
-	responseModel, diags := SystemCertificateSelfSignedResourceValueFrom(ctx, respObj, pemBytes, plan.SubjectDN)
+	responseModel, diags := SystemCertificateSelfSignedResourceValueFrom(ctx, respObj, pemBytes, dnStruct)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -277,6 +286,12 @@ func (r *SystemCertificateSelfSignedResource) Read(ctx context.Context, req reso
 	}
 
 	endpoint := endpoints.GetSystemCertificateEndpoint()
+
+	dnStruct, diags := ExpandSubjectDN(ctx, state.SubjectDN)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
 	// Get Certificate Metadata
 	diags = requestAndUnmarshal(r.client, &respObj, "GET", endpoint, nil, true)
@@ -303,7 +318,7 @@ func (r *SystemCertificateSelfSignedResource) Read(ctx context.Context, req reso
 		return
 	}
 
-	responseModel, diags := SystemCertificateSelfSignedResourceValueFrom(ctx, respObj, pemBytes, state.SubjectDN)
+	responseModel, diags := SystemCertificateSelfSignedResourceValueFrom(ctx, respObj, pemBytes, dnStruct)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return

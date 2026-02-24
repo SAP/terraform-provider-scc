@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
 
 type CertificateSubjectDNConfig struct {
@@ -15,6 +16,20 @@ type CertificateSubjectDNConfig struct {
 	Organization       types.String `tfsdk:"o"`
 	State              types.String `tfsdk:"st"`
 	Country            types.String `tfsdk:"c"`
+}
+
+func ExpandSubjectDN(ctx context.Context, subjectDN types.Object) (*CertificateSubjectDNConfig, diag.Diagnostics) {
+	if subjectDN.IsNull() || subjectDN.IsUnknown() {
+		return nil, diag.Diagnostics{}
+	}
+
+	var result CertificateSubjectDNConfig
+	diags := subjectDN.As(ctx, &result, basetypes.ObjectAsOptions{})
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	return &result, diags
 }
 
 func BuildSubjectDN(subjectDN *CertificateSubjectDNConfig) string {

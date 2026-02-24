@@ -5,6 +5,8 @@ description: |-
   Creates and manages a Self-Signed System Certificate in SAP Cloud Connector.
   Supports:
   • Self-signed certificates
+  Note:
+  Any change to key_size or subject_dn forces replacement since SAP Cloud Connector supports only one system certificate.
   Further documentation:
   https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/system-certificate-apis#create-a-self-signed-system-certificate-(master-only)
 ---
@@ -15,6 +17,9 @@ Creates and manages a **Self-Signed System Certificate** in SAP Cloud Connector.
 		
 **Supports:**
 • Self-signed certificates
+
+**Note:**
+Any change to key_size or subject_dn forces replacement since SAP Cloud Connector supports only one system certificate.
 
 __Further documentation:__
 <https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/system-certificate-apis#create-a-self-signed-system-certificate-(master-only)>
