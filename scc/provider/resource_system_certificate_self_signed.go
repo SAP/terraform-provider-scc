@@ -16,7 +16,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
@@ -45,15 +44,6 @@ func (r *SystemCertificateSelfSignedResource) Schema(ctx context.Context, req re
 __Further documentation:__
 <https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/system-certificate-apis#create-a-self-signed-system-certificate-(master-only)>`,
 		Attributes: map[string]schema.Attribute{
-			"type": schema.StringAttribute{
-				MarkdownDescription: "Certificate type. Allowed values: `selfsigned`",
-				Computed:            true,
-				Default:             stringdefault.StaticString("selfsigned"),
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-					stringplanmodifier.RequiresReplace(),
-				},
-			},
 			"key_size": schema.Int64Attribute{
 				MarkdownDescription: "Key size in bits. Allowed values: 2048 or 4096.",
 				Required:            true,
@@ -268,7 +258,6 @@ func (r *SystemCertificateSelfSignedResource) Create(ctx context.Context, req re
 		return
 	}
 
-	responseModel.Type = plan.Type
 	responseModel.KeySize = plan.KeySize
 
 	diags = resp.State.Set(ctx, responseModel)
@@ -320,7 +309,6 @@ func (r *SystemCertificateSelfSignedResource) Read(ctx context.Context, req reso
 		return
 	}
 
-	responseModel.Type = state.Type
 	responseModel.KeySize = state.KeySize
 
 	diags = resp.State.Set(ctx, &responseModel)

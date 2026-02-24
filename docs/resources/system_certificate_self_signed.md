@@ -43,7 +43,6 @@ resource "scc_system_certificate_self_signed" "self_signed_cert" {
 - `certificate_pem` (String, Sensitive) System certificate in PEM format.
 - `issuer` (String) Certificate authority (CA) that issued this certificate.
 - `serial_number` (String) Unique identifier for the certificate, typically assigned by the CA.
-- `type` (String) Certificate type. Allowed values: `selfsigned`
 - `valid_from` (String) Timestamp of the beginning of the validity period.
 - `valid_to` (String) Timestamp of the end of the validity period.
 

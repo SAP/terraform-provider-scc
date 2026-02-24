@@ -19,7 +19,6 @@ type SystemCertificateConfig struct {
 }
 
 type SystemCertificateSelfSignedResourceConfig struct {
-	Type           types.String                `tfsdk:"type"`
 	KeySize        types.Int64                 `tfsdk:"key_size"`
 	SubjectDN      *CertificateSubjectDNConfig `tfsdk:"subject_dn"`
 	Issuer         types.String                `tfsdk:"issuer"`
