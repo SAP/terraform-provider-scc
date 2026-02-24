@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
@@ -18,6 +19,18 @@ type CertificateSubjectDNConfig struct {
 	Organization       types.String `tfsdk:"o"`
 	State              types.String `tfsdk:"st"`
 	Country            types.String `tfsdk:"c"`
+}
+
+var subjectDNAttrTypes = types.ObjectType{
+	AttrTypes: map[string]attr.Type{
+		"cn":    types.StringType,
+		"email": types.StringType,
+		"l":     types.StringType,
+		"ou":    types.StringType,
+		"o":     types.StringType,
+		"st":    types.StringType,
+		"c":     types.StringType,
+	},
 }
 
 func ExpandSubjectDN(ctx context.Context, subjectDN types.Object) (*CertificateSubjectDNConfig, diag.Diagnostics) {

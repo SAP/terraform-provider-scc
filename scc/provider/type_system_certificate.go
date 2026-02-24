@@ -29,16 +29,6 @@ type SystemCertificateSelfSignedResourceConfig struct {
 	CertificatePEM types.String `tfsdk:"certificate_pem"`
 }
 
-var subjectDNAttrTypes = types.ObjectType{
-	AttrTypes: map[string]attr.Type{
-		"cn":    types.StringType,
-		"email": types.StringType,
-		"l":     types.StringType,
-		"ou":    types.StringType,
-		"o":     types.StringType,
-		"st":    types.StringType,
-		"c":     types.StringType,
-	},
 }
 
 func SystemCertificateDataSourceValueFrom(ctx context.Context, value apiobjects.SystemCertificate, pemBytes []byte) (SystemCertificateConfig, diag.Diagnostics) {
