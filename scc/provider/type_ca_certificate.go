@@ -10,12 +10,12 @@ import (
 
 type CACertificateConfig struct {
 	SubjectDN       types.Object `tfsdk:"subject_dn"`
-	Issuer          types.String                `tfsdk:"issuer"`
-	ValidFrom       types.String                `tfsdk:"valid_from"`
-	ValidTo         types.String                `tfsdk:"valid_to"`
-	SerialNumber    types.String                `tfsdk:"serial_number"`
-	SubjectAltNames types.String                `tfsdk:"subject_alternative_names"`
-	CertificatePEM  types.String                `tfsdk:"certificate_pem"`
+	Issuer          types.String `tfsdk:"issuer"`
+	ValidFrom       types.String `tfsdk:"valid_from"`
+	ValidTo         types.String `tfsdk:"valid_to"`
+	SerialNumber    types.String `tfsdk:"serial_number"`
+	SubjectAltNames types.String `tfsdk:"subject_alternative_names"`
+	CertificatePEM  types.String `tfsdk:"certificate_pem"`
 }
 
 func CACertificateDataSourceValueFrom(ctx context.Context, value apiobjects.CACertificate, pemBytes []byte) (CACertificateConfig, diag.Diagnostics) {
@@ -32,6 +32,7 @@ func CACertificateDataSourceValueFrom(ctx context.Context, value apiobjects.CACe
 		SerialNumber:    types.StringValue(value.SerialNumber),
 		SubjectAltNames: subjectAltNames,
 		CertificatePEM:  types.StringValue(string(pemBytes)),
+		SubjectDN:       types.ObjectNull(subjectDNAttrTypes.AttrTypes),
 	}
 
 	if value.SubjectDN != "" {
