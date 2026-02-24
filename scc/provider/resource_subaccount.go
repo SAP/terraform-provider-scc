@@ -522,6 +522,14 @@ func (r *SubaccountResource) Update(ctx context.Context, req resource.UpdateRequ
 	responseModel.AutoRenewBeforeDays = plan.AutoRenewBeforeDays
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, responseModel)...)
+
+	identity := subaccountResourceIdentityModel{
+		Subaccount: state.Subaccount,
+		RegionHost: state.RegionHost,
+	}
+
+	diags = resp.Identity.Set(ctx, identity)
+	resp.Diagnostics.Append(diags...)
 }
 
 func appendAndCheckErrors(diags *diag.Diagnostics, newDiags diag.Diagnostics) bool {

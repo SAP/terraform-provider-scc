@@ -56,7 +56,7 @@ func TestResourceSubaccount(t *testing.T) {
 						statecheck.ExpectIdentity(
 							"scc_subaccount.scc_sa",
 							map[string]knownvalue.Check{
-								"region_host": knownvalue.StringExact("cf.eu12.hana.ondemand.com"),
+								"region_host": knownvalue.StringExact(regionHost),
 								"subaccount":  knownvalue.StringRegexp(regexpValidUUID),
 							},
 						),
@@ -130,6 +130,15 @@ func TestResourceSubaccount(t *testing.T) {
 						resource.TestCheckResourceAttr("scc_subaccount.scc_sa", "description", "Updated description"),
 						resource.TestCheckResourceAttr("scc_subaccount.scc_sa", "display_name", "Updated Display Name"),
 					),
+					ConfigStateChecks: []statecheck.StateCheck{
+						statecheck.ExpectIdentity(
+							"scc_subaccount.scc_sa",
+							map[string]knownvalue.Check{
+								"region_host": knownvalue.StringExact(regionHost),
+								"subaccount":  knownvalue.StringRegexp(regexpValidUUID),
+							},
+						),
+					},
 				},
 			},
 		})
@@ -151,6 +160,15 @@ func TestResourceSubaccount(t *testing.T) {
 					Check: resource.ComposeAggregateTestCheckFunc(
 						resource.TestCheckResourceAttr("scc_subaccount.scc_sa", "tunnel.state", "Connected"),
 					),
+					ConfigStateChecks: []statecheck.StateCheck{
+						statecheck.ExpectIdentity(
+							"scc_subaccount.scc_sa",
+							map[string]knownvalue.Check{
+								"region_host": knownvalue.StringExact(regionHost),
+								"subaccount":  knownvalue.StringRegexp(regexpValidUUID),
+							},
+						),
+					},
 				},
 				// Update with mismatched configuration should throw error
 				{
@@ -162,12 +180,30 @@ func TestResourceSubaccount(t *testing.T) {
 					Check: resource.ComposeAggregateTestCheckFunc(
 						resource.TestCheckResourceAttr("scc_subaccount.scc_sa", "tunnel.state", "Disconnected"),
 					),
+					ConfigStateChecks: []statecheck.StateCheck{
+						statecheck.ExpectIdentity(
+							"scc_subaccount.scc_sa",
+							map[string]knownvalue.Check{
+								"region_host": knownvalue.StringExact(regionHost),
+								"subaccount":  knownvalue.StringRegexp(regexpValidUUID),
+							},
+						),
+					},
 				},
 				{
 					Config: providerConfig(user) + ResourceSubaccountWithTunnelState("scc_sa", regionHost, subaccount, user.CloudUsername, user.CloudPassword, "Testing tunnel reconnected", true),
 					Check: resource.ComposeAggregateTestCheckFunc(
 						resource.TestCheckResourceAttr("scc_subaccount.scc_sa", "tunnel.state", "Connected"),
 					),
+					ConfigStateChecks: []statecheck.StateCheck{
+						statecheck.ExpectIdentity(
+							"scc_subaccount.scc_sa",
+							map[string]knownvalue.Check{
+								"region_host": knownvalue.StringExact(regionHost),
+								"subaccount":  knownvalue.StringRegexp(regexpValidUUID),
+							},
+						),
+					},
 				},
 			},
 		})

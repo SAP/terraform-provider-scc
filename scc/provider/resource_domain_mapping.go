@@ -278,6 +278,15 @@ func (r *DomainMappingResource) Update(ctx context.Context, req resource.UpdateR
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	identity := domainMappingResourceIdentityModel{
+		Subaccount:     state.Subaccount,
+		RegionHost:     state.RegionHost,
+		InternalDomain: state.InternalDomain,
+	}
+
+	diags = resp.Identity.Set(ctx, identity)
+	resp.Diagnostics.Append(diags...)
 }
 
 func (r *DomainMappingResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {

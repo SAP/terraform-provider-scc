@@ -319,6 +319,17 @@ func (r *SystemMappingResourceResource) Update(ctx context.Context, req resource
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	identity := systemMappingResourceResourceIdentityModel{
+		Subaccount:  state.Subaccount,
+		RegionHost:  state.RegionHost,
+		VirtualHost: state.VirtualHost,
+		VirtualPort: state.VirtualPort,
+		URLPath:     state.URLPath,
+	}
+
+	diags = resp.Identity.Set(ctx, identity)
+	resp.Diagnostics.Append(diags...)
 }
 
 func (r *SystemMappingResourceResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
