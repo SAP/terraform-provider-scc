@@ -67,16 +67,12 @@ func requestAndUnmarshal[T any](client *api.RestApiClient, respObj *T, requestTy
 	var diags diag.Diagnostics
 	switch requestType {
 	case "GET":
-		response, diags = sendRequest(client, nil, endpoint, "Read")
 		response, diags = sendRequest(client, nil, endpoint, actionGetRequest)
 	case "POST":
-		response, diags = sendRequest(client, planBody, endpoint, "Create")
 		response, diags = sendRequest(client, planBody, endpoint, actionCreateRequest)
 	case "PUT":
-		response, diags = sendRequest(client, planBody, endpoint, "Update")
 		response, diags = sendRequest(client, planBody, endpoint, actionUpdateRequest)
 	case "DELETE":
-		response, diags = sendRequest(client, nil, endpoint, "Delete")
 		response, diags = sendRequest(client, nil, endpoint, actionDeleteRequest)
 	default:
 		diags.AddError("Invalid Request Type", fmt.Sprintf("unsupported request type: %s", requestType))
