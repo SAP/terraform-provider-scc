@@ -140,6 +140,21 @@ func TestResourceSubaccountABAPServiceChannel(t *testing.T) {
 						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.scc_abap_sc", "connections", "2"),
 						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.scc_abap_sc", "enabled", "false"),
 					),
+					ConfigStateChecks: []statecheck.StateCheck{
+						statecheck.ExpectIdentity(
+							"scc_subaccount_abap_service_channel.scc_abap_sc",
+							map[string]knownvalue.Check{
+								"id": knownvalue.Int64Func(func(v int64) error {
+									if v <= 0 {
+										return fmt.Errorf("id should be positive, got %d", v)
+									}
+									return nil
+								}),
+								"region_host": knownvalue.StringExact(regionHost),
+								"subaccount":  knownvalue.StringRegexp(regexpValidUUID),
+							},
+						),
+					},
 				},
 			},
 		})

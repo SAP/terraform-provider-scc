@@ -342,6 +342,15 @@ func (r *SubaccountK8SServiceChannelResource) Update(ctx context.Context, req re
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	identity := subaccountK8SServiceChannelResourceIdentityModel{
+		Subaccount: state.Subaccount,
+		RegionHost: state.RegionHost,
+		ID:         state.ID,
+	}
+
+	diags = resp.Identity.Set(ctx, identity)
+	resp.Diagnostics.Append(diags...)
 }
 
 func (r *SubaccountK8SServiceChannelResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
