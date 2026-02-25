@@ -2,10 +2,12 @@ package provider
 
 import (
 	"encoding/json"
+	"encoding/pem"
 	"fmt"
 	"io"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/SAP/terraform-provider-scc/internal/api"
@@ -14,8 +16,10 @@ import (
 )
 
 const (
+	actionGetRequest    = "Read"
 	actionCreateRequest = "Create"
 	actionUpdateRequest = "Update"
+	actionDeleteRequest = "Delete"
 )
 
 type FormattedTimes struct {
@@ -23,29 +27,29 @@ type FormattedTimes struct {
 	WithTimezone types.String
 }
 
-func sendGetRequest(client *api.RestApiClient, endpoint string) (*http.Response, diag.Diagnostics) {
-	response, diags := client.GetRequest(endpoint)
-	if diags.HasError() {
-		return nil, diags
-	}
-
-	return response, diags
-}
-
-func sendPostOrPutRequest(client *api.RestApiClient, planBody map[string]any, endpoint string, action string) (*http.Response, diag.Diagnostics) {
+func sendRequest(client *api.RestApiClient, planBody map[string]any, endpoint string, action string) (*http.Response, diag.Diagnostics) {
 	var response *http.Response
 	var diags diag.Diagnostics
-	requestByteBody, err := json.Marshal(planBody)
-	if err != nil {
-		diags.AddError("Failed to Marshal Request Body", fmt.Sprintf("failed to marshal API request body from plan: %v", err))
-		return nil, diags
+	var requestByteBody []byte
+	var err error
+
+	if planBody != nil {
+		requestByteBody, err = json.Marshal(planBody)
+		if err != nil {
+			diags.AddError("Failed to Marshal Request Body", fmt.Sprintf("failed to marshal API request body from plan: %v", err))
+			return nil, diags
+		}
 	}
 
 	switch action {
+	case actionGetRequest:
+		response, diags = client.GetRequest(endpoint)
 	case actionCreateRequest:
 		response, diags = client.PostRequest(endpoint, requestByteBody)
 	case actionUpdateRequest:
 		response, diags = client.PutRequest(endpoint, requestByteBody)
+	case actionDeleteRequest:
+		response, diags = client.DeleteRequest(endpoint)
 	default:
 		diags.AddError("Invalid Action", fmt.Sprintf("unsupported action type: %s", action))
 		return nil, diags
@@ -58,27 +62,18 @@ func sendPostOrPutRequest(client *api.RestApiClient, planBody map[string]any, en
 	return response, diags
 }
 
-func sendDeleteRequest(client *api.RestApiClient, endpoint string) (*http.Response, diag.Diagnostics) {
-	response, diags := client.DeleteRequest(endpoint)
-	if diags.HasError() {
-		return nil, diags
-	}
-
-	return response, diags
-}
-
 func requestAndUnmarshal[T any](client *api.RestApiClient, respObj *T, requestType string, endpoint string, planBody map[string]any, marshalResponse bool) diag.Diagnostics {
 	var response *http.Response
 	var diags diag.Diagnostics
 	switch requestType {
 	case "GET":
-		response, diags = sendGetRequest(client, endpoint)
+		response, diags = sendRequest(client, nil, endpoint, actionGetRequest)
 	case "POST":
-		response, diags = sendPostOrPutRequest(client, planBody, endpoint, "Create")
+		response, diags = sendRequest(client, planBody, endpoint, actionCreateRequest)
 	case "PUT":
-		response, diags = sendPostOrPutRequest(client, planBody, endpoint, "Update")
+		response, diags = sendRequest(client, planBody, endpoint, actionUpdateRequest)
 	case "DELETE":
-		response, diags = sendDeleteRequest(client, endpoint)
+		response, diags = sendRequest(client, nil, endpoint, actionDeleteRequest)
 	default:
 		diags.AddError("Invalid Request Type", fmt.Sprintf("unsupported request type: %s", requestType))
 		return diags
@@ -141,7 +136,7 @@ func ConvertMillisToTimes(millis any) FormattedTimes {
 }
 
 func GetCertificateBinary(client *api.RestApiClient, endpoint string) ([]byte, diag.Diagnostics) {
-	response, diags := client.DoRequest(http.MethodGet, endpoint, nil, "application/pkix-cert")
+	response, diags := client.DoRequest(http.MethodGet, endpoint, nil, "application/pkix-cert", "")
 	if diags.HasError() {
 		return nil, diags
 	}
@@ -161,4 +156,41 @@ func GetCertificateBinary(client *api.RestApiClient, endpoint string) ([]byte, d
 		return nil, diags
 	}
 	return body, diags
+}
+
+func validatePEMData(data string) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	if strings.TrimSpace(data) == "" {
+		diags.AddError(
+			"Empty PEM Data",
+			"No certificate data provided.",
+		)
+		return diags
+	}
+
+	block, _ := pem.Decode([]byte(data))
+	if block == nil {
+		diags.AddError(
+			"Invalid PEM Block",
+			"Failed to decode PEM block. Ensure certificate is valid PEM format.",
+		)
+		return diags
+	}
+
+	// Only check supported types
+	switch block.Type {
+	case "CERTIFICATE",
+		"PRIVATE KEY",
+		"RSA PRIVATE KEY",
+		"EC PRIVATE KEY":
+		return diags
+	default:
+		diags.AddError(
+			"Unsupported PEM Type",
+			fmt.Sprintf("Unsupported PEM block type: %s", block.Type),
+		)
+	}
+
+	return diags
 }

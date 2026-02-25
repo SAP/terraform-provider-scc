@@ -238,7 +238,7 @@ func hookRedactSensitiveBody() func(i *cassette.Interaction) error {
 
 		if strings.Contains(i.Response.Body, "issuer") {
 			reIssuer := regexp.MustCompile(`"issuer"\s*:\s*".*?"`)
-			i.Response.Body = reIssuer.ReplaceAllString(i.Response.Body, `"issuer": "CN=redacted,OU=SAP Cloud Platform Clients,O=redacted,L=redacted,C=redacted"`)
+			i.Response.Body = reIssuer.ReplaceAllString(i.Response.Body, `"issuer": "CN=redacted,OU=redacted,O=redacted,L=redacted,C=redacted"`)
 		}
 
 		if strings.Contains(i.Response.Body, "serialNumber") {
@@ -295,6 +295,7 @@ func TestSCCProvider_AllResources(t *testing.T) {
 		"scc_subaccount_k8s_service_channel",
 		"scc_subaccount_abap_service_channel",
 		"scc_subaccount_using_auth",
+		"scc_system_certificate_self_signed",
 	}
 
 	ctx := context.Background()
@@ -457,7 +458,7 @@ func TestSCCProvider_NoAuth(t *testing.T) {
 }
 
 func TestSCCProvider_InvalidPEM(t *testing.T) {
-	diags := validatePEM("not-a-valid-pem")
+	diags := validatePEMData("not-a-valid-pem")
 	assert.True(t, diags.HasError(), "Expected diagnostics to contain error for invalid PEM")
 	assert.Equal(t, "Invalid PEM Block", diags[0].Summary())
 }
@@ -474,7 +475,7 @@ zj0EAwIDSAAwRQIgTTb7LtqRQon2OHxMOyuvl+e8FQZXzSH14Yc7u9s9n9ICIQDE
 CEGH5OML6z7C7oCSys7ce4GkTbtJ4rNZoxVOxFwPvA==
 -----END CERTIFICATE-----`
 
-	diags := validatePEM(dummyPEM)
+	diags := validatePEMData(dummyPEM)
 	assert.False(t, diags.HasError(), "expected no error diagnostics for valid PEM")
 	assert.Len(t, diags, 0)
 }

@@ -9,7 +9,7 @@ import (
 )
 
 type CACertificateConfig struct {
-	SubjectDN       types.String `tfsdk:"subject_dn"`
+	SubjectDN       types.Object `tfsdk:"subject_dn"`
 	Issuer          types.String `tfsdk:"issuer"`
 	ValidFrom       types.String `tfsdk:"valid_from"`
 	ValidTo         types.String `tfsdk:"valid_to"`
@@ -28,11 +28,18 @@ func CACertificateDataSourceValueFrom(ctx context.Context, value apiobjects.CACe
 	model := &CACertificateConfig{
 		ValidTo:         ConvertMillisToTimes(value.NotAfterTimeStamp).WithTimezone,
 		ValidFrom:       ConvertMillisToTimes(value.NotBeforeTimeStamp).WithTimezone,
-		SubjectDN:       types.StringValue(value.SubjectDN),
 		Issuer:          types.StringValue(value.Issuer),
 		SerialNumber:    types.StringValue(value.SerialNumber),
 		SubjectAltNames: subjectAltNames,
 		CertificatePEM:  types.StringValue(string(pemBytes)),
+		SubjectDN:       types.ObjectNull(subjectDNAttrTypes.AttrTypes),
+	}
+
+	if value.SubjectDN != "" {
+		dn := parseSubjectDN(value.SubjectDN)
+		model.SubjectDN = buildSubjectDNObject(dn)
+	} else {
+		model.SubjectDN = types.ObjectNull(subjectDNAttrTypes.AttrTypes)
 	}
 	return *model, diag.Diagnostics{}
 }

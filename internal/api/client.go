@@ -148,7 +148,7 @@ func withTLSClient(client *http.Client, tlsConfig *tls.Config) *http.Client {
 	return client
 }
 
-func (c *RestApiClient) DoRequest(method string, endpoint string, body []byte, acceptType string) (*http.Response, diag.Diagnostics) {
+func (c *RestApiClient) DoRequest(method string, endpoint string, body []byte, acceptType string, contentType string) (*http.Response, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	endpointURL, err := url.Parse(endpoint)
 	if err != nil {
@@ -171,7 +171,11 @@ func (c *RestApiClient) DoRequest(method string, endpoint string, body []byte, a
 	}
 
 	if body != nil {
-		req.Header.Set("Content-Type", "application/json")
+		if contentType != "" {
+			req.Header.Set("Content-Type", contentType)
+		} else {
+			req.Header.Set("Content-Type", "application/json")
+		}
 	}
 
 	if c.Username != "" && c.Password != "" {
@@ -230,17 +234,17 @@ func validateResponse(response *http.Response) diag.Diagnostics {
 }
 
 func (c *RestApiClient) GetRequest(endpoint string) (*http.Response, diag.Diagnostics) {
-	return c.DoRequest(http.MethodGet, endpoint, nil, "")
+	return c.DoRequest(http.MethodGet, endpoint, nil, "", "")
 }
 
 func (c *RestApiClient) PostRequest(endpoint string, body []byte) (*http.Response, diag.Diagnostics) {
-	return c.DoRequest(http.MethodPost, endpoint, body, "")
+	return c.DoRequest(http.MethodPost, endpoint, body, "", "")
 }
 
 func (c *RestApiClient) PutRequest(endpoint string, body []byte) (*http.Response, diag.Diagnostics) {
-	return c.DoRequest(http.MethodPut, endpoint, body, "")
+	return c.DoRequest(http.MethodPut, endpoint, body, "", "")
 }
 
 func (c *RestApiClient) DeleteRequest(endpoint string) (*http.Response, diag.Diagnostics) {
-	return c.DoRequest(http.MethodDelete, endpoint, nil, "")
+	return c.DoRequest(http.MethodDelete, endpoint, nil, "", "")
 }

@@ -38,7 +38,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Mon, 23 Feb 2026 10:53:46 GMT
+                - Mon, 23 Feb 2026 10:30:58 GMT
             Server:
                 - nginx/1.27.5
             Set-Cookie:
@@ -48,10 +48,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - d85a7c5a-8cd1-4c73-7ddd-94bb32968f5a
+                - f71778f6-aa17-4a48-43d7-37fcef6f0026
         status: 200 OK
         code: 200
-        duration: 799.495542ms
+        duration: 988.137667ms
     - id: 1
       request:
         proto: HTTP/1.1
@@ -70,7 +70,7 @@ interactions:
                 - '*/*'
             Authorization:
                 - redacted
-        url: https://redacted.instance.url/api/v1/configuration/connector/onPremise/ppCaCertificate
+        url: https://redacted.instance.url/api/v1/connector/version
         method: GET
       response:
         proto: HTTP/1.1
@@ -78,18 +78,18 @@ interactions:
         proto_minor: 1
         transfer_encoding: []
         trailer: {}
-        content_length: 182
+        content_length: 20
         uncompressed: false
-        body: '{"notAfterTimeStamp":1803379492000,"notBeforeTimeStamp":1771842892000,"subjectDN": "CN=redacted,L=redacted,OU=redacted,OU=redacted,O=redacted,C=redacted","issuer": "CN=redacted,OU=redacted,O=redacted,L=redacted,C=redacted","serialNumber": "aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa"}'
+        body: '{"version":"2.18.2"}'
         headers:
             Cache-Control:
-                - no-store
+                - max-age=3600
             Content-Length:
-                - "182"
+                - "20"
             Content-Type:
                 - application/json
             Date:
-                - Mon, 23 Feb 2026 10:53:46 GMT
+                - Mon, 23 Feb 2026 10:30:58 GMT
             Server:
                 - nginx/1.27.5
             Set-Cookie:
@@ -99,50 +99,50 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - dc6d1901-ec32-4484-69ec-b4ee32c1fd5b
+                - a51f9843-7a7a-4f66-746c-10ef2169ab86
         status: 200 OK
         code: 200
-        duration: 276.035166ms
+        duration: 317.887875ms
     - id: 2
       request:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
-        content_length: 0
+        content_length: 69
         transfer_encoding: []
         trailer: {}
         host: https://redacted.instance.url
         remote_addr: ""
         request_uri: ""
-        body: ""
+        body: '{"keySize":2048,"subjectDN":"CN=testCertificate","type":"selfsigned"}'
         form: {}
         headers:
             Accept:
-                - application/pkix-cert
+                - '*/*'
             Authorization:
                 - redacted
-        url: https://redacted.instance.url/api/v1/configuration/connector/onPremise/ppCaCertificate
-        method: GET
+            Content-Type:
+                - application/json
+        url: https://redacted.instance.url/api/v1/configuration/connector/onPremise/systemCertificate
+        method: POST
       response:
         proto: HTTP/1.1
         proto_major: 1
         proto_minor: 1
         transfer_encoding: []
         trailer: {}
-        content_length: 726
+        content_length: 0
         uncompressed: false
-        body: REDACTED_BINARY_CERTIFICATE
+        body: ""
         headers:
             Cache-Control:
                 - no-store
-            Content-Disposition:
-                - attachment;filename="ca_certificate.der"
             Content-Length:
-                - "726"
-            Content-Type:
-                - application/octet-stream
+                - "0"
             Date:
-                - Mon, 23 Feb 2026 10:53:47 GMT
+                - Mon, 23 Feb 2026 10:30:59 GMT
+            Location:
+                - redacted
             Server:
                 - nginx/1.27.5
             Set-Cookie:
@@ -152,10 +152,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 48c469ef-40a8-4f2f-72b8-85a11e97593f
-        status: 200 OK
-        code: 200
-        duration: 279.2155ms
+                - 620960b1-08dc-43f8-7d13-c1bd31585edf
+        status: 201 Created
+        code: 201
+        duration: 694.750542ms
     - id: 3
       request:
         proto: HTTP/1.1
@@ -174,7 +174,7 @@ interactions:
                 - '*/*'
             Authorization:
                 - redacted
-        url: https://redacted.instance.url/api/v1/connector/version
+        url: https://redacted.instance.url/api/v1/configuration/connector/onPremise/systemCertificate
         method: GET
       response:
         proto: HTTP/1.1
@@ -182,18 +182,18 @@ interactions:
         proto_minor: 1
         transfer_encoding: []
         trailer: {}
-        content_length: 20
+        content_length: 198
         uncompressed: false
-        body: '{"version":"2.18.2"}'
+        body: '{"notAfterTimeStamp":1803378659000,"notBeforeTimeStamp":1771842059000,"subjectDN": "CN=redacted,L=redacted,OU=redacted,OU=redacted,O=redacted,C=redacted","issuer": "CN=redacted,OU=redacted,O=redacted,L=redacted,C=redacted","serialNumber": "aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa"}'
         headers:
             Cache-Control:
-                - max-age=3600
+                - no-store
             Content-Length:
-                - "20"
+                - "198"
             Content-Type:
                 - application/json
             Date:
-                - Mon, 23 Feb 2026 10:53:47 GMT
+                - Mon, 23 Feb 2026 10:30:59 GMT
             Server:
                 - nginx/1.27.5
             Set-Cookie:
@@ -203,10 +203,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - f082d36e-7106-43db-73c0-14821810bb8f
+                - 1708311b-31d8-47c2-73c1-4ba0ec1936ee
         status: 200 OK
         code: 200
-        duration: 281.388083ms
+        duration: 316.366167ms
     - id: 4
       request:
         proto: HTTP/1.1
@@ -222,10 +222,10 @@ interactions:
         form: {}
         headers:
             Accept:
-                - '*/*'
+                - application/pkix-cert
             Authorization:
                 - redacted
-        url: https://redacted.instance.url/api/v1/connector/version
+        url: https://redacted.instance.url/api/v1/configuration/connector/onPremise/systemCertificate
         method: GET
       response:
         proto: HTTP/1.1
@@ -233,18 +233,20 @@ interactions:
         proto_minor: 1
         transfer_encoding: []
         trailer: {}
-        content_length: 20
+        content_length: 700
         uncompressed: false
-        body: '{"version":"2.18.2"}'
+        body: REDACTED_BINARY_CERTIFICATE
         headers:
             Cache-Control:
-                - max-age=3600
+                - no-store
+            Content-Disposition:
+                - attachment;filename="system_certificate.der"
             Content-Length:
-                - "20"
+                - "700"
             Content-Type:
-                - application/json
+                - application/octet-stream
             Date:
-                - Mon, 23 Feb 2026 10:53:47 GMT
+                - Mon, 23 Feb 2026 10:31:00 GMT
             Server:
                 - nginx/1.27.5
             Set-Cookie:
@@ -254,10 +256,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 721158c5-a9ee-4634-7708-3db23a2cb735
+                - aba7f8d7-e600-4181-5801-03c09f8a6731
         status: 200 OK
         code: 200
-        duration: 277.814625ms
+        duration: 384.400626ms
     - id: 5
       request:
         proto: HTTP/1.1
@@ -276,7 +278,7 @@ interactions:
                 - '*/*'
             Authorization:
                 - redacted
-        url: https://redacted.instance.url/api/v1/configuration/connector/onPremise/ppCaCertificate
+        url: https://redacted.instance.url/api/v1/connector/version
         method: GET
       response:
         proto: HTTP/1.1
@@ -284,18 +286,18 @@ interactions:
         proto_minor: 1
         transfer_encoding: []
         trailer: {}
-        content_length: 182
+        content_length: 20
         uncompressed: false
-        body: '{"notAfterTimeStamp":1803379492000,"notBeforeTimeStamp":1771842892000,"subjectDN": "CN=redacted,L=redacted,OU=redacted,OU=redacted,O=redacted,C=redacted","issuer": "CN=redacted,OU=redacted,O=redacted,L=redacted,C=redacted","serialNumber": "aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa"}'
+        body: '{"version":"2.18.2"}'
         headers:
             Cache-Control:
-                - no-store
+                - max-age=3600
             Content-Length:
-                - "182"
+                - "20"
             Content-Type:
                 - application/json
             Date:
-                - Mon, 23 Feb 2026 10:53:48 GMT
+                - Mon, 23 Feb 2026 10:31:00 GMT
             Server:
                 - nginx/1.27.5
             Set-Cookie:
@@ -305,64 +307,11 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 25f3af8b-9272-4fd4-43ef-42e6e09c5390
+                - 3b51ccb7-e3bd-4fb5-6a2a-cf751b455883
         status: 200 OK
         code: 200
-        duration: 281.1995ms
+        duration: 329.9565ms
     - id: 6
-      request:
-        proto: HTTP/1.1
-        proto_major: 1
-        proto_minor: 1
-        content_length: 0
-        transfer_encoding: []
-        trailer: {}
-        host: https://redacted.instance.url
-        remote_addr: ""
-        request_uri: ""
-        body: ""
-        form: {}
-        headers:
-            Accept:
-                - application/pkix-cert
-            Authorization:
-                - redacted
-        url: https://redacted.instance.url/api/v1/configuration/connector/onPremise/ppCaCertificate
-        method: GET
-      response:
-        proto: HTTP/1.1
-        proto_major: 1
-        proto_minor: 1
-        transfer_encoding: []
-        trailer: {}
-        content_length: 726
-        uncompressed: false
-        body: REDACTED_BINARY_CERTIFICATE
-        headers:
-            Cache-Control:
-                - no-store
-            Content-Disposition:
-                - attachment;filename="ca_certificate.der"
-            Content-Length:
-                - "726"
-            Content-Type:
-                - application/octet-stream
-            Date:
-                - Mon, 23 Feb 2026 10:53:48 GMT
-            Server:
-                - nginx/1.27.5
-            Set-Cookie:
-                - redacted
-            Strict-Transport-Security:
-                - max-age=31536000; includeSubDomains; preload;
-            X-Csrf-Token:
-                - redacted
-            X-Vcap-Request-Id:
-                - 7bb1e12a-d2ad-4776-7e3a-399056daa39f
-        status: 200 OK
-        code: 200
-        duration: 280.051917ms
-    - id: 7
       request:
         proto: HTTP/1.1
         proto_major: 1
@@ -399,7 +348,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Mon, 23 Feb 2026 10:53:48 GMT
+                - Mon, 23 Feb 2026 10:31:00 GMT
             Server:
                 - nginx/1.27.5
             Set-Cookie:
@@ -409,11 +358,11 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 75b93add-ee54-49eb-60e4-6bdae347ce1d
+                - 785f2125-81be-4b34-7a24-5ffa0d2ea65c
         status: 200 OK
         code: 200
-        duration: 281.868459ms
-    - id: 8
+        duration: 327.386292ms
+    - id: 7
       request:
         proto: HTTP/1.1
         proto_major: 1
@@ -431,7 +380,7 @@ interactions:
                 - '*/*'
             Authorization:
                 - redacted
-        url: https://redacted.instance.url/api/v1/configuration/connector/onPremise/ppCaCertificate
+        url: https://redacted.instance.url/api/v1/configuration/connector/onPremise/systemCertificate
         method: GET
       response:
         proto: HTTP/1.1
@@ -439,18 +388,18 @@ interactions:
         proto_minor: 1
         transfer_encoding: []
         trailer: {}
-        content_length: 182
+        content_length: 198
         uncompressed: false
-        body: '{"notAfterTimeStamp":1803379492000,"notBeforeTimeStamp":1771842892000,"subjectDN": "CN=redacted,L=redacted,OU=redacted,OU=redacted,O=redacted,C=redacted","issuer": "CN=redacted,OU=redacted,O=redacted,L=redacted,C=redacted","serialNumber": "aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa"}'
+        body: '{"notAfterTimeStamp":1803378659000,"notBeforeTimeStamp":1771842059000,"subjectDN": "CN=redacted,L=redacted,OU=redacted,OU=redacted,O=redacted,C=redacted","issuer": "CN=redacted,OU=redacted,O=redacted,L=redacted,C=redacted","serialNumber": "aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa:aa"}'
         headers:
             Cache-Control:
                 - no-store
             Content-Length:
-                - "182"
+                - "198"
             Content-Type:
                 - application/json
             Date:
-                - Mon, 23 Feb 2026 10:53:49 GMT
+                - Mon, 23 Feb 2026 10:31:01 GMT
             Server:
                 - nginx/1.27.5
             Set-Cookie:
@@ -460,11 +409,11 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 5b7d7b6b-0c56-417b-6179-7bca753faee0
+                - 1425abe2-db42-4311-5f6b-253a4e6e4298
         status: 200 OK
         code: 200
-        duration: 276.053958ms
-    - id: 9
+        duration: 315.347251ms
+    - id: 8
       request:
         proto: HTTP/1.1
         proto_major: 1
@@ -482,7 +431,7 @@ interactions:
                 - application/pkix-cert
             Authorization:
                 - redacted
-        url: https://redacted.instance.url/api/v1/configuration/connector/onPremise/ppCaCertificate
+        url: https://redacted.instance.url/api/v1/configuration/connector/onPremise/systemCertificate
         method: GET
       response:
         proto: HTTP/1.1
@@ -490,20 +439,20 @@ interactions:
         proto_minor: 1
         transfer_encoding: []
         trailer: {}
-        content_length: 726
+        content_length: 700
         uncompressed: false
         body: REDACTED_BINARY_CERTIFICATE
         headers:
             Cache-Control:
                 - no-store
             Content-Disposition:
-                - attachment;filename="ca_certificate.der"
+                - attachment;filename="system_certificate.der"
             Content-Length:
-                - "726"
+                - "700"
             Content-Type:
                 - application/octet-stream
             Date:
-                - Mon, 23 Feb 2026 10:53:49 GMT
+                - Mon, 23 Feb 2026 10:31:01 GMT
             Server:
                 - nginx/1.27.5
             Set-Cookie:
@@ -513,10 +462,61 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 86cb7bae-655d-4bbe-4a5f-2a44a2a6fd7c
+                - 45790cb0-a27b-427d-7f72-cd2cd8968a77
         status: 200 OK
         code: 200
-        duration: 284.431042ms
+        duration: 316.550542ms
+    - id: 9
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: https://redacted.instance.url
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+        url: https://redacted.instance.url/api/v1/connector/version
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 20
+        uncompressed: false
+        body: '{"version":"2.18.2"}'
+        headers:
+            Cache-Control:
+                - max-age=3600
+            Content-Length:
+                - "20"
+            Content-Type:
+                - application/json
+            Date:
+                - Mon, 23 Feb 2026 10:31:02 GMT
+            Server:
+                - nginx/1.27.5
+            Set-Cookie:
+                - redacted
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            X-Csrf-Token:
+                - redacted
+            X-Vcap-Request-Id:
+                - c44b9d5d-e040-473c-51df-ed1d2f36f00c
+        status: 200 OK
+        code: 200
+        duration: 326.307ms
     - id: 10
       request:
         proto: HTTP/1.1
@@ -554,7 +554,7 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Mon, 23 Feb 2026 10:53:49 GMT
+                - Mon, 23 Feb 2026 10:31:02 GMT
             Server:
                 - nginx/1.27.5
             Set-Cookie:
@@ -564,7 +564,54 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 4a3d03c2-e521-4696-56a7-2e06fb413b5c
+                - 00947421-30d1-44aa-554d-b80ab1cdb6eb
         status: 200 OK
         code: 200
-        duration: 276.931792ms
+        duration: 319.017667ms
+    - id: 11
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: https://redacted.instance.url
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+        url: https://redacted.instance.url/api/v1/configuration/connector/onPremise/systemCertificate
+        method: DELETE
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 0
+        uncompressed: false
+        body: ""
+        headers:
+            Cache-Control:
+                - no-store
+            Date:
+                - Mon, 23 Feb 2026 10:31:02 GMT
+            Server:
+                - nginx/1.27.5
+            Set-Cookie:
+                - redacted
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            X-Csrf-Token:
+                - redacted
+            X-Vcap-Request-Id:
+                - d46026dd-0f65-4695-5394-f5711d118112
+        status: 204 No Content
+        code: 204
+        duration: 511.345042ms

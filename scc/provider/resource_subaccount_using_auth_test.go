@@ -40,7 +40,7 @@ func TestResourceSubaccountUsingAuth(t *testing.T) {
 						resource.TestCheckResourceAttr("scc_subaccount_using_auth.scc_sa_auth", "tunnel.application_connections.#", "0"),
 						resource.TestCheckResourceAttr("scc_subaccount_using_auth.scc_sa_auth", "tunnel.service_channels.#", "0"),
 
-						resource.TestMatchResourceAttr("scc_subaccount_using_auth.scc_sa_auth", "tunnel.subaccount_certificate.issuer", regexp.MustCompile(`CN=.*?,OU=S.*?,O=.*?,L=.*?,C=.*?`)),
+						resource.TestMatchResourceAttr("scc_subaccount_using_auth.scc_sa_auth", "tunnel.subaccount_certificate.issuer", regexp.MustCompile(`CN=.*?,OU=.*?,O=.*?,L=.*?,C=.*?`)),
 						resource.TestMatchResourceAttr("scc_subaccount_using_auth.scc_sa_auth", "tunnel.subaccount_certificate.valid_to", regexValidTimeStamp),
 						resource.TestMatchResourceAttr("scc_subaccount_using_auth.scc_sa_auth", "tunnel.subaccount_certificate.valid_from", regexValidTimeStamp),
 						resource.TestMatchResourceAttr("scc_subaccount_using_auth.scc_sa_auth", "tunnel.subaccount_certificate.serial_number", regexValidSerialNumber),

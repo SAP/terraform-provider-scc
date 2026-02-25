@@ -314,7 +314,7 @@ func TestRestApiClient_DoRequest_BinaryResponse(t *testing.T) {
 	client, diags := createBasicAuthClient(server.URL)
 	require.False(t, diags.HasError())
 
-	resp, diags := client.DoRequest(http.MethodGet, "/cert", nil, "application/pkix-cert")
+	resp, diags := client.DoRequest(http.MethodGet, "/cert", nil, "application/pkix-cert", "")
 
 	require.False(t, diags.HasError())
 	body, _ := io.ReadAll(resp.Body)

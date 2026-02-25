@@ -36,6 +36,19 @@ data "scc_ca_certificate" "ca_certificate" {}
 - `issuer` (String) Distinguished Name (DN) of the issuing Certificate Authority. For self-signed root CAs, this is the same as the subject.
 - `serial_number` (String) Serial number assigned to the CA certificate by its issuing authority.
 - `subject_alternative_names` (String) Subject Alternative Names (SANs) present in the CA certificate, if any.
-- `subject_dn` (String) Subject Distinguished Name (DN) of the CA certificate, identifying the certificate authority.
+- `subject_dn` (Attributes) Subject Distinguished Name (DN) of the issuing **Certificate Authority (CA)** certificate. (see [below for nested schema](#nestedatt--subject_dn))
 - `valid_from` (String) Timestamp of the beginning of the validity period.
 - `valid_to` (String) Timestamp of the end of the validity period.
+
+<a id="nestedatt--subject_dn"></a>
+### Nested Schema for `subject_dn`
+
+Read-Only:
+
+- `c` (String) Country (C) of the CA subject, typically represented as a two-letter ISO country code.
+- `cn` (String) Common Name (CN) of the CA certificate, typically representing the CA name.
+- `email` (String) Email address associated with the CA subject.
+- `l` (String) Locality (L) of the CA subject, such as a city or town.
+- `o` (String) Organization (O) of the CA subject, representing the name of the organization.
+- `ou` (String) Organizational Unit (OU) of the CA subject, representing a department or division within an organization.
+- `st` (String) State or Province (ST) of the CA subject.
