@@ -1,10 +1,21 @@
 package provider
 
 import (
+	"bytes"
+	"context"
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
+	"crypto/x509/pkix"
+	"encoding/pem"
+	"math/big"
 	"testing"
+	"time"
 
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestParseSubjectDN_AllFields(t *testing.T) {
@@ -233,4 +244,115 @@ func TestBuildSubjectDN_UnknownValuesIgnored(t *testing.T) {
 	result := BuildSubjectDN(subject)
 
 	assert.Equal(t, "CN=cert", result)
+}
+
+func TestExpandSubjectDN_Null(t *testing.T) {
+	ctx := context.Background()
+	obj := types.ObjectNull(subjectDNAttrTypes.AttrTypes)
+
+	res, diags := ExpandSubjectDN(ctx, obj)
+
+	assert.Nil(t, res)
+	assert.False(t, diags.HasError())
+}
+func TestExpandSubjectDN_Valid(t *testing.T) {
+	ctx := context.Background()
+
+	obj, diags := types.ObjectValue(
+		subjectDNAttrTypes.AttrTypes,
+		map[string]attr.Value{
+			"cn":    types.StringValue("cert"),
+			"email": types.StringNull(),
+			"l":     types.StringNull(),
+			"ou":    types.StringNull(),
+			"o":     types.StringValue("SAP"),
+			"st":    types.StringNull(),
+			"c":     types.StringNull(),
+		},
+	)
+
+	assert.False(t, diags.HasError())
+
+	res, diags := ExpandSubjectDN(ctx, obj)
+
+	assert.False(t, diags.HasError())
+	assert.Equal(t, "cert", res.CommonName.ValueString())
+	assert.Equal(t, "SAP", res.Organization.ValueString())
+}
+
+func TestValidatePEMData_Empty(t *testing.T) {
+	diags := validatePEMData("")
+	assert.True(t, diags.HasError())
+}
+
+func TestValidatePEMData_InvalidPEM(t *testing.T) {
+	diags := validatePEMData("not a pem")
+	assert.True(t, diags.HasError())
+}
+
+func TestValidatePEMData_UnsupportedType(t *testing.T) {
+	pem := `-----BEGIN FOO-----
+abcd
+-----END FOO-----`
+
+	diags := validatePEMData(pem)
+	assert.True(t, diags.HasError())
+}
+
+func TestValidatePEMData_ValidCert(t *testing.T) {
+	var validCert = generateTestCert(t)
+	diags := validatePEMData(validCert)
+	assert.False(t, diags.HasError())
+}
+
+func TestValidatePEMChain_Empty(t *testing.T) {
+	diags := validatePEMChain("")
+	assert.True(t, diags.HasError())
+}
+
+func TestValidatePEMChain_InvalidBlock(t *testing.T) {
+	data := `-----BEGIN PRIVATE KEY-----
+abcd
+-----END PRIVATE KEY-----`
+
+	diags := validatePEMChain(data)
+	assert.True(t, diags.HasError())
+}
+
+func TestValidatePEMChain_MultipleCerts(t *testing.T) {
+	var validCert = generateTestCert(t)
+	data := validCert + "\n" + validCert
+	diags := validatePEMChain(data)
+	assert.False(t, diags.HasError())
+}
+
+func generateTestCert(t *testing.T) string {
+	priv, err := rsa.GenerateKey(rand.Reader, 2048)
+	require.NoError(t, err)
+
+	template := x509.Certificate{
+		SerialNumber: big.NewInt(1),
+		NotBefore:    time.Now(),
+		NotAfter:     time.Now().Add(24 * time.Hour),
+		Subject: pkix.Name{
+			CommonName: "test-cert",
+		},
+	}
+
+	derBytes, err := x509.CreateCertificate(
+		rand.Reader,
+		&template,
+		&template,
+		&priv.PublicKey,
+		priv,
+	)
+	require.NoError(t, err)
+
+	var pemBuf bytes.Buffer
+	pem.Encode(&pemBuf, &pem.Block{
+		Type:  "CERTIFICATE",
+		Bytes: derBytes,
+	})
+
+	return pemBuf.String()
 }

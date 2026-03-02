@@ -2,12 +2,10 @@ package provider
 
 import (
 	"encoding/json"
-	"encoding/pem"
 	"fmt"
 	"io"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/SAP/terraform-provider-scc/internal/api"
@@ -133,64 +131,4 @@ func ConvertMillisToTimes(millis any) FormattedTimes {
 		UTC:          types.StringValue(t.Format("2006-01-02 15:04:05")),
 		WithTimezone: types.StringValue(t.Format("2006-01-02 15:04:05 -0700")),
 	}
-}
-
-func GetCertificateBinary(client *api.RestApiClient, endpoint string) ([]byte, diag.Diagnostics) {
-	response, diags := client.DoRequest(http.MethodGet, endpoint, nil, "application/pkix-cert", "")
-	if diags.HasError() {
-		return nil, diags
-	}
-
-	defer func() {
-		if err := response.Body.Close(); err != nil {
-			diags.AddWarning(
-				"Failed to Close Response Body",
-				fmt.Sprintf("error closing response body: %v", err),
-			)
-		}
-	}()
-
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		diags.AddError("Failed to Read Response Body", fmt.Sprintf("failed to read response body: %v", err))
-		return nil, diags
-	}
-	return body, diags
-}
-
-func validatePEMData(data string) diag.Diagnostics {
-	var diags diag.Diagnostics
-
-	if strings.TrimSpace(data) == "" {
-		diags.AddError(
-			"Empty PEM Data",
-			"No certificate data provided.",
-		)
-		return diags
-	}
-
-	block, _ := pem.Decode([]byte(data))
-	if block == nil {
-		diags.AddError(
-			"Invalid PEM Block",
-			"Failed to decode PEM block. Ensure certificate is valid PEM format.",
-		)
-		return diags
-	}
-
-	// Only check supported types
-	switch block.Type {
-	case "CERTIFICATE",
-		"PRIVATE KEY",
-		"RSA PRIVATE KEY",
-		"EC PRIVATE KEY":
-		return diags
-	default:
-		diags.AddError(
-			"Unsupported PEM Type",
-			fmt.Sprintf("Unsupported PEM block type: %s", block.Type),
-		)
-	}
-
-	return diags
 }

@@ -122,3 +122,173 @@ func parseSubjectDN(dn string) *CertificateSubjectDNConfig {
 
 	return result
 }
+
+func uploadSignedChain(c *api.RestApiClient, endpoint, cert string) diag.Diagnostics {
+	var diags diag.Diagnostics
+	var body bytes.Buffer
+	writer := multipart.NewWriter(&body)
+
+	part, err := writer.CreateFormFile("signedCertificate", "signed_chain.pem")
+	if err != nil {
+		diags.AddError(
+			"Failed to Create Multipart Form",
+			fmt.Sprintf("error creating multipart form: %v", err),
+		)
+		return diags
+	}
+
+	_, err = part.Write([]byte(cert))
+	if err != nil {
+		diags.AddError(
+			"Failed to Write Certificate to Multipart Form",
+			fmt.Sprintf("error writing certificate to multipart form: %v", err),
+		)
+		return diags
+	}
+
+	if err := writer.Close(); err != nil {
+		diags.AddError(
+			"Failed to Finalize Multipart Form",
+			fmt.Sprintf("error closing multipart writer: %v", err),
+		)
+		return diags
+	}
+
+	resp, diags := c.DoRequest(http.MethodPatch, endpoint, body.Bytes(), "", writer.FormDataContentType())
+	if diags.HasError() {
+		return diags
+	}
+
+	defer func() {
+		if cerr := resp.Body.Close(); cerr != nil {
+			diags.AddWarning(
+				"Response Body Close Failed",
+				fmt.Sprintf("error closing response body: %v", cerr),
+			)
+		}
+	}()
+
+	if resp.StatusCode >= 400 {
+		bodyBytes, _ := io.ReadAll(resp.Body)
+		diags.AddError(
+			"Failed to Upload Signed Certificate Chain",
+			fmt.Sprintf("status code: %d, response: %s", resp.StatusCode, string(bodyBytes)),
+		)
+	}
+
+	return diags
+}
+
+func GetCertificateBinary(client *api.RestApiClient, endpoint string) ([]byte, diag.Diagnostics) {
+	response, diags := client.DoRequest(http.MethodGet, endpoint, nil, "application/pkix-cert", "")
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	defer func() {
+		if err := response.Body.Close(); err != nil {
+			diags.AddWarning(
+				"Failed to Close Response Body",
+				fmt.Sprintf("error closing response body: %v", err),
+			)
+		}
+	}()
+
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		diags.AddError("Failed to Read Response Body", fmt.Sprintf("failed to read response body: %v", err))
+		return nil, diags
+	}
+	return body, diags
+}
+
+func validatePEMData(data string) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	if strings.TrimSpace(data) == "" {
+		diags.AddError(
+			"Empty PEM Data",
+			"No certificate data provided.",
+		)
+		return diags
+	}
+
+	block, _ := pem.Decode([]byte(data))
+	if block == nil {
+		diags.AddError(
+			"Invalid PEM Block",
+			"Failed to decode PEM block. Ensure certificate is valid PEM format.",
+		)
+		return diags
+	}
+
+	// Only check supported types
+	switch block.Type {
+	case "CERTIFICATE",
+		"PRIVATE KEY",
+		"RSA PRIVATE KEY",
+		"EC PRIVATE KEY":
+		return diags
+	default:
+		diags.AddError(
+			"Unsupported PEM Type",
+			fmt.Sprintf("Unsupported PEM block type: %s", block.Type),
+		)
+	}
+
+	return diags
+}
+
+func validatePEMChain(data string) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	data = strings.TrimSpace(data)
+	if data == "" {
+		diags.AddError(
+			"Empty Certificate Chain Data",
+			"No certificate chain provided.",
+		)
+		return diags
+	}
+
+	result := []byte(data)
+	certCount := 0
+
+	for {
+		var block *pem.Block
+		block, result = pem.Decode(result)
+
+		if block == nil {
+			break
+		}
+
+		if block.Type != "CERTIFICATE" {
+			diags.AddError(
+				"Invalid PEM Block in Chain",
+				fmt.Sprintf("Failed to decode PEM block. Ensure certificate chain is valid PEM format. Unsupported block type: %s", block.Type),
+			)
+			return diags
+		}
+
+		_, err := x509.ParseCertificate(block.Bytes)
+		if err != nil {
+			diags.AddError(
+				"Invalid Certificate in Chain",
+				fmt.Sprintf("Failed to parse certificate in chain: %v", err),
+			)
+			return diags
+		}
+
+		certCount++
+	}
+
+	if certCount == 0 {
+		diags.AddError(
+			"No Valid Certificates Found",
+			"Failed to find any valid certificates in the provided chain.",
+		)
+		return diags
+	}
+
+	return diags
+}
