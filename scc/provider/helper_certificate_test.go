@@ -349,10 +349,11 @@ func generateTestCert(t *testing.T) string {
 	require.NoError(t, err)
 
 	var pemBuf bytes.Buffer
-	pem.Encode(&pemBuf, &pem.Block{
+	err = pem.Encode(&pemBuf, &pem.Block{
 		Type:  "CERTIFICATE",
 		Bytes: derBytes,
 	})
+	require.NoError(t, err)
 
 	return pemBuf.String()
 }
