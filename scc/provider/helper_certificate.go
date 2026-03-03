@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/x509"
+	"encoding/base64"
 	"encoding/pem"
 	"fmt"
 	"io"
@@ -17,6 +18,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 )
+
+// Wrappers for testing purposes (allows mocking in tests)
+var getCertificateBinaryFunc = getCertificateBinary
 
 type CertificateSubjectDNConfig struct {
 	CommonName         types.String `tfsdk:"cn"`
@@ -186,7 +190,83 @@ func uploadSignedChain(c *api.RestApiClient, endpoint, cert string) diag.Diagnos
 	return diags
 }
 
-func GetCertificateBinary(client *api.RestApiClient, endpoint string) ([]byte, diag.Diagnostics) {
+func uploadPKCS12Certificate(c *api.RestApiClient, endpoint string, pkcs12Bytes []byte, password, keyPassword string) diag.Diagnostics {
+	var diags diag.Diagnostics
+	var body bytes.Buffer
+	writer := multipart.NewWriter(&body)
+
+	if err := writer.WriteField("password", password); err != nil {
+		diags.AddError(
+			"Failed to Write Password Field",
+			fmt.Sprintf("error writing password field: %v", err),
+		)
+		return diags
+	}
+
+	if keyPassword != "" {
+		if err := writer.WriteField("keyPassword", keyPassword); err != nil {
+			diags.AddError(
+				"Failed to Write Key Password Field",
+				fmt.Sprintf("error writing key password field: %v", err),
+			)
+			return diags
+		}
+	}
+
+	part, err := writer.CreateFormFile("pkcs12", "certificate.p12")
+	if err != nil {
+		diags.AddError(
+			"Failed to Create Multipart Form",
+			fmt.Sprintf("error creating multipart form: %v", err),
+		)
+		return diags
+	}
+
+	_, err = part.Write(pkcs12Bytes)
+	if err != nil {
+		diags.AddError(
+			"Failed to Write Certificate to Multipart Form",
+			fmt.Sprintf("error writing certificate to multipart form: %v", err),
+		)
+		return diags
+	}
+
+	if err := writer.Close(); err != nil {
+		diags.AddError(
+			"Failed to Finalize Multipart Form",
+			fmt.Sprintf("error closing multipart writer: %v", err),
+		)
+		return diags
+	}
+
+	resp, diags := c.DoRequest(http.MethodPut, endpoint, body.Bytes(), "", writer.FormDataContentType())
+	if diags.HasError() {
+		return diags
+	}
+
+	defer func() {
+		if cerr := resp.Body.Close(); cerr != nil {
+			diags.AddWarning(
+				"Response Body Close Failed",
+				fmt.Sprintf("error closing response body: %v", cerr),
+			)
+		}
+	}()
+
+	if resp.StatusCode >= 400 {
+		bodyBytes, _ := io.ReadAll(resp.Body)
+		diags.AddError(
+			"Failed to Upload PKCS#12 Certificate",
+			fmt.Sprintf("status code: %d, response: %s", resp.StatusCode, string(bodyBytes)),
+		)
+
+		return diags
+	}
+
+	return diags
+}
+
+func getCertificateBinary(client *api.RestApiClient, endpoint string) ([]byte, diag.Diagnostics) {
 	response, diags := client.DoRequest(http.MethodGet, endpoint, nil, "application/pkix-cert", "")
 	if diags.HasError() {
 		return nil, diags
@@ -298,4 +378,34 @@ func validatePEMChain(data string) diag.Diagnostics {
 	}
 
 	return diags
+}
+
+func validatePKCS12Inputs(plan SystemCertificatePKCS12CertificateResourceConfig) ([]byte, diag.Diagnostics) {
+	var diags diag.Diagnostics
+
+	rawCertificate := []byte(plan.PKCS12Certificate.ValueString())
+	if decoded, err := base64.StdEncoding.DecodeString(plan.PKCS12Certificate.ValueString()); err == nil {
+		rawCertificate = decoded
+	}
+
+	if len(rawCertificate) == 0 {
+		diags.AddError(
+			"Invalid PKCS#12 Certificate",
+			"Provided PKCS#12 certificate is empty after decoding.",
+		)
+		return nil, diags
+	}
+
+	if !plan.KeyPassword.IsNull() &&
+		!plan.KeyPassword.IsUnknown() &&
+		plan.KeyPassword.ValueString() == "" {
+
+		diags.AddError(
+			"Invalid Key Password",
+			"If key_password is set, it must not be empty.",
+		)
+		return nil, diags
+	}
+
+	return rawCertificate, diags
 }

@@ -230,21 +230,21 @@ func (r *SystemCertificateSelfSignedResource) Create(ctx context.Context, req re
 	endpoint := endpoints.GetSystemCertificateEndpoint()
 
 	// Create Self-Signed Certificate
-	diags = requestAndUnmarshal(r.client, &respObj, "POST", endpoint, planBody, false)
+	diags = requestAndUnmarshalFunc(r.client, &respObj, "POST", endpoint, planBody, false)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	// Get Certificate Metadata
-	diags = requestAndUnmarshal(r.client, &respObj, "GET", endpoint, nil, true)
+	diags = requestAndUnmarshalFunc(r.client, &respObj, "GET", endpoint, nil, true)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	// Generate Binary Certificate
-	certBytes, diags := GetCertificateBinary(r.client, endpoint)
+	certBytes, diags := getCertificateBinaryFunc(r.client, endpoint)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -294,14 +294,14 @@ func (r *SystemCertificateSelfSignedResource) Read(ctx context.Context, req reso
 	}
 
 	// Get Certificate Metadata
-	diags = requestAndUnmarshal(r.client, &respObj, "GET", endpoint, nil, true)
+	diags = requestAndUnmarshalFunc(r.client, &respObj, "GET", endpoint, nil, true)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	// Generate Binary Certificate
-	certBytes, diags := GetCertificateBinary(r.client, endpoint)
+	certBytes, diags := getCertificateBinaryFunc(r.client, endpoint)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -351,7 +351,7 @@ func (r *SystemCertificateSelfSignedResource) Delete(ctx context.Context, req re
 
 	endpoint := endpoints.GetSystemCertificateEndpoint()
 
-	diags = requestAndUnmarshal(r.client, &respObj, "DELETE", endpoint, nil, false)
+	diags = requestAndUnmarshalFunc(r.client, &respObj, "DELETE", endpoint, nil, false)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return

@@ -142,14 +142,14 @@ func (d *SystemCertificateDataSource) Read(ctx context.Context, req datasource.R
 	endpoint := endpoints.GetSystemCertificateEndpoint()
 
 	// Get Certificate Metadata
-	diags = requestAndUnmarshal(d.client, &respObj, "GET", endpoint, nil, true)
+	diags = requestAndUnmarshalFunc(d.client, &respObj, "GET", endpoint, nil, true)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	// Generate Binary Certificate
-	certBytes, diags := GetCertificateBinary(d.client, endpoint)
+	certBytes, diags := getCertificateBinaryFunc(d.client, endpoint)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return

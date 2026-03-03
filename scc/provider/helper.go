@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/SAP/terraform-provider-scc/internal/api"
+	apiobjects "github.com/SAP/terraform-provider-scc/internal/api/apiObjects"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
@@ -23,6 +24,18 @@ const (
 type FormattedTimes struct {
 	UTC          types.String
 	WithTimezone types.String
+}
+
+// Wrappers for testing purposes (allows mocking in tests)
+var requestAndUnmarshalFunc = func(
+	client *api.RestApiClient,
+	respObj *apiobjects.SystemCertificate,
+	method string,
+	endpoint string,
+	body map[string]any,
+	expectJSON bool,
+) diag.Diagnostics {
+	return requestAndUnmarshal(client, respObj, method, endpoint, body, expectJSON)
 }
 
 func sendRequest(client *api.RestApiClient, planBody map[string]any, endpoint string, action string) (*http.Response, diag.Diagnostics) {
