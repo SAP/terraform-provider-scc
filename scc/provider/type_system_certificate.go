@@ -39,6 +39,14 @@ type SystemCertificateSignedChainResourceConfig struct {
 	SubjectAltNames types.String `tfsdk:"subject_alternative_names"`
 	CertificatePEM  types.String `tfsdk:"certificate_pem"`
 }
+
+type CSRActionConfig struct {
+	Type                    types.String `tfsdk:"type"`
+	KeySize                 types.Int64  `tfsdk:"key_size"`
+	SubjectDN               types.Object `tfsdk:"subject_dn"`
+	SubjectAlternativeNames types.List   `tfsdk:"subject_alternative_names"`
+}
+
 func SystemCertificateDataSourceValueFrom(ctx context.Context, value apiobjects.SystemCertificate, pemBytes []byte) (SystemCertificateConfig, diag.Diagnostics) {
 	subjectAltNames := types.StringNull()
 
