@@ -1,7 +1,7 @@
 action "scc_generate_csr" "system_cert" {
   config {
-    type     = "system"   # Options: ca | system | ui
-    key_size = 2048       # Options: 2048 | 4096
+    type     = "system" # Options: ca | system | ui
+    key_size = 2048     # Options: 2048 | 4096
     subject_dn = {
       cn    = "cloud-connector.example.com"
       o     = "SAP"
