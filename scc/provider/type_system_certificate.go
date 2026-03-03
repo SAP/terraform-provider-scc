@@ -29,6 +29,16 @@ type SystemCertificateSelfSignedResourceConfig struct {
 	CertificatePEM types.String `tfsdk:"certificate_pem"`
 }
 
+type SystemCertificateSignedChainResourceConfig struct {
+	SignedChain     types.String `tfsdk:"signed_chain"`
+	SubjectDN       types.Object `tfsdk:"subject_dn"`
+	Issuer          types.String `tfsdk:"issuer"`
+	ValidFrom       types.String `tfsdk:"valid_from"`
+	ValidTo         types.String `tfsdk:"valid_to"`
+	SerialNumber    types.String `tfsdk:"serial_number"`
+	SubjectAltNames types.String `tfsdk:"subject_alternative_names"`
+	CertificatePEM  types.String `tfsdk:"certificate_pem"`
+}
 func SystemCertificateDataSourceValueFrom(ctx context.Context, value apiobjects.SystemCertificate, pemBytes []byte) (SystemCertificateConfig, diag.Diagnostics) {
 	subjectAltNames := types.StringNull()
 
@@ -73,6 +83,34 @@ func SystemCertificateSelfSignedResourceValueFrom(ctx context.Context, value api
 	}
 	return *model, diag.Diagnostics{}
 }
+
+func SystemCertificateSignedChainResourceValueFrom(ctx context.Context, value apiobjects.SystemCertificate, pemBytes []byte) (SystemCertificateSignedChainResourceConfig, diag.Diagnostics) {
+	subjectAltNames := types.StringNull()
+
+	if value.SubjectAltNames != "" {
+		subjectAltNames = types.StringValue(value.SubjectAltNames)
+	}
+
+	model := &SystemCertificateSignedChainResourceConfig{
+		ValidTo:         ConvertMillisToTimes(value.NotAfterTimeStamp).WithTimezone,
+		ValidFrom:       ConvertMillisToTimes(value.NotBeforeTimeStamp).WithTimezone,
+		Issuer:          types.StringValue(value.Issuer),
+		SerialNumber:    types.StringValue(value.SerialNumber),
+		SubjectAltNames: subjectAltNames,
+		SubjectDN:       types.ObjectNull(subjectDNAttrTypes.AttrTypes),
+		CertificatePEM:  types.StringValue(string(pemBytes)),
+	}
+
+	if value.SubjectDN != "" {
+		dn := parseSubjectDN(value.SubjectDN)
+		model.SubjectDN = buildSubjectDNObject(dn)
+	} else {
+		model.SubjectDN = types.ObjectNull(subjectDNAttrTypes.AttrTypes)
+	}
+
+	return *model, diag.Diagnostics{}
+}
+
 func buildSubjectDNObject(dn *CertificateSubjectDNConfig) types.Object {
 	if dn == nil {
 		return types.ObjectNull(subjectDNAttrTypes.AttrTypes)

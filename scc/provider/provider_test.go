@@ -296,6 +296,7 @@ func TestSCCProvider_AllResources(t *testing.T) {
 		"scc_subaccount_abap_service_channel",
 		"scc_subaccount_using_auth",
 		"scc_system_certificate_self_signed",
+		"scc_system_certificate_signed_chain",
 	}
 
 	ctx := context.Background()

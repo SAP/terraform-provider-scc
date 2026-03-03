@@ -299,6 +299,7 @@ func (c *cloudConnectorProvider) Resources(_ context.Context) []func() resource.
 		NewSubaccountK8SServiceChannelResource,
 		NewSubaccountABAPServiceChannelResource,
 		NewSystemCertificateSelfSignedResource,
+		NewSystemCertificateSignedChainResource,
 	}
 }
 
