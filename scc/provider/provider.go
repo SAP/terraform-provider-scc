@@ -10,6 +10,7 @@ import (
 
 	"github.com/SAP/terraform-provider-scc/internal/api"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/action"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/list"
@@ -146,6 +147,7 @@ func (c *cloudConnectorProvider) Configure(ctx context.Context, req provider.Con
 	resp.DataSourceData = client
 	resp.ResourceData = client
 	resp.ListResourceData = client
+	resp.ActionData = client
 }
 
 func resolveAttributes(config cloudConnectorProviderData) (string, string, string, string, string, string) {
@@ -312,5 +314,11 @@ func (p *cloudConnectorProvider) ListResources(_ context.Context) []func() list.
 		NewSystemMappingResourceListResource,
 		NewSubaccountABAPServiceChannelListResource,
 		NewSubaccountK8SServiceChannelListResource,
+	}
+}
+
+func (p *cloudConnectorProvider) Actions(_ context.Context) []func() action.Action {
+	return []func() action.Action{
+		NewGenerateCSRAction,
 	}
 }
