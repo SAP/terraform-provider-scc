@@ -54,6 +54,8 @@ type SystemCertificatePKCS12CertificateResourceConfig struct {
 	SerialNumber      types.String `tfsdk:"serial_number"`
 	SubjectAltNames   types.String `tfsdk:"subject_alternative_names"`
 	CertificatePEM    types.String `tfsdk:"certificate_pem"`
+}
+
 type CSRActionConfig struct {
 	Type                    types.String `tfsdk:"type"`
 	KeySize                 types.Int64  `tfsdk:"key_size"`
