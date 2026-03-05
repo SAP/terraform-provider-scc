@@ -37,6 +37,7 @@ var requestAndUnmarshalFunc = func(
 ) diag.Diagnostics {
 	return requestAndUnmarshal(client, respObj, method, endpoint, body, expectJSON)
 }
+var sendRequestFunc = sendRequest
 
 func sendRequest(client *api.RestApiClient, planBody map[string]any, endpoint string, action string) (*http.Response, diag.Diagnostics) {
 	var response *http.Response

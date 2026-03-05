@@ -15,6 +15,7 @@ import (
 
 	"github.com/SAP/terraform-provider-scc/internal/api"
 	"github.com/SAP/terraform-provider-scc/validation/uuidvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/action"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
@@ -374,6 +375,39 @@ func TestSCCProvider_ListResources(t *testing.T) {
 		listResourceFunc().Metadata(
 			ctx,
 			resource.MetadataRequest{
+				ProviderTypeName: "scc",
+			},
+			&resp,
+		)
+
+		registered = append(registered, resp.TypeName)
+	}
+
+	assert.ElementsMatch(t, expected, registered)
+}
+
+func TestSCCProvider_AllActions(t *testing.T) {
+	ctx := context.Background()
+
+	expected := []string{
+		"scc_generate_csr",
+	}
+
+	p := New()
+
+	actionProvider, ok := p.(provider.ProviderWithActions)
+	if !ok {
+		t.Fatalf("provider does not implement ProviderWithActions")
+	}
+
+	var registered []string
+
+	for _, actionProviderFunc := range actionProvider.Actions(ctx) {
+		var resp action.MetadataResponse
+
+		actionProviderFunc().Metadata(
+			ctx,
+			action.MetadataRequest{
 				ProviderTypeName: "scc",
 			},
 			&resp,

@@ -44,6 +44,11 @@ var subjectDNAttrTypes = types.ObjectType{
 	},
 }
 
+type SubjectAlternativeNames struct {
+	Type  types.String `tfsdk:"type"`
+	Value types.String `tfsdk:"value"`
+}
+
 func ExpandSubjectDN(ctx context.Context, subjectDN types.Object) (*CertificateSubjectDNConfig, diag.Diagnostics) {
 	if subjectDN.IsNull() || subjectDN.IsUnknown() {
 		return nil, diag.Diagnostics{}
