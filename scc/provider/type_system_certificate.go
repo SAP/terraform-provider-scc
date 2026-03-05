@@ -9,6 +9,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
+// Wrappers for testing purposes (allows mocking in tests)
+var pkcs12CertificateResourceValueFromFunc = SystemCertificatePKCS12CertificateResourceValueFrom
+
 type SystemCertificateConfig struct {
 	SubjectDN       types.Object `tfsdk:"subject_dn"`
 	Issuer          types.String `tfsdk:"issuer"`
@@ -38,6 +41,19 @@ type SystemCertificateSignedChainResourceConfig struct {
 	SerialNumber    types.String `tfsdk:"serial_number"`
 	SubjectAltNames types.String `tfsdk:"subject_alternative_names"`
 	CertificatePEM  types.String `tfsdk:"certificate_pem"`
+}
+
+type SystemCertificatePKCS12CertificateResourceConfig struct {
+	PKCS12Certificate types.String `tfsdk:"pkcs12_certificate"`
+	Password          types.String `tfsdk:"password"`
+	KeyPassword       types.String `tfsdk:"key_password"`
+	SubjectDN         types.Object `tfsdk:"subject_dn"`
+	Issuer            types.String `tfsdk:"issuer"`
+	ValidFrom         types.String `tfsdk:"valid_from"`
+	ValidTo           types.String `tfsdk:"valid_to"`
+	SerialNumber      types.String `tfsdk:"serial_number"`
+	SubjectAltNames   types.String `tfsdk:"subject_alternative_names"`
+	CertificatePEM    types.String `tfsdk:"certificate_pem"`
 }
 
 type CSRActionConfig struct {
@@ -100,6 +116,33 @@ func SystemCertificateSignedChainResourceValueFrom(ctx context.Context, value ap
 	}
 
 	model := &SystemCertificateSignedChainResourceConfig{
+		ValidTo:         ConvertMillisToTimes(value.NotAfterTimeStamp).WithTimezone,
+		ValidFrom:       ConvertMillisToTimes(value.NotBeforeTimeStamp).WithTimezone,
+		Issuer:          types.StringValue(value.Issuer),
+		SerialNumber:    types.StringValue(value.SerialNumber),
+		SubjectAltNames: subjectAltNames,
+		SubjectDN:       types.ObjectNull(subjectDNAttrTypes.AttrTypes),
+		CertificatePEM:  types.StringValue(string(pemBytes)),
+	}
+
+	if value.SubjectDN != "" {
+		dn := parseSubjectDN(value.SubjectDN)
+		model.SubjectDN = buildSubjectDNObject(dn)
+	} else {
+		model.SubjectDN = types.ObjectNull(subjectDNAttrTypes.AttrTypes)
+	}
+
+	return *model, diag.Diagnostics{}
+}
+
+func SystemCertificatePKCS12CertificateResourceValueFrom(ctx context.Context, value apiobjects.SystemCertificate, pemBytes []byte) (SystemCertificatePKCS12CertificateResourceConfig, diag.Diagnostics) {
+	subjectAltNames := types.StringNull()
+
+	if value.SubjectAltNames != "" {
+		subjectAltNames = types.StringValue(value.SubjectAltNames)
+	}
+
+	model := &SystemCertificatePKCS12CertificateResourceConfig{
 		ValidTo:         ConvertMillisToTimes(value.NotAfterTimeStamp).WithTimezone,
 		ValidFrom:       ConvertMillisToTimes(value.NotBeforeTimeStamp).WithTimezone,
 		Issuer:          types.StringValue(value.Issuer),

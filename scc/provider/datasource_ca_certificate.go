@@ -149,7 +149,7 @@ func (d *CACertificateDataSource) Read(ctx context.Context, req datasource.ReadR
 	}
 
 	// Generate Binary Certificate
-	certBytes, diags := GetCertificateBinary(d.client, endpoint)
+	certBytes, diags := getCertificateBinaryFunc(d.client, endpoint)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return

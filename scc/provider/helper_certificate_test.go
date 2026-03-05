@@ -8,15 +8,30 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/pem"
+	"io"
 	"math/big"
+	"net/http"
+	"net/http/httptest"
+	"net/url"
 	"testing"
 	"time"
 
+	"github.com/SAP/terraform-provider-scc/internal/api"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+func newTestClient(t *testing.T, server *httptest.Server) *api.RestApiClient {
+	baseURL, err := url.Parse(server.URL)
+	require.NoError(t, err)
+
+	return &api.RestApiClient{
+		BaseURL: baseURL,
+		Client:  server.Client(),
+	}
+}
 
 func TestParseSubjectDN_AllFields(t *testing.T) {
 	dn := "CN=testCert,EMAIL=test@example.com,L=Bangalore,OU=Engineering,O=SAP,ST=KA,C=IN"
@@ -280,6 +295,16 @@ func TestExpandSubjectDN_Valid(t *testing.T) {
 	assert.Equal(t, "SAP", res.Organization.ValueString())
 }
 
+func TestExpandSubjectDN_Unknown(t *testing.T) {
+	ctx := context.Background()
+	obj := types.ObjectUnknown(subjectDNAttrTypes.AttrTypes)
+
+	res, diags := ExpandSubjectDN(ctx, obj)
+
+	assert.Nil(t, res)
+	assert.False(t, diags.HasError())
+}
+
 func TestValidatePEMData_Empty(t *testing.T) {
 	diags := validatePEMData("")
 	assert.True(t, diags.HasError())
@@ -356,4 +381,261 @@ func generateTestCert(t *testing.T) string {
 	require.NoError(t, err)
 
 	return pemBuf.String()
+}
+
+func TestValidatePEMChain_InvalidCertificateBytes(t *testing.T) {
+	data := `-----BEGIN CERTIFICATE-----
+abcd
+-----END CERTIFICATE-----`
+
+	diags := validatePEMChain(data)
+	assert.True(t, diags.HasError())
+}
+
+func TestUploadSignedChain_Success(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, http.MethodPatch, r.Method)
+
+		err := r.ParseMultipartForm(10 << 20)
+		require.NoError(t, err)
+
+		file, _, err := r.FormFile("signedCertificate")
+		require.NoError(t, err)
+		defer func() {
+			if err := file.Close(); err != nil {
+				t.Errorf("failed to close file: %v", err)
+			}
+		}()
+
+		content, err := io.ReadAll(file)
+		require.NoError(t, err)
+
+		assert.Contains(t, string(content), "CERTIFICATE")
+
+		w.WriteHeader(http.StatusNoContent)
+	}))
+	defer server.Close()
+
+	client := newTestClient(t, server)
+
+	diags := uploadSignedChain(client, "", "-----BEGIN CERTIFICATE-----test")
+	assert.False(t, diags.HasError())
+}
+
+func TestUploadSignedChain_HTTPError(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusBadRequest)
+		if _, err := w.Write([]byte("INVALID_REQUEST")); err != nil {
+			t.Fatalf("write failed: %v", err)
+		}
+	}))
+	defer server.Close()
+
+	client := newTestClient(t, server)
+
+	diags := uploadSignedChain(client, "", "test")
+	assert.True(t, diags.HasError())
+}
+
+func TestGetCertificateBinary_Success(t *testing.T) {
+	expected := []byte("binary-cert")
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, "application/pkix-cert", r.Header.Get("Accept"))
+		w.WriteHeader(http.StatusOK)
+		_, err := w.Write(expected)
+		require.NoError(t, err)
+	}))
+	defer server.Close()
+
+	client := newTestClient(t, server)
+
+	body, diags := getCertificateBinaryFunc(client, "")
+	assert.False(t, diags.HasError())
+	assert.Equal(t, expected, body)
+}
+
+func TestGetCertificateBinary_ReadError(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	client := newTestClient(t, server)
+
+	body, diags := getCertificateBinaryFunc(client, "")
+	assert.False(t, diags.HasError())
+	assert.NotNil(t, body)
+}
+
+func TestUploadPKCS12Certificate_Success_WithKeyPassword(t *testing.T) {
+	expectedBytes := []byte("dummy-p12-content")
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, http.MethodPut, r.Method)
+		assert.Contains(t, r.Header.Get("Content-Type"), "multipart/form-data")
+
+		err := r.ParseMultipartForm(10 << 20)
+		require.NoError(t, err)
+
+		// Validate password fields
+		assert.Equal(t, "storepass", r.FormValue("password"))
+		assert.Equal(t, "keypass", r.FormValue("keyPassword"))
+
+		// Validate file field
+		file, _, err := r.FormFile("pkcs12")
+		require.NoError(t, err)
+		defer func() {
+			if err := file.Close(); err != nil {
+				t.Errorf("failed to close file: %v", err)
+			}
+		}()
+
+		body, err := io.ReadAll(file)
+		require.NoError(t, err)
+
+		assert.Equal(t, expectedBytes, body)
+
+		w.WriteHeader(http.StatusNoContent)
+	}))
+	defer server.Close()
+
+	client := newTestClient(t, server)
+
+	diags := uploadPKCS12Certificate(
+		client,
+		"",
+		expectedBytes,
+		"storepass",
+		"keypass",
+	)
+
+	assert.False(t, diags.HasError())
+}
+
+func TestUploadPKCS12Certificate_Success_WithoutKeyPassword(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		err := r.ParseMultipartForm(10 << 20)
+		require.NoError(t, err)
+
+		assert.Equal(t, "storepass", r.FormValue("password"))
+		assert.Equal(t, "", r.FormValue("keyPassword"))
+
+		w.WriteHeader(http.StatusNoContent)
+	}))
+	defer server.Close()
+
+	client := newTestClient(t, server)
+
+	diags := uploadPKCS12Certificate(
+		client,
+		"",
+		[]byte("data"),
+		"storepass",
+		"",
+	)
+
+	assert.False(t, diags.HasError())
+}
+
+func TestUploadPKCS12Certificate_HTTP400(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusBadRequest)
+		if _, err := w.Write([]byte("INVALID_REQUEST")); err != nil {
+			t.Fatalf("write failed: %v", err)
+		}
+	}))
+	defer server.Close()
+
+	client := newTestClient(t, server)
+
+	diags := uploadPKCS12Certificate(
+		client,
+		"",
+		[]byte("data"),
+		"pass",
+		"",
+	)
+
+	assert.True(t, diags.HasError())
+	assert.Contains(t, diags.Errors()[0].Detail(), "INVALID_REQUEST")
+}
+
+func TestUploadPKCS12Certificate_HTTP500(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+		if _, err := w.Write([]byte("SERVER_ERROR")); err != nil {
+			t.Fatalf("write failed: %v", err)
+		}
+	}))
+	defer server.Close()
+
+	client := newTestClient(t, server)
+
+	diags := uploadPKCS12Certificate(
+		client,
+		"",
+		[]byte("data"),
+		"pass",
+		"",
+	)
+
+	assert.True(t, diags.HasError())
+	assert.Contains(t, diags.Errors()[0].Detail(), "SERVER_ERROR")
+}
+
+func TestUploadPKCS12Certificate_DoRequestFailure(t *testing.T) {
+	// Invalid server to force client error
+	client := &api.RestApiClient{
+		BaseURL: &url.URL{
+			Scheme: "http",
+			Host:   "invalid-host",
+		},
+		Client: &http.Client{},
+	}
+
+	diags := uploadPKCS12Certificate(
+		client,
+		"",
+		[]byte("data"),
+		"pass",
+		"",
+	)
+
+	assert.True(t, diags.HasError())
+}
+
+func TestUploadPKCS12Certificate_EmptyPKCS12Bytes(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		err := r.ParseMultipartForm(10 << 20)
+		require.NoError(t, err)
+
+		file, _, err := r.FormFile("pkcs12")
+		require.NoError(t, err)
+		defer func() {
+			if err := file.Close(); err != nil {
+				t.Errorf("failed to close file: %v", err)
+			}
+		}()
+
+		body, err := io.ReadAll(file)
+		require.NoError(t, err)
+
+		assert.Equal(t, []byte{}, body)
+
+		w.WriteHeader(http.StatusNoContent)
+	}))
+	defer server.Close()
+
+	client := newTestClient(t, server)
+
+	diags := uploadPKCS12Certificate(
+		client,
+		"",
+		[]byte{},
+		"pass",
+		"",
+	)
+
+	assert.False(t, diags.HasError())
 }
