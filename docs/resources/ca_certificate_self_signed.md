@@ -6,7 +6,7 @@ description: |-
   Supports:
   • Self-signed certificates
   Note:
-  Any change to key_size or subject_dn forces replacement since SAP Cloud Connector supports only one system certificate.
+  Any change to key_size or subject_dn forces replacement since SAP Cloud Connector supports only one principal propagation CA certificate.
   Further documentation:
   https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/ca-certificate-for-principal-propagation-apis#create-a-self-signed-ca-certificate-for-principal-propagation-(master-only)
 ---
@@ -19,7 +19,7 @@ Creates and manages a **Self-Signed CA Certificate** in SAP Cloud Connector.
 • Self-signed certificates
 
 **Note:**
-Any change to key_size or subject_dn forces replacement since SAP Cloud Connector supports only one system certificate.
+Any change to key_size or subject_dn forces replacement since SAP Cloud Connector supports only one principal propagation CA certificate.
 
 __Further documentation:__
 <https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/ca-certificate-for-principal-propagation-apis#create-a-self-signed-ca-certificate-for-principal-propagation-(master-only)>
@@ -40,7 +40,7 @@ __Further documentation:__
 
 ### Read-Only
 
-- `certificate_pem` (String, Sensitive) System certificate in PEM format.
+- `certificate_pem` (String, Sensitive) CA certificate in PEM format.
 - `issuer` (String) Certificate authority (CA) that issued this certificate.
 - `serial_number` (String) Unique identifier for the certificate, typically assigned by the CA.
 - `valid_from` (String) Timestamp of the beginning of the validity period.

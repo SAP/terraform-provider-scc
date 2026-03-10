@@ -44,7 +44,7 @@ func (r *CACertificateSelfSignedResource) Schema(ctx context.Context, req resour
 • Self-signed certificates
 
 **Note:**
-Any change to key_size or subject_dn forces replacement since SAP Cloud Connector supports only one system certificate.
+Any change to key_size or subject_dn forces replacement since SAP Cloud Connector supports only one principal propagation CA certificate.
 
 __Further documentation:__
 <https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/ca-certificate-for-principal-propagation-apis#create-a-self-signed-ca-certificate-for-principal-propagation-(master-only)>`,
@@ -58,6 +58,7 @@ __Further documentation:__
 				},
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.RequiresReplace(),
+					int64planmodifier.UseStateForUnknown(),
 				},
 				Default: int64default.StaticInt64(4096),
 			},
@@ -196,7 +197,7 @@ __Further documentation:__
 				},
 			},
 			"certificate_pem": schema.StringAttribute{
-				MarkdownDescription: "System certificate in PEM format.",
+				MarkdownDescription: "CA certificate in PEM format.",
 				Computed:            true,
 				Sensitive:           true,
 				PlanModifiers: []planmodifier.String{
@@ -387,7 +388,7 @@ func (r *CACertificateSelfSignedResource) Read(ctx context.Context, req resource
 func (r *CACertificateSelfSignedResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	resp.Diagnostics.AddError(
 		"Update Not Supported",
-		"Changing a self-signed system certificate requires resource replacement.",
+		"Changing a self-signed CA certificate requires resource replacement.",
 	)
 }
 
