@@ -87,7 +87,6 @@ If not set, the provider will omit this form field.
 - `certificate_pem` (String) PEM-encoded certificate data. This is the leaf certificate extracted from the provided signed chain.
 - `issuer` (String) Certificate authority (CA) that issued this certificate.
 - `serial_number` (String) Unique identifier for the certificate, typically assigned by the CA.
-- `subject_alternative_names` (String) List of Subject Alternative Names (SANs) included in the certificate, such as DNS names, IP addresses, or email addresses.
 - `subject_dn` (Attributes) Subject Distinguished Name (DN) of the certificate. The Common Name (CN) is mandatory, while other fields like L, OU, O, ST, C, or Email may be present depending on the issuing CA. (see [below for nested schema](#nestedatt--subject_dn))
 - `valid_from` (String) Timestamp of the beginning of the validity period.
 - `valid_to` (String) Timestamp of the end of the validity period.

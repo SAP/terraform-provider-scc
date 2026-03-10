@@ -312,13 +312,13 @@ func TestCreateInternal_ModelConversionFails(t *testing.T) {
 	oldUpload := uploadPKCS12CertificateFunc
 	oldReq := requestAndUnmarshalFunc
 	oldBin := getCertificateBinaryFunc
-	oldValue := pkcs12CertificateResourceValueFromFunc
+	oldValue := pkcs12SystemCertificateResourceValueFromFunc
 
 	defer func() {
 		uploadPKCS12CertificateFunc = oldUpload
 		requestAndUnmarshalFunc = oldReq
 		getCertificateBinaryFunc = oldBin
-		pkcs12CertificateResourceValueFromFunc = oldValue
+		pkcs12SystemCertificateResourceValueFromFunc = oldValue
 	}()
 
 	uploadPKCS12CertificateFunc = func(*api.RestApiClient, string, []byte, string, string) diag.Diagnostics {
@@ -360,13 +360,13 @@ func TestCreateInternal_Success(t *testing.T) {
 	oldUpload := uploadPKCS12CertificateFunc
 	oldReq := requestAndUnmarshalFunc
 	oldBin := getCertificateBinaryFunc
-	oldValue := pkcs12CertificateResourceValueFromFunc
+	oldValue := pkcs12SystemCertificateResourceValueFromFunc
 
 	defer func() {
 		uploadPKCS12CertificateFunc = oldUpload
 		requestAndUnmarshalFunc = oldReq
 		getCertificateBinaryFunc = oldBin
-		pkcs12CertificateResourceValueFromFunc = oldValue
+		pkcs12SystemCertificateResourceValueFromFunc = oldValue
 	}()
 
 	uploadPKCS12CertificateFunc = func(*api.RestApiClient, string, []byte, string, string) diag.Diagnostics {

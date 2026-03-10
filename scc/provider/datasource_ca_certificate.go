@@ -104,14 +104,14 @@ __Further documentation:__
 					Attributes: map[string]schema.Attribute{
 						"type": schema.StringAttribute{
 							MarkdownDescription: "The type of SAN, such as DNS, IP, RFC822 or URI.",
-							Required:            true,
+							Computed:            true,
 							Validators: []validator.String{
 								stringvalidator.OneOf("DNS", "IP", "RFC822", "URI"),
 							},
 						},
 						"value": schema.StringAttribute{
 							MarkdownDescription: "The value of the SAN, such as a domain name for DNS, an IP address for IP, an email address for RFC822, or a URI for URI.",
-							Required:            true,
+							Computed:            true,
 							Validators: []validator.String{
 								stringvalidator.LengthAtLeast(1),
 							},

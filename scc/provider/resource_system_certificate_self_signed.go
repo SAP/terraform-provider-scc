@@ -57,6 +57,7 @@ __Further documentation:__
 				},
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.RequiresReplace(),
+					int64planmodifier.UseStateForUnknown(),
 				},
 				Default: int64default.StaticInt64(4096),
 			},

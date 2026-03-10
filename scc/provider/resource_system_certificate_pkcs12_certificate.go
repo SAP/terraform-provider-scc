@@ -170,10 +170,6 @@ If not set, the provider will omit this form field.`,
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"subject_alternative_names": schema.StringAttribute{
-				MarkdownDescription: "List of Subject Alternative Names (SANs) included in the certificate, such as DNS names, IP addresses, or email addresses.",
-				Computed:            true,
-			},
 			"certificate_pem": schema.StringAttribute{
 				MarkdownDescription: "PEM-encoded certificate data. This is the leaf certificate extracted from the provided signed chain.",
 				Computed:            true,
@@ -296,7 +292,7 @@ func (r *SystemCertificatePKCS12CertificateResource) Delete(ctx context.Context,
 		return
 	}
 
-	var state PKCS12CertificateResourceConfig
+	var state PKCS12SystemCertificateResourceConfig
 	var respObj apiobjects.Certificate
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)

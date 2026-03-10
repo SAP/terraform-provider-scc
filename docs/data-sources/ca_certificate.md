@@ -43,7 +43,7 @@ data "scc_ca_certificate" "ca_certificate" {}
 <a id="nestedatt--subject_alternative_names"></a>
 ### Nested Schema for `subject_alternative_names`
 
-Required:
+Read-Only:
 
 - `type` (String) The type of SAN, such as DNS, IP, RFC822 or URI.
 - `value` (String) The value of the SAN, such as a domain name for DNS, an IP address for IP, an email address for RFC822, or a URI for URI.
