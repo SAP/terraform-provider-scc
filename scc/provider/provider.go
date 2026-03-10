@@ -303,6 +303,7 @@ func (c *cloudConnectorProvider) Resources(_ context.Context) []func() resource.
 		NewSystemCertificateSelfSignedResource,
 		NewSystemCertificateSignedChainResource,
 		NewSystemCertificatePKCS12CertificateResource,
+		NewCACertificateSelfSignedResource,
 	}
 }
 
