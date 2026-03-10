@@ -35,10 +35,19 @@ data "scc_ca_certificate" "ca_certificate" {}
 - `certificate_pem` (String, Sensitive) CA certificate in PEM format, which can be used to configure trust stores or verify certificate chains.
 - `issuer` (String) Distinguished Name (DN) of the issuing Certificate Authority. For self-signed root CAs, this is the same as the subject.
 - `serial_number` (String) Serial number assigned to the CA certificate by its issuing authority.
-- `subject_alternative_names` (String) Subject Alternative Names (SANs) present in the CA certificate, if any.
+- `subject_alternative_names` (Attributes List) Subject Alternative Names (SANs) for the certificate, allowing additional identities to be associated with the certificate beyond the Common Name (CN). (see [below for nested schema](#nestedatt--subject_alternative_names))
 - `subject_dn` (Attributes) Subject Distinguished Name (DN) of the issuing **Certificate Authority (CA)** certificate. (see [below for nested schema](#nestedatt--subject_dn))
 - `valid_from` (String) Timestamp of the beginning of the validity period.
 - `valid_to` (String) Timestamp of the end of the validity period.
+
+<a id="nestedatt--subject_alternative_names"></a>
+### Nested Schema for `subject_alternative_names`
+
+Read-Only:
+
+- `type` (String) The type of SAN, such as DNS, IP, RFC822 or URI.
+- `value` (String) The value of the SAN, such as a domain name for DNS, an IP address for IP, an email address for RFC822, or a URI for URI.
+
 
 <a id="nestedatt--subject_dn"></a>
 ### Nested Schema for `subject_dn`

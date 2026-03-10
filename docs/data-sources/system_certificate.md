@@ -35,7 +35,6 @@ data "scc_system_certificate" "system_certificate" {}
 - `certificate_pem` (String, Sensitive) System certificate in PEM format.
 - `issuer` (String) Certificate authority (CA) that issued this certificate.
 - `serial_number` (String) Unique identifier for the certificate, typically assigned by the CA.
-- `subject_alternative_names` (String) List of Subject Alternative Names (SANs) included in the certificate, such as DNS names, IP addresses, or email addresses.
 - `subject_dn` (Attributes) Subject Distinguished Name (DN) of the certificate, identifying the certificate owner. (see [below for nested schema](#nestedatt--subject_dn))
 - `valid_from` (String) Timestamp of the beginning of the validity period.
 - `valid_to` (String) Timestamp of the end of the validity period.

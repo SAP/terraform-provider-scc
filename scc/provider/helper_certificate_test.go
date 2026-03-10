@@ -7,6 +7,7 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"crypto/x509/pkix"
+	"encoding/base64"
 	"encoding/pem"
 	"io"
 	"math/big"
@@ -17,8 +18,10 @@ import (
 	"time"
 
 	"github.com/SAP/terraform-provider-scc/internal/api"
+	apiobjects "github.com/SAP/terraform-provider-scc/internal/api/apiObjects"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -33,6 +36,7 @@ func newTestClient(t *testing.T, server *httptest.Server) *api.RestApiClient {
 	}
 }
 
+// Tests for parseSubjectDN function
 func TestParseSubjectDN_AllFields(t *testing.T) {
 	dn := "CN=testCert,EMAIL=test@example.com,L=Bangalore,OU=Engineering,O=SAP,ST=KA,C=IN"
 
@@ -112,126 +116,6 @@ func TestParseSubjectDN_MultipleOU_LastWins(t *testing.T) {
 	assert.Equal(t, types.StringValue("Team2"), result.OrganizationalUnit)
 }
 
-func TestBuildSubjectDN_AllFields(t *testing.T) {
-	subject := &CertificateSubjectDNConfig{
-		CommonName:         types.StringValue("testCert"),
-		Email:              types.StringValue("test@sap.com"),
-		Locality:           types.StringValue("Bangalore"),
-		OrganizationalUnit: types.StringValue("BTP"),
-		Organization:       types.StringValue("SAP"),
-		State:              types.StringValue("KA"),
-		Country:            types.StringValue("IN"),
-	}
-
-	result := BuildSubjectDN(subject)
-
-	expected := "CN=testCert,EMAIL=test@sap.com,L=Bangalore,OU=BTP,O=SAP,ST=KA,C=IN"
-	assert.Equal(t, expected, result)
-}
-
-func TestBuildSubjectDN_OnlyCN(t *testing.T) {
-	subject := &CertificateSubjectDNConfig{
-		CommonName: types.StringValue("testCert"),
-	}
-
-	result := BuildSubjectDN(subject)
-
-	assert.Equal(t, "CN=testCert", result)
-}
-
-func TestBuildSubjectDN_NilSubject(t *testing.T) {
-	result := BuildSubjectDN(nil)
-	assert.Equal(t, "", result)
-}
-
-func TestBuildSubjectDN_CNNull(t *testing.T) {
-	subject := &CertificateSubjectDNConfig{
-		CommonName: types.StringNull(),
-	}
-
-	result := BuildSubjectDN(subject)
-	assert.Equal(t, "", result)
-}
-
-func TestBuildSubjectDN_EmptyOptionalFieldsIgnored(t *testing.T) {
-	subject := &CertificateSubjectDNConfig{
-		CommonName:         types.StringValue("testCert"),
-		Email:              types.StringValue(""),
-		Locality:           types.StringNull(),
-		OrganizationalUnit: types.StringValue(" "),
-		Organization:       types.StringValue("SAP"),
-	}
-
-	result := BuildSubjectDN(subject)
-
-	assert.Equal(t, "CN=testCert,O=SAP", result)
-}
-
-func TestBuildSubjectDN_SpacesTrimmed(t *testing.T) {
-	subject := &CertificateSubjectDNConfig{
-		CommonName:   types.StringValue(" testCert "),
-		Organization: types.StringValue(" SAP "),
-		Country:      types.StringValue(" IN "),
-	}
-
-	result := BuildSubjectDN(subject)
-
-	assert.Equal(t, "CN=testCert,O=SAP,C=IN", result)
-}
-
-func TestBuildSubjectDN_FieldOrder(t *testing.T) {
-	subject := &CertificateSubjectDNConfig{
-		CommonName:   types.StringValue("cert"),
-		Country:      types.StringValue("IN"),
-		Organization: types.StringValue("SAP"),
-		Email:        types.StringValue("a@sap.com"),
-		Locality:     types.StringValue("BLR"),
-	}
-
-	result := BuildSubjectDN(subject)
-
-	expected := "CN=cert,EMAIL=a@sap.com,L=BLR,O=SAP,C=IN"
-	assert.Equal(t, expected, result)
-}
-
-func TestBuildSubjectDN_OptionalFieldsNull(t *testing.T) {
-	subject := &CertificateSubjectDNConfig{
-		CommonName:   types.StringValue("cert"),
-		Email:        types.StringNull(),
-		Organization: types.StringNull(),
-	}
-
-	result := BuildSubjectDN(subject)
-
-	assert.Equal(t, "CN=cert", result)
-}
-
-func TestBuildSubjectDN_SpecialCharacters(t *testing.T) {
-	subject := &CertificateSubjectDNConfig{
-		CommonName:   types.StringValue("test-cert_123"),
-		Organization: types.StringValue("SAP-SE"),
-	}
-
-	result := BuildSubjectDN(subject)
-
-	assert.Equal(t, "CN=test-cert_123,O=SAP-SE", result)
-}
-
-func TestBuildSubjectDN_RoundTrip(t *testing.T) {
-	input := &CertificateSubjectDNConfig{
-		CommonName:   types.StringValue("testCert"),
-		Organization: types.StringValue("SAP"),
-		Country:      types.StringValue("IN"),
-	}
-
-	dn := BuildSubjectDN(input)
-	parsed := parseSubjectDN(dn)
-
-	assert.Equal(t, input.CommonName, parsed.CommonName)
-	assert.Equal(t, input.Organization, parsed.Organization)
-	assert.Equal(t, input.Country, parsed.Country)
-}
-
 func TestParseSubjectDN_EmptyPartsIgnored(t *testing.T) {
 	dn := "CN=test,,O=SAP, ,C=IN"
 
@@ -250,22 +134,170 @@ func TestParseSubjectDN_DuplicateCN_LastWins(t *testing.T) {
 	assert.Equal(t, types.StringValue("two"), result.CommonName)
 }
 
-func TestBuildSubjectDN_UnknownValuesIgnored(t *testing.T) {
-	subject := &CertificateSubjectDNConfig{
-		CommonName: types.StringValue("cert"),
-		Email:      types.StringUnknown(),
+// Tests for buildSubjectDN function
+func TestBuildSubjectDN_AllFields(t *testing.T) {
+	subject := &certificateSubjectDNConfig{
+		CommonName:         types.StringValue("testCert"),
+		Email:              types.StringValue("test@sap.com"),
+		Locality:           types.StringValue("Bangalore"),
+		OrganizationalUnit: types.StringValue("BTP"),
+		Organization:       types.StringValue("SAP"),
+		State:              types.StringValue("KA"),
+		Country:            types.StringValue("IN"),
 	}
 
-	result := BuildSubjectDN(subject)
+	result := buildSubjectDN(subject)
+
+	expected := "CN=testCert,EMAIL=test@sap.com,L=Bangalore,OU=BTP,O=SAP,ST=KA,C=IN"
+	assert.Equal(t, expected, result)
+}
+
+func TestBuildSubjectDN_OnlyCN(t *testing.T) {
+	subject := &certificateSubjectDNConfig{
+		CommonName: types.StringValue("testCert"),
+	}
+
+	result := buildSubjectDN(subject)
+
+	assert.Equal(t, "CN=testCert", result)
+}
+
+func TestBuildSubjectDN_NilSubject(t *testing.T) {
+	result := buildSubjectDN(nil)
+	assert.Equal(t, "", result)
+}
+
+func TestBuildSubjectDN_CNNull(t *testing.T) {
+	subject := &certificateSubjectDNConfig{
+		CommonName: types.StringNull(),
+	}
+
+	result := buildSubjectDN(subject)
+	assert.Equal(t, "", result)
+}
+
+func TestBuildSubjectDN_EmptyOptionalFieldsIgnored(t *testing.T) {
+	subject := &certificateSubjectDNConfig{
+		CommonName:         types.StringValue("testCert"),
+		Email:              types.StringValue(""),
+		Locality:           types.StringNull(),
+		OrganizationalUnit: types.StringValue(" "),
+		Organization:       types.StringValue("SAP"),
+	}
+
+	result := buildSubjectDN(subject)
+
+	assert.Equal(t, "CN=testCert,O=SAP", result)
+}
+
+func TestBuildSubjectDN_SpacesTrimmed(t *testing.T) {
+	subject := &certificateSubjectDNConfig{
+		CommonName:   types.StringValue(" testCert "),
+		Organization: types.StringValue(" SAP "),
+		Country:      types.StringValue(" IN "),
+	}
+
+	result := buildSubjectDN(subject)
+
+	assert.Equal(t, "CN=testCert,O=SAP,C=IN", result)
+}
+
+func TestBuildSubjectDN_FieldOrder(t *testing.T) {
+	subject := &certificateSubjectDNConfig{
+		CommonName:   types.StringValue("cert"),
+		Country:      types.StringValue("IN"),
+		Organization: types.StringValue("SAP"),
+		Email:        types.StringValue("a@sap.com"),
+		Locality:     types.StringValue("BLR"),
+	}
+
+	result := buildSubjectDN(subject)
+
+	expected := "CN=cert,EMAIL=a@sap.com,L=BLR,O=SAP,C=IN"
+	assert.Equal(t, expected, result)
+}
+
+func TestBuildSubjectDN_OptionalFieldsNull(t *testing.T) {
+	subject := &certificateSubjectDNConfig{
+		CommonName:   types.StringValue("cert"),
+		Email:        types.StringNull(),
+		Organization: types.StringNull(),
+	}
+
+	result := buildSubjectDN(subject)
 
 	assert.Equal(t, "CN=cert", result)
 }
 
+func TestBuildSubjectDN_SpecialCharacters(t *testing.T) {
+	subject := &certificateSubjectDNConfig{
+		CommonName:   types.StringValue("test-cert_123"),
+		Organization: types.StringValue("SAP-SE"),
+	}
+
+	result := buildSubjectDN(subject)
+
+	assert.Equal(t, "CN=test-cert_123,O=SAP-SE", result)
+}
+
+func TestBuildSubjectDN_RoundTrip(t *testing.T) {
+	input := &certificateSubjectDNConfig{
+		CommonName:   types.StringValue("testCert"),
+		Organization: types.StringValue("SAP"),
+		Country:      types.StringValue("IN"),
+	}
+
+	dn := buildSubjectDN(input)
+	parsed := parseSubjectDN(dn)
+
+	assert.Equal(t, input.CommonName, parsed.CommonName)
+	assert.Equal(t, input.Organization, parsed.Organization)
+	assert.Equal(t, input.Country, parsed.Country)
+}
+
+func TestBuildSubjectDN_UnknownValuesIgnored(t *testing.T) {
+	subject := &certificateSubjectDNConfig{
+		CommonName: types.StringValue("cert"),
+		Email:      types.StringUnknown(),
+	}
+
+	result := buildSubjectDN(subject)
+
+	assert.Equal(t, "CN=cert", result)
+}
+
+func TestBuildSubjectDNObject_Valid(t *testing.T) {
+	dn := &certificateSubjectDNConfig{
+		CommonName:   types.StringValue("cert"),
+		Organization: types.StringValue("SAP"),
+		Country:      types.StringValue("IN"),
+	}
+
+	obj := buildSubjectDNObject(dn)
+
+	assert.False(t, obj.IsNull())
+
+	var result certificateSubjectDNConfig
+	diags := obj.As(context.Background(), &result, basetypes.ObjectAsOptions{})
+
+	assert.False(t, diags.HasError())
+	assert.Equal(t, "cert", result.CommonName.ValueString())
+	assert.Equal(t, "SAP", result.Organization.ValueString())
+	assert.Equal(t, "IN", result.Country.ValueString())
+}
+
+func TestBuildSubjectDNObject_Nil(t *testing.T) {
+	obj := buildSubjectDNObject(nil)
+
+	assert.True(t, obj.IsNull())
+}
+
+// Tests for expandSubjectDN function
 func TestExpandSubjectDN_Null(t *testing.T) {
 	ctx := context.Background()
 	obj := types.ObjectNull(subjectDNAttrTypes.AttrTypes)
 
-	res, diags := ExpandSubjectDN(ctx, obj)
+	res, diags := expandSubjectDN(ctx, obj)
 
 	assert.Nil(t, res)
 	assert.False(t, diags.HasError())
@@ -288,7 +320,7 @@ func TestExpandSubjectDN_Valid(t *testing.T) {
 
 	assert.False(t, diags.HasError())
 
-	res, diags := ExpandSubjectDN(ctx, obj)
+	res, diags := expandSubjectDN(ctx, obj)
 
 	assert.False(t, diags.HasError())
 	assert.Equal(t, "cert", res.CommonName.ValueString())
@@ -299,12 +331,13 @@ func TestExpandSubjectDN_Unknown(t *testing.T) {
 	ctx := context.Background()
 	obj := types.ObjectUnknown(subjectDNAttrTypes.AttrTypes)
 
-	res, diags := ExpandSubjectDN(ctx, obj)
+	res, diags := expandSubjectDN(ctx, obj)
 
 	assert.Nil(t, res)
 	assert.False(t, diags.HasError())
 }
 
+// Tests for validatePEMData function
 func TestValidatePEMData_Empty(t *testing.T) {
 	diags := validatePEMData("")
 	assert.True(t, diags.HasError())
@@ -330,6 +363,7 @@ func TestValidatePEMData_ValidCert(t *testing.T) {
 	assert.False(t, diags.HasError())
 }
 
+// Tests for validatePEMChain function
 func TestValidatePEMChain_Empty(t *testing.T) {
 	diags := validatePEMChain("")
 	assert.True(t, diags.HasError())
@@ -392,6 +426,7 @@ abcd
 	assert.True(t, diags.HasError())
 }
 
+// Tests for uploadSignedChain function
 func TestUploadSignedChain_Success(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		assert.Equal(t, http.MethodPatch, r.Method)
@@ -437,6 +472,7 @@ func TestUploadSignedChain_HTTPError(t *testing.T) {
 	assert.True(t, diags.HasError())
 }
 
+// Tests for getCertificateBinary function
 func TestGetCertificateBinary_Success(t *testing.T) {
 	expected := []byte("binary-cert")
 
@@ -468,6 +504,7 @@ func TestGetCertificateBinary_ReadError(t *testing.T) {
 	assert.NotNil(t, body)
 }
 
+// Tests for uploadPKCS12Certificate function
 func TestUploadPKCS12Certificate_Success_WithKeyPassword(t *testing.T) {
 	expectedBytes := []byte("dummy-p12-content")
 
@@ -638,4 +675,126 @@ func TestUploadPKCS12Certificate_EmptyPKCS12Bytes(t *testing.T) {
 	)
 
 	assert.False(t, diags.HasError())
+}
+
+// Tests for validatePKCS12Inputs function
+func TestValidatePKCS12Inputs_Base64Input(t *testing.T) {
+	raw := []byte("dummy-p12")
+	encoded := base64.StdEncoding.EncodeToString(raw)
+
+	plan := PKCS12SystemCertificateResourceConfig{
+		PKCS12Certificate: types.StringValue(encoded),
+		KeyPassword:       types.StringNull(),
+	}
+
+	data, diags := validatePKCS12Inputs(plan)
+
+	assert.False(t, diags.HasError())
+	assert.Equal(t, raw, data)
+}
+
+func TestValidatePKCS12Inputs_RawInput(t *testing.T) {
+	plan := PKCS12SystemCertificateResourceConfig{
+		PKCS12Certificate: types.StringValue("rawdata"),
+		KeyPassword:       types.StringNull(),
+	}
+
+	data, diags := validatePKCS12Inputs(plan)
+
+	assert.False(t, diags.HasError())
+	assert.Equal(t, []byte("rawdata"), data)
+}
+
+func TestValidatePKCS12Inputs_EmptyCertificate(t *testing.T) {
+	plan := PKCS12SystemCertificateResourceConfig{
+		PKCS12Certificate: types.StringValue(""),
+		KeyPassword:       types.StringNull(),
+	}
+
+	_, diags := validatePKCS12Inputs(plan)
+
+	assert.True(t, diags.HasError())
+}
+
+// Tests for buildCertificateModel function
+func TestBuildCertificateModel(t *testing.T) {
+	ctx := context.Background()
+
+	cert := apiobjects.Certificate{
+		Issuer:             "TestCA",
+		SerialNumber:       "12345",
+		SubjectDN:          "CN=test,O=SAP,C=IN",
+		NotBeforeTimeStamp: time.Now().UnixMilli(),
+		NotAfterTimeStamp:  time.Now().Add(time.Hour).UnixMilli(),
+	}
+
+	model, diags := buildCertificateModel(ctx, cert, []byte("pem-data"))
+
+	assert.False(t, diags.HasError())
+
+	assert.Equal(t, "TestCA", model.Issuer.ValueString())
+	assert.Equal(t, "12345", model.SerialNumber.ValueString())
+	assert.Equal(t, "pem-data", model.CertificatePEM.ValueString())
+
+	assert.False(t, model.SubjectDN.IsNull())
+}
+
+func TestBuildCertificateModel_NoSubjectDN(t *testing.T) {
+	ctx := context.Background()
+
+	cert := apiobjects.Certificate{
+		Issuer:             "TestCA",
+		SerialNumber:       "123",
+		NotBeforeTimeStamp: time.Now().UnixMilli(),
+		NotAfterTimeStamp:  time.Now().UnixMilli(),
+	}
+
+	model, diags := buildCertificateModel(ctx, cert, []byte("pem"))
+
+	assert.False(t, diags.HasError())
+	assert.True(t, model.SubjectDN.IsNull())
+}
+
+// Tests for buildCertificateModelWithSAN function
+func TestBuildCertificateModelWithSAN(t *testing.T) {
+	ctx := context.Background()
+
+	cert := apiobjects.Certificate{
+		Issuer:             "TestCA",
+		SerialNumber:       "123",
+		NotBeforeTimeStamp: time.Now().UnixMilli(),
+		NotAfterTimeStamp:  time.Now().UnixMilli(),
+		SubjectDN:          "CN=test",
+		SubjectAltNames: []apiobjects.SubjectAltNames{
+			{
+				Type:  "DNS",
+				Value: "example.com",
+			},
+			{
+				Type:  "IP",
+				Value: "127.0.0.1",
+			},
+		},
+	}
+
+	model, diags := buildCertificateModelWithSAN(ctx, cert, []byte("pem"))
+
+	assert.False(t, diags.HasError())
+	assert.False(t, model.SubjectAltNames.IsNull())
+}
+
+func TestBuildCertificateModelWithSAN_NoSAN(t *testing.T) {
+	ctx := context.Background()
+
+	cert := apiobjects.Certificate{
+		Issuer:             "TestCA",
+		SerialNumber:       "123",
+		NotBeforeTimeStamp: time.Now().UnixMilli(),
+		NotAfterTimeStamp:  time.Now().UnixMilli(),
+	}
+
+	model, diags := buildCertificateModelWithSAN(ctx, cert, []byte("pem"))
+
+	assert.False(t, diags.HasError())
+	assert.True(t, model.SubjectAltNames.IsNull())
 }

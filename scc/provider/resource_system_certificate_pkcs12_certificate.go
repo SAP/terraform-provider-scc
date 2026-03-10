@@ -170,10 +170,6 @@ If not set, the provider will omit this form field.`,
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"subject_alternative_names": schema.StringAttribute{
-				MarkdownDescription: "List of Subject Alternative Names (SANs) included in the certificate, such as DNS names, IP addresses, or email addresses.",
-				Computed:            true,
-			},
 			"certificate_pem": schema.StringAttribute{
 				MarkdownDescription: "PEM-encoded certificate data. This is the leaf certificate extracted from the provided signed chain.",
 				Computed:            true,
@@ -205,7 +201,7 @@ func (r *SystemCertificatePKCS12CertificateResource) Configure(ctx context.Conte
 }
 
 func (r *SystemCertificatePKCS12CertificateResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var plan SystemCertificatePKCS12CertificateResourceConfig
+	var plan PKCS12SystemCertificateResourceConfig
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -231,8 +227,8 @@ func (r *SystemCertificatePKCS12CertificateResource) Read(ctx context.Context, r
 		return
 	}
 
-	var state SystemCertificatePKCS12CertificateResourceConfig
-	var respObj apiobjects.SystemCertificate
+	var state PKCS12SystemCertificateResourceConfig
+	var respObj apiobjects.Certificate
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -266,7 +262,7 @@ func (r *SystemCertificatePKCS12CertificateResource) Read(ctx context.Context, r
 		return
 	}
 
-	responseModel, diags := SystemCertificatePKCS12CertificateResourceValueFrom(ctx, respObj, pemBytes)
+	responseModel, diags := pkcs12SystemCertificateResourceValueFromFunc(ctx, respObj, pemBytes)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -296,8 +292,8 @@ func (r *SystemCertificatePKCS12CertificateResource) Delete(ctx context.Context,
 		return
 	}
 
-	var state SystemCertificatePKCS12CertificateResourceConfig
-	var respObj apiobjects.SystemCertificate
+	var state PKCS12SystemCertificateResourceConfig
+	var respObj apiobjects.Certificate
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -315,10 +311,10 @@ func (r *SystemCertificatePKCS12CertificateResource) Delete(ctx context.Context,
 	resp.State.RemoveResource(ctx)
 }
 
-func (r *SystemCertificatePKCS12CertificateResource) createInternal(ctx context.Context, plan SystemCertificatePKCS12CertificateResourceConfig) (*SystemCertificatePKCS12CertificateResourceConfig, diag.Diagnostics) {
+func (r *SystemCertificatePKCS12CertificateResource) createInternal(ctx context.Context, plan PKCS12SystemCertificateResourceConfig) (*PKCS12SystemCertificateResourceConfig, diag.Diagnostics) {
 
 	var diags diag.Diagnostics
-	var respObj apiobjects.SystemCertificate
+	var respObj apiobjects.Certificate
 
 	rawCertificate, diags := validatePKCS12Inputs(plan)
 	diags.Append(diags...)
@@ -365,7 +361,7 @@ func (r *SystemCertificatePKCS12CertificateResource) createInternal(ctx context.
 		return nil, diags
 	}
 
-	responseModel, modelDiags := pkcs12CertificateResourceValueFromFunc(ctx, respObj, pemBytes)
+	responseModel, modelDiags := pkcs12SystemCertificateResourceValueFromFunc(ctx, respObj, pemBytes)
 	diags.Append(modelDiags...)
 	if diags.HasError() {
 		return nil, diags

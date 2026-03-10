@@ -34,19 +34,6 @@ func TestResourceSystemCertificateSelfSigned(t *testing.T) {
 		})
 	})
 
-	t.Run("error path - key size mandatory", func(t *testing.T) {
-		resource.Test(t, resource.TestCase{
-			IsUnitTest:               true,
-			ProtoV6ProviderFactories: getTestProviders(nil),
-			Steps: []resource.TestStep{
-				{
-					Config:      ResourceSystemCertificateSelfSignedWoKeySize("scc_sys_cert_ss", "testCertificate"),
-					ExpectError: regexp.MustCompile(`The argument "key_size" is required, but no definition was found.`),
-				},
-			},
-		})
-	})
-
 	t.Run("error path - subject dn mandatory", func(t *testing.T) {
 		resource.Test(t, resource.TestCase{
 			IsUnitTest:               true,
@@ -83,15 +70,6 @@ func ResourceSystemCertificateSelfSigned(datasourceName string, keySize int64, c
     		cn = "%s"
   		}
 	}`, datasourceName, keySize, commonName)
-}
-
-func ResourceSystemCertificateSelfSignedWoKeySize(datasourceName string, commonName string) string {
-	return fmt.Sprintf(`
-	resource "scc_system_certificate_self_signed" "%s" {
-  		subject_dn = {
-    		cn = "%s"
-  		}
-	}`, datasourceName, commonName)
 }
 
 func ResourceSystemCertificateSelfSignedWoSubjectDN(datasourceName string, keySize int64) string {

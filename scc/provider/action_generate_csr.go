@@ -196,13 +196,13 @@ func (a *GenerateCSRAction) InvokeWithPlan(ctx context.Context, plan CSRActionCo
 		return
 	}
 
-	dnStruct, diags := ExpandSubjectDN(ctx, plan.SubjectDN)
+	dnStruct, diags := expandSubjectDN(ctx, plan.SubjectDN)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	subjectDN := BuildSubjectDN(dnStruct)
+	subjectDN := buildSubjectDN(dnStruct)
 	planBody := map[string]any{
 		"type":      "csr",
 		"keySize":   plan.KeySize.ValueInt64(),
@@ -211,7 +211,7 @@ func (a *GenerateCSRAction) InvokeWithPlan(ctx context.Context, plan CSRActionCo
 
 	if !plan.SubjectAlternativeNames.IsNull() &&
 		!plan.SubjectAlternativeNames.IsUnknown() {
-		var sanList []SubjectAlternativeNames
+		var sanList []subjectAlternativeNames
 		diags = plan.SubjectAlternativeNames.ElementsAs(ctx, &sanList, false)
 		resp.Diagnostics.Append(diags...)
 		if resp.Diagnostics.HasError() {

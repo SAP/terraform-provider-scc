@@ -145,10 +145,6 @@ The provider validates PEM format before uploading.`,
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
-			"subject_alternative_names": schema.StringAttribute{
-				MarkdownDescription: "List of Subject Alternative Names (SANs) included in the certificate, such as DNS names, IP addresses, or email addresses.",
-				Computed:            true,
-			},
 			"certificate_pem": schema.StringAttribute{
 				MarkdownDescription: "PEM-encoded certificate data. This is the leaf certificate extracted from the provided signed chain.",
 				Computed:            true,
@@ -180,8 +176,8 @@ func (r *SystemCertificateSignedChainResource) Configure(ctx context.Context, re
 }
 
 func (r *SystemCertificateSignedChainResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var plan SystemCertificateSignedChainResourceConfig
-	var respObj apiobjects.SystemCertificate
+	var plan SignedChainSystemCertificateResourceConfig
+	var respObj apiobjects.Certificate
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -189,7 +185,7 @@ func (r *SystemCertificateSignedChainResource) Create(ctx context.Context, req r
 	}
 
 	if !plan.SignedChain.IsNull() && !plan.SignedChain.IsUnknown() {
-		certDiags := validatePEMChain(plan.SignedChain.ValueString())
+		certDiags := validatePEMChainFunc(plan.SignedChain.ValueString())
 		resp.Diagnostics.Append(certDiags...)
 		if resp.Diagnostics.HasError() {
 			return
@@ -230,7 +226,7 @@ func (r *SystemCertificateSignedChainResource) Create(ctx context.Context, req r
 		return
 	}
 
-	responseModel, diags := SystemCertificateSignedChainResourceValueFrom(ctx, respObj, pemBytes)
+	responseModel, diags := signedChainSystemCertificateResourceValueFromFunc(ctx, respObj, pemBytes)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -251,8 +247,8 @@ func (r *SystemCertificateSignedChainResource) Read(ctx context.Context, req res
 		return
 	}
 
-	var state SystemCertificateSignedChainResourceConfig
-	var respObj apiobjects.SystemCertificate
+	var state SignedChainSystemCertificateResourceConfig
+	var respObj apiobjects.Certificate
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -286,7 +282,7 @@ func (r *SystemCertificateSignedChainResource) Read(ctx context.Context, req res
 		return
 	}
 
-	responseModel, diags := SystemCertificateSignedChainResourceValueFrom(ctx, respObj, pemBytes)
+	responseModel, diags := signedChainSystemCertificateResourceValueFromFunc(ctx, respObj, pemBytes)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -314,8 +310,8 @@ func (r *SystemCertificateSignedChainResource) Delete(ctx context.Context, req r
 		return
 	}
 
-	var state SystemCertificateSignedChainResourceConfig
-	var respObj apiobjects.SystemCertificate
+	var state SignedChainSystemCertificateResourceConfig
+	var respObj apiobjects.Certificate
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {

@@ -40,8 +40,11 @@ resource "scc_system_certificate_self_signed" "self_signed_cert" {
 
 ### Required
 
-- `key_size` (Number) Key size in bits. Allowed values: 2048 or 4096.
 - `subject_dn` (Attributes) Subject Distinguished Name (DN) of the certificate. The Common Name (CN) is mandatory, while other fields like L, OU, O, ST, C, or Email may be present depending on the issuing CA. (see [below for nested schema](#nestedatt--subject_dn))
+
+### Optional
+
+- `key_size` (Number) Key size in bits. Allowed values: 2048 or 4096.
 
 ### Read-Only
 
