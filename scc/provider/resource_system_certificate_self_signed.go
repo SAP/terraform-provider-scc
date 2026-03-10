@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -49,13 +50,15 @@ __Further documentation:__
 		Attributes: map[string]schema.Attribute{
 			"key_size": schema.Int64Attribute{
 				MarkdownDescription: "Key size in bits. Allowed values: 2048 or 4096.",
-				Required:            true,
+				Optional:            true,
+				Computed:            true,
 				Validators: []validator.Int64{
 					int64validator.OneOf(2048, 4096),
 				},
 				PlanModifiers: []planmodifier.Int64{
 					int64planmodifier.RequiresReplace(),
 				},
+				Default: int64default.StaticInt64(4096),
 			},
 			"subject_dn": schema.SingleNestedAttribute{
 				MarkdownDescription: "Subject Distinguished Name (DN) of the certificate. The Common Name (CN) is mandatory, while other fields like L, OU, O, ST, C, or Email may be present depending on the issuing CA.",
@@ -198,8 +201,8 @@ func (r *SystemCertificateSelfSignedResource) Configure(ctx context.Context, req
 }
 
 func (r *SystemCertificateSelfSignedResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var plan SystemCertificateSelfSignedResourceConfig
-	var respObj apiobjects.SystemCertificate
+	var plan SelfSignedSystemCertificateResourceConfig
+	var respObj apiobjects.Certificate
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -214,13 +217,13 @@ func (r *SystemCertificateSelfSignedResource) Create(ctx context.Context, req re
 		return
 	}
 
-	dnStruct, diags := ExpandSubjectDN(ctx, plan.SubjectDN)
+	dnStruct, diags := expandSubjectDN(ctx, plan.SubjectDN)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	subjectDN := BuildSubjectDN(dnStruct)
+	subjectDN := buildSubjectDN(dnStruct)
 	planBody := map[string]any{
 		"type":      "selfsigned",
 		"keySize":   plan.KeySize.ValueInt64(),
@@ -261,7 +264,7 @@ func (r *SystemCertificateSelfSignedResource) Create(ctx context.Context, req re
 		return
 	}
 
-	responseModel, diags := SystemCertificateSelfSignedResourceValueFrom(ctx, respObj, pemBytes, dnStruct)
+	responseModel, diags := selfSignedSystemCertificateResourceValueFromFunc(ctx, respObj, pemBytes, dnStruct)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -277,8 +280,8 @@ func (r *SystemCertificateSelfSignedResource) Create(ctx context.Context, req re
 }
 
 func (r *SystemCertificateSelfSignedResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var state SystemCertificateSelfSignedResourceConfig
-	var respObj apiobjects.SystemCertificate
+	var state SelfSignedSystemCertificateResourceConfig
+	var respObj apiobjects.Certificate
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -287,7 +290,7 @@ func (r *SystemCertificateSelfSignedResource) Read(ctx context.Context, req reso
 
 	endpoint := endpoints.GetSystemCertificateEndpoint()
 
-	dnStruct, diags := ExpandSubjectDN(ctx, state.SubjectDN)
+	dnStruct, diags := expandSubjectDN(ctx, state.SubjectDN)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -318,7 +321,7 @@ func (r *SystemCertificateSelfSignedResource) Read(ctx context.Context, req reso
 		return
 	}
 
-	responseModel, diags := SystemCertificateSelfSignedResourceValueFrom(ctx, respObj, pemBytes, dnStruct)
+	responseModel, diags := selfSignedSystemCertificateResourceValueFromFunc(ctx, respObj, pemBytes, dnStruct)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -341,8 +344,8 @@ func (r *SystemCertificateSelfSignedResource) Update(ctx context.Context, req re
 }
 
 func (r *SystemCertificateSelfSignedResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var state SystemCertificateSelfSignedResourceConfig
-	var respObj apiobjects.SystemCertificate
+	var state SelfSignedSystemCertificateResourceConfig
+	var respObj apiobjects.Certificate
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {

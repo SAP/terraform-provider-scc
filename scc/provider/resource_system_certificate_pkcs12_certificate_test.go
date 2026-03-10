@@ -90,7 +90,7 @@ func TestSystemCertificatePKCS12_Read_NoState(t *testing.T) {
 }
 
 func TestValidatePKCS12Inputs_RawValue(t *testing.T) {
-	plan := SystemCertificatePKCS12CertificateResourceConfig{
+	plan := PKCS12SystemCertificateResourceConfig{
 		PKCS12Certificate: types.StringValue("raw-data"),
 	}
 
@@ -101,7 +101,7 @@ func TestValidatePKCS12Inputs_RawValue(t *testing.T) {
 }
 
 func TestValidatePKCS12Inputs_EmptyCert(t *testing.T) {
-	plan := SystemCertificatePKCS12CertificateResourceConfig{
+	plan := PKCS12SystemCertificateResourceConfig{
 		PKCS12Certificate: types.StringValue(""),
 	}
 
@@ -111,7 +111,7 @@ func TestValidatePKCS12Inputs_EmptyCert(t *testing.T) {
 }
 
 func TestValidatePKCS12Inputs_EmptyKeyPassword(t *testing.T) {
-	plan := SystemCertificatePKCS12CertificateResourceConfig{
+	plan := PKCS12SystemCertificateResourceConfig{
 		PKCS12Certificate: types.StringValue("abc"),
 		KeyPassword:       types.StringValue(""),
 	}
@@ -124,7 +124,7 @@ func TestValidatePKCS12Inputs_EmptyKeyPassword(t *testing.T) {
 func TestValidatePKCS12Inputs_Base64Decode(t *testing.T) {
 	encoded := base64.StdEncoding.EncodeToString([]byte("hello"))
 
-	plan := SystemCertificatePKCS12CertificateResourceConfig{
+	plan := PKCS12SystemCertificateResourceConfig{
 		PKCS12Certificate: types.StringValue(encoded),
 	}
 
@@ -135,7 +135,7 @@ func TestValidatePKCS12Inputs_Base64Decode(t *testing.T) {
 }
 
 func TestValidatePKCS12Inputs_KeyPasswordUnknown(t *testing.T) {
-	plan := SystemCertificatePKCS12CertificateResourceConfig{
+	plan := PKCS12SystemCertificateResourceConfig{
 		PKCS12Certificate: types.StringValue("abc"),
 		KeyPassword:       types.StringUnknown(),
 	}
@@ -146,7 +146,7 @@ func TestValidatePKCS12Inputs_KeyPasswordUnknown(t *testing.T) {
 }
 
 func TestValidatePKCS12Inputs_ValidWithKeyPassword(t *testing.T) {
-	plan := SystemCertificatePKCS12CertificateResourceConfig{
+	plan := PKCS12SystemCertificateResourceConfig{
 		PKCS12Certificate: types.StringValue("abc"),
 		KeyPassword:       types.StringValue("keypass"),
 	}
@@ -160,7 +160,7 @@ func TestValidatePKCS12Inputs_ValidWithKeyPassword(t *testing.T) {
 func TestCreateInternal_ValidationFails(t *testing.T) {
 	r := &SystemCertificatePKCS12CertificateResource{}
 
-	plan := SystemCertificatePKCS12CertificateResourceConfig{
+	plan := PKCS12SystemCertificateResourceConfig{
 		PKCS12Certificate: types.StringValue(""),
 	}
 
@@ -183,7 +183,7 @@ func TestCreateInternal_UploadFails(t *testing.T) {
 		return d
 	}
 
-	plan := SystemCertificatePKCS12CertificateResourceConfig{
+	plan := PKCS12SystemCertificateResourceConfig{
 		PKCS12Certificate: types.StringValue("abc"),
 		Password:          types.StringValue("pass"),
 	}
@@ -209,13 +209,13 @@ func TestCreateInternal_MetadataFails(t *testing.T) {
 		return nil
 	}
 
-	requestAndUnmarshalFunc = func(*api.RestApiClient, *apiobjects.SystemCertificate, string, string, map[string]any, bool) diag.Diagnostics {
+	requestAndUnmarshalFunc = func(*api.RestApiClient, *apiobjects.Certificate, string, string, map[string]any, bool) diag.Diagnostics {
 		var d diag.Diagnostics
 		d.AddError("metadata error", "fail")
 		return d
 	}
 
-	plan := SystemCertificatePKCS12CertificateResourceConfig{
+	plan := PKCS12SystemCertificateResourceConfig{
 		PKCS12Certificate: types.StringValue("abc"),
 		Password:          types.StringValue("pass"),
 	}
@@ -243,7 +243,7 @@ func TestCreateInternal_BinaryFails(t *testing.T) {
 		return nil
 	}
 
-	requestAndUnmarshalFunc = func(*api.RestApiClient, *apiobjects.SystemCertificate, string, string, map[string]any, bool) diag.Diagnostics {
+	requestAndUnmarshalFunc = func(*api.RestApiClient, *apiobjects.Certificate, string, string, map[string]any, bool) diag.Diagnostics {
 		return nil
 	}
 
@@ -253,7 +253,7 @@ func TestCreateInternal_BinaryFails(t *testing.T) {
 		return nil, d
 	}
 
-	plan := SystemCertificatePKCS12CertificateResourceConfig{
+	plan := PKCS12SystemCertificateResourceConfig{
 		PKCS12Certificate: types.StringValue("abc"),
 		Password:          types.StringValue("pass"),
 	}
@@ -284,7 +284,7 @@ func TestCreateInternal_InvalidPEM(t *testing.T) {
 		return nil
 	}
 
-	requestAndUnmarshalFunc = func(*api.RestApiClient, *apiobjects.SystemCertificate, string, string, map[string]any, bool) diag.Diagnostics {
+	requestAndUnmarshalFunc = func(*api.RestApiClient, *apiobjects.Certificate, string, string, map[string]any, bool) diag.Diagnostics {
 		return nil
 	}
 
@@ -294,7 +294,7 @@ func TestCreateInternal_InvalidPEM(t *testing.T) {
 		return nil, d
 	}
 
-	plan := SystemCertificatePKCS12CertificateResourceConfig{
+	plan := PKCS12SystemCertificateResourceConfig{
 		PKCS12Certificate: types.StringValue("abc"),
 		Password:          types.StringValue("pass"),
 	}
@@ -325,7 +325,7 @@ func TestCreateInternal_ModelConversionFails(t *testing.T) {
 		return nil
 	}
 
-	requestAndUnmarshalFunc = func(*api.RestApiClient, *apiobjects.SystemCertificate, string, string, map[string]any, bool) diag.Diagnostics {
+	requestAndUnmarshalFunc = func(*api.RestApiClient, *apiobjects.Certificate, string, string, map[string]any, bool) diag.Diagnostics {
 		return nil
 	}
 
@@ -336,13 +336,13 @@ func TestCreateInternal_ModelConversionFails(t *testing.T) {
 		return block.Bytes, nil
 	}
 
-	pkcs12CertificateResourceValueFromFunc = func(context.Context, apiobjects.SystemCertificate, []byte) (SystemCertificatePKCS12CertificateResourceConfig, diag.Diagnostics) {
+	pkcs12SystemCertificateResourceValueFromFunc = func(context.Context, apiobjects.Certificate, []byte) (PKCS12SystemCertificateResourceConfig, diag.Diagnostics) {
 		var d diag.Diagnostics
 		d.AddError("model error", "fail")
-		return SystemCertificatePKCS12CertificateResourceConfig{}, d
+		return PKCS12SystemCertificateResourceConfig{}, d
 	}
 
-	plan := SystemCertificatePKCS12CertificateResourceConfig{
+	plan := PKCS12SystemCertificateResourceConfig{
 		PKCS12Certificate: types.StringValue("abc"),
 		Password:          types.StringValue("pass"),
 	}
@@ -373,7 +373,7 @@ func TestCreateInternal_Success(t *testing.T) {
 		return nil
 	}
 
-	requestAndUnmarshalFunc = func(*api.RestApiClient, *apiobjects.SystemCertificate, string, string, map[string]any, bool) diag.Diagnostics {
+	requestAndUnmarshalFunc = func(*api.RestApiClient, *apiobjects.Certificate, string, string, map[string]any, bool) diag.Diagnostics {
 		return nil
 	}
 
@@ -381,14 +381,14 @@ func TestCreateInternal_Success(t *testing.T) {
 		return generateValidDERCert(t), nil
 	}
 
-	pkcs12CertificateResourceValueFromFunc = func(ctx context.Context, obj apiobjects.SystemCertificate, pem []byte) (SystemCertificatePKCS12CertificateResourceConfig, diag.Diagnostics) {
-		return SystemCertificatePKCS12CertificateResourceConfig{
+	pkcs12SystemCertificateResourceValueFromFunc = func(ctx context.Context, obj apiobjects.Certificate, pem []byte) (PKCS12SystemCertificateResourceConfig, diag.Diagnostics) {
+		return PKCS12SystemCertificateResourceConfig{
 			PKCS12Certificate: types.StringValue("abc"),
 			Password:          types.StringValue("pass"),
 		}, nil
 	}
 
-	plan := SystemCertificatePKCS12CertificateResourceConfig{
+	plan := PKCS12SystemCertificateResourceConfig{
 		PKCS12Certificate: types.StringValue("abc"),
 		Password:          types.StringValue("pass"),
 	}

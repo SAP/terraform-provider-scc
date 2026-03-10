@@ -29,7 +29,7 @@ type FormattedTimes struct {
 // Wrappers for testing purposes (allows mocking in tests)
 var requestAndUnmarshalFunc = func(
 	client *api.RestApiClient,
-	respObj *apiobjects.SystemCertificate,
+	respObj *apiobjects.Certificate,
 	method string,
 	endpoint string,
 	body map[string]any,

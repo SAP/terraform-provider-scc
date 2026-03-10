@@ -97,9 +97,27 @@ __Further documentation:__
 				MarkdownDescription: "Serial number assigned to the CA certificate by its issuing authority.",
 				Computed:            true,
 			},
-			"subject_alternative_names": schema.StringAttribute{
-				MarkdownDescription: "Subject Alternative Names (SANs) present in the CA certificate, if any.",
+			"subject_alternative_names": schema.ListNestedAttribute{
+				MarkdownDescription: "Subject Alternative Names (SANs) for the certificate, allowing additional identities to be associated with the certificate beyond the Common Name (CN).",
 				Computed:            true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"type": schema.StringAttribute{
+							MarkdownDescription: "The type of SAN, such as DNS, IP, RFC822 or URI.",
+							Required:            true,
+							Validators: []validator.String{
+								stringvalidator.OneOf("DNS", "IP", "RFC822", "URI"),
+							},
+						},
+						"value": schema.StringAttribute{
+							MarkdownDescription: "The value of the SAN, such as a domain name for DNS, an IP address for IP, an email address for RFC822, or a URI for URI.",
+							Required:            true,
+							Validators: []validator.String{
+								stringvalidator.LengthAtLeast(1),
+							},
+						},
+					},
+				},
 			},
 			"certificate_pem": schema.StringAttribute{
 				MarkdownDescription: "CA certificate in PEM format, which can be used to configure trust stores or verify certificate chains.",
@@ -130,8 +148,8 @@ func (d *CACertificateDataSource) Configure(ctx context.Context, req datasource.
 }
 
 func (d *CACertificateDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data CACertificateConfig
-	var respObj apiobjects.CACertificate
+	var data CertificateWithSANConfig
+	var respObj apiobjects.Certificate
 	diags := req.Config.Get(ctx, &data)
 
 	resp.Diagnostics.Append(diags...)
@@ -160,7 +178,7 @@ func (d *CACertificateDataSource) Read(ctx context.Context, req datasource.ReadR
 		Bytes: certBytes,
 	})
 
-	responseModel, diags := CACertificateDataSourceValueFrom(ctx, respObj, pemBytes)
+	responseModel, diags := CertificateDataSourceValueFrom(ctx, respObj, pemBytes)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return

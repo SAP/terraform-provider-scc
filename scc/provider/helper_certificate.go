@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/SAP/terraform-provider-scc/internal/api"
+	apiobjects "github.com/SAP/terraform-provider-scc/internal/api/apiObjects"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -21,8 +22,23 @@ import (
 
 // Wrappers for testing purposes (allows mocking in tests)
 var getCertificateBinaryFunc = getCertificateBinary
+var validatePEMChainFunc = validatePEMChain
 
-type CertificateSubjectDNConfig struct {
+type CertificateConfig struct {
+	SubjectDN      types.Object `tfsdk:"subject_dn"`
+	Issuer         types.String `tfsdk:"issuer"`
+	ValidFrom      types.String `tfsdk:"valid_from"`
+	ValidTo        types.String `tfsdk:"valid_to"`
+	SerialNumber   types.String `tfsdk:"serial_number"`
+	CertificatePEM types.String `tfsdk:"certificate_pem"`
+}
+
+type CertificateWithSANConfig struct {
+	CertificateConfig
+	SubjectAltNames types.List `tfsdk:"subject_alternative_names"`
+}
+
+type certificateSubjectDNConfig struct {
 	CommonName         types.String `tfsdk:"cn"`
 	Email              types.String `tfsdk:"email"`
 	Locality           types.String `tfsdk:"l"`
@@ -44,17 +60,24 @@ var subjectDNAttrTypes = types.ObjectType{
 	},
 }
 
-type SubjectAlternativeNames struct {
+type subjectAlternativeNames struct {
 	Type  types.String `tfsdk:"type"`
 	Value types.String `tfsdk:"value"`
 }
 
-func ExpandSubjectDN(ctx context.Context, subjectDN types.Object) (*CertificateSubjectDNConfig, diag.Diagnostics) {
+var subjectAlternativeNamesType = types.ObjectType{
+	AttrTypes: map[string]attr.Type{
+		"type":  types.StringType,
+		"value": types.StringType,
+	},
+}
+
+func expandSubjectDN(ctx context.Context, subjectDN types.Object) (*certificateSubjectDNConfig, diag.Diagnostics) {
 	if subjectDN.IsNull() || subjectDN.IsUnknown() {
 		return nil, diag.Diagnostics{}
 	}
 
-	var result CertificateSubjectDNConfig
+	var result certificateSubjectDNConfig
 	diags := subjectDN.As(ctx, &result, basetypes.ObjectAsOptions{})
 	if diags.HasError() {
 		return nil, diags
@@ -63,7 +86,7 @@ func ExpandSubjectDN(ctx context.Context, subjectDN types.Object) (*CertificateS
 	return &result, diags
 }
 
-func BuildSubjectDN(subjectDN *CertificateSubjectDNConfig) string {
+func buildSubjectDN(subjectDN *certificateSubjectDNConfig) string {
 	if subjectDN == nil || subjectDN.CommonName.IsNull() {
 		return ""
 	}
@@ -96,8 +119,8 @@ func BuildSubjectDN(subjectDN *CertificateSubjectDNConfig) string {
 	return strings.Join(parts, ",")
 }
 
-func parseSubjectDN(dn string) *CertificateSubjectDNConfig {
-	result := &CertificateSubjectDNConfig{
+func parseSubjectDN(dn string) *certificateSubjectDNConfig {
+	result := &certificateSubjectDNConfig{
 		CommonName:         types.StringNull(),
 		Email:              types.StringNull(),
 		Locality:           types.StringNull(),
@@ -137,6 +160,28 @@ func parseSubjectDN(dn string) *CertificateSubjectDNConfig {
 	}
 
 	return result
+}
+
+func buildSubjectDNObject(dn *certificateSubjectDNConfig) types.Object {
+	if dn == nil {
+		return types.ObjectNull(subjectDNAttrTypes.AttrTypes)
+	}
+
+	attrs := map[string]attr.Value{
+		"cn":    dn.CommonName,
+		"email": dn.Email,
+		"l":     dn.Locality,
+		"ou":    dn.OrganizationalUnit,
+		"o":     dn.Organization,
+		"st":    dn.State,
+		"c":     dn.Country,
+	}
+
+	obj, diags := types.ObjectValue(subjectDNAttrTypes.AttrTypes, attrs)
+	if diags.HasError() {
+		panic("failed to build subject_dn object")
+	}
+	return obj
 }
 
 func uploadSignedChain(c *api.RestApiClient, endpoint, cert string) diag.Diagnostics {
@@ -385,7 +430,7 @@ func validatePEMChain(data string) diag.Diagnostics {
 	return diags
 }
 
-func validatePKCS12Inputs(plan SystemCertificatePKCS12CertificateResourceConfig) ([]byte, diag.Diagnostics) {
+func validatePKCS12Inputs(plan PKCS12SystemCertificateResourceConfig) ([]byte, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	rawCertificate := []byte(plan.PKCS12Certificate.ValueString())
@@ -413,4 +458,62 @@ func validatePKCS12Inputs(plan SystemCertificatePKCS12CertificateResourceConfig)
 	}
 
 	return rawCertificate, diags
+}
+
+// buildCertificateModelWithSAN maps API certificate data to the Terraform model
+// for CA/UI certificates, including Subject Alternative Names (SAN).
+func buildCertificateModelWithSAN(ctx context.Context, value apiobjects.Certificate, pemBytes []byte) (CertificateWithSANConfig, diag.Diagnostics) {
+	subjectAltNamesValue := []subjectAlternativeNames{}
+	for _, san := range value.SubjectAltNames {
+		subjectAltNamesValue = append(subjectAltNamesValue, subjectAlternativeNames{
+			Type:  types.StringValue(san.Type),
+			Value: types.StringValue(san.Value),
+		})
+	}
+
+	var subjectAltNames types.List
+
+	if len(subjectAltNamesValue) == 0 {
+		subjectAltNames = types.ListNull(subjectAlternativeNamesType)
+	} else {
+		var diags diag.Diagnostics
+		subjectAltNames, diags = types.ListValueFrom(ctx, subjectAlternativeNamesType, subjectAltNamesValue)
+		if diags.HasError() {
+			return CertificateWithSANConfig{}, diags
+		}
+	}
+
+	certificateConfig, diags := buildCertificateModel(ctx, value, pemBytes)
+	if diags.HasError() {
+		return CertificateWithSANConfig{}, diags
+	}
+
+	model := &CertificateWithSANConfig{
+		CertificateConfig: certificateConfig,
+		SubjectAltNames:   subjectAltNames,
+	}
+
+	return *model, diag.Diagnostics{}
+}
+
+// buildCertificateModel maps API certificate data to the Terraform
+// model for system certificates. SAN values are ignored because
+// system certificates do not support Subject Alternative Names.
+func buildCertificateModel(ctx context.Context, value apiobjects.Certificate, pemBytes []byte) (CertificateConfig, diag.Diagnostics) {
+	model := &CertificateConfig{
+		ValidTo:        ConvertMillisToTimes(value.NotAfterTimeStamp).WithTimezone,
+		ValidFrom:      ConvertMillisToTimes(value.NotBeforeTimeStamp).WithTimezone,
+		Issuer:         types.StringValue(value.Issuer),
+		SerialNumber:   types.StringValue(value.SerialNumber),
+		CertificatePEM: types.StringValue(string(pemBytes)),
+		SubjectDN:      types.ObjectNull(subjectDNAttrTypes.AttrTypes),
+	}
+
+	if value.SubjectDN != "" {
+		dn := parseSubjectDN(value.SubjectDN)
+		model.SubjectDN = buildSubjectDNObject(dn)
+	}
+
+	return *model, diag.Diagnostics{}
+
 }

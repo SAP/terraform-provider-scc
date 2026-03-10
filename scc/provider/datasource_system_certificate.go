@@ -97,10 +97,6 @@ __Further documentation:__
 				MarkdownDescription: "Unique identifier for the certificate, typically assigned by the CA.",
 				Computed:            true,
 			},
-			"subject_alternative_names": schema.StringAttribute{
-				MarkdownDescription: "List of Subject Alternative Names (SANs) included in the certificate, such as DNS names, IP addresses, or email addresses.",
-				Computed:            true,
-			},
 			"certificate_pem": schema.StringAttribute{
 				MarkdownDescription: "System certificate in PEM format.",
 				Computed:            true,
@@ -130,8 +126,8 @@ func (d *SystemCertificateDataSource) Configure(ctx context.Context, req datasou
 }
 
 func (d *SystemCertificateDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data SystemCertificateConfig
-	var respObj apiobjects.SystemCertificate
+	var data CertificateConfig
+	var respObj apiobjects.Certificate
 	diags := req.Config.Get(ctx, &data)
 
 	resp.Diagnostics.Append(diags...)
