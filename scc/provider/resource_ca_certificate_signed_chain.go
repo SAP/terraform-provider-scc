@@ -16,33 +16,36 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
-var _ resource.Resource = &SystemCertificateSignedChainResource{}
+var _ resource.Resource = &CACertificateSignedChainResource{}
 
-func NewSystemCertificateSignedChainResource() resource.Resource {
-	return &SystemCertificateSignedChainResource{}
+func NewCACertificateSignedChainResource() resource.Resource {
+	return &CACertificateSignedChainResource{}
 }
 
-type SystemCertificateSignedChainResource struct {
+type CACertificateSignedChainResource struct {
 	client *api.RestApiClient
 }
 
-func (r *SystemCertificateSignedChainResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_system_certificate_signed_chain"
+func (r *CACertificateSignedChainResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_ca_certificate_signed_chain"
 }
 
-func (r *SystemCertificateSignedChainResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *CACertificateSignedChainResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: `Creates and manages a **Signed Chain Certificate** for the SAP BTP Connectivity service. This resource uploads a certificate chain that was generated from a CSR
-downloaded from SAP Cloud Connector.
+		MarkdownDescription: `Creates and manages a **Signed Chain CA Certificate for Principal Propagation** for the SAP BTP Connectivity service. 
+This resource uploads a certificate chain that was generated from a CSR downloaded from SAP Cloud Connector for **Principal Propagation**.
+The uploaded certificate chain becomes the **Principal Propagation CA certificate** used by the connector.
 		
 **Supports:**
 • Signed Chain Certificate: A certificate that is signed by an external Certificate Authority (CA) and includes the full certificate chain up to the root CA.
 
 **Required Workflow:**
-1. Generate a Certificate Signing Request (CSR) from the SAP Cloud Connector.
+1. Generate a **Certificate Signing Request (CSR)** from SAP Cloud Connector for Principal Propagation.
 2. Submit the CSR to a trusted Certificate Authority (CA) to obtain a signed certificate chain.
-3. Create certificate chain in the order:
-   leaf certificate -> intermediate CA (if applicable) -> root CA.
+3. Construct the PEM chain in the following order:
+   - Signed certificate (generated from the CSR)
+   - Intermediate CA certificate(s) (if applicable)
+   - Root CA certificate
 4. Provide the chain to Terraform using either:
    - file("signed_chain.pem")
    - or by directly pasting the PEM-encoded chain in the configuration.
@@ -52,19 +55,21 @@ downloaded from SAP Cloud Connector.
 - Cloud Connector accepts **only the latest CSR**
 - Certificate must match the CSR's public key and subject.
 - Chain must be PEM-encoded.
-- On deleting the system certificate resource, the certificate is removed from the SAP Cloud Connector, and any existing connections that rely on that certificate will be disrupted until a new certificate is uploaded using a new CSR.
-- Any change to signed_chain forces replacement since SAP Cloud Connector supports only one system certificate.
+- On deleting the CA certificate resource, the certificate is removed from the SAP Cloud Connector, and any existing connections that rely on that certificate will be disrupted until a new certificate is uploaded using a new CSR.
+- Any change to signed_chain forces replacement since SAP Cloud Connector supports only one CA certificate.
 
 __Further documentation:__
-<https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/system-certificate-apis#upload-a-signed-certificate-chain-as-system-certificate-(master-only)>`,
+<https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/ca-certificate-for-principal-propagation-apis#upload-a-signed-certificate-chain-as-ca-certificate-for-principal-propagation-(master-only)>`,
 		Attributes: map[string]schema.Attribute{
 			"signed_chain": schema.StringAttribute{
-				MarkdownDescription: `PEM-encoded signed certificate chain.
-The chain should be ordered as follows:
-1. Leaf Certificate: The certificate issued for the specific domain or service, containing the public key and subject information.
-2. Intermediate CA Certificate(s) (if applicable): One or more certificates that link the leaf certificate to the root CA. These are necessary if the issuing CA is not a root CA.
-3. Root CA Certificate: The top-level certificate that is self-signed by the CA, serving as the trust anchor for the certificate chain.
-
+				MarkdownDescription: `PEM-encoded signed certificate chain for the Principal Propagation CA certificate.
+The certificate chain must be ordered as follows:
+1. **Signed Certificate**  
+   The certificate issued from the Cloud Connector CSR.
+2. **Intermediate CA Certificate(s)** (optional)  
+   Certificates that link the signed certificate to the root CA.
+3. **Root CA Certificate**  
+   The trust anchor of the certificate hierarchy.
 This value can be provided using:
 - file("signed_chain.pem")
 - Inline multi-line string.
@@ -142,6 +147,28 @@ The provider validates PEM format before uploading.`,
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
+			"subject_alternative_names": schema.ListNestedAttribute{
+				MarkdownDescription: "Subject Alternative Names (SANs) for the certificate, allowing additional identities to be associated with the certificate beyond the Common Name (CN).",
+				Computed:            true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"type": schema.StringAttribute{
+							MarkdownDescription: "The type of SAN, such as DNS, IP, RFC822 or URI.",
+							Computed:            true,
+							Validators: []validator.String{
+								stringvalidator.OneOf("DNS", "IP", "RFC822", "URI"),
+							},
+						},
+						"value": schema.StringAttribute{
+							MarkdownDescription: "The value of the SAN, such as a domain name for DNS, an IP address for IP, an email address for RFC822, or a URI for URI.",
+							Computed:            true,
+							Validators: []validator.String{
+								stringvalidator.LengthAtLeast(1),
+							},
+						},
+					},
+				},
+			},
 			"certificate_pem": schema.StringAttribute{
 				MarkdownDescription: "PEM-encoded certificate data. This is the leaf certificate extracted from the provided signed chain.",
 				Computed:            true,
@@ -153,7 +180,7 @@ The provider validates PEM format before uploading.`,
 	}
 }
 
-func (r *SystemCertificateSignedChainResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *CACertificateSignedChainResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -172,8 +199,8 @@ func (r *SystemCertificateSignedChainResource) Configure(ctx context.Context, re
 	r.client = client
 }
 
-func (r *SystemCertificateSignedChainResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var plan SignedChainSystemCertificateResourceConfig
+func (r *CACertificateSignedChainResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var plan SignedChainCertificateResourceConfig
 	var respObj apiobjects.Certificate
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
@@ -189,7 +216,7 @@ func (r *SystemCertificateSignedChainResource) Create(ctx context.Context, req r
 		}
 	}
 
-	endpoint := endpoints.GetSystemCertificateEndpoint()
+	endpoint := endpoints.GetCACertificateEndpoint()
 
 	// Upload Signed Certificate Chain
 	diags = uploadSignedChainFunc(r.client, endpoint, plan.SignedChain.ValueString())
@@ -223,7 +250,7 @@ func (r *SystemCertificateSignedChainResource) Create(ctx context.Context, req r
 		return
 	}
 
-	responseModel, diags := signedChainSystemCertificateResourceValueFromFunc(ctx, respObj, pemBytes)
+	responseModel, diags := signedChainCertificateResourceValueFromFunc(ctx, respObj, pemBytes)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -238,13 +265,13 @@ func (r *SystemCertificateSignedChainResource) Create(ctx context.Context, req r
 	}
 }
 
-func (r *SystemCertificateSignedChainResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *CACertificateSignedChainResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	// If there is no state, there is nothing to read (in case of mock testsing, the state can be null but the resource still needs to be read to set the response)
 	if req.State.Raw.IsNull() {
 		return
 	}
 
-	var state SignedChainSystemCertificateResourceConfig
+	var state SignedChainCertificateResourceConfig
 	var respObj apiobjects.Certificate
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -252,7 +279,7 @@ func (r *SystemCertificateSignedChainResource) Read(ctx context.Context, req res
 		return
 	}
 
-	endpoint := endpoints.GetSystemCertificateEndpoint()
+	endpoint := endpoints.GetCACertificateEndpoint()
 
 	// Get Certificate Metadata
 	diags = requestAndUnmarshalFunc(r.client, &respObj, "GET", endpoint, nil, true)
@@ -279,7 +306,7 @@ func (r *SystemCertificateSignedChainResource) Read(ctx context.Context, req res
 		return
 	}
 
-	responseModel, diags := signedChainSystemCertificateResourceValueFromFunc(ctx, respObj, pemBytes)
+	responseModel, diags := signedChainCertificateResourceValueFromFunc(ctx, respObj, pemBytes)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -294,20 +321,20 @@ func (r *SystemCertificateSignedChainResource) Read(ctx context.Context, req res
 	}
 }
 
-func (r *SystemCertificateSignedChainResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *CACertificateSignedChainResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	resp.Diagnostics.AddError(
 		"Update Not Supported",
-		"Changing a signed system certificate requires resource replacement.",
+		"Changing a signed CA certificate requires resource replacement.",
 	)
 }
 
-func (r *SystemCertificateSignedChainResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *CACertificateSignedChainResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	// If there is no state, there is nothing to delete (in case of mock testing, the state can be null but the resource still needs to be deleted to set the response)
 	if req.State.Raw.IsNull() {
 		return
 	}
 
-	var state SignedChainSystemCertificateResourceConfig
+	var state SignedChainCertificateResourceConfig
 	var respObj apiobjects.Certificate
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -315,7 +342,7 @@ func (r *SystemCertificateSignedChainResource) Delete(ctx context.Context, req r
 		return
 	}
 
-	endpoint := endpoints.GetSystemCertificateEndpoint()
+	endpoint := endpoints.GetCACertificateEndpoint()
 
 	diags = requestAndUnmarshalFunc(r.client, &respObj, "DELETE", endpoint, nil, false)
 	resp.Diagnostics.Append(diags...)
