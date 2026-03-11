@@ -16,11 +16,8 @@ import (
 	apiobjects "github.com/SAP/terraform-provider-scc/internal/api/apiObjects"
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
-	"github.com/hashicorp/terraform-plugin-framework/resource"
-	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-framework/types/basetypes"
-	"github.com/hashicorp/terraform-plugin-go/tftypes"
 )
 
 // Wrappers for testing purposes (allows mocking in tests)
@@ -520,73 +517,4 @@ func buildCertificateModel(ctx context.Context, value apiobjects.Certificate, pe
 
 	return *model, diag.Diagnostics{}
 
-}
-
-func buildSignedChainPlan(
-	ctx context.Context,
-	r resource.Resource,
-	chain string,
-	includeSAN bool,
-) tfsdk.Plan {
-
-	schemaResp := &resource.SchemaResponse{}
-	r.Schema(ctx, resource.SchemaRequest{}, schemaResp)
-
-	subjectDNType := tftypes.Object{
-		AttributeTypes: map[string]tftypes.Type{
-			"cn":    tftypes.String,
-			"email": tftypes.String,
-			"l":     tftypes.String,
-			"ou":    tftypes.String,
-			"o":     tftypes.String,
-			"st":    tftypes.String,
-			"c":     tftypes.String,
-		},
-	}
-
-	attrTypes := map[string]tftypes.Type{
-		"signed_chain":    tftypes.String,
-		"subject_dn":      subjectDNType,
-		"valid_to":        tftypes.String,
-		"valid_from":      tftypes.String,
-		"issuer":          tftypes.String,
-		"serial_number":   tftypes.String,
-		"certificate_pem": tftypes.String,
-	}
-
-	values := map[string]tftypes.Value{
-		"signed_chain":    tftypes.NewValue(tftypes.String, chain),
-		"subject_dn":      tftypes.NewValue(subjectDNType, nil),
-		"valid_to":        tftypes.NewValue(tftypes.String, nil),
-		"valid_from":      tftypes.NewValue(tftypes.String, nil),
-		"issuer":          tftypes.NewValue(tftypes.String, nil),
-		"serial_number":   tftypes.NewValue(tftypes.String, nil),
-		"certificate_pem": tftypes.NewValue(tftypes.String, nil),
-	}
-
-	if includeSAN {
-		sanType := tftypes.Object{
-			AttributeTypes: map[string]tftypes.Type{
-				"type":  tftypes.String,
-				"value": tftypes.String,
-			},
-		}
-
-		attrTypes["subject_alternative_names"] = tftypes.List{
-			ElementType: sanType,
-		}
-
-		values["subject_alternative_names"] = tftypes.NewValue(
-			tftypes.List{ElementType: sanType},
-			nil,
-		)
-	}
-
-	return tfsdk.Plan{
-		Schema: schemaResp.Schema,
-		Raw: tftypes.NewValue(
-			tftypes.Object{AttributeTypes: attrTypes},
-			values,
-		),
-	}
 }

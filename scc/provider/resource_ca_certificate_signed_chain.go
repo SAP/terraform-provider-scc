@@ -37,7 +37,7 @@ This resource uploads a certificate chain that was generated from a CSR download
 The uploaded certificate chain becomes the **Principal Propagation CA certificate** used by the connector.
 		
 **Supports:**
-• Signed Chain Certificate: A certificate that is signed by an external Certificate Authority (CA) and includes the full certificate chain up to the root CA.
+- Signed Chain Certificate: A certificate that is signed by an external Certificate Authority (CA) and includes the full certificate chain up to the root CA.
 
 **Required Workflow:**
 1. Generate a **Certificate Signing Request (CSR)** from SAP Cloud Connector for Principal Propagation.
@@ -266,7 +266,7 @@ func (r *CACertificateSignedChainResource) Create(ctx context.Context, req resou
 }
 
 func (r *CACertificateSignedChainResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	// If there is no state, there is nothing to read (in case of mock testsing, the state can be null but the resource still needs to be read to set the response)
+	// If there is no state, there is nothing to read (in case of mock testing, the state can be null but the resource still needs to be read to set the response)
 	if req.State.Raw.IsNull() {
 		return
 	}

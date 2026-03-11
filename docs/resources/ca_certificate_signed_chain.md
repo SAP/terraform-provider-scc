@@ -6,7 +6,7 @@ description: |-
   This resource uploads a certificate chain that was generated from a CSR downloaded from SAP Cloud Connector for Principal Propagation.
   The uploaded certificate chain becomes the Principal Propagation CA certificate used by the connector.
   Supports:
-  • Signed Chain Certificate: A certificate that is signed by an external Certificate Authority (CA) and includes the full certificate chain up to the root CA.
+  Signed Chain Certificate: A certificate that is signed by an external Certificate Authority (CA) and includes the full certificate chain up to the root CA.
   Required Workflow:
   Generate a Certificate Signing Request (CSR) from SAP Cloud Connector for Principal Propagation.Submit the CSR to a trusted Certificate Authority (CA) to obtain a signed certificate chain.Construct the PEM chain in the following order:
   Signed certificate (generated from the CSR)Intermediate CA certificate(s) (if applicable)Root CA certificateProvide the chain to Terraform using either:
@@ -24,7 +24,7 @@ This resource uploads a certificate chain that was generated from a CSR download
 The uploaded certificate chain becomes the **Principal Propagation CA certificate** used by the connector.
 		
 **Supports:**
-• Signed Chain Certificate: A certificate that is signed by an external Certificate Authority (CA) and includes the full certificate chain up to the root CA.
+- Signed Chain Certificate: A certificate that is signed by an external Certificate Authority (CA) and includes the full certificate chain up to the root CA.
 
 **Required Workflow:**
 1. Generate a **Certificate Signing Request (CSR)** from SAP Cloud Connector for Principal Propagation.
