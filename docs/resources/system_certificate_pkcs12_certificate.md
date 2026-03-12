@@ -11,9 +11,9 @@ description: |-
   The signed leaf certificate.The private key corresponding to the CSR (exported from SAP Cloud Connector).Intermediate CA certificate(s) (if applicable)Root CA certificateProvide the chain to Terraform using either:
   filebase64("certificate.p12")Inline base64-encoded PKCS#12 string
   Notes:
-  Cloud Connector accepts only the latest CSRCertificate must match the CSR's public key and subject.The PKCS#12 file must include the private key.On deleting the CA certificate resource, the certificate is removed from the SAP Cloud Connector, and any existing connections that rely on that certificate will be disrupted until a new certificate is uploaded using a new CSR.Any change to the PKCS#12 content forces replacement since SAP Cloud Connector supports only one ca certificate.
+  Cloud Connector accepts only the latest CSRCertificate must match the CSR's public key and subject.The PKCS#12 file must include the private key.On deleting the CA certificate resource, the certificate is removed from the SAP Cloud Connector, and any existing connections that rely on that certificate will be disrupted until a new certificate is uploaded using a new CSR.Any change to the PKCS#12 content forces replacement since SAP Cloud Connector supports only one system certificate.
   Further documentation:
-  https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/ca-certificate-for-principal-propagation-apis#upload-a-pkcs#12-certificate-as-ca-certificate-for-principal-propagation-(master-only)
+  https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/system-certificate-apis#upload-a-pkcs#12-certificate-as-system-certificate-(master-only)
 ---
 
 # scc_system_certificate_pkcs12_certificate (Resource)
@@ -42,10 +42,10 @@ The PKCS#12 file must be created from a CSR generated in SAP Cloud Connector and
 - Certificate must match the CSR's public key and subject.
 - The PKCS#12 file must include the private key.
 - On deleting the CA certificate resource, the certificate is removed from the SAP Cloud Connector, and any existing connections that rely on that certificate will be disrupted until a new certificate is uploaded using a new CSR.
-- Any change to the PKCS#12 content forces replacement since SAP Cloud Connector supports only one ca certificate.
+- Any change to the PKCS#12 content forces replacement since SAP Cloud Connector supports only one system certificate.
 
 __Further documentation:__
-<https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/ca-certificate-for-principal-propagation-apis#upload-a-pkcs#12-certificate-as-ca-certificate-for-principal-propagation-(master-only)>
+<https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/system-certificate-apis#upload-a-pkcs#12-certificate-as-system-certificate-(master-only)>
 
 ## Example Usage
 

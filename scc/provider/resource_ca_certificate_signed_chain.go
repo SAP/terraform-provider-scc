@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 var _ resource.Resource = &CACertificateSignedChainResource{}
@@ -200,7 +201,7 @@ func (r *CACertificateSignedChainResource) Configure(ctx context.Context, req re
 }
 
 func (r *CACertificateSignedChainResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var plan SignedChainCertificateResourceConfig
+	var plan SignedChainCACertificateResourceConfig
 	var respObj apiobjects.Certificate
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
@@ -250,13 +251,14 @@ func (r *CACertificateSignedChainResource) Create(ctx context.Context, req resou
 		return
 	}
 
-	responseModel, diags := signedChainCertificateResourceValueFromFunc(ctx, respObj, pemBytes)
+	responseModel, diags := signedChainCACertificateResourceValueFromFunc(ctx, respObj)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	responseModel.SignedChain = plan.SignedChain
+	responseModel.CertificatePEM = types.StringValue(string(pemBytes))
 
 	diags = resp.State.Set(ctx, responseModel)
 	resp.Diagnostics.Append(diags...)
@@ -271,7 +273,7 @@ func (r *CACertificateSignedChainResource) Read(ctx context.Context, req resourc
 		return
 	}
 
-	var state SignedChainCertificateResourceConfig
+	var state SignedChainCACertificateResourceConfig
 	var respObj apiobjects.Certificate
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -306,13 +308,14 @@ func (r *CACertificateSignedChainResource) Read(ctx context.Context, req resourc
 		return
 	}
 
-	responseModel, diags := signedChainCertificateResourceValueFromFunc(ctx, respObj, pemBytes)
+	responseModel, diags := signedChainCACertificateResourceValueFromFunc(ctx, respObj)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	responseModel.SignedChain = state.SignedChain
+	responseModel.CertificatePEM = types.StringValue(string(pemBytes))
 
 	diags = resp.State.Set(ctx, &responseModel)
 	resp.Diagnostics.Append(diags...)
@@ -334,7 +337,7 @@ func (r *CACertificateSignedChainResource) Delete(ctx context.Context, req resou
 		return
 	}
 
-	var state SignedChainCertificateResourceConfig
+	var state SignedChainCACertificateResourceConfig
 	var respObj apiobjects.Certificate
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)

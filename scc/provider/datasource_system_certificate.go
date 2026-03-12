@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 var _ datasource.DataSource = &SystemCertificateDataSource{}
@@ -126,7 +127,7 @@ func (d *SystemCertificateDataSource) Configure(ctx context.Context, req datasou
 }
 
 func (d *SystemCertificateDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
-	var data CertificateConfig
+	var data SystemCertificateDataSourceConfig
 	var respObj apiobjects.Certificate
 	diags := req.Config.Get(ctx, &data)
 
@@ -156,11 +157,13 @@ func (d *SystemCertificateDataSource) Read(ctx context.Context, req datasource.R
 		Bytes: certBytes,
 	})
 
-	responseModel, diags := SystemCertificateDataSourceValueFrom(ctx, respObj, pemBytes)
+	responseModel, diags := SystemCertificateDataSourceValueFrom(ctx, respObj)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	responseModel.CertificatePEM = types.StringValue(string(pemBytes))
 
 	diags = resp.State.Set(ctx, &responseModel)
 	resp.Diagnostics.Append(diags...)

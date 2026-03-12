@@ -271,13 +271,13 @@ func TestCreateInternal_InvalidPEM(t *testing.T) {
 	oldUpload := uploadPKCS12CertificateFunc
 	oldReq := requestAndUnmarshalFunc
 	oldBin := getCertificateBinaryFunc
-	oldValue := pkcs12CertificateResourceValueFromFunc
+	oldValue := pkcs12SystemCertificateResourceValueFromFunc
 
 	defer func() {
 		uploadPKCS12CertificateFunc = oldUpload
 		requestAndUnmarshalFunc = oldReq
 		getCertificateBinaryFunc = oldBin
-		pkcs12CertificateResourceValueFromFunc = oldValue
+		pkcs12SystemCertificateResourceValueFromFunc = oldValue
 	}()
 
 	uploadPKCS12CertificateFunc = func(*api.RestApiClient, string, []byte, string, string) diag.Diagnostics {
@@ -336,7 +336,7 @@ func TestCreateInternal_ModelConversionFails(t *testing.T) {
 		return block.Bytes, nil
 	}
 
-	pkcs12SystemCertificateResourceValueFromFunc = func(context.Context, apiobjects.Certificate, []byte) (PKCS12SystemCertificateResourceConfig, diag.Diagnostics) {
+	pkcs12SystemCertificateResourceValueFromFunc = func(context.Context, apiobjects.Certificate) (PKCS12SystemCertificateResourceConfig, diag.Diagnostics) {
 		var d diag.Diagnostics
 		d.AddError("model error", "fail")
 		return PKCS12SystemCertificateResourceConfig{}, d
@@ -381,7 +381,7 @@ func TestCreateInternal_Success(t *testing.T) {
 		return generateValidDERCert(t), nil
 	}
 
-	pkcs12SystemCertificateResourceValueFromFunc = func(ctx context.Context, obj apiobjects.Certificate, pem []byte) (PKCS12SystemCertificateResourceConfig, diag.Diagnostics) {
+	pkcs12SystemCertificateResourceValueFromFunc = func(ctx context.Context, obj apiobjects.Certificate) (PKCS12SystemCertificateResourceConfig, diag.Diagnostics) {
 		return PKCS12SystemCertificateResourceConfig{
 			PKCS12Certificate: types.StringValue("abc"),
 			Password:          types.StringValue("pass"),

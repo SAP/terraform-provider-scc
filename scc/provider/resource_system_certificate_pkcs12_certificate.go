@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 var _ resource.Resource = &SystemCertificatePKCS12CertificateResource{}
@@ -57,10 +58,10 @@ The PKCS#12 file must be created from a CSR generated in SAP Cloud Connector and
 - Certificate must match the CSR's public key and subject.
 - The PKCS#12 file must include the private key.
 - On deleting the CA certificate resource, the certificate is removed from the SAP Cloud Connector, and any existing connections that rely on that certificate will be disrupted until a new certificate is uploaded using a new CSR.
-- Any change to the PKCS#12 content forces replacement since SAP Cloud Connector supports only one ca certificate.
+- Any change to the PKCS#12 content forces replacement since SAP Cloud Connector supports only one system certificate.
 
 __Further documentation:__
-<https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/ca-certificate-for-principal-propagation-apis#upload-a-pkcs#12-certificate-as-ca-certificate-for-principal-propagation-(master-only)>`,
+<https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/system-certificate-apis#upload-a-pkcs#12-certificate-as-system-certificate-(master-only)>`,
 		Attributes: map[string]schema.Attribute{
 			"pkcs12_certificate": schema.StringAttribute{
 				MarkdownDescription: `PKCS#12 (.p12) certificate bundle.
@@ -219,7 +220,7 @@ func (r *SystemCertificatePKCS12CertificateResource) Create(ctx context.Context,
 }
 
 func (r *SystemCertificatePKCS12CertificateResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	// If there is no state, there is nothing to read (in case of mock testsing, the state can be null but the resource still needs to be read to set the response)
+	// If there is no state, there is nothing to read (in case of mock testing, the state can be null but the resource still needs to be read to set the response)
 	if req.State.Raw.IsNull() {
 		return
 	}
@@ -259,7 +260,7 @@ func (r *SystemCertificatePKCS12CertificateResource) Read(ctx context.Context, r
 		return
 	}
 
-	responseModel, modelDiags := pkcs12SystemCertificateResourceValueFromFunc(ctx, respObj, pemBytes)
+	responseModel, modelDiags := pkcs12SystemCertificateResourceValueFromFunc(ctx, respObj)
 	resp.Diagnostics.Append(modelDiags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -268,6 +269,7 @@ func (r *SystemCertificatePKCS12CertificateResource) Read(ctx context.Context, r
 	responseModel.PKCS12Certificate = state.PKCS12Certificate
 	responseModel.Password = state.Password
 	responseModel.KeyPassword = state.KeyPassword
+	responseModel.CertificatePEM = types.StringValue(string(pemBytes))
 
 	diags = resp.State.Set(ctx, &responseModel)
 	resp.Diagnostics.Append(diags...)
@@ -358,7 +360,7 @@ func (r *SystemCertificatePKCS12CertificateResource) createInternal(ctx context.
 		return nil, diags
 	}
 
-	responseModel, modelDiags := pkcs12SystemCertificateResourceValueFromFunc(ctx, respObj, pemBytes)
+	responseModel, modelDiags := pkcs12SystemCertificateResourceValueFromFunc(ctx, respObj)
 	diags.Append(modelDiags...)
 	if diags.HasError() {
 		return nil, diags
@@ -367,6 +369,7 @@ func (r *SystemCertificatePKCS12CertificateResource) createInternal(ctx context.
 	responseModel.PKCS12Certificate = plan.PKCS12Certificate
 	responseModel.Password = plan.Password
 	responseModel.KeyPassword = plan.KeyPassword
+	responseModel.CertificatePEM = types.StringValue(string(pemBytes))
 
 	return &responseModel, diags
 }

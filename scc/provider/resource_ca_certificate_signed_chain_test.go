@@ -463,14 +463,14 @@ func TestCACertificateSignedChain_Create_Success(t *testing.T) {
 	oldUpload := uploadSignedChainFunc
 	oldReq := requestAndUnmarshalFunc
 	oldBin := getCertificateBinaryFunc
-	oldModel := signedChainCertificateResourceValueFromFunc
+	oldModel := signedChainCACertificateResourceValueFromFunc
 	oldValidate := validatePEMChainFunc
 
 	defer func() {
 		uploadSignedChainFunc = oldUpload
 		requestAndUnmarshalFunc = oldReq
 		getCertificateBinaryFunc = oldBin
-		signedChainCertificateResourceValueFromFunc = oldModel
+		signedChainCACertificateResourceValueFromFunc = oldModel
 		validatePEMChainFunc = oldValidate
 	}()
 
@@ -503,7 +503,7 @@ func TestCACertificateSignedChain_Create_Success(t *testing.T) {
 		return block.Bytes, nil
 	}
 
-	signedChainCertificateResourceValueFromFunc = SignedChainCertificateResourceValueFrom
+	signedChainCACertificateResourceValueFromFunc = SignedChainCACertificateResourceValueFrom
 
 	validatePEMChainFunc = func(data string) diag.Diagnostics {
 		return nil

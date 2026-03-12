@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 var _ resource.Resource = &SystemCertificateSignedChainResource{}
@@ -223,13 +224,14 @@ func (r *SystemCertificateSignedChainResource) Create(ctx context.Context, req r
 		return
 	}
 
-	responseModel, diags := signedChainSystemCertificateResourceValueFromFunc(ctx, respObj, pemBytes)
+	responseModel, diags := signedChainSystemCertificateResourceValueFromFunc(ctx, respObj)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	responseModel.SignedChain = plan.SignedChain
+	responseModel.CertificatePEM = types.StringValue(string(pemBytes))
 
 	diags = resp.State.Set(ctx, responseModel)
 	resp.Diagnostics.Append(diags...)
@@ -239,7 +241,7 @@ func (r *SystemCertificateSignedChainResource) Create(ctx context.Context, req r
 }
 
 func (r *SystemCertificateSignedChainResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	// If there is no state, there is nothing to read (in case of mock testsing, the state can be null but the resource still needs to be read to set the response)
+	// If there is no state, there is nothing to read (in case of mock testing, the state can be null but the resource still needs to be read to set the response)
 	if req.State.Raw.IsNull() {
 		return
 	}
@@ -279,13 +281,14 @@ func (r *SystemCertificateSignedChainResource) Read(ctx context.Context, req res
 		return
 	}
 
-	responseModel, diags := signedChainSystemCertificateResourceValueFromFunc(ctx, respObj, pemBytes)
+	responseModel, diags := signedChainSystemCertificateResourceValueFromFunc(ctx, respObj)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	responseModel.SignedChain = state.SignedChain
+	responseModel.CertificatePEM = types.StringValue(string(pemBytes))
 
 	diags = resp.State.Set(ctx, &responseModel)
 	resp.Diagnostics.Append(diags...)

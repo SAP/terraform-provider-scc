@@ -15,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 var _ resource.Resource = &CACertificatePKCS12CertificateResource{}
@@ -56,11 +57,11 @@ The PKCS#12 file must be created from a CSR generated in SAP Cloud Connector and
 - Cloud Connector accepts **only the latest CSR**
 - Certificate must match the CSR's public key and subject.
 - The PKCS#12 file must include the private key.
-- On deleting the system certificate resource, the certificate is removed from the SAP Cloud Connector, and any existing connections that rely on that certificate will be disrupted until a new certificate is uploaded using a new CSR.
-- Any change to the PKCS#12 content forces replacement since SAP Cloud Connector supports only one system certificate.
+- On deleting the CA certificate resource, the certificate is removed from the SAP Cloud Connector, and any existing connections that rely on that certificate will be disrupted until a new certificate is uploaded using a new CSR.
+- Any change to the PKCS#12 content forces replacement since SAP Cloud Connector supports only one CA certificate.
 
 __Further documentation:__
-<https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/system-certificate-apis#upload-a-pkcs#12-certificate-as-system-certificate-(master-only)>`,
+<https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/ca-certificate-for-principal-propagation-apis#upload-a-pkcs#12-certificate-as-ca-certificate-for-principal-propagation-(master-only)>`,
 		Attributes: map[string]schema.Attribute{
 			"pkcs12_certificate": schema.StringAttribute{
 				MarkdownDescription: `PKCS#12 (.p12) certificate bundle.
@@ -220,7 +221,7 @@ func (r *CACertificatePKCS12CertificateResource) Configure(ctx context.Context, 
 }
 
 func (r *CACertificatePKCS12CertificateResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var plan PKCS12CertificateResourceConfig
+	var plan PKCS12CACertificateResourceConfig
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -241,12 +242,12 @@ func (r *CACertificatePKCS12CertificateResource) Create(ctx context.Context, req
 }
 
 func (r *CACertificatePKCS12CertificateResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	// If there is no state, there is nothing to read (in case of mock testsing, the state can be null but the resource still needs to be read to set the response)
+	// If there is no state, there is nothing to read (in case of mock testing, the state can be null but the resource still needs to be read to set the response)
 	if req.State.Raw.IsNull() {
 		return
 	}
 
-	var state PKCS12CertificateResourceConfig
+	var state PKCS12CACertificateResourceConfig
 	var respObj apiobjects.Certificate
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -281,7 +282,7 @@ func (r *CACertificatePKCS12CertificateResource) Read(ctx context.Context, req r
 		return
 	}
 
-	responseModel, d := pkcs12CertificateResourceValueFromFunc(ctx, respObj, pemBytes)
+	responseModel, d := pkcs12CACertificateResourceValueFromFunc(ctx, respObj)
 	resp.Diagnostics.Append(d...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -290,6 +291,7 @@ func (r *CACertificatePKCS12CertificateResource) Read(ctx context.Context, req r
 	responseModel.PKCS12Certificate = state.PKCS12Certificate
 	responseModel.Password = state.Password
 	responseModel.KeyPassword = state.KeyPassword
+	responseModel.CertificatePEM = types.StringValue(string(pemBytes))
 
 	diags = resp.State.Set(ctx, &responseModel)
 	resp.Diagnostics.Append(diags...)
@@ -301,7 +303,7 @@ func (r *CACertificatePKCS12CertificateResource) Read(ctx context.Context, req r
 func (r *CACertificatePKCS12CertificateResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	resp.Diagnostics.AddError(
 		"Update Not Supported",
-		"Updating a PKCS#12 system certificate is not supported because SAP Cloud Connector only accepts the latest uploaded certificate. To update the certificate, you must create a new resource with the updated PKCS#12 content, which will replace the existing certificate in SAP Cloud Connector.",
+		"Updating a PKCS#12 CA certificate is not supported because SAP Cloud Connector only accepts the latest uploaded certificate. To update the certificate, you must create a new resource with the updated PKCS#12 content, which will replace the existing certificate in SAP Cloud Connector.",
 	)
 }
 
@@ -311,7 +313,7 @@ func (r *CACertificatePKCS12CertificateResource) Delete(ctx context.Context, req
 		return
 	}
 
-	var state PKCS12CertificateResourceConfig
+	var state PKCS12CACertificateResourceConfig
 	var respObj apiobjects.Certificate
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -330,7 +332,7 @@ func (r *CACertificatePKCS12CertificateResource) Delete(ctx context.Context, req
 	resp.State.RemoveResource(ctx)
 }
 
-func (r *CACertificatePKCS12CertificateResource) createInternal(ctx context.Context, plan PKCS12CertificateResourceConfig) (*PKCS12CertificateResourceConfig, diag.Diagnostics) {
+func (r *CACertificatePKCS12CertificateResource) createInternal(ctx context.Context, plan PKCS12CACertificateResourceConfig) (*PKCS12CACertificateResourceConfig, diag.Diagnostics) {
 
 	var diags diag.Diagnostics
 	var respObj apiobjects.Certificate
@@ -380,7 +382,7 @@ func (r *CACertificatePKCS12CertificateResource) createInternal(ctx context.Cont
 		return nil, diags
 	}
 
-	responseModel, d := pkcs12CertificateResourceValueFromFunc(ctx, respObj, pemBytes)
+	responseModel, d := pkcs12CACertificateResourceValueFromFunc(ctx, respObj)
 	diags.Append(d...)
 	if diags.HasError() {
 		return nil, diags
@@ -389,6 +391,7 @@ func (r *CACertificatePKCS12CertificateResource) createInternal(ctx context.Cont
 	responseModel.PKCS12Certificate = plan.PKCS12Certificate
 	responseModel.Password = plan.Password
 	responseModel.KeyPassword = plan.KeyPassword
+	responseModel.CertificatePEM = types.StringValue(string(pemBytes))
 
 	return &responseModel, diags
 }

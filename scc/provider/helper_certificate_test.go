@@ -731,13 +731,12 @@ func TestBuildCertificateModel(t *testing.T) {
 		NotAfterTimeStamp:  time.Now().Add(time.Hour).UnixMilli(),
 	}
 
-	model, diags := buildCertificateModel(ctx, cert, []byte("pem-data"))
+	model, diags := buildCertificateModel(ctx, cert)
 
 	assert.False(t, diags.HasError())
 
 	assert.Equal(t, "TestCA", model.Issuer.ValueString())
 	assert.Equal(t, "12345", model.SerialNumber.ValueString())
-	assert.Equal(t, "pem-data", model.CertificatePEM.ValueString())
 
 	assert.False(t, model.SubjectDN.IsNull())
 }
@@ -752,7 +751,7 @@ func TestBuildCertificateModel_NoSubjectDN(t *testing.T) {
 		NotAfterTimeStamp:  time.Now().UnixMilli(),
 	}
 
-	model, diags := buildCertificateModel(ctx, cert, []byte("pem"))
+	model, diags := buildCertificateModel(ctx, cert)
 
 	assert.False(t, diags.HasError())
 	assert.True(t, model.SubjectDN.IsNull())
@@ -780,7 +779,7 @@ func TestBuildCertificateModelWithSAN(t *testing.T) {
 		},
 	}
 
-	model, diags := buildCertificateModelWithSAN(ctx, cert, []byte("pem"))
+	model, diags := buildCertificateModelWithSAN(ctx, cert)
 
 	assert.False(t, diags.HasError())
 	assert.False(t, model.SubjectAltNames.IsNull())
@@ -796,7 +795,7 @@ func TestBuildCertificateModelWithSAN_NoSAN(t *testing.T) {
 		NotAfterTimeStamp:  time.Now().UnixMilli(),
 	}
 
-	model, diags := buildCertificateModelWithSAN(ctx, cert, []byte("pem"))
+	model, diags := buildCertificateModelWithSAN(ctx, cert)
 
 	assert.False(t, diags.HasError())
 	assert.True(t, model.SubjectAltNames.IsNull())
@@ -825,23 +824,26 @@ func buildSignedChainPlan(
 	}
 
 	attrTypes := map[string]tftypes.Type{
-		"signed_chain":    tftypes.String,
-		"subject_dn":      subjectDNType,
-		"valid_to":        tftypes.String,
-		"valid_from":      tftypes.String,
-		"issuer":          tftypes.String,
-		"serial_number":   tftypes.String,
-		"certificate_pem": tftypes.String,
+		"signed_chain":  tftypes.String,
+		"subject_dn":    subjectDNType,
+		"valid_to":      tftypes.String,
+		"valid_from":    tftypes.String,
+		"issuer":        tftypes.String,
+		"serial_number": tftypes.String,
 	}
 
 	values := map[string]tftypes.Value{
-		"signed_chain":    tftypes.NewValue(tftypes.String, chain),
-		"subject_dn":      tftypes.NewValue(subjectDNType, nil),
-		"valid_to":        tftypes.NewValue(tftypes.String, nil),
-		"valid_from":      tftypes.NewValue(tftypes.String, nil),
-		"issuer":          tftypes.NewValue(tftypes.String, nil),
-		"serial_number":   tftypes.NewValue(tftypes.String, nil),
-		"certificate_pem": tftypes.NewValue(tftypes.String, nil),
+		"signed_chain":  tftypes.NewValue(tftypes.String, chain),
+		"subject_dn":    tftypes.NewValue(subjectDNType, nil),
+		"valid_to":      tftypes.NewValue(tftypes.String, nil),
+		"valid_from":    tftypes.NewValue(tftypes.String, nil),
+		"issuer":        tftypes.NewValue(tftypes.String, nil),
+		"serial_number": tftypes.NewValue(tftypes.String, nil),
+	}
+
+	if _, ok := schemaResp.Schema.Attributes["certificate_pem"]; ok {
+		attrTypes["certificate_pem"] = tftypes.String
+		values["certificate_pem"] = tftypes.NewValue(tftypes.String, nil)
 	}
 
 	if includeSAN {

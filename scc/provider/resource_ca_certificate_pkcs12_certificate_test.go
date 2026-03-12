@@ -90,7 +90,7 @@ func TestCACertificatePKCS12Certificate_Read_NoState(t *testing.T) {
 }
 
 func TestCACertificatePKCS12Certificate_Inputs_RawValue(t *testing.T) {
-	plan := PKCS12CertificateResourceConfig{
+	plan := PKCS12CACertificateResourceConfig{
 		PKCS12Certificate: types.StringValue("raw-data"),
 	}
 
@@ -101,7 +101,7 @@ func TestCACertificatePKCS12Certificate_Inputs_RawValue(t *testing.T) {
 }
 
 func TestCACertificatePKCS12Certificate_Inputs_EmptyCert(t *testing.T) {
-	plan := PKCS12CertificateResourceConfig{
+	plan := PKCS12CACertificateResourceConfig{
 		PKCS12Certificate: types.StringValue(""),
 	}
 
@@ -111,7 +111,7 @@ func TestCACertificatePKCS12Certificate_Inputs_EmptyCert(t *testing.T) {
 }
 
 func TestCACertificatePKCS12Certificate_Inputs_EmptyKeyPassword(t *testing.T) {
-	plan := PKCS12CertificateResourceConfig{
+	plan := PKCS12CACertificateResourceConfig{
 		PKCS12Certificate: types.StringValue("abc"),
 		KeyPassword:       types.StringValue(""),
 	}
@@ -124,7 +124,7 @@ func TestCACertificatePKCS12Certificate_Inputs_EmptyKeyPassword(t *testing.T) {
 func TestCACertificatePKCS12Certificate_Inputs_Base64Decode(t *testing.T) {
 	encoded := base64.StdEncoding.EncodeToString([]byte("hello"))
 
-	plan := PKCS12CertificateResourceConfig{
+	plan := PKCS12CACertificateResourceConfig{
 		PKCS12Certificate: types.StringValue(encoded),
 	}
 
@@ -135,7 +135,7 @@ func TestCACertificatePKCS12Certificate_Inputs_Base64Decode(t *testing.T) {
 }
 
 func TestCACertificatePKCS12Certificate_Inputs_KeyPasswordUnknown(t *testing.T) {
-	plan := PKCS12CertificateResourceConfig{
+	plan := PKCS12CACertificateResourceConfig{
 		PKCS12Certificate: types.StringValue("abc"),
 		KeyPassword:       types.StringUnknown(),
 	}
@@ -146,7 +146,7 @@ func TestCACertificatePKCS12Certificate_Inputs_KeyPasswordUnknown(t *testing.T) 
 }
 
 func TestCACertificatePKCS12Certificate_Inputs_ValidWithKeyPassword(t *testing.T) {
-	plan := PKCS12CertificateResourceConfig{
+	plan := PKCS12CACertificateResourceConfig{
 		PKCS12Certificate: types.StringValue("abc"),
 		KeyPassword:       types.StringValue("keypass"),
 	}
@@ -160,7 +160,7 @@ func TestCACertificatePKCS12Certificate_Inputs_ValidWithKeyPassword(t *testing.T
 func TestCACertificatePKCS12Certificate_Create_ValidationFails(t *testing.T) {
 	r := &CACertificatePKCS12CertificateResource{}
 
-	plan := PKCS12CertificateResourceConfig{
+	plan := PKCS12CACertificateResourceConfig{
 		PKCS12Certificate: types.StringValue(""),
 	}
 
@@ -183,7 +183,7 @@ func TestCACertificatePKCS12Certificate_Create_UploadFails(t *testing.T) {
 		return d
 	}
 
-	plan := PKCS12CertificateResourceConfig{
+	plan := PKCS12CACertificateResourceConfig{
 		PKCS12Certificate: types.StringValue("abc"),
 		Password:          types.StringValue("pass"),
 	}
@@ -215,7 +215,7 @@ func TestCACertificatePKCS12Certificate_Create_MetadataFails(t *testing.T) {
 		return d
 	}
 
-	plan := PKCS12CertificateResourceConfig{
+	plan := PKCS12CACertificateResourceConfig{
 		PKCS12Certificate: types.StringValue("abc"),
 		Password:          types.StringValue("pass"),
 	}
@@ -253,7 +253,7 @@ func TestCACertificatePKCS12Certificate_Create_BinaryFails(t *testing.T) {
 		return nil, d
 	}
 
-	plan := PKCS12CertificateResourceConfig{
+	plan := PKCS12CACertificateResourceConfig{
 		PKCS12Certificate: types.StringValue("abc"),
 		Password:          types.StringValue("pass"),
 	}
@@ -271,13 +271,13 @@ func TestCACertificatePKCS12Certificate_Create_InvalidPEM(t *testing.T) {
 	oldUpload := uploadPKCS12CertificateFunc
 	oldReq := requestAndUnmarshalFunc
 	oldBin := getCertificateBinaryFunc
-	oldValue := pkcs12CertificateResourceValueFromFunc
+	oldValue := pkcs12CACertificateResourceValueFromFunc
 
 	defer func() {
 		uploadPKCS12CertificateFunc = oldUpload
 		requestAndUnmarshalFunc = oldReq
 		getCertificateBinaryFunc = oldBin
-		pkcs12CertificateResourceValueFromFunc = oldValue
+		pkcs12CACertificateResourceValueFromFunc = oldValue
 	}()
 
 	uploadPKCS12CertificateFunc = func(*api.RestApiClient, string, []byte, string, string) diag.Diagnostics {
@@ -294,7 +294,7 @@ func TestCACertificatePKCS12Certificate_Create_InvalidPEM(t *testing.T) {
 		return nil, d
 	}
 
-	plan := PKCS12CertificateResourceConfig{
+	plan := PKCS12CACertificateResourceConfig{
 		PKCS12Certificate: types.StringValue("abc"),
 		Password:          types.StringValue("pass"),
 	}
@@ -312,13 +312,13 @@ func TestCACertificatePKCS12Certificate_Create_ModelConversionFails(t *testing.T
 	oldUpload := uploadPKCS12CertificateFunc
 	oldReq := requestAndUnmarshalFunc
 	oldBin := getCertificateBinaryFunc
-	oldValue := pkcs12CertificateResourceValueFromFunc
+	oldValue := pkcs12CACertificateResourceValueFromFunc
 
 	defer func() {
 		uploadPKCS12CertificateFunc = oldUpload
 		requestAndUnmarshalFunc = oldReq
 		getCertificateBinaryFunc = oldBin
-		pkcs12CertificateResourceValueFromFunc = oldValue
+		pkcs12CACertificateResourceValueFromFunc = oldValue
 	}()
 
 	uploadPKCS12CertificateFunc = func(*api.RestApiClient, string, []byte, string, string) diag.Diagnostics {
@@ -336,13 +336,13 @@ func TestCACertificatePKCS12Certificate_Create_ModelConversionFails(t *testing.T
 		return block.Bytes, nil
 	}
 
-	pkcs12CertificateResourceValueFromFunc = func(context.Context, apiobjects.Certificate, []byte) (PKCS12CertificateResourceConfig, diag.Diagnostics) {
+	pkcs12CACertificateResourceValueFromFunc = func(context.Context, apiobjects.Certificate) (PKCS12CACertificateResourceConfig, diag.Diagnostics) {
 		var d diag.Diagnostics
 		d.AddError("model error", "fail")
-		return PKCS12CertificateResourceConfig{}, d
+		return PKCS12CACertificateResourceConfig{}, d
 	}
 
-	plan := PKCS12CertificateResourceConfig{
+	plan := PKCS12CACertificateResourceConfig{
 		PKCS12Certificate: types.StringValue("abc"),
 		Password:          types.StringValue("pass"),
 	}
@@ -360,13 +360,13 @@ func TestCACertificatePKCS12Certificate_Create_Success(t *testing.T) {
 	oldUpload := uploadPKCS12CertificateFunc
 	oldReq := requestAndUnmarshalFunc
 	oldBin := getCertificateBinaryFunc
-	oldValue := pkcs12CertificateResourceValueFromFunc
+	oldValue := pkcs12CACertificateResourceValueFromFunc
 
 	defer func() {
 		uploadPKCS12CertificateFunc = oldUpload
 		requestAndUnmarshalFunc = oldReq
 		getCertificateBinaryFunc = oldBin
-		pkcs12CertificateResourceValueFromFunc = oldValue
+		pkcs12CACertificateResourceValueFromFunc = oldValue
 	}()
 
 	uploadPKCS12CertificateFunc = func(*api.RestApiClient, string, []byte, string, string) diag.Diagnostics {
@@ -381,14 +381,14 @@ func TestCACertificatePKCS12Certificate_Create_Success(t *testing.T) {
 		return generateValidDERCert(t), nil
 	}
 
-	pkcs12CertificateResourceValueFromFunc = func(ctx context.Context, obj apiobjects.Certificate, pem []byte) (PKCS12CertificateResourceConfig, diag.Diagnostics) {
-		return PKCS12CertificateResourceConfig{
+	pkcs12CACertificateResourceValueFromFunc = func(ctx context.Context, obj apiobjects.Certificate) (PKCS12CACertificateResourceConfig, diag.Diagnostics) {
+		return PKCS12CACertificateResourceConfig{
 			PKCS12Certificate: types.StringValue("abc"),
 			Password:          types.StringValue("pass"),
 		}, nil
 	}
 
-	plan := PKCS12CertificateResourceConfig{
+	plan := PKCS12CACertificateResourceConfig{
 		PKCS12Certificate: types.StringValue("abc"),
 		Password:          types.StringValue("pass"),
 	}
