@@ -27,6 +27,7 @@ type SystemCertificateDataSourceConfig struct {
 	CertificatePEM types.String `tfsdk:"certificate_pem"`
 	CertificateConfig
 }
+
 type SelfSignedSystemCertificateResourceConfig struct {
 	KeySize        types.Int64  `tfsdk:"key_size"`
 	CertificatePEM types.String `tfsdk:"certificate_pem"`
