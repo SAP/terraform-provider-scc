@@ -10,8 +10,7 @@ import (
 
 // Wrappers for testing purposes (allows mocking in tests)
 var selfSignedCertificateResourceValueFromFunc = SelfSignedCertificateResourceValueFrom
-
-// var signedChainCertificateResourceValueFromFunc = SignedChainCertificateResourceValueFrom
+var signedChainCertificateResourceValueFromFunc = SignedChainCertificateResourceValueFrom
 var pkcs12CertificateResourceValueFromFunc = PKCS12CertificateResourceValueFrom
 
 var selfSignedSystemCertificateResourceValueFromFunc = SelfSignedSystemCertificateResourceValueFrom

@@ -15,8 +15,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestSystemCertificateSignedChain_Metadata(t *testing.T) {
-	r := NewSystemCertificateSignedChainResource()
+func TestCACertificateSignedChain_Metadata(t *testing.T) {
+	r := NewCACertificateSignedChainResource()
 
 	req := resource.MetadataRequest{
 		ProviderTypeName: "scc",
@@ -25,11 +25,11 @@ func TestSystemCertificateSignedChain_Metadata(t *testing.T) {
 
 	r.Metadata(context.Background(), req, resp)
 
-	assert.Equal(t, "scc_system_certificate_signed_chain", resp.TypeName)
+	assert.Equal(t, "scc_ca_certificate_signed_chain", resp.TypeName)
 }
 
-func TestSystemCertificateSignedChain_Schema(t *testing.T) {
-	r := NewSystemCertificateSignedChainResource()
+func TestCACertificateSignedChain_Schema(t *testing.T) {
+	r := NewCACertificateSignedChainResource()
 
 	resp := &resource.SchemaResponse{}
 	r.Schema(context.Background(), resource.SchemaRequest{}, resp)
@@ -38,8 +38,8 @@ func TestSystemCertificateSignedChain_Schema(t *testing.T) {
 	assert.True(t, resp.Schema.Attributes["signed_chain"].IsRequired())
 }
 
-func TestSystemCertificateSignedChain_Schema_Attributes(t *testing.T) {
-	r := NewSystemCertificateSignedChainResource()
+func TestCACertificateSignedChain_Schema_Attributes(t *testing.T) {
+	r := NewCACertificateSignedChainResource()
 	resp := &resource.SchemaResponse{}
 
 	r.Schema(context.Background(), resource.SchemaRequest{}, resp)
@@ -50,8 +50,8 @@ func TestSystemCertificateSignedChain_Schema_Attributes(t *testing.T) {
 	assert.True(t, attr.IsRequired())
 }
 
-func TestSystemCertificateSignedChain_Configure_Success(t *testing.T) {
-	r := NewSystemCertificateSignedChainResource().(*SystemCertificateSignedChainResource)
+func TestCACertificateSignedChain_Configure_Success(t *testing.T) {
+	r := NewCACertificateSignedChainResource().(*CACertificateSignedChainResource)
 
 	client := &api.RestApiClient{}
 
@@ -65,8 +65,8 @@ func TestSystemCertificateSignedChain_Configure_Success(t *testing.T) {
 	assert.False(t, resp.Diagnostics.HasError())
 }
 
-func TestSystemCertificateSignedChain_Configure_WrongType(t *testing.T) {
-	r := NewSystemCertificateSignedChainResource().(*SystemCertificateSignedChainResource)
+func TestCACertificateSignedChain_Configure_WrongType(t *testing.T) {
+	r := NewCACertificateSignedChainResource().(*CACertificateSignedChainResource)
 
 	req := resource.ConfigureRequest{
 		ProviderData: "wrong",
@@ -77,7 +77,7 @@ func TestSystemCertificateSignedChain_Configure_WrongType(t *testing.T) {
 
 	assert.True(t, resp.Diagnostics.HasError())
 }
-func TestSystemCertificateSignedChain_Create_InvalidPEM(t *testing.T) {
+func TestCACertificateSignedChain_Create_InvalidPEM(t *testing.T) {
 	// Invalid PEM should fail validation
 	diags := validatePEMChain("not a cert")
 	if diags == nil || !diags.HasError() {
@@ -85,8 +85,8 @@ func TestSystemCertificateSignedChain_Create_InvalidPEM(t *testing.T) {
 	}
 }
 
-func TestSystemCertificateSignedChain_Update(t *testing.T) {
-	r := NewSystemCertificateSignedChainResource()
+func TestCACertificateSignedChain_Update(t *testing.T) {
+	r := NewCACertificateSignedChainResource()
 
 	resp := &resource.UpdateResponse{}
 	r.Update(context.Background(), resource.UpdateRequest{}, resp)
@@ -94,8 +94,8 @@ func TestSystemCertificateSignedChain_Update(t *testing.T) {
 	assert.True(t, resp.Diagnostics.HasError())
 }
 
-func TestSystemCertificateSignedChain_Delete(t *testing.T) {
-	r := &SystemCertificateSignedChainResource{
+func TestCACertificateSignedChain_Delete(t *testing.T) {
+	r := &CACertificateSignedChainResource{
 		client: &api.RestApiClient{},
 	}
 
@@ -121,8 +121,8 @@ func TestSystemCertificateSignedChain_Delete(t *testing.T) {
 	assert.False(t, resp.Diagnostics.HasError())
 }
 
-func TestSystemCertificateSignedChain_Delete_NoState(t *testing.T) {
-	r := NewSystemCertificateSignedChainResource()
+func TestCACertificateSignedChain_Delete_NoState(t *testing.T) {
+	r := NewCACertificateSignedChainResource()
 
 	req := resource.DeleteRequest{}
 	resp := &resource.DeleteResponse{}
@@ -132,8 +132,8 @@ func TestSystemCertificateSignedChain_Delete_NoState(t *testing.T) {
 	assert.False(t, resp.Diagnostics.HasError())
 }
 
-func TestSystemCertificateSignedChain_Read(t *testing.T) {
-	r := &SystemCertificateSignedChainResource{
+func TestCACertificateSignedChain_Read(t *testing.T) {
+	r := &CACertificateSignedChainResource{
 		client: &api.RestApiClient{},
 	}
 
@@ -171,8 +171,8 @@ func TestSystemCertificateSignedChain_Read(t *testing.T) {
 	assert.False(t, resp.Diagnostics.HasError())
 }
 
-func TestSystemCertificateSignedChain_Read_NoState(t *testing.T) {
-	r := NewSystemCertificateSignedChainResource()
+func TestCACertificateSignedChain_Read_NoState(t *testing.T) {
+	r := NewCACertificateSignedChainResource()
 
 	req := resource.ReadRequest{}
 	resp := &resource.ReadResponse{}
@@ -182,18 +182,10 @@ func TestSystemCertificateSignedChain_Read_NoState(t *testing.T) {
 	assert.False(t, resp.Diagnostics.HasError())
 }
 
-func TestValidatePEMChain_Valid(t *testing.T) {
-	cert := generateTestCert(t)
-
-	diags := validatePEMChain(cert)
-
-	assert.False(t, diags.HasError())
-}
-
-func TestSystemCertificateSignedChain_Delete_APIFailure(t *testing.T) {
+func TestCACertificateSignedChain_Delete_APIFailure(t *testing.T) {
 	ctx := context.Background()
 
-	r := NewSystemCertificateSignedChainResource().(*SystemCertificateSignedChainResource)
+	r := NewCACertificateSignedChainResource().(*CACertificateSignedChainResource)
 	r.client = &api.RestApiClient{}
 
 	old := requestAndUnmarshalFunc
@@ -235,10 +227,10 @@ func TestSystemCertificateSignedChain_Delete_APIFailure(t *testing.T) {
 	assert.True(t, resp.Diagnostics.HasError())
 }
 
-func TestSystemCertificateSignedChain_Read_APIFailure(t *testing.T) {
+func TestCACertificateSignedChain_Read_APIFailure(t *testing.T) {
 	ctx := context.Background()
 
-	r := NewSystemCertificateSignedChainResource().(*SystemCertificateSignedChainResource)
+	r := NewCACertificateSignedChainResource().(*CACertificateSignedChainResource)
 	r.client = &api.RestApiClient{}
 
 	old := requestAndUnmarshalFunc
@@ -273,10 +265,10 @@ func TestSystemCertificateSignedChain_Read_APIFailure(t *testing.T) {
 	assert.True(t, resp.Diagnostics.HasError())
 }
 
-func TestSystemCertificateSignedChain_Read_BinaryFailure(t *testing.T) {
+func TestCACertificateSignedChain_Read_BinaryFailure(t *testing.T) {
 	ctx := context.Background()
 
-	r := NewSystemCertificateSignedChainResource().(*SystemCertificateSignedChainResource)
+	r := NewCACertificateSignedChainResource().(*CACertificateSignedChainResource)
 	r.client = &api.RestApiClient{}
 
 	oldReq := requestAndUnmarshalFunc
@@ -323,10 +315,10 @@ func TestSystemCertificateSignedChain_Read_BinaryFailure(t *testing.T) {
 	assert.True(t, resp.Diagnostics.HasError())
 }
 
-func TestSystemCertificateSignedChain_Create_UploadFails(t *testing.T) {
+func TestCACertificateSignedChain_Create_UploadFails(t *testing.T) {
 	ctx := context.Background()
 
-	r := NewSystemCertificateSignedChainResource().(*SystemCertificateSignedChainResource)
+	r := NewCACertificateSignedChainResource().(*CACertificateSignedChainResource)
 	r.client = &api.RestApiClient{}
 
 	oldUpload := uploadSignedChainFunc
@@ -368,14 +360,14 @@ func TestSystemCertificateSignedChain_Create_UploadFails(t *testing.T) {
 	assert.True(t, resp.Diagnostics.HasError())
 }
 
-func buildSystemCertificateSignedChainPlan(ctx context.Context, r *SystemCertificateSignedChainResource, chain string) tfsdk.Plan {
-	return buildSignedChainPlan(ctx, r, chain, false)
+func buildCACertificateSignedChainPlan(ctx context.Context, r *CACertificateSignedChainResource, chain string) tfsdk.Plan {
+	return buildSignedChainPlan(ctx, r, chain, true)
 }
 
-func TestSystemCertificateSignedChain_Create_MetadataFails(t *testing.T) {
+func TestCACertificateSignedChain_Create_MetadataFails(t *testing.T) {
 	ctx := context.Background()
 
-	r := NewSystemCertificateSignedChainResource().(*SystemCertificateSignedChainResource)
+	r := NewCACertificateSignedChainResource().(*CACertificateSignedChainResource)
 	r.client = &api.RestApiClient{}
 
 	oldUpload := uploadSignedChainFunc
@@ -404,7 +396,7 @@ func TestSystemCertificateSignedChain_Create_MetadataFails(t *testing.T) {
 	}
 
 	req := resource.CreateRequest{
-		Plan: buildSystemCertificateSignedChainPlan(ctx, r, "fake-cert"),
+		Plan: buildCACertificateSignedChainPlan(ctx, r, "fake-cert"),
 	}
 
 	resp := &resource.CreateResponse{}
@@ -414,10 +406,10 @@ func TestSystemCertificateSignedChain_Create_MetadataFails(t *testing.T) {
 	assert.True(t, resp.Diagnostics.HasError())
 }
 
-func TestSystemCertificateSignedChain_Create_BinaryFails(t *testing.T) {
+func TestCACertificateSignedChain_Create_BinaryFails(t *testing.T) {
 	ctx := context.Background()
 
-	r := NewSystemCertificateSignedChainResource().(*SystemCertificateSignedChainResource)
+	r := NewCACertificateSignedChainResource().(*CACertificateSignedChainResource)
 	r.client = &api.RestApiClient{}
 
 	oldUpload := uploadSignedChainFunc
@@ -452,7 +444,7 @@ func TestSystemCertificateSignedChain_Create_BinaryFails(t *testing.T) {
 	}
 
 	req := resource.CreateRequest{
-		Plan: buildSystemCertificateSignedChainPlan(ctx, r, "fake-cert"),
+		Plan: buildCACertificateSignedChainPlan(ctx, r, "fake-cert"),
 	}
 
 	resp := &resource.CreateResponse{}
@@ -462,23 +454,23 @@ func TestSystemCertificateSignedChain_Create_BinaryFails(t *testing.T) {
 	assert.True(t, resp.Diagnostics.HasError())
 }
 
-func TestSystemCertificateSignedChain_Create_Success(t *testing.T) {
+func TestCACertificateSignedChain_Create_Success(t *testing.T) {
 	ctx := context.Background()
 
-	r := NewSystemCertificateSignedChainResource().(*SystemCertificateSignedChainResource)
+	r := NewCACertificateSignedChainResource().(*CACertificateSignedChainResource)
 	r.client = &api.RestApiClient{}
 
 	oldUpload := uploadSignedChainFunc
 	oldReq := requestAndUnmarshalFunc
 	oldBin := getCertificateBinaryFunc
-	oldModel := signedChainSystemCertificateResourceValueFromFunc
+	oldModel := signedChainCertificateResourceValueFromFunc
 	oldValidate := validatePEMChainFunc
 
 	defer func() {
 		uploadSignedChainFunc = oldUpload
 		requestAndUnmarshalFunc = oldReq
 		getCertificateBinaryFunc = oldBin
-		signedChainSystemCertificateResourceValueFromFunc = oldModel
+		signedChainCertificateResourceValueFromFunc = oldModel
 		validatePEMChainFunc = oldValidate
 	}()
 
@@ -511,7 +503,7 @@ func TestSystemCertificateSignedChain_Create_Success(t *testing.T) {
 		return block.Bytes, nil
 	}
 
-	signedChainSystemCertificateResourceValueFromFunc = SignedChainSystemCertificateResourceValueFrom
+	signedChainCertificateResourceValueFromFunc = SignedChainCertificateResourceValueFrom
 
 	validatePEMChainFunc = func(data string) diag.Diagnostics {
 		return nil
@@ -520,7 +512,7 @@ func TestSystemCertificateSignedChain_Create_Success(t *testing.T) {
 	// build schema-backed plan
 	validChain := generateTestCert(t)
 	req := resource.CreateRequest{
-		Plan: buildSystemCertificateSignedChainPlan(ctx, r, validChain),
+		Plan: buildCACertificateSignedChainPlan(ctx, r, validChain),
 	}
 
 	resp := &resource.CreateResponse{}

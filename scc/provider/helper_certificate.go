@@ -23,6 +23,7 @@ import (
 // Wrappers for testing purposes (allows mocking in tests)
 var getCertificateBinaryFunc = getCertificateBinary
 var validatePEMChainFunc = validatePEMChain
+var uploadSignedChainFunc = uploadSignedChain
 
 type CertificateConfig struct {
 	SubjectDN      types.Object `tfsdk:"subject_dn"`
