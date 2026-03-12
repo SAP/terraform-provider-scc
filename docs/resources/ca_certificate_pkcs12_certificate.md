@@ -1,8 +1,8 @@
 ---
-page_title: "scc_system_certificate_pkcs12_certificate Resource - scc"
+page_title: "scc_ca_certificate_pkcs12_certificate Resource - scc"
 subcategory: ""
 description: |-
-  Creates and manages a PKCS#12 (P12) System Certificate for the SAP BTP Connectivity service.
+  Creates and manages a PKCS#12 (P12) CA Certificate for the SAP BTP Connectivity service.
   The PKCS#12 file must be created from a CSR generated in SAP Cloud Connector and signed by a trusted Certificate Authority (CA).
   Supports:
   • PKCS#12 Certificate: A certificate bundle that is signed by an external Certificate Authority (CA) and includes bundle containing private key and full certificate chain.
@@ -11,14 +11,14 @@ description: |-
   The signed leaf certificate.The private key corresponding to the CSR (exported from SAP Cloud Connector).Intermediate CA certificate(s) (if applicable)Root CA certificateProvide the chain to Terraform using either:
   filebase64("certificate.p12")Inline base64-encoded PKCS#12 string
   Notes:
-  Cloud Connector accepts only the latest CSRCertificate must match the CSR's public key and subject.The PKCS#12 file must include the private key.On deleting the CA certificate resource, the certificate is removed from the SAP Cloud Connector, and any existing connections that rely on that certificate will be disrupted until a new certificate is uploaded using a new CSR.Any change to the PKCS#12 content forces replacement since SAP Cloud Connector supports only one ca certificate.
+  Cloud Connector accepts only the latest CSRCertificate must match the CSR's public key and subject.The PKCS#12 file must include the private key.On deleting the system certificate resource, the certificate is removed from the SAP Cloud Connector, and any existing connections that rely on that certificate will be disrupted until a new certificate is uploaded using a new CSR.Any change to the PKCS#12 content forces replacement since SAP Cloud Connector supports only one system certificate.
   Further documentation:
-  https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/ca-certificate-for-principal-propagation-apis#upload-a-pkcs#12-certificate-as-ca-certificate-for-principal-propagation-(master-only)
+  https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/system-certificate-apis#upload-a-pkcs#12-certificate-as-system-certificate-(master-only)
 ---
 
-# scc_system_certificate_pkcs12_certificate (Resource)
+# scc_ca_certificate_pkcs12_certificate (Resource)
 
-Creates and manages a **PKCS#12 (P12) System Certificate** for the SAP BTP Connectivity service. 
+Creates and manages a **PKCS#12 (P12) CA Certificate** for the SAP BTP Connectivity service. 
 The PKCS#12 file must be created from a CSR generated in SAP Cloud Connector and signed by a trusted Certificate Authority (CA).
 		
 **Supports:**
@@ -41,16 +41,16 @@ The PKCS#12 file must be created from a CSR generated in SAP Cloud Connector and
 - Cloud Connector accepts **only the latest CSR**
 - Certificate must match the CSR's public key and subject.
 - The PKCS#12 file must include the private key.
-- On deleting the CA certificate resource, the certificate is removed from the SAP Cloud Connector, and any existing connections that rely on that certificate will be disrupted until a new certificate is uploaded using a new CSR.
-- Any change to the PKCS#12 content forces replacement since SAP Cloud Connector supports only one ca certificate.
+- On deleting the system certificate resource, the certificate is removed from the SAP Cloud Connector, and any existing connections that rely on that certificate will be disrupted until a new certificate is uploaded using a new CSR.
+- Any change to the PKCS#12 content forces replacement since SAP Cloud Connector supports only one system certificate.
 
 __Further documentation:__
-<https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/ca-certificate-for-principal-propagation-apis#upload-a-pkcs#12-certificate-as-ca-certificate-for-principal-propagation-(master-only)>
+<https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/system-certificate-apis#upload-a-pkcs#12-certificate-as-system-certificate-(master-only)>
 
 ## Example Usage
 
 ```terraform
-resource "scc_system_certificate_pkcs12_certificate" "system_cert_p12_as_file" {
+resource "scc_ca_certificate_pkcs12_certificate" "ca_cert_p12_as_file" {
   pkcs12_certificate = filebase64("${path.module}/certs/certificate.p12")
   password           = "test"
   key_password       = "test"
@@ -87,9 +87,19 @@ If not set, the provider will omit this form field.
 - `certificate_pem` (String) PEM-encoded certificate data. This is the leaf certificate extracted from the provided signed chain.
 - `issuer` (String) Certificate authority (CA) that issued this certificate.
 - `serial_number` (String) Unique identifier for the certificate, typically assigned by the CA.
+- `subject_alternative_names` (Attributes List) Subject Alternative Names (SANs) for the certificate, allowing additional identities to be associated with the certificate beyond the Common Name (CN). (see [below for nested schema](#nestedatt--subject_alternative_names))
 - `subject_dn` (Attributes) Subject Distinguished Name (DN) of the certificate. The Common Name (CN) is mandatory, while other fields like L, OU, O, ST, C, or Email may be present depending on the issuing CA. (see [below for nested schema](#nestedatt--subject_dn))
 - `valid_from` (String) Timestamp of the beginning of the validity period.
 - `valid_to` (String) Timestamp of the end of the validity period.
+
+<a id="nestedatt--subject_alternative_names"></a>
+### Nested Schema for `subject_alternative_names`
+
+Read-Only:
+
+- `type` (String) The type of SAN, such as DNS, IP, RFC822 or URI.
+- `value` (String) The value of the SAN, such as a domain name for DNS, an IP address for IP, an email address for RFC822, or a URI for URI.
+
 
 <a id="nestedatt--subject_dn"></a>
 ### Nested Schema for `subject_dn`

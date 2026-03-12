@@ -17,23 +17,23 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
-var _ resource.Resource = &SystemCertificatePKCS12CertificateResource{}
+var _ resource.Resource = &CACertificatePKCS12CertificateResource{}
 
-func NewSystemCertificatePKCS12CertificateResource() resource.Resource {
-	return &SystemCertificatePKCS12CertificateResource{}
+func NewCACertificatePKCS12CertificateResource() resource.Resource {
+	return &CACertificatePKCS12CertificateResource{}
 }
 
-type SystemCertificatePKCS12CertificateResource struct {
+type CACertificatePKCS12CertificateResource struct {
 	client *api.RestApiClient
 }
 
-func (r *SystemCertificatePKCS12CertificateResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_system_certificate_pkcs12_certificate"
+func (r *CACertificatePKCS12CertificateResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_ca_certificate_pkcs12_certificate"
 }
 
-func (r *SystemCertificatePKCS12CertificateResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *CACertificatePKCS12CertificateResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: `Creates and manages a **PKCS#12 (P12) System Certificate** for the SAP BTP Connectivity service. 
+		MarkdownDescription: `Creates and manages a **PKCS#12 (P12) CA Certificate** for the SAP BTP Connectivity service. 
 The PKCS#12 file must be created from a CSR generated in SAP Cloud Connector and signed by a trusted Certificate Authority (CA).
 		
 **Supports:**
@@ -56,11 +56,11 @@ The PKCS#12 file must be created from a CSR generated in SAP Cloud Connector and
 - Cloud Connector accepts **only the latest CSR**
 - Certificate must match the CSR's public key and subject.
 - The PKCS#12 file must include the private key.
-- On deleting the CA certificate resource, the certificate is removed from the SAP Cloud Connector, and any existing connections that rely on that certificate will be disrupted until a new certificate is uploaded using a new CSR.
-- Any change to the PKCS#12 content forces replacement since SAP Cloud Connector supports only one ca certificate.
+- On deleting the system certificate resource, the certificate is removed from the SAP Cloud Connector, and any existing connections that rely on that certificate will be disrupted until a new certificate is uploaded using a new CSR.
+- Any change to the PKCS#12 content forces replacement since SAP Cloud Connector supports only one system certificate.
 
 __Further documentation:__
-<https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/ca-certificate-for-principal-propagation-apis#upload-a-pkcs#12-certificate-as-ca-certificate-for-principal-propagation-(master-only)>`,
+<https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/system-certificate-apis#upload-a-pkcs#12-certificate-as-system-certificate-(master-only)>`,
 		Attributes: map[string]schema.Attribute{
 			"pkcs12_certificate": schema.StringAttribute{
 				MarkdownDescription: `PKCS#12 (.p12) certificate bundle.
@@ -167,6 +167,28 @@ If not set, the provider will omit this form field.`,
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
+			"subject_alternative_names": schema.ListNestedAttribute{
+				MarkdownDescription: "Subject Alternative Names (SANs) for the certificate, allowing additional identities to be associated with the certificate beyond the Common Name (CN).",
+				Computed:            true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"type": schema.StringAttribute{
+							MarkdownDescription: "The type of SAN, such as DNS, IP, RFC822 or URI.",
+							Computed:            true,
+							Validators: []validator.String{
+								stringvalidator.OneOf("DNS", "IP", "RFC822", "URI"),
+							},
+						},
+						"value": schema.StringAttribute{
+							MarkdownDescription: "The value of the SAN, such as a domain name for DNS, an IP address for IP, an email address for RFC822, or a URI for URI.",
+							Computed:            true,
+							Validators: []validator.String{
+								stringvalidator.LengthAtLeast(1),
+							},
+						},
+					},
+				},
+			},
 			"certificate_pem": schema.StringAttribute{
 				MarkdownDescription: "PEM-encoded certificate data. This is the leaf certificate extracted from the provided signed chain.",
 				Computed:            true,
@@ -178,7 +200,7 @@ If not set, the provider will omit this form field.`,
 	}
 }
 
-func (r *SystemCertificatePKCS12CertificateResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *CACertificatePKCS12CertificateResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -197,8 +219,8 @@ func (r *SystemCertificatePKCS12CertificateResource) Configure(ctx context.Conte
 	r.client = client
 }
 
-func (r *SystemCertificatePKCS12CertificateResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var plan PKCS12SystemCertificateResourceConfig
+func (r *CACertificatePKCS12CertificateResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var plan PKCS12CertificateResourceConfig
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -218,13 +240,13 @@ func (r *SystemCertificatePKCS12CertificateResource) Create(ctx context.Context,
 	}
 }
 
-func (r *SystemCertificatePKCS12CertificateResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *CACertificatePKCS12CertificateResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	// If there is no state, there is nothing to read (in case of mock testsing, the state can be null but the resource still needs to be read to set the response)
 	if req.State.Raw.IsNull() {
 		return
 	}
 
-	var state PKCS12SystemCertificateResourceConfig
+	var state PKCS12CertificateResourceConfig
 	var respObj apiobjects.Certificate
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -232,18 +254,18 @@ func (r *SystemCertificatePKCS12CertificateResource) Read(ctx context.Context, r
 		return
 	}
 
-	endpoint := endpoints.GetSystemCertificateEndpoint()
+	endpoint := endpoints.GetCACertificateEndpoint()
 
 	// Get Certificate Metadata
-	requestDiags := requestAndUnmarshalFunc(r.client, &respObj, "GET", endpoint, nil, true)
-	resp.Diagnostics.Append(requestDiags...)
+	d := requestAndUnmarshalFunc(r.client, &respObj, "GET", endpoint, nil, true)
+	resp.Diagnostics.Append(d...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	// Generate Binary Certificate
-	certBytes, binaryDiags := getCertificateBinaryFunc(r.client, endpoint)
-	resp.Diagnostics.Append(binaryDiags...)
+	certBytes, d := getCertificateBinaryFunc(r.client, endpoint)
+	resp.Diagnostics.Append(d...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -253,14 +275,14 @@ func (r *SystemCertificatePKCS12CertificateResource) Read(ctx context.Context, r
 		Bytes: certBytes,
 	})
 
-	certDiags := validatePEMData(string(pemBytes))
-	resp.Diagnostics.Append(certDiags...)
+	d = validatePEMData(string(pemBytes))
+	resp.Diagnostics.Append(d...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	responseModel, modelDiags := pkcs12SystemCertificateResourceValueFromFunc(ctx, respObj, pemBytes)
-	resp.Diagnostics.Append(modelDiags...)
+	responseModel, d := pkcs12CertificateResourceValueFromFunc(ctx, respObj, pemBytes)
+	resp.Diagnostics.Append(d...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -276,20 +298,20 @@ func (r *SystemCertificatePKCS12CertificateResource) Read(ctx context.Context, r
 	}
 }
 
-func (r *SystemCertificatePKCS12CertificateResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *CACertificatePKCS12CertificateResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	resp.Diagnostics.AddError(
 		"Update Not Supported",
 		"Updating a PKCS#12 system certificate is not supported because SAP Cloud Connector only accepts the latest uploaded certificate. To update the certificate, you must create a new resource with the updated PKCS#12 content, which will replace the existing certificate in SAP Cloud Connector.",
 	)
 }
 
-func (r *SystemCertificatePKCS12CertificateResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *CACertificatePKCS12CertificateResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	// If there is no state, there is nothing to delete (in case of mock testing, the state can be null but the resource still needs to be deleted to set the response)
 	if req.State.Raw.IsNull() {
 		return
 	}
 
-	var state PKCS12SystemCertificateResourceConfig
+	var state PKCS12CertificateResourceConfig
 	var respObj apiobjects.Certificate
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -297,7 +319,7 @@ func (r *SystemCertificatePKCS12CertificateResource) Delete(ctx context.Context,
 		return
 	}
 
-	endpoint := endpoints.GetSystemCertificateEndpoint()
+	endpoint := endpoints.GetCACertificateEndpoint()
 
 	diags = requestAndUnmarshalFunc(r.client, &respObj, "DELETE", endpoint, nil, false)
 	resp.Diagnostics.Append(diags...)
@@ -308,7 +330,7 @@ func (r *SystemCertificatePKCS12CertificateResource) Delete(ctx context.Context,
 	resp.State.RemoveResource(ctx)
 }
 
-func (r *SystemCertificatePKCS12CertificateResource) createInternal(ctx context.Context, plan PKCS12SystemCertificateResourceConfig) (*PKCS12SystemCertificateResourceConfig, diag.Diagnostics) {
+func (r *CACertificatePKCS12CertificateResource) createInternal(ctx context.Context, plan PKCS12CertificateResourceConfig) (*PKCS12CertificateResourceConfig, diag.Diagnostics) {
 
 	var diags diag.Diagnostics
 	var respObj apiobjects.Certificate
@@ -319,7 +341,7 @@ func (r *SystemCertificatePKCS12CertificateResource) createInternal(ctx context.
 		return nil, diags
 	}
 
-	endpoint := endpoints.GetSystemCertificateEndpoint()
+	endpoint := endpoints.GetCACertificateEndpoint()
 
 	keyPassword := ""
 	if !plan.KeyPassword.IsNull() && !plan.KeyPassword.IsUnknown() {
@@ -327,22 +349,22 @@ func (r *SystemCertificatePKCS12CertificateResource) createInternal(ctx context.
 	}
 
 	// Upload PKCS#12 Certificate
-	uploadDiags := uploadPKCS12CertificateFunc(r.client, endpoint, rawCertificate, plan.Password.ValueString(), keyPassword)
-	diags.Append(uploadDiags...)
+	d = uploadPKCS12CertificateFunc(r.client, endpoint, rawCertificate, plan.Password.ValueString(), keyPassword)
+	diags.Append(d...)
 	if diags.HasError() {
 		return nil, diags
 	}
 
 	// Get Certificate Metadata
-	requestDiags := requestAndUnmarshalFunc(r.client, &respObj, "GET", endpoint, nil, true)
-	diags.Append(requestDiags...)
+	d = requestAndUnmarshalFunc(r.client, &respObj, "GET", endpoint, nil, true)
+	diags.Append(d...)
 	if diags.HasError() {
 		return nil, diags
 	}
 
 	// Generate Binary Certificate
-	certBytes, binaryDiags := getCertificateBinaryFunc(r.client, endpoint)
-	diags.Append(binaryDiags...)
+	certBytes, d := getCertificateBinaryFunc(r.client, endpoint)
+	diags.Append(d...)
 	if diags.HasError() {
 		return nil, diags
 	}
@@ -352,14 +374,14 @@ func (r *SystemCertificatePKCS12CertificateResource) createInternal(ctx context.
 		Bytes: certBytes,
 	})
 
-	certDiags := validatePEMData(string(pemBytes))
-	diags.Append(certDiags...)
+	d = validatePEMData(string(pemBytes))
+	diags.Append(d...)
 	if diags.HasError() {
 		return nil, diags
 	}
 
-	responseModel, modelDiags := pkcs12SystemCertificateResourceValueFromFunc(ctx, respObj, pemBytes)
-	diags.Append(modelDiags...)
+	responseModel, d := pkcs12CertificateResourceValueFromFunc(ctx, respObj, pemBytes)
+	diags.Append(d...)
 	if diags.HasError() {
 		return nil, diags
 	}

@@ -24,6 +24,7 @@ import (
 var getCertificateBinaryFunc = getCertificateBinary
 var validatePEMChainFunc = validatePEMChain
 var uploadSignedChainFunc = uploadSignedChain
+var uploadPKCS12CertificateFunc = uploadPKCS12Certificate
 
 type CertificateConfig struct {
 	SubjectDN      types.Object `tfsdk:"subject_dn"`
@@ -431,11 +432,11 @@ func validatePEMChain(data string) diag.Diagnostics {
 	return diags
 }
 
-func validatePKCS12Inputs(plan PKCS12SystemCertificateResourceConfig) ([]byte, diag.Diagnostics) {
+func validatePKCS12Inputs(pkcs12Certificate, keyPassword types.String) ([]byte, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	rawCertificate := []byte(plan.PKCS12Certificate.ValueString())
-	if decoded, err := base64.StdEncoding.DecodeString(plan.PKCS12Certificate.ValueString()); err == nil {
+	rawCertificate := []byte(pkcs12Certificate.ValueString())
+	if decoded, err := base64.StdEncoding.DecodeString(pkcs12Certificate.ValueString()); err == nil {
 		rawCertificate = decoded
 	}
 
@@ -447,9 +448,9 @@ func validatePKCS12Inputs(plan PKCS12SystemCertificateResourceConfig) ([]byte, d
 		return nil, diags
 	}
 
-	if !plan.KeyPassword.IsNull() &&
-		!plan.KeyPassword.IsUnknown() &&
-		plan.KeyPassword.ValueString() == "" {
+	if !keyPassword.IsNull() &&
+		!keyPassword.IsUnknown() &&
+		keyPassword.ValueString() == "" {
 
 		diags.AddError(
 			"Invalid Key Password",

@@ -690,7 +690,7 @@ func TestValidatePKCS12Inputs_Base64Input(t *testing.T) {
 		KeyPassword:       types.StringNull(),
 	}
 
-	data, diags := validatePKCS12Inputs(plan)
+	data, diags := validatePKCS12Inputs(plan.PKCS12Certificate, plan.KeyPassword)
 
 	assert.False(t, diags.HasError())
 	assert.Equal(t, raw, data)
@@ -702,7 +702,7 @@ func TestValidatePKCS12Inputs_RawInput(t *testing.T) {
 		KeyPassword:       types.StringNull(),
 	}
 
-	data, diags := validatePKCS12Inputs(plan)
+	data, diags := validatePKCS12Inputs(plan.PKCS12Certificate, plan.KeyPassword)
 
 	assert.False(t, diags.HasError())
 	assert.Equal(t, []byte("rawdata"), data)
@@ -714,7 +714,7 @@ func TestValidatePKCS12Inputs_EmptyCertificate(t *testing.T) {
 		KeyPassword:       types.StringNull(),
 	}
 
-	_, diags := validatePKCS12Inputs(plan)
+	_, diags := validatePKCS12Inputs(plan.PKCS12Certificate, plan.KeyPassword)
 
 	assert.True(t, diags.HasError())
 }
@@ -869,4 +869,10 @@ func buildSignedChainPlan(
 			values,
 		),
 	}
+}
+
+func generateValidDERCert(t *testing.T) []byte {
+	cert := generateTestCert(t)
+	block, _ := pem.Decode([]byte(cert))
+	return block.Bytes
 }
