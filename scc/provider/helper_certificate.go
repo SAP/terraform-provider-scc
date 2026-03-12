@@ -24,14 +24,14 @@ import (
 var getCertificateBinaryFunc = getCertificateBinary
 var validatePEMChainFunc = validatePEMChain
 var uploadSignedChainFunc = uploadSignedChain
+var uploadPKCS12CertificateFunc = uploadPKCS12Certificate
 
 type CertificateConfig struct {
-	SubjectDN      types.Object `tfsdk:"subject_dn"`
-	Issuer         types.String `tfsdk:"issuer"`
-	ValidFrom      types.String `tfsdk:"valid_from"`
-	ValidTo        types.String `tfsdk:"valid_to"`
-	SerialNumber   types.String `tfsdk:"serial_number"`
-	CertificatePEM types.String `tfsdk:"certificate_pem"`
+	SubjectDN    types.Object `tfsdk:"subject_dn"`
+	Issuer       types.String `tfsdk:"issuer"`
+	ValidFrom    types.String `tfsdk:"valid_from"`
+	ValidTo      types.String `tfsdk:"valid_to"`
+	SerialNumber types.String `tfsdk:"serial_number"`
 }
 
 type CertificateWithSANConfig struct {
@@ -431,11 +431,11 @@ func validatePEMChain(data string) diag.Diagnostics {
 	return diags
 }
 
-func validatePKCS12Inputs(plan PKCS12SystemCertificateResourceConfig) ([]byte, diag.Diagnostics) {
+func validatePKCS12Inputs(pkcs12Certificate, keyPassword types.String) ([]byte, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
-	rawCertificate := []byte(plan.PKCS12Certificate.ValueString())
-	if decoded, err := base64.StdEncoding.DecodeString(plan.PKCS12Certificate.ValueString()); err == nil {
+	rawCertificate := []byte(pkcs12Certificate.ValueString())
+	if decoded, err := base64.StdEncoding.DecodeString(pkcs12Certificate.ValueString()); err == nil {
 		rawCertificate = decoded
 	}
 
@@ -447,9 +447,9 @@ func validatePKCS12Inputs(plan PKCS12SystemCertificateResourceConfig) ([]byte, d
 		return nil, diags
 	}
 
-	if !plan.KeyPassword.IsNull() &&
-		!plan.KeyPassword.IsUnknown() &&
-		plan.KeyPassword.ValueString() == "" {
+	if !keyPassword.IsNull() &&
+		!keyPassword.IsUnknown() &&
+		keyPassword.ValueString() == "" {
 
 		diags.AddError(
 			"Invalid Key Password",
@@ -463,7 +463,7 @@ func validatePKCS12Inputs(plan PKCS12SystemCertificateResourceConfig) ([]byte, d
 
 // buildCertificateModelWithSAN maps API certificate data to the Terraform model
 // for CA/UI certificates, including Subject Alternative Names (SAN).
-func buildCertificateModelWithSAN(ctx context.Context, value apiobjects.Certificate, pemBytes []byte) (CertificateWithSANConfig, diag.Diagnostics) {
+func buildCertificateModelWithSAN(ctx context.Context, value apiobjects.Certificate) (CertificateWithSANConfig, diag.Diagnostics) {
 	subjectAltNamesValue := []subjectAlternativeNames{}
 	for _, san := range value.SubjectAltNames {
 		subjectAltNamesValue = append(subjectAltNamesValue, subjectAlternativeNames{
@@ -484,7 +484,7 @@ func buildCertificateModelWithSAN(ctx context.Context, value apiobjects.Certific
 		}
 	}
 
-	certificateConfig, diags := buildCertificateModel(ctx, value, pemBytes)
+	certificateConfig, diags := buildCertificateModel(ctx, value)
 	if diags.HasError() {
 		return CertificateWithSANConfig{}, diags
 	}
@@ -500,14 +500,13 @@ func buildCertificateModelWithSAN(ctx context.Context, value apiobjects.Certific
 // buildCertificateModel maps API certificate data to the Terraform
 // model for system certificates. SAN values are ignored because
 // system certificates do not support Subject Alternative Names.
-func buildCertificateModel(ctx context.Context, value apiobjects.Certificate, pemBytes []byte) (CertificateConfig, diag.Diagnostics) {
+func buildCertificateModel(ctx context.Context, value apiobjects.Certificate) (CertificateConfig, diag.Diagnostics) {
 	model := &CertificateConfig{
-		ValidTo:        ConvertMillisToTimes(value.NotAfterTimeStamp).WithTimezone,
-		ValidFrom:      ConvertMillisToTimes(value.NotBeforeTimeStamp).WithTimezone,
-		Issuer:         types.StringValue(value.Issuer),
-		SerialNumber:   types.StringValue(value.SerialNumber),
-		CertificatePEM: types.StringValue(string(pemBytes)),
-		SubjectDN:      types.ObjectNull(subjectDNAttrTypes.AttrTypes),
+		ValidTo:      ConvertMillisToTimes(value.NotAfterTimeStamp).WithTimezone,
+		ValidFrom:    ConvertMillisToTimes(value.NotBeforeTimeStamp).WithTimezone,
+		Issuer:       types.StringValue(value.Issuer),
+		SerialNumber: types.StringValue(value.SerialNumber),
+		SubjectDN:    types.ObjectNull(subjectDNAttrTypes.AttrTypes),
 	}
 
 	if value.SubjectDN != "" {

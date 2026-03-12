@@ -20,6 +20,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 var _ resource.Resource = &CACertificateSelfSignedResource{}
@@ -228,7 +229,7 @@ func (r *CACertificateSelfSignedResource) Configure(ctx context.Context, req res
 }
 
 func (r *CACertificateSelfSignedResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var plan SelfSignedCertificateResourceConfig
+	var plan SelfSignedCACertificateResourceConfig
 	var respObj apiobjects.Certificate
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
@@ -313,13 +314,14 @@ func (r *CACertificateSelfSignedResource) Create(ctx context.Context, req resour
 		return
 	}
 
-	responseModel, diags := selfSignedCertificateResourceValueFromFunc(ctx, respObj, pemBytes, dnStruct)
+	responseModel, diags := selfSignedCACertificateResourceValueFromFunc(ctx, respObj, dnStruct)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	responseModel.KeySize = plan.KeySize
+	responseModel.CertificatePEM = types.StringValue(string(pemBytes))
 
 	diags = resp.State.Set(ctx, responseModel)
 	resp.Diagnostics.Append(diags...)
@@ -329,7 +331,7 @@ func (r *CACertificateSelfSignedResource) Create(ctx context.Context, req resour
 }
 
 func (r *CACertificateSelfSignedResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var state SelfSignedCertificateResourceConfig
+	var state SelfSignedCACertificateResourceConfig
 	var respObj apiobjects.Certificate
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -370,13 +372,14 @@ func (r *CACertificateSelfSignedResource) Read(ctx context.Context, req resource
 		return
 	}
 
-	responseModel, diags := selfSignedCertificateResourceValueFromFunc(ctx, respObj, pemBytes, dnStruct)
+	responseModel, diags := selfSignedCACertificateResourceValueFromFunc(ctx, respObj, dnStruct)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	responseModel.KeySize = state.KeySize
+	responseModel.CertificatePEM = types.StringValue(string(pemBytes))
 
 	diags = resp.State.Set(ctx, responseModel)
 	resp.Diagnostics.Append(diags...)
@@ -393,7 +396,7 @@ func (r *CACertificateSelfSignedResource) Update(ctx context.Context, req resour
 }
 
 func (r *CACertificateSelfSignedResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var state SelfSignedCertificateResourceConfig
+	var state SelfSignedCACertificateResourceConfig
 	var respObj apiobjects.Certificate
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)

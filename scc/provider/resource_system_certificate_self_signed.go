@@ -19,6 +19,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 var _ resource.Resource = &SystemCertificateSelfSignedResource{}
@@ -265,13 +266,14 @@ func (r *SystemCertificateSelfSignedResource) Create(ctx context.Context, req re
 		return
 	}
 
-	responseModel, diags := selfSignedSystemCertificateResourceValueFromFunc(ctx, respObj, pemBytes, dnStruct)
+	responseModel, diags := selfSignedSystemCertificateResourceValueFromFunc(ctx, respObj, dnStruct)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	responseModel.KeySize = plan.KeySize
+	responseModel.CertificatePEM = types.StringValue(string(pemBytes))
 
 	diags = resp.State.Set(ctx, responseModel)
 	resp.Diagnostics.Append(diags...)
@@ -322,13 +324,14 @@ func (r *SystemCertificateSelfSignedResource) Read(ctx context.Context, req reso
 		return
 	}
 
-	responseModel, diags := selfSignedSystemCertificateResourceValueFromFunc(ctx, respObj, pemBytes, dnStruct)
+	responseModel, diags := selfSignedSystemCertificateResourceValueFromFunc(ctx, respObj, dnStruct)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	responseModel.KeySize = state.KeySize
+	responseModel.CertificatePEM = types.StringValue(string(pemBytes))
 
 	diags = resp.State.Set(ctx, &responseModel)
 	resp.Diagnostics.Append(diags...)

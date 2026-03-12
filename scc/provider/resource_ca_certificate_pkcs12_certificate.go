@@ -9,6 +9,7 @@ import (
 	apiobjects "github.com/SAP/terraform-provider-scc/internal/api/apiObjects"
 	"github.com/SAP/terraform-provider-scc/internal/api/endpoints"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -17,65 +18,64 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-var _ resource.Resource = &CACertificateSignedChainResource{}
+var _ resource.Resource = &CACertificatePKCS12CertificateResource{}
 
-func NewCACertificateSignedChainResource() resource.Resource {
-	return &CACertificateSignedChainResource{}
+func NewCACertificatePKCS12CertificateResource() resource.Resource {
+	return &CACertificatePKCS12CertificateResource{}
 }
 
-type CACertificateSignedChainResource struct {
+type CACertificatePKCS12CertificateResource struct {
 	client *api.RestApiClient
 }
 
-func (r *CACertificateSignedChainResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
-	resp.TypeName = req.ProviderTypeName + "_ca_certificate_signed_chain"
+func (r *CACertificatePKCS12CertificateResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_ca_certificate_pkcs12_certificate"
 }
 
-func (r *CACertificateSignedChainResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *CACertificatePKCS12CertificateResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: `Creates and manages a **Signed Chain CA Certificate for Principal Propagation** for the SAP BTP Connectivity service. 
-This resource uploads a certificate chain that was generated from a CSR downloaded from SAP Cloud Connector for **Principal Propagation**.
-The uploaded certificate chain becomes the **Principal Propagation CA certificate** used by the connector.
+		MarkdownDescription: `Creates and manages a **PKCS#12 (P12) CA Certificate** for the SAP BTP Connectivity service. 
+The PKCS#12 file must be created from a CSR generated in SAP Cloud Connector and signed by a trusted Certificate Authority (CA).
 		
 **Supports:**
-- Signed Chain Certificate: A certificate that is signed by an external Certificate Authority (CA) and includes the full certificate chain up to the root CA.
+• PKCS#12 Certificate: A certificate bundle that is signed by an external Certificate Authority (CA) and includes bundle containing private key and full certificate chain.
 
 **Required Workflow:**
-1. Generate a **Certificate Signing Request (CSR)** from SAP Cloud Connector for Principal Propagation.
-2. Submit the CSR to a trusted Certificate Authority (CA) to obtain a signed certificate chain.
-3. Construct the PEM chain in the following order:
-   - Signed certificate (generated from the CSR)
+1. Generate a Certificate Signing Request (CSR) from the SAP Cloud Connector.
+2. Submit the CSR to a trusted Certificate Authority (CA).
+3. Obtain the signed certificate (leaf certificate) and the CA chain.
+4. Create a PKCS#12 bundle that includes:
+   - The signed leaf certificate.
+   - The private key corresponding to the CSR (exported from SAP Cloud Connector).
    - Intermediate CA certificate(s) (if applicable)
    - Root CA certificate
-4. Provide the chain to Terraform using either:
-   - file("signed_chain.pem")
-   - or by directly pasting the PEM-encoded chain in the configuration.
-
+5. Provide the chain to Terraform using either:
+   - filebase64("certificate.p12")
+   - Inline base64-encoded PKCS#12 string
 
 **Notes:**
 - Cloud Connector accepts **only the latest CSR**
 - Certificate must match the CSR's public key and subject.
-- Chain must be PEM-encoded.
+- The PKCS#12 file must include the private key.
 - On deleting the CA certificate resource, the certificate is removed from the SAP Cloud Connector, and any existing connections that rely on that certificate will be disrupted until a new certificate is uploaded using a new CSR.
-- Any change to signed_chain forces replacement since SAP Cloud Connector supports only one CA certificate.
+- Any change to the PKCS#12 content forces replacement since SAP Cloud Connector supports only one CA certificate.
 
 __Further documentation:__
-<https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/ca-certificate-for-principal-propagation-apis#upload-a-signed-certificate-chain-as-ca-certificate-for-principal-propagation-(master-only)>`,
+<https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/ca-certificate-for-principal-propagation-apis#upload-a-pkcs#12-certificate-as-ca-certificate-for-principal-propagation-(master-only)>`,
 		Attributes: map[string]schema.Attribute{
-			"signed_chain": schema.StringAttribute{
-				MarkdownDescription: `PEM-encoded signed certificate chain for the Principal Propagation CA certificate.
-The certificate chain must be ordered as follows:
-1. **Signed Certificate**  
-   The certificate issued from the Cloud Connector CSR.
-2. **Intermediate CA Certificate(s)** (optional)  
-   Certificates that link the signed certificate to the root CA.
-3. **Root CA Certificate**  
-   The trust anchor of the certificate hierarchy.
-This value can be provided using:
-- file("signed_chain.pem")
-- Inline multi-line string.
+			"pkcs12_certificate": schema.StringAttribute{
+				MarkdownDescription: `PKCS#12 (.p12) certificate bundle.
+This value may be provided as:
+- Raw binary using filebase64("certificate.p12")
+- Base64-encoded string
+- Inline Base64 multi-line string
 
-The provider validates PEM format before uploading.`,
+The bundle must contain:
+- Leaf certificate
+- Private key
+- Full certificate chain
+
+This attribute is sensitive and forces replacement when changed.`,
 				Required:  true,
 				Sensitive: true,
 				Validators: []validator.String{
@@ -83,7 +83,27 @@ The provider validates PEM format before uploading.`,
 				},
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
-					stringplanmodifier.UseStateForUnknown(),
+				},
+			},
+			"password": schema.StringAttribute{
+				MarkdownDescription: "Password used to decrypt the PKCS#12 file.",
+				Required:            true,
+				Sensitive:           true,
+				Validators: []validator.String{
+					stringvalidator.LengthAtLeast(1),
+				},
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
+			},
+			"key_password": schema.StringAttribute{
+				MarkdownDescription: `Password used to encrypt the private key within the PKCS#12 file. 
+This is often the same as the main password but can be different depending on how the PKCS#12 file was created.
+If not set, the provider will omit this form field.`,
+				Optional:  true,
+				Sensitive: true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
 				},
 			},
 			"subject_dn": schema.SingleNestedAttribute{
@@ -181,7 +201,7 @@ The provider validates PEM format before uploading.`,
 	}
 }
 
-func (r *CACertificateSignedChainResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *CACertificatePKCS12CertificateResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -200,65 +220,19 @@ func (r *CACertificateSignedChainResource) Configure(ctx context.Context, req re
 	r.client = client
 }
 
-func (r *CACertificateSignedChainResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var plan SignedChainCACertificateResourceConfig
-	var respObj apiobjects.Certificate
+func (r *CACertificatePKCS12CertificateResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var plan PKCS12CACertificateResourceConfig
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	if !plan.SignedChain.IsNull() && !plan.SignedChain.IsUnknown() {
-		certDiags := validatePEMChainFunc(plan.SignedChain.ValueString())
-		resp.Diagnostics.Append(certDiags...)
-		if resp.Diagnostics.HasError() {
-			return
-		}
-	}
-
-	endpoint := endpoints.GetCACertificateEndpoint()
-
-	// Upload Signed Certificate Chain
-	diags = uploadSignedChainFunc(r.client, endpoint, plan.SignedChain.ValueString())
-	resp.Diagnostics.Append(diags...)
+	responseModel, d := r.createInternal(ctx, plan)
+	resp.Diagnostics.Append(d...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
-	// Get Certificate Metadata
-	diags = requestAndUnmarshalFunc(r.client, &respObj, "GET", endpoint, nil, true)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	// Generate Binary Certificate
-	certBytes, diags := getCertificateBinaryFunc(r.client, endpoint)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	pemBytes := pem.EncodeToMemory(&pem.Block{
-		Type:  "CERTIFICATE",
-		Bytes: certBytes,
-	})
-
-	certDiags := validatePEMData(string(pemBytes))
-	resp.Diagnostics.Append(certDiags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	responseModel, diags := signedChainCACertificateResourceValueFromFunc(ctx, respObj)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	responseModel.SignedChain = plan.SignedChain
-	responseModel.CertificatePEM = types.StringValue(string(pemBytes))
 
 	diags = resp.State.Set(ctx, responseModel)
 	resp.Diagnostics.Append(diags...)
@@ -267,13 +241,13 @@ func (r *CACertificateSignedChainResource) Create(ctx context.Context, req resou
 	}
 }
 
-func (r *CACertificateSignedChainResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *CACertificatePKCS12CertificateResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	// If there is no state, there is nothing to read (in case of mock testing, the state can be null but the resource still needs to be read to set the response)
 	if req.State.Raw.IsNull() {
 		return
 	}
 
-	var state SignedChainCACertificateResourceConfig
+	var state PKCS12CACertificateResourceConfig
 	var respObj apiobjects.Certificate
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -284,15 +258,15 @@ func (r *CACertificateSignedChainResource) Read(ctx context.Context, req resourc
 	endpoint := endpoints.GetCACertificateEndpoint()
 
 	// Get Certificate Metadata
-	diags = requestAndUnmarshalFunc(r.client, &respObj, "GET", endpoint, nil, true)
-	resp.Diagnostics.Append(diags...)
+	d := requestAndUnmarshalFunc(r.client, &respObj, "GET", endpoint, nil, true)
+	resp.Diagnostics.Append(d...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
 	// Generate Binary Certificate
-	certBytes, diags := getCertificateBinaryFunc(r.client, endpoint)
-	resp.Diagnostics.Append(diags...)
+	certBytes, d := getCertificateBinaryFunc(r.client, endpoint)
+	resp.Diagnostics.Append(d...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -302,19 +276,21 @@ func (r *CACertificateSignedChainResource) Read(ctx context.Context, req resourc
 		Bytes: certBytes,
 	})
 
-	certDiags := validatePEMData(string(pemBytes))
-	resp.Diagnostics.Append(certDiags...)
+	d = validatePEMData(string(pemBytes))
+	resp.Diagnostics.Append(d...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	responseModel, diags := signedChainCACertificateResourceValueFromFunc(ctx, respObj)
-	resp.Diagnostics.Append(diags...)
+	responseModel, d := pkcs12CACertificateResourceValueFromFunc(ctx, respObj)
+	resp.Diagnostics.Append(d...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	responseModel.SignedChain = state.SignedChain
+	responseModel.PKCS12Certificate = state.PKCS12Certificate
+	responseModel.Password = state.Password
+	responseModel.KeyPassword = state.KeyPassword
 	responseModel.CertificatePEM = types.StringValue(string(pemBytes))
 
 	diags = resp.State.Set(ctx, &responseModel)
@@ -324,20 +300,20 @@ func (r *CACertificateSignedChainResource) Read(ctx context.Context, req resourc
 	}
 }
 
-func (r *CACertificateSignedChainResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *CACertificatePKCS12CertificateResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	resp.Diagnostics.AddError(
 		"Update Not Supported",
-		"Changing a signed CA certificate requires resource replacement.",
+		"Updating a PKCS#12 CA certificate is not supported because SAP Cloud Connector only accepts the latest uploaded certificate. To update the certificate, you must create a new resource with the updated PKCS#12 content, which will replace the existing certificate in SAP Cloud Connector.",
 	)
 }
 
-func (r *CACertificateSignedChainResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *CACertificatePKCS12CertificateResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	// If there is no state, there is nothing to delete (in case of mock testing, the state can be null but the resource still needs to be deleted to set the response)
 	if req.State.Raw.IsNull() {
 		return
 	}
 
-	var state SignedChainCACertificateResourceConfig
+	var state PKCS12CACertificateResourceConfig
 	var respObj apiobjects.Certificate
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -354,4 +330,68 @@ func (r *CACertificateSignedChainResource) Delete(ctx context.Context, req resou
 	}
 
 	resp.State.RemoveResource(ctx)
+}
+
+func (r *CACertificatePKCS12CertificateResource) createInternal(ctx context.Context, plan PKCS12CACertificateResourceConfig) (*PKCS12CACertificateResourceConfig, diag.Diagnostics) {
+
+	var diags diag.Diagnostics
+	var respObj apiobjects.Certificate
+
+	rawCertificate, d := validatePKCS12Inputs(plan.PKCS12Certificate, plan.KeyPassword)
+	diags.Append(d...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	endpoint := endpoints.GetCACertificateEndpoint()
+
+	keyPassword := ""
+	if !plan.KeyPassword.IsNull() && !plan.KeyPassword.IsUnknown() {
+		keyPassword = plan.KeyPassword.ValueString()
+	}
+
+	// Upload PKCS#12 Certificate
+	d = uploadPKCS12CertificateFunc(r.client, endpoint, rawCertificate, plan.Password.ValueString(), keyPassword)
+	diags.Append(d...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	// Get Certificate Metadata
+	d = requestAndUnmarshalFunc(r.client, &respObj, "GET", endpoint, nil, true)
+	diags.Append(d...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	// Generate Binary Certificate
+	certBytes, d := getCertificateBinaryFunc(r.client, endpoint)
+	diags.Append(d...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	pemBytes := pem.EncodeToMemory(&pem.Block{
+		Type:  "CERTIFICATE",
+		Bytes: certBytes,
+	})
+
+	d = validatePEMData(string(pemBytes))
+	diags.Append(d...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	responseModel, d := pkcs12CACertificateResourceValueFromFunc(ctx, respObj)
+	diags.Append(d...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	responseModel.PKCS12Certificate = plan.PKCS12Certificate
+	responseModel.Password = plan.Password
+	responseModel.KeyPassword = plan.KeyPassword
+	responseModel.CertificatePEM = types.StringValue(string(pemBytes))
+
+	return &responseModel, diags
 }
