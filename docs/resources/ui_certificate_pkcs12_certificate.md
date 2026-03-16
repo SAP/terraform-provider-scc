@@ -11,7 +11,7 @@ description: |-
   The signed leaf certificate.The private key corresponding to the CSR (exported from SAP Cloud Connector).Intermediate CA certificate(s) (if applicable)Root CA certificateProvide the chain to Terraform using either:
   filebase64("certificate.p12")Inline base64-encoded PKCS#12 string
   Notes:
-  Cloud Connector accepts only the latest CSRCertificate must match the CSR's public key and subject.The PKCS#12 file must include the private key.On deleting the UI certificate resource, Terraform only removes the resource from the state. The UI certificate remains configured in SAP Cloud Connector because the connector does not provide an API to delete UI certificates and will continue to be used until it is replaced by uploading a new certificate (for example, from a new CSR).Any change to the PKCS#12 content forces replacement since SAP Cloud Connector supports only one system certificate.
+  Cloud Connector accepts only the latest CSRCertificate must match the CSR's public key and subject.The PKCS#12 file must include the private key.On deleting the UI certificate resource, Terraform only removes the resource from the state. The UI certificate remains configured in SAP Cloud Connector because the connector does not provide an API to delete UI certificates and will continue to be used until it is replaced by uploading a new certificate (for example, from a new CSR).Any change to the PKCS#12 content forces replacement since SAP Cloud Connector supports only one UI certificate.
   Further documentation:
   https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/authentication-and-ui-settings#upload-a-pkcs#12-certificate-as-ui-certificate
 ---
@@ -42,7 +42,7 @@ The PKCS#12 file must be created from a CSR generated in SAP Cloud Connector and
 - Certificate must match the CSR's public key and subject.
 - The PKCS#12 file must include the private key.
 - On deleting the UI certificate resource, Terraform only removes the resource from the state. The UI certificate remains configured in SAP Cloud Connector because the connector does not provide an API to delete UI certificates and will continue to be used until it is replaced by uploading a new certificate (for example, from a new CSR).
-- Any change to the PKCS#12 content forces replacement since SAP Cloud Connector supports only one system certificate.
+- Any change to the PKCS#12 content forces replacement since SAP Cloud Connector supports only one UI certificate.
 
 __Further documentation:__
 <https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/authentication-and-ui-settings#upload-a-pkcs#12-certificate-as-ui-certificate>

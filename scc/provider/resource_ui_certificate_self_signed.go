@@ -44,7 +44,7 @@ func (r *UICertificateSelfSignedResource) Schema(ctx context.Context, req resour
 
 **Note:**
 - Any change to key_size or subject_dn forces replacement since SAP Cloud Connector supports only one principal propagation UI certificate.
-- On deleting the UI certificate resource, Terraform only removes the resource from the state. The UI certificate remains configured in SAP Cloud Connector because the connector does not provide an API to delete UI certificates and will continue to be used until it is replaced by creating a new self-signed certificate
+- On deleting the UI certificate resource, Terraform only removes the resource from the state. The UI certificate remains configured in SAP Cloud Connector because the connector does not provide an API to delete UI certificates and will continue to be used until it is replaced by creating a new self-signed certificate.
 
 
 __Further documentation:__

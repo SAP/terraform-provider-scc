@@ -6,7 +6,7 @@ description: |-
   Supports:
   Self-signed certificates
   Note:
-  Any change to key_size or subject_dn forces replacement since SAP Cloud Connector supports only one principal propagation UI certificate.On deleting the UI certificate resource, Terraform only removes the resource from the state. The UI certificate remains configured in SAP Cloud Connector because the connector does not provide an API to delete UI certificates and will continue to be used until it is replaced by creating a new self-signed certificate
+  Any change to key_size or subject_dn forces replacement since SAP Cloud Connector supports only one principal propagation UI certificate.On deleting the UI certificate resource, Terraform only removes the resource from the state. The UI certificate remains configured in SAP Cloud Connector because the connector does not provide an API to delete UI certificates and will continue to be used until it is replaced by creating a new self-signed certificate.
   Further documentation:
   https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/authentication-and-ui-settings#create-a-self-signed-ui-certificate
 ---
@@ -20,7 +20,7 @@ Creates and manages a **Self-Signed UI Certificate** in SAP Cloud Connector.
 
 **Note:**
 - Any change to key_size or subject_dn forces replacement since SAP Cloud Connector supports only one principal propagation UI certificate.
-- On deleting the UI certificate resource, Terraform only removes the resource from the state. The UI certificate remains configured in SAP Cloud Connector because the connector does not provide an API to delete UI certificates and will continue to be used until it is replaced by creating a new self-signed certificate
+- On deleting the UI certificate resource, Terraform only removes the resource from the state. The UI certificate remains configured in SAP Cloud Connector because the connector does not provide an API to delete UI certificates and will continue to be used until it is replaced by creating a new self-signed certificate.
 
 
 __Further documentation:__
