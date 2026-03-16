@@ -18,6 +18,8 @@ var selfSignedSystemCertificateResourceValueFromFunc = SelfSignedSystemCertifica
 var signedChainSystemCertificateResourceValueFromFunc = SignedChainSystemCertificateResourceValueFrom
 var pkcs12SystemCertificateResourceValueFromFunc = PKCS12SystemCertificateResourceValueFrom
 
+// Wrappers for UI Certificate testing purposes (allows mocking in tests)
+var selfSignedUICertificateResourceValueFromFunc = SelfSignedUICertificateResourceValueFrom
 type CACertificateDataSourceConfig struct {
 	CertificatePEM types.String `tfsdk:"certificate_pem"`
 	CertificateWithSANConfig
@@ -68,10 +70,10 @@ type PKCS12CACertificateResourceConfig struct {
 	CertificateWithSANConfig
 }
 
-// type SelfSignedUICertificateResourceConfig struct {
-// 	KeySize types.Int64 `tfsdk:"key_size"`
-// 	CertificateWithSANConfig
-// }
+type SelfSignedUICertificateResourceConfig struct {
+	KeySize types.Int64 `tfsdk:"key_size"`
+	CertificateWithSANConfig
+}
 
 // type SignedChainUICertificateResourceConfig struct {
 // 	SignedChain types.String `tfsdk:"signed_chain"`
@@ -208,3 +210,15 @@ func PKCS12SystemCertificateResourceValueFrom(ctx context.Context, value apiobje
 		CertificateConfig: config,
 	}, diag.Diagnostics{}
 }
+// UI Certificates
+func SelfSignedUICertificateResourceValueFrom(ctx context.Context, value apiobjects.Certificate, existingDN *certificateSubjectDNConfig) (SelfSignedUICertificateResourceConfig, diag.Diagnostics) {
+	config, diags := buildCertificateWithSANConfig(ctx, value, existingDN)
+	if diags.HasError() {
+		return SelfSignedUICertificateResourceConfig{}, diags
+	}
+
+	return SelfSignedUICertificateResourceConfig{
+		CertificateWithSANConfig: config,
+	}, diag.Diagnostics{}
+}
+
