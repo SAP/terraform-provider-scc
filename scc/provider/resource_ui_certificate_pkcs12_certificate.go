@@ -36,7 +36,7 @@ func (r *UICertificatePKCS12CertificateResource) Schema(ctx context.Context, req
 The PKCS#12 file must be created from a CSR generated in SAP Cloud Connector and signed by a trusted Certificate Authority (CA).
 		
 **Supports:**
-• PKCS#12 Certificate: A certificate bundle that is signed by an external Certificate Authority (CA) and includes bundle containing private key and full certificate chain.
+- PKCS#12 Certificate: A certificate bundle that is signed by an external Certificate Authority (CA) and includes bundle containing private key and full certificate chain.
 
 **Required Workflow:**
 1. Generate a Certificate Signing Request (CSR) from the SAP Cloud Connector.
@@ -55,7 +55,7 @@ The PKCS#12 file must be created from a CSR generated in SAP Cloud Connector and
 - Cloud Connector accepts **only the latest CSR**
 - Certificate must match the CSR's public key and subject.
 - The PKCS#12 file must include the private key.
-- On deleting the system certificate resource, the certificate is removed from the SAP Cloud Connector, and any existing connections that rely on that certificate will be disrupted until a new certificate is uploaded using a new CSR.
+- On deleting the UI certificate resource, Terraform only removes the resource from the state. The UI certificate remains configured in SAP Cloud Connector because the connector does not provide an API to delete UI certificates and will continue to be used until it is replaced by uploading a new certificate (for example, from a new CSR).
 - Any change to the PKCS#12 content forces replacement since SAP Cloud Connector supports only one system certificate.
 
 __Further documentation:__

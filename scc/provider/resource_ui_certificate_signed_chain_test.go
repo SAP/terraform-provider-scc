@@ -86,23 +86,7 @@ func TestUICertificateSignedChain_Update(t *testing.T) {
 }
 
 func TestUICertificateSignedChain_Delete(t *testing.T) {
-	r := &UICertificateSignedChainResource{
-		client: &api.RestApiClient{},
-	}
-
-	// Mock API call
-	old := requestAndUnmarshalFunc
-	requestAndUnmarshalFunc = func(
-		client *api.RestApiClient,
-		respObj *apiobjects.Certificate,
-		method string,
-		endpoint string,
-		body map[string]any,
-		expectJSON bool,
-	) diag.Diagnostics {
-		return nil
-	}
-	defer func() { requestAndUnmarshalFunc = old }()
+	r := &UICertificateSignedChainResource{}
 
 	resp := &resource.DeleteResponse{}
 	req := resource.DeleteRequest{}
