@@ -303,6 +303,7 @@ func TestSCCProvider_AllResources(t *testing.T) {
 		"scc_ca_certificate_signed_chain",
 		"scc_ca_certificate_pkcs12_certificate",
 		"scc_ui_certificate_self_signed",
+		"scc_ui_certificate_signed_chain",
 	}
 
 	ctx := context.Background()
