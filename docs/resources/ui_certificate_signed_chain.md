@@ -12,7 +12,7 @@ description: |-
   Signed certificate (generated from the CSR)Intermediate CA certificate(s) (if applicable)Root CA certificateProvide the chain to Terraform using either:
   file("signed_chain.pem")or by directly pasting the PEM-encoded chain in the configuration.
   Notes:
-  Cloud Connector accepts only the latest CSRCertificate must match the CSR's public key and subject.Chain must be PEM-encoded.On deleting the UI certificate resource, the certificate is removed from the SAP Cloud Connector, and any existing connections that rely on that certificate will be disrupted until a new certificate is uploaded using a new CSR.Any change to signed_chain forces replacement since SAP Cloud Connector supports only one UI certificate.
+  Cloud Connector accepts only the latest CSRCertificate must match the CSR's public key and subject.Chain must be PEM-encoded.On deleting the UI certificate resource, Terraform only removes the resource from the state. The UI certificate remains configured in SAP Cloud Connector because the connector does not provide an API to delete UI certificates and will continue to be used until it is replaced by uploading a new certificate (for example, from a new CSR).Any change to signed_chain forces replacement since SAP Cloud Connector supports only one UI certificate.
   Further documentation:
   https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/authentication-and-ui-settings#upload-a-signed-certificate-chain-as-ui-certificate
 ---
@@ -42,7 +42,7 @@ The uploaded certificate chain becomes the **UI certificate** used by the connec
 - Cloud Connector accepts **only the latest CSR**
 - Certificate must match the CSR's public key and subject.
 - Chain must be PEM-encoded.
-- On deleting the UI certificate resource, the certificate is removed from the SAP Cloud Connector, and any existing connections that rely on that certificate will be disrupted until a new certificate is uploaded using a new CSR.
+- On deleting the UI certificate resource, Terraform only removes the resource from the state. The UI certificate remains configured in SAP Cloud Connector because the connector does not provide an API to delete UI certificates and will continue to be used until it is replaced by uploading a new certificate (for example, from a new CSR).
 - Any change to signed_chain forces replacement since SAP Cloud Connector supports only one UI certificate.
 
 __Further documentation:__

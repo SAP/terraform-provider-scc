@@ -76,22 +76,7 @@ func TestUICertificateSelfSigned_Update(t *testing.T) {
 }
 
 func TestUICertificateSelfSigned_Delete(t *testing.T) {
-	r := &UICertificateSelfSignedResource{
-		client: &api.RestApiClient{},
-	}
-
-	old := requestAndUnmarshalFunc
-	requestAndUnmarshalFunc = func(
-		client *api.RestApiClient,
-		respObj *apiobjects.Certificate,
-		method string,
-		endpoint string,
-		body map[string]any,
-		expectJSON bool,
-	) diag.Diagnostics {
-		return nil
-	}
-	defer func() { requestAndUnmarshalFunc = old }()
+	r := &UICertificateSelfSignedResource{}
 
 	resp := &resource.DeleteResponse{}
 	req := resource.DeleteRequest{}
