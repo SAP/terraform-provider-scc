@@ -21,6 +21,8 @@ var pkcs12SystemCertificateResourceValueFromFunc = PKCS12SystemCertificateResour
 // Wrappers for UI Certificate testing purposes (allows mocking in tests)
 var selfSignedUICertificateResourceValueFromFunc = SelfSignedUICertificateResourceValueFrom
 var signedChainUICertificateResourceValueFromFunc = SignedChainUICertificateResourceValueFrom
+var pkcs12UICertificateResourceValueFromFunc = PKCS12UICertificateResourceValueFrom
+
 type CACertificateDataSourceConfig struct {
 	CertificatePEM types.String `tfsdk:"certificate_pem"`
 	CertificateWithSANConfig
@@ -81,12 +83,12 @@ type SignedChainUICertificateResourceConfig struct {
 	CertificateWithSANConfig
 }
 
-// type PKCS12UICertificateResourceConfig struct {
-// 	PKCS12Certificate types.String `tfsdk:"pkcs12_certificate"`
-// 	Password          types.String `tfsdk:"password"`
-// 	KeyPassword       types.String `tfsdk:"key_password"`
-// 	CertificateWithSANConfig
-// }
+type PKCS12UICertificateResourceConfig struct {
+	PKCS12Certificate types.String `tfsdk:"pkcs12_certificate"`
+	Password          types.String `tfsdk:"password"`
+	KeyPassword       types.String `tfsdk:"key_password"`
+	CertificateWithSANConfig
+}
 
 type CSRActionConfig struct {
 	Type                    types.String `tfsdk:"type"`
@@ -231,6 +233,17 @@ func SignedChainUICertificateResourceValueFrom(ctx context.Context, value apiobj
 	}
 
 	return SignedChainUICertificateResourceConfig{
+		CertificateWithSANConfig: config,
+	}, diag.Diagnostics{}
+}
+
+func PKCS12UICertificateResourceValueFrom(ctx context.Context, value apiobjects.Certificate) (PKCS12UICertificateResourceConfig, diag.Diagnostics) {
+	config, diags := buildCertificateWithSANConfig(ctx, value, nil)
+	if diags.HasError() {
+		return PKCS12UICertificateResourceConfig{}, diags
+	}
+
+	return PKCS12UICertificateResourceConfig{
 		CertificateWithSANConfig: config,
 	}, diag.Diagnostics{}
 }
