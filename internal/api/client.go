@@ -10,6 +10,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 )
@@ -156,11 +157,17 @@ func (c *RestApiClient) DoRequest(method string, endpoint string, body []byte, a
 		return nil, diags
 	}
 
-	finalURL := c.BaseURL.ResolveReference(endpointURL)
+	// Path joining preserves any base path on instance_url so that proxy deployments
+	// with a URL prefix (e.g. "https://host/xp264-scc") work correctly.
+	// Slashes are trimmed on both sides before joining to prevent double-slashes
+	// (e.g. base="/xp264-scc/" + endpoint="/api/resource" → "/xp264-scc/api/resource").
+	baseURL := *c.BaseURL
+	baseURL.Path = strings.TrimRight(baseURL.Path, "/") + "/" + strings.TrimLeft(endpointURL.Path, "/")
+	baseURL.RawQuery = endpointURL.RawQuery
 
-	req, err := http.NewRequest(method, finalURL.String(), bytes.NewBuffer(body))
+	req, err := http.NewRequest(method, baseURL.String(), bytes.NewBuffer(body))
 	if err != nil {
-		diags.AddError("Failed to Create Request", fmt.Sprintf("Error creating request for %s %s: %v", method, finalURL.String(), err))
+		diags.AddError("Failed to Create Request", fmt.Sprintf("Error creating request for %s %s: %v", method, baseURL.String(), err))
 		return nil, diags
 	}
 
@@ -184,7 +191,7 @@ func (c *RestApiClient) DoRequest(method string, endpoint string, body []byte, a
 
 	resp, err := c.Client.Do(req)
 	if err != nil {
-		diags.AddError("Request Failed", fmt.Sprintf("Error sending %s request to %s: %v", method, finalURL.String(), err))
+		diags.AddError("Request Failed", fmt.Sprintf("Error sending %s request to %s: %v", method, baseURL.String(), err))
 		return nil, diags
 	}
 	validateDiags := validateResponse(resp)

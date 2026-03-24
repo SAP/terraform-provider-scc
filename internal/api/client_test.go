@@ -320,3 +320,197 @@ func TestRestApiClient_DoRequest_BinaryResponse(t *testing.T) {
 	body, _ := io.ReadAll(resp.Body)
 	assert.Equal(t, []byte{0x01, 0x02, 0x03}, body)
 }
+
+func buildFinalURL(base *url.URL, endpoint string) string {
+	endpointURL, _ := url.Parse(endpoint)
+
+	baseCopy := *base
+	baseCopy.Path = strings.TrimRight(baseCopy.Path, "/") + "/" + strings.TrimLeft(endpointURL.Path, "/")
+	baseCopy.RawQuery = endpointURL.RawQuery
+
+	return baseCopy.String()
+}
+
+func TestURLJoin_WithBasePath(t *testing.T) {
+	base, _ := url.Parse("https://example.com/xp264-scc")
+
+	result := buildFinalURL(base, "/api/v1/test")
+
+	expected := "https://example.com/xp264-scc/api/v1/test"
+
+	if result != expected {
+		t.Fatalf("expected %s, got %s", expected, result)
+	}
+}
+
+func TestURLJoin_NoBasePath(t *testing.T) {
+	base, _ := url.Parse("https://example.com")
+
+	result := buildFinalURL(base, "/api/v1/test")
+
+	expected := "https://example.com/api/v1/test"
+
+	if result != expected {
+		t.Fatalf("expected %s, got %s", expected, result)
+	}
+}
+
+func TestURLJoin_QueryParams(t *testing.T) {
+	base, _ := url.Parse("https://example.com/xp264-scc")
+
+	result := buildFinalURL(base, "/api/v1/test?foo=bar")
+
+	expected := "https://example.com/xp264-scc/api/v1/test?foo=bar"
+
+	if result != expected {
+		t.Fatalf("expected %s, got %s", expected, result)
+	}
+}
+
+func TestDoRequest_APIMPathPreserved(t *testing.T) {
+	var receivedPath string
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		receivedPath = r.URL.Path
+		w.WriteHeader(200)
+	}))
+	defer server.Close()
+
+	base, _ := url.Parse(server.URL + "/xp264-scc")
+
+	client := &RestApiClient{
+		BaseURL: base,
+		Client:  server.Client(),
+	}
+
+	_, diags := client.GetRequest("/api/v1/connector/version")
+	if diags.HasError() {
+		t.Fatalf("unexpected error: %v", diags)
+	}
+
+	expected := "/xp264-scc/api/v1/connector/version"
+
+	if receivedPath != expected {
+		t.Fatalf("expected path %s, got %s", expected, receivedPath)
+	}
+}
+
+func TestDoRequest_NoBasePath(t *testing.T) {
+	var receivedPath string
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		receivedPath = r.URL.Path
+		w.WriteHeader(200)
+	}))
+	defer server.Close()
+
+	base, _ := url.Parse(server.URL)
+
+	client := &RestApiClient{
+		BaseURL: base,
+		Client:  server.Client(),
+	}
+
+	_, diags := client.GetRequest("/api/v1/connector/version")
+	if diags.HasError() {
+		t.Fatalf("unexpected error: %v", diags)
+	}
+
+	expected := "/api/v1/connector/version"
+
+	if receivedPath != expected {
+		t.Fatalf("expected path %s, got %s", expected, receivedPath)
+	}
+}
+
+func TestDoRequest_QueryParamsPreserved(t *testing.T) {
+	var receivedPath string
+	var receivedQuery string
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		receivedPath = r.URL.Path
+		receivedQuery = r.URL.RawQuery
+		w.WriteHeader(200)
+	}))
+	defer server.Close()
+
+	base, _ := url.Parse(server.URL + "/xp264-scc")
+
+	client := &RestApiClient{
+		BaseURL: base,
+		Client:  server.Client(),
+	}
+
+	_, diags := client.GetRequest("/api/v1/test?foo=bar&x=1")
+	require.False(t, diags.HasError())
+
+	assert.Equal(t, "/xp264-scc/api/v1/test", receivedPath)
+	assert.Equal(t, "foo=bar&x=1", receivedQuery)
+}
+
+func TestDoRequest_EmptyEndpoint(t *testing.T) {
+	var receivedPath string
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		receivedPath = r.URL.Path
+		w.WriteHeader(200)
+	}))
+	defer server.Close()
+
+	base, _ := url.Parse(server.URL + "/xp264-scc")
+
+	client := &RestApiClient{
+		BaseURL: base,
+		Client:  server.Client(),
+	}
+
+	_, diags := client.GetRequest("")
+	require.False(t, diags.HasError())
+
+	assert.Equal(t, "/xp264-scc/", receivedPath)
+}
+
+func TestDoRequest_NoLeadingSlash(t *testing.T) {
+	var receivedPath string
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		receivedPath = r.URL.Path
+		w.WriteHeader(200)
+	}))
+	defer server.Close()
+
+	base, _ := url.Parse(server.URL + "/xp264-scc")
+
+	client := &RestApiClient{
+		BaseURL: base,
+		Client:  server.Client(),
+	}
+
+	_, diags := client.GetRequest("api/v1/test")
+	require.False(t, diags.HasError())
+
+	assert.Equal(t, "/xp264-scc/api/v1/test", receivedPath)
+}
+
+func TestDoRequest_BaseQueryPreserved(t *testing.T) {
+	var receivedQuery string
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		receivedQuery = r.URL.RawQuery
+		w.WriteHeader(200)
+	}))
+	defer server.Close()
+
+	base, _ := url.Parse(server.URL + "/xp264-scc?base=1")
+
+	client := &RestApiClient{
+		BaseURL: base,
+		Client:  server.Client(),
+	}
+
+	_, diags := client.GetRequest("/api/v1/test?foo=bar")
+	require.False(t, diags.HasError())
+
+	// Decide behavior: override OR merge
+	assert.Equal(t, "foo=bar", receivedQuery)
+}
