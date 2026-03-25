@@ -227,7 +227,7 @@ func (a *GenerateCSRAction) InvokeWithPlan(ctx context.Context, plan CSRActionCo
 				})
 			}
 
-			planBody["subjectAlternativeNames"] = sanFields
+			planBody["subjectAltNames"] = sanFields
 		}
 	}
 
