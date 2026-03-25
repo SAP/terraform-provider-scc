@@ -128,6 +128,67 @@ func TestGenerateCSRAction_Invoke_InvalidType(t *testing.T) {
 	assert.True(t, resp.Diagnostics.HasError())
 }
 
+func TestGenerateCSRAction_Invoke_WithSANs(t *testing.T) {
+	a := &GenerateCSRAction{
+		client: &api.RestApiClient{},
+	}
+
+	var capturedBody map[string]any
+
+	oldSend := sendRequestFunc
+	defer func() { sendRequestFunc = oldSend }()
+
+	sendRequestFunc = func(client *api.RestApiClient, body map[string]any, endpoint string, action string) (*http.Response, diag.Diagnostics) {
+		capturedBody = body
+
+		return &http.Response{
+			StatusCode: 200,
+			Body: io.NopCloser(strings.NewReader("-----BEGIN CERTIFICATE REQUEST-----\nTEST\n-----END CERTIFICATE REQUEST-----")),
+		}, nil
+	}
+
+	plan := testCSRPlan()
+
+	plan.SubjectAlternativeNames = types.ListValueMust(
+		types.ObjectType{
+			AttrTypes: map[string]attr.Type{
+				"type":  types.StringType,
+				"value": types.StringType,
+			},
+		},
+		[]attr.Value{
+			types.ObjectValueMust(
+				map[string]attr.Type{
+					"type":  types.StringType,
+					"value": types.StringType,
+				},
+				map[string]attr.Value{
+					"type":  types.StringValue("DNS"),
+					"value": types.StringValue("example.com"),
+				},
+			),
+		},
+	)
+
+	resp := newTestResp()
+
+	a.InvokeWithPlan(context.Background(), plan, resp)
+
+	assert.False(t, resp.Diagnostics.HasError())
+
+	sans, ok := capturedBody["subjectAltNames"]
+	assert.True(t, ok, "subjectAltNames key should exist")
+
+	sanList, ok := sans.([]map[string]string)
+	assert.True(t, ok, "subjectAltNames should be []map[string]string")
+
+	assert.Len(t, sanList, 1)
+	assert.Equal(t, "DNS", sanList[0]["type"])
+	assert.Equal(t, "example.com", sanList[0]["value"])
+
+	_ = os.Remove("system_csr.pem")
+}
+
 func testCSRPlan() CSRActionConfig {
 	return CSRActionConfig{
 		Type:    types.StringValue("system"),
