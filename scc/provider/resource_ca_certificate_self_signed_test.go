@@ -239,9 +239,11 @@ func TestCACertificateSelfSigned_Create_InvalidPEM(t *testing.T) {
 
 	oldReq := requestAndUnmarshalFunc
 	oldBin := getCertificateBinaryFunc
+	oldValidate := validatePEMData
 	defer func() {
 		requestAndUnmarshalFunc = oldReq
 		getCertificateBinaryFunc = oldBin
+		validatePEMData = oldValidate
 	}()
 
 	requestAndUnmarshalFunc = func(*api.RestApiClient, *apiobjects.Certificate, string, string, map[string]any, bool) diag.Diagnostics {
@@ -252,11 +254,17 @@ func TestCACertificateSelfSigned_Create_InvalidPEM(t *testing.T) {
 		return []byte("invalid"), nil
 	}
 
+	validatePEMData = func(string) diag.Diagnostics {
+	var d diag.Diagnostics
+	d.AddError("Invalid PEM", "failed to parse certificate")
+	return d
+}
+
 	plan := testValidSelfSignedCAPlan()
 
 	_, diags := createSelfSignedCACertificateFunc(r, context.Background(), plan)
 
-	assert.False(t, diags.HasError())
+	assert.True(t, diags.HasError())
 }
 
 func TestCACertificateSelfSigned_Create_ModelFails(t *testing.T) {

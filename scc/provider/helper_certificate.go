@@ -340,7 +340,7 @@ func getCertificateBinary(client *api.RestApiClient, endpoint string) ([]byte, d
 	return body, diags
 }
 
-func validatePEMData(data string) diag.Diagnostics {
+var validatePEMData = func(data string) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	if strings.TrimSpace(data) == "" {

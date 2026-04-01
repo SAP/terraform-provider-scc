@@ -15,9 +15,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
@@ -62,9 +59,6 @@ __Further documentation:__
 				Computed:            true,
 				Validators: []validator.Int64{
 					int64validator.OneOf(2048, 4096),
-				},
-				PlanModifiers: []planmodifier.Int64{
-					int64planmodifier.UseStateForUnknown(),
 				},
 				Default: int64default.StaticInt64(4096),
 			},
@@ -149,30 +143,18 @@ __Further documentation:__
 			"valid_to": schema.StringAttribute{
 				MarkdownDescription: "Timestamp of the end of the validity period.",
 				Computed:            true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"valid_from": schema.StringAttribute{
 				MarkdownDescription: "Timestamp of the beginning of the validity period.",
 				Computed:            true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"issuer": schema.StringAttribute{
 				MarkdownDescription: "Certificate authority (CA) that issued this certificate.",
 				Computed:            true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"serial_number": schema.StringAttribute{
 				MarkdownDescription: "Unique identifier for the certificate, typically assigned by the CA.",
 				Computed:            true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"subject_alternative_names": schema.ListNestedAttribute{
 				MarkdownDescription: "Subject Alternative Names (SANs) for the certificate, allowing additional identities to be associated with the certificate beyond the Common Name (CN).",
@@ -200,9 +182,6 @@ __Further documentation:__
 				MarkdownDescription: "CA certificate in PEM format.",
 				Computed:            true,
 				Sensitive:           true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 			},
 		},
 	}
