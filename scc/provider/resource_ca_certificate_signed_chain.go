@@ -9,6 +9,7 @@ import (
 	apiobjects "github.com/SAP/terraform-provider-scc/internal/api/apiObjects"
 	"github.com/SAP/terraform-provider-scc/internal/api/endpoints"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -51,6 +52,14 @@ The uploaded certificate chain becomes the **Principal Propagation CA certificat
    - file("signed_chain.pem")
    - or by directly pasting the PEM-encoded chain in the configuration.
 
+**Behavior:**
+- This resource supports **in-place certificate rotation**.
+- Updating the signed_chain will **upload a new certificate**, replacing the existing certificate without deleting it.
+- This avoids downtime and aligns with the Cloud Connector certificate lifecycle (CSR → sign → upload).
+
+**Renewal Note:**
+- To renew a certificate, a **new CSR must be generated** from SAP Cloud Connector.
+- The signed certificate must correspond to the **most recently generated CSR**, otherwise the upload will fail.
 
 **Notes:**
 - Cloud Connector accepts **only the latest CSR**
@@ -82,7 +91,6 @@ The provider validates PEM format before uploading.`,
 					stringvalidator.LengthAtLeast(1),
 				},
 				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
@@ -202,65 +210,19 @@ func (r *CACertificateSignedChainResource) Configure(ctx context.Context, req re
 
 func (r *CACertificateSignedChainResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var plan SignedChainCACertificateResourceConfig
-	var respObj apiobjects.Certificate
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	if !plan.SignedChain.IsNull() && !plan.SignedChain.IsUnknown() {
-		certDiags := validatePEMChainFunc(plan.SignedChain.ValueString())
-		resp.Diagnostics.Append(certDiags...)
-		if resp.Diagnostics.HasError() {
-			return
-		}
-	}
-
-	endpoint := endpoints.GetCACertificateEndpoint()
-
-	// Upload Signed Certificate Chain
-	diags = uploadSignedChainFunc(r.client, endpoint, plan.SignedChain.ValueString())
+	model, diags := createSignedChainCACertificateFunc(r, ctx, plan.SignedChain.ValueString())
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	// Get Certificate Metadata
-	diags = requestAndUnmarshalFunc(r.client, &respObj, "GET", endpoint, nil, true)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	// Generate Binary Certificate
-	certBytes, diags := getCertificateBinaryFunc(r.client, endpoint)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	pemBytes := pem.EncodeToMemory(&pem.Block{
-		Type:  "CERTIFICATE",
-		Bytes: certBytes,
-	})
-
-	certDiags := validatePEMData(string(pemBytes))
-	resp.Diagnostics.Append(certDiags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	responseModel, diags := signedChainCACertificateResourceValueFromFunc(ctx, respObj)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	responseModel.SignedChain = plan.SignedChain
-	responseModel.CertificatePEM = types.StringValue(string(pemBytes))
-
-	diags = resp.State.Set(ctx, responseModel)
+	diags = resp.State.Set(ctx, model)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -325,10 +287,34 @@ func (r *CACertificateSignedChainResource) Read(ctx context.Context, req resourc
 }
 
 func (r *CACertificateSignedChainResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	resp.Diagnostics.AddError(
-		"Update Not Supported",
-		"Changing a signed CA certificate requires resource replacement.",
-	)
+	var plan, state SignedChainCACertificateResourceConfig
+	diags := req.Plan.Get(ctx, &plan)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	diags = req.State.Get(ctx, &state)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// If the signed chain is not changing, there is no need to update
+	if !shouldUpdateSignedChain(plan.SignedChain, state.SignedChain) {
+		return
+	}
+
+	model, diags := createSignedChainCACertificateFunc(r, ctx, plan.SignedChain.ValueString())
+	if diags.HasError() {
+		return
+	}
+
+	diags = resp.State.Set(ctx, model)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 }
 
 func (r *CACertificateSignedChainResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -354,4 +340,59 @@ func (r *CACertificateSignedChainResource) Delete(ctx context.Context, req resou
 	}
 
 	resp.State.RemoveResource(ctx)
+}
+
+var createSignedChainCACertificateFunc = func(r *CACertificateSignedChainResource, ctx context.Context, signedChain string) (*SignedChainCACertificateResourceConfig, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	var respObj apiobjects.Certificate
+
+	if signedChain != "" {
+		certDiags := validatePEMChainFunc(signedChain)
+		diags.Append(certDiags...)
+		if diags.HasError() {
+			return nil, diags
+		}
+	}
+
+	endpoint := endpoints.GetCACertificateEndpoint()
+
+	d := uploadSignedChainFunc(r.client, endpoint, signedChain)
+	diags.Append(d...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	d = requestAndUnmarshalFunc(r.client, &respObj, "GET", endpoint, nil, true)
+	diags.Append(d...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	certBytes, d := getCertificateBinaryFunc(r.client, endpoint)
+	diags.Append(d...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	pemBytes := pem.EncodeToMemory(&pem.Block{
+		Type:  "CERTIFICATE",
+		Bytes: certBytes,
+	})
+
+	certDiags := validatePEMData(string(pemBytes))
+	diags.Append(certDiags...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	responseModel, d := signedChainCACertificateResourceValueFromFunc(ctx, respObj)
+	diags.Append(d...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	responseModel.SignedChain = types.StringValue(signedChain)
+	responseModel.CertificatePEM = types.StringValue(string(pemBytes))
+
+	return &responseModel, diags
 }

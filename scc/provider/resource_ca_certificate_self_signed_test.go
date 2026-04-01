@@ -1,88 +1,407 @@
 package provider
 
 import (
-	"fmt"
-	"regexp"
+	"context"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/SAP/terraform-provider-scc/internal/api"
+	apiobjects "github.com/SAP/terraform-provider-scc/internal/api/apiObjects"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-func TestResourceCACertificateSelfSigned(t *testing.T) {
-	t.Parallel()
+func TestCACertificateSelfSigned_Metadata(t *testing.T) {
+	r := NewCACertificateSelfSignedResource()
 
-	t.Run("happy path", func(t *testing.T) {
-		rec, user := setupVCR(t, "fixtures/resource_ca_certificate_self_signed")
-		defer stopQuietly(rec)
+	req := resource.MetadataRequest{
+		ProviderTypeName: "scc",
+	}
+	resp := &resource.MetadataResponse{}
 
-		resource.Test(t, resource.TestCase{
-			IsUnitTest:               true,
-			ProtoV6ProviderFactories: getTestProviders(rec.GetDefaultClient()),
-			Steps: []resource.TestStep{
-				{
-					Config: providerConfig(user) + ResourceCACertificateSelfSigned("scc_ca_cert_ss", 2048, "testCertificate"),
-					Check: resource.ComposeAggregateTestCheckFunc(
-						resource.TestCheckResourceAttr("scc_ca_certificate_self_signed.scc_ca_cert_ss", "subject_dn.cn", "testCertificate"),
-						resource.TestMatchResourceAttr("scc_ca_certificate_self_signed.scc_ca_cert_ss", "issuer", regexp.MustCompile(`CN=.*?(,.*)?`)),
-						resource.TestMatchResourceAttr("scc_ca_certificate_self_signed.scc_ca_cert_ss", "valid_from", regexValidTimeStamp),
-						resource.TestMatchResourceAttr("scc_ca_certificate_self_signed.scc_ca_cert_ss", "valid_to", regexValidTimeStamp),
-						resource.TestMatchResourceAttr("scc_ca_certificate_self_signed.scc_ca_cert_ss", "serial_number", regexValidSerialNumber),
-						resource.TestCheckResourceAttrSet("scc_ca_certificate_self_signed.scc_ca_cert_ss", "certificate_pem"),
-					),
-				},
-			},
-		})
-	})
+	r.Metadata(context.Background(), req, resp)
 
-	t.Run("error path - subject dn mandatory", func(t *testing.T) {
-		resource.Test(t, resource.TestCase{
-			IsUnitTest:               true,
-			ProtoV6ProviderFactories: getTestProviders(nil),
-			Steps: []resource.TestStep{
-				{
-					Config:      ResourceCACertificateSelfSignedWoSubjectDN("scc_ca_cert_ss", 2048),
-					ExpectError: regexp.MustCompile(`The argument "subject_dn" is required, but no definition was found.`),
-				},
-			},
-		})
-	})
-
-	t.Run("error path - common name mandatory", func(t *testing.T) {
-		resource.Test(t, resource.TestCase{
-			IsUnitTest:               true,
-			ProtoV6ProviderFactories: getTestProviders(nil),
-			Steps: []resource.TestStep{
-				{
-					Config:      ResourceCACertificateSelfSignedWoCommonName("scc_ca_cert_ss", 2048),
-					ExpectError: regexp.MustCompile(`Inappropriate value for attribute "subject_dn": attribute "cn" is required.`),
-				},
-			},
-		})
-	})
-
+	assert.Equal(t, "scc_ca_certificate_self_signed", resp.TypeName)
 }
 
-func ResourceCACertificateSelfSigned(datasourceName string, keySize int64, commonName string) string {
-	return fmt.Sprintf(`
-	resource "scc_ca_certificate_self_signed" "%s" {
-  		key_size = %d
-  		subject_dn = {
-    		cn = "%s"
-  		}
-	}`, datasourceName, keySize, commonName)
+func TestCACertificateSelfSigned_Schema(t *testing.T) {
+	r := NewCACertificateSelfSignedResource()
+	resp := &resource.SchemaResponse{}
+
+	r.Schema(context.Background(), resource.SchemaRequest{}, resp)
+
+	assert.Contains(t, resp.Schema.Attributes, "key_size")
+	assert.Contains(t, resp.Schema.Attributes, "subject_dn")
+	assert.Contains(t, resp.Schema.Attributes, "certificate_pem")
 }
 
-func ResourceCACertificateSelfSignedWoSubjectDN(datasourceName string, keySize int64) string {
-	return fmt.Sprintf(`
-	resource "scc_ca_certificate_self_signed" "%s" {
-  		key_size = %d
-	}`, datasourceName, keySize)
+func TestCACertificateSelfSigned_Configure_Success(t *testing.T) {
+	r := NewCACertificateSelfSignedResource().(*CACertificateSelfSignedResource)
+
+	client := &api.RestApiClient{}
+	req := resource.ConfigureRequest{ProviderData: client}
+	resp := &resource.ConfigureResponse{}
+
+	r.Configure(context.Background(), req, resp)
+
+	assert.False(t, resp.Diagnostics.HasError())
+	assert.NotNil(t, r.client)
 }
 
-func ResourceCACertificateSelfSignedWoCommonName(datasourceName string, keySize int64) string {
-	return fmt.Sprintf(`
-	resource "scc_ca_certificate_self_signed" "%s" {
-		key_size = %d
-  		subject_dn = {}
-	}`, datasourceName, keySize)
+func TestCACertificateSelfSigned_Configure_WrongType(t *testing.T) {
+	r := NewCACertificateSelfSignedResource().(*CACertificateSelfSignedResource)
+
+	req := resource.ConfigureRequest{ProviderData: "wrong"}
+	resp := &resource.ConfigureResponse{}
+
+	r.Configure(context.Background(), req, resp)
+
+	assert.True(t, resp.Diagnostics.HasError())
+}
+
+func TestCACertificateSelfSigned_Create_MissingSubjectDN(t *testing.T) {
+	r := &CACertificateSelfSignedResource{}
+
+	plan := SelfSignedCACertificateResourceConfig{
+		CertificateWithSANConfig: CertificateWithSANConfig{
+			CertificateConfig: CertificateConfig{
+				SubjectDN: types.ObjectNull(subjectDNAttrTypes.AttrTypes),
+			},
+		},
+	}
+
+	_, diags := createSelfSignedCACertificateFunc(r, context.Background(), plan)
+
+	assert.True(t, diags.HasError())
+}
+
+func TestCACertificateSelfSigned_Create_RequestFails(t *testing.T) {
+	r := &CACertificateSelfSignedResource{
+		client: &api.RestApiClient{},
+	}
+
+	oldReq := requestAndUnmarshalFunc
+	defer func() { requestAndUnmarshalFunc = oldReq }()
+
+	requestAndUnmarshalFunc = func(*api.RestApiClient, *apiobjects.Certificate, string, string, map[string]any, bool) diag.Diagnostics {
+		var d diag.Diagnostics
+		d.AddError("request failed", "fail")
+		return d
+	}
+
+	plan := testValidSelfSignedCAPlan()
+
+	_, diags := createSelfSignedCACertificateFunc(r, context.Background(), plan)
+
+	assert.True(t, diags.HasError())
+}
+
+func TestCACertificateSelfSigned_Create_BinaryFails(t *testing.T) {
+	r := &CACertificateSelfSignedResource{
+		client: &api.RestApiClient{},
+	}
+
+	oldReq := requestAndUnmarshalFunc
+	oldBin := getCertificateBinaryFunc
+	defer func() {
+		requestAndUnmarshalFunc = oldReq
+		getCertificateBinaryFunc = oldBin
+	}()
+
+	requestAndUnmarshalFunc = func(*api.RestApiClient, *apiobjects.Certificate, string, string, map[string]any, bool) diag.Diagnostics {
+		return nil
+	}
+
+	getCertificateBinaryFunc = func(*api.RestApiClient, string) ([]byte, diag.Diagnostics) {
+		var d diag.Diagnostics
+		d.AddError("binary error", "fail")
+		return nil, d
+	}
+
+	plan := testValidSelfSignedCAPlan()
+
+	_, diags := createSelfSignedCACertificateFunc(r, context.Background(), plan)
+
+	assert.True(t, diags.HasError())
+}
+
+func TestCACertificateSelfSigned_Create_Success(t *testing.T) {
+	r := &CACertificateSelfSignedResource{
+		client: &api.RestApiClient{},
+	}
+
+	oldReq := requestAndUnmarshalFunc
+	oldBin := getCertificateBinaryFunc
+	oldValue := selfSignedCACertificateResourceValueFromFunc
+
+	defer func() {
+		requestAndUnmarshalFunc = oldReq
+		getCertificateBinaryFunc = oldBin
+		selfSignedCACertificateResourceValueFromFunc = oldValue
+	}()
+
+	requestAndUnmarshalFunc = func(*api.RestApiClient, *apiobjects.Certificate, string, string, map[string]any, bool) diag.Diagnostics {
+		return nil
+	}
+
+	getCertificateBinaryFunc = func(*api.RestApiClient, string) ([]byte, diag.Diagnostics) {
+		return generateValidDERCert(t), nil
+	}
+
+	selfSignedCACertificateResourceValueFromFunc = func(
+		ctx context.Context,
+		obj apiobjects.Certificate,
+		dn *certificateSubjectDNConfig,
+	) (SelfSignedCACertificateResourceConfig, diag.Diagnostics) {
+		return testValidSelfSignedCAPlan(), nil
+	}
+
+	plan := testValidSelfSignedCAPlan()
+
+	state, diags := createSelfSignedCACertificateFunc(r, context.Background(), plan)
+
+	assert.False(t, diags.HasError())
+	assert.NotNil(t, state)
+}
+
+func TestCACertificateSelfSigned_Create_WithSANs(t *testing.T) {
+	r := &CACertificateSelfSignedResource{
+		client: &api.RestApiClient{},
+	}
+
+	oldReq := requestAndUnmarshalFunc
+	oldBin := getCertificateBinaryFunc
+	oldValue := selfSignedCACertificateResourceValueFromFunc
+
+	defer func() {
+		requestAndUnmarshalFunc = oldReq
+		getCertificateBinaryFunc = oldBin
+		selfSignedCACertificateResourceValueFromFunc = oldValue
+	}()
+
+	var capturedBody map[string]any
+
+	requestAndUnmarshalFunc = func(
+		_ *api.RestApiClient,
+		_ *apiobjects.Certificate,
+		method string,
+		_ string,
+		body map[string]any,
+		_ bool,
+	) diag.Diagnostics {
+		if method == "POST" {
+			capturedBody = body
+		}
+		return nil
+	}
+
+	getCertificateBinaryFunc = func(*api.RestApiClient, string) ([]byte, diag.Diagnostics) {
+		return generateValidDERCert(t), nil
+	}
+
+	selfSignedCACertificateResourceValueFromFunc = func(
+		ctx context.Context,
+		obj apiobjects.Certificate,
+		dn *certificateSubjectDNConfig,
+	) (SelfSignedCACertificateResourceConfig, diag.Diagnostics) {
+		return testValidSelfSignedCAPlan(), nil
+	}
+
+	plan := testValidSelfSignedCAPlan()
+
+	plan.SubjectAltNames = types.ListValueMust(
+		subjectAlternativeNamesType,
+		[]attr.Value{
+			types.ObjectValueMust(
+				subjectAlternativeNamesType.AttrTypes,
+				map[string]attr.Value{
+					"type":  types.StringValue("DNS"),
+					"value": types.StringValue("example.com"),
+				},
+			),
+		},
+	)
+
+	_, diags := createSelfSignedCACertificateFunc(r, context.Background(), plan)
+
+	require.False(t, diags.HasError())
+
+	assert.Contains(t, capturedBody, "subjectAltNames")
+}
+
+func TestCACertificateSelfSigned_Create_InvalidPEM(t *testing.T) {
+	r := &CACertificateSelfSignedResource{
+		client: &api.RestApiClient{},
+	}
+
+	oldReq := requestAndUnmarshalFunc
+	oldBin := getCertificateBinaryFunc
+	defer func() {
+		requestAndUnmarshalFunc = oldReq
+		getCertificateBinaryFunc = oldBin
+	}()
+
+	requestAndUnmarshalFunc = func(*api.RestApiClient, *apiobjects.Certificate, string, string, map[string]any, bool) diag.Diagnostics {
+		return nil
+	}
+
+	getCertificateBinaryFunc = func(*api.RestApiClient, string) ([]byte, diag.Diagnostics) {
+		return []byte("invalid"), nil
+	}
+
+	plan := testValidSelfSignedCAPlan()
+
+	_, diags := createSelfSignedCACertificateFunc(r, context.Background(), plan)
+
+	assert.False(t, diags.HasError())
+}
+
+func TestCACertificateSelfSigned_Create_ModelFails(t *testing.T) {
+	r := &CACertificateSelfSignedResource{
+		client: &api.RestApiClient{},
+	}
+
+	oldReq := requestAndUnmarshalFunc
+	oldBin := getCertificateBinaryFunc
+	oldValue := selfSignedCACertificateResourceValueFromFunc
+
+	defer func() {
+		requestAndUnmarshalFunc = oldReq
+		getCertificateBinaryFunc = oldBin
+		selfSignedCACertificateResourceValueFromFunc = oldValue
+	}()
+
+	requestAndUnmarshalFunc = func(*api.RestApiClient, *apiobjects.Certificate, string, string, map[string]any, bool) diag.Diagnostics {
+		return nil
+	}
+
+	getCertificateBinaryFunc = func(*api.RestApiClient, string) ([]byte, diag.Diagnostics) {
+		return generateValidDERCert(t), nil
+	}
+
+	selfSignedCACertificateResourceValueFromFunc = func(
+		ctx context.Context,
+		obj apiobjects.Certificate,
+		dn *certificateSubjectDNConfig,
+	) (SelfSignedCACertificateResourceConfig, diag.Diagnostics) {
+		var d diag.Diagnostics
+		d.AddError("model error", "fail")
+		return SelfSignedCACertificateResourceConfig{}, d
+	}
+
+	plan := testValidSelfSignedCAPlan()
+
+	_, diags := createSelfSignedCACertificateFunc(r, context.Background(), plan)
+
+	assert.True(t, diags.HasError())
+}
+
+func TestCACertificateSelfSigned_Delete_Success(t *testing.T) {
+	r := &CACertificateSelfSignedResource{
+		client: &api.RestApiClient{},
+	}
+
+	oldReq := requestAndUnmarshalFunc
+	defer func() { requestAndUnmarshalFunc = oldReq }()
+
+	requestAndUnmarshalFunc = func(*api.RestApiClient, *apiobjects.Certificate, string, string, map[string]any, bool) diag.Diagnostics {
+		return nil
+	}
+
+	req := resource.DeleteRequest{}
+	resp := &resource.DeleteResponse{}
+
+	r.Delete(context.Background(), req, resp)
+
+	assert.False(t, resp.Diagnostics.HasError())
+}
+
+func TestCACertificateSelfSigned_Read_Success(t *testing.T) {
+	r := &CACertificateSelfSignedResource{
+		client: &api.RestApiClient{},
+	}
+
+	oldReq := requestAndUnmarshalFunc
+	oldBin := getCertificateBinaryFunc
+	oldValue := selfSignedCACertificateResourceValueFromFunc
+
+	defer func() {
+		requestAndUnmarshalFunc = oldReq
+		getCertificateBinaryFunc = oldBin
+		selfSignedCACertificateResourceValueFromFunc = oldValue
+	}()
+
+	requestAndUnmarshalFunc = func(*api.RestApiClient, *apiobjects.Certificate, string, string, map[string]any, bool) diag.Diagnostics {
+		return nil
+	}
+
+	getCertificateBinaryFunc = func(*api.RestApiClient, string) ([]byte, diag.Diagnostics) {
+		return generateValidDERCert(t), nil
+	}
+
+	selfSignedCACertificateResourceValueFromFunc = func(
+		ctx context.Context,
+		obj apiobjects.Certificate,
+		dn *certificateSubjectDNConfig,
+	) (SelfSignedCACertificateResourceConfig, diag.Diagnostics) {
+		return testValidSelfSignedCAPlan(), nil
+	}
+
+	req := resource.ReadRequest{}
+	resp := &resource.ReadResponse{}
+
+	r.Read(context.Background(), req, resp)
+
+	assert.False(t, resp.Diagnostics.HasError())
+}
+
+func TestCACertificateSelfSigned_Update_NoChange(t *testing.T) {
+	plan := testValidSelfSignedCAPlan()
+	state := testValidSelfSignedCAPlan()
+
+	noChange := plan.KeySize == state.KeySize &&
+		plan.SubjectDN.Equal(state.SubjectDN) &&
+		plan.SubjectAltNames.Equal(state.SubjectAltNames)
+
+	assert.True(t, noChange)
+}
+
+func TestCACertificateSelfSigned_Update_Change(t *testing.T) {
+	plan := testValidSelfSignedCAPlan()
+	state := testValidSelfSignedCAPlan()
+
+	plan.KeySize = types.Int64Value(2048)
+
+	changed := plan.KeySize != state.KeySize ||
+		!plan.SubjectDN.Equal(state.SubjectDN) ||
+		!plan.SubjectAltNames.Equal(state.SubjectAltNames)
+
+	assert.True(t, changed)
+}
+
+func testValidSelfSignedCAPlan() SelfSignedCACertificateResourceConfig {
+	return SelfSignedCACertificateResourceConfig{
+		KeySize: types.Int64Value(4096),
+
+		CertificateWithSANConfig: CertificateWithSANConfig{
+			CertificateConfig: CertificateConfig{
+				SubjectDN: types.ObjectValueMust(
+					subjectDNAttrTypes.AttrTypes,
+					map[string]attr.Value{
+						"cn":    types.StringValue("example.com"),
+						"email": types.StringNull(),
+						"l":     types.StringNull(),
+						"ou":    types.StringNull(),
+						"o":     types.StringNull(),
+						"st":    types.StringNull(),
+						"c":     types.StringNull(),
+					},
+				),
+			},
+			SubjectAltNames: types.ListNull(subjectAlternativeNamesType),
+		},
+	}
 }

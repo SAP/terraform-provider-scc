@@ -517,3 +517,19 @@ func buildCertificateModel(ctx context.Context, value apiobjects.Certificate) (C
 	return *model, diag.Diagnostics{}
 
 }
+
+func shouldUpdatePKCS12(planCertificate, stateCertificate, planPassword, statePassword, planKeyPassword, stateKeyPassword types.String) bool {
+	return !planCertificate.Equal(stateCertificate) ||
+		!planPassword.Equal(statePassword) ||
+		!planKeyPassword.Equal(stateKeyPassword)
+}
+
+func shouldUpdateSignedChain(planChain, stateChain types.String) bool {
+	return !planChain.Equal(stateChain)
+}
+
+func shouldUpdateSelfSignedCertificate(planKeySize, stateKeySize types.Int64, planSubjectDN, stateSubjectDN types.Object, planSubjectAltNames, stateSubjectAltNames types.List) bool {
+	return !planKeySize.Equal(stateKeySize) ||
+		!planSubjectDN.Equal(stateSubjectDN) ||
+		!planSubjectAltNames.Equal(stateSubjectAltNames)
+}
