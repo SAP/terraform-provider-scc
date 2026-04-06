@@ -255,10 +255,10 @@ func TestCACertificateSelfSigned_Create_InvalidPEM(t *testing.T) {
 	}
 
 	validatePEMData = func(string) diag.Diagnostics {
-	var d diag.Diagnostics
-	d.AddError("Invalid PEM", "failed to parse certificate")
-	return d
-}
+		var d diag.Diagnostics
+		d.AddError("Invalid PEM", "failed to parse certificate")
+		return d
+	}
 
 	plan := testValidSelfSignedCAPlan()
 
