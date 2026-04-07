@@ -11,14 +11,10 @@ import (
 	"github.com/SAP/terraform-provider-scc/internal/api/endpoints"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
@@ -44,8 +40,15 @@ func (r *CACertificateSelfSignedResource) Schema(ctx context.Context, req resour
 **Supports:**
 • Self-signed certificates
 
-**Note:**
-Any change to key_size or subject_dn forces replacement since SAP Cloud Connector supports only one principal propagation CA certificate.
+**Behavior:**
+- This resource creates a self-signed CA certificate directly on the SAP Cloud Connector.
+- Any change to key_size or subject_dn will result in **replacement of the existing certificate**, as only one CA certificate is supported.
+- Replacement will create a new certificate and remove the existing one.
+
+**Notes:**
+- SAP Cloud Connector supports only a single CA certificate for this purpose.
+- Changing certificate properties (such as key size or subject) requires generating a new certificate.
+- On terraform destroy, the CA certificate is removed from the SAP Cloud Connector, which may disrupt dependent configurations until a new certificate is created.
 
 __Further documentation:__
 <https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/ca-certificate-for-principal-propagation-apis#create-a-self-signed-ca-certificate-for-principal-propagation-(master-only)>`,
@@ -57,18 +60,11 @@ __Further documentation:__
 				Validators: []validator.Int64{
 					int64validator.OneOf(2048, 4096),
 				},
-				PlanModifiers: []planmodifier.Int64{
-					int64planmodifier.RequiresReplace(),
-					int64planmodifier.UseStateForUnknown(),
-				},
 				Default: int64default.StaticInt64(4096),
 			},
 			"subject_dn": schema.SingleNestedAttribute{
 				MarkdownDescription: "Subject Distinguished Name (DN) of the certificate. The Common Name (CN) is mandatory, while other fields like L, OU, O, ST, C, or Email may be present depending on the issuing CA.",
 				Required:            true,
-				PlanModifiers: []planmodifier.Object{
-					objectplanmodifier.RequiresReplace(),
-				},
 				Attributes: map[string]schema.Attribute{
 					"cn": schema.StringAttribute{
 						MarkdownDescription: "Common Name (CN) of the certificate, typically representing the domain name or identifier for which the certificate is issued.",
@@ -147,30 +143,18 @@ __Further documentation:__
 			"valid_to": schema.StringAttribute{
 				MarkdownDescription: "Timestamp of the end of the validity period.",
 				Computed:            true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"valid_from": schema.StringAttribute{
 				MarkdownDescription: "Timestamp of the beginning of the validity period.",
 				Computed:            true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"issuer": schema.StringAttribute{
 				MarkdownDescription: "Certificate authority (CA) that issued this certificate.",
 				Computed:            true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"serial_number": schema.StringAttribute{
 				MarkdownDescription: "Unique identifier for the certificate, typically assigned by the CA.",
 				Computed:            true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 			},
 			"subject_alternative_names": schema.ListNestedAttribute{
 				MarkdownDescription: "Subject Alternative Names (SANs) for the certificate, allowing additional identities to be associated with the certificate beyond the Common Name (CN).",
@@ -193,17 +177,11 @@ __Further documentation:__
 						},
 					},
 				},
-				PlanModifiers: []planmodifier.List{
-					listplanmodifier.RequiresReplace(),
-				},
 			},
 			"certificate_pem": schema.StringAttribute{
 				MarkdownDescription: "CA certificate in PEM format.",
 				Computed:            true,
 				Sensitive:           true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
 			},
 		},
 	}
@@ -230,100 +208,19 @@ func (r *CACertificateSelfSignedResource) Configure(ctx context.Context, req res
 
 func (r *CACertificateSelfSignedResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var plan SelfSignedCACertificateResourceConfig
-	var respObj apiobjects.Certificate
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	if plan.SubjectDN.IsNull() || plan.SubjectDN.IsUnknown() {
-		resp.Diagnostics.AddError(
-			"Missing Subject DN",
-			"Subject DN with a non-empty Common Name (CN) is required to create a self-signed certificate.",
-		)
-		return
-	}
-
-	dnStruct, diags := expandSubjectDN(ctx, plan.SubjectDN)
+	model, diags := createSelfSignedCACertificateFunc(r, ctx, plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	subjectDN := buildSubjectDN(dnStruct)
-	planBody := map[string]any{
-		"type":      "selfsigned",
-		"keySize":   plan.KeySize.ValueInt64(),
-		"subjectDN": subjectDN,
-	}
-
-	if !plan.SubjectAltNames.IsNull() &&
-		!plan.SubjectAltNames.IsUnknown() {
-		var sanList []subjectAlternativeNames
-		diags = plan.SubjectAltNames.ElementsAs(ctx, &sanList, false)
-		resp.Diagnostics.Append(diags...)
-		if resp.Diagnostics.HasError() {
-			return
-		}
-
-		if len(sanList) > 0 {
-			sanFields := []map[string]string{}
-			for _, san := range sanList {
-				sanFields = append(sanFields, map[string]string{
-					"type":  san.Type.ValueString(),
-					"value": san.Value.ValueString(),
-				})
-			}
-
-			planBody["subjectAltNames"] = sanFields
-		}
-	}
-
-	endpoint := endpoints.GetCACertificateEndpoint()
-
-	// Create Self-Signed Certificate
-	diags = requestAndUnmarshalFunc(r.client, &respObj, "POST", endpoint, planBody, false)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	// Get Certificate Metadata
-	diags = requestAndUnmarshalFunc(r.client, &respObj, "GET", endpoint, nil, true)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	// Generate Binary Certificate
-	certBytes, diags := getCertificateBinaryFunc(r.client, endpoint)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	pemBytes := pem.EncodeToMemory(&pem.Block{
-		Type:  "CERTIFICATE",
-		Bytes: certBytes,
-	})
-
-	certDiags := validatePEMData(string(pemBytes))
-	resp.Diagnostics.Append(certDiags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	responseModel, diags := selfSignedCACertificateResourceValueFromFunc(ctx, respObj, dnStruct)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	responseModel.KeySize = plan.KeySize
-	responseModel.CertificatePEM = types.StringValue(string(pemBytes))
-
-	diags = resp.State.Set(ctx, responseModel)
+	diags = resp.State.Set(ctx, model)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -331,6 +228,9 @@ func (r *CACertificateSelfSignedResource) Create(ctx context.Context, req resour
 }
 
 func (r *CACertificateSelfSignedResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	if req.State.Raw.IsNull() {
+		return
+	}
 	var state SelfSignedCACertificateResourceConfig
 	var respObj apiobjects.Certificate
 	diags := req.State.Get(ctx, &state)
@@ -389,13 +289,44 @@ func (r *CACertificateSelfSignedResource) Read(ctx context.Context, req resource
 }
 
 func (r *CACertificateSelfSignedResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	resp.Diagnostics.AddError(
-		"Update Not Supported",
-		"Changing a self-signed CA certificate requires resource replacement.",
-	)
+	var plan, state SelfSignedCACertificateResourceConfig
+	diags := req.Plan.Get(ctx, &plan)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	diags = req.State.Get(ctx, &state)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if plan.KeySize == state.KeySize && plan.SubjectDN.Equal(state.SubjectDN) && plan.SubjectAltNames.Equal(state.SubjectAltNames) {
+		return
+	}
+
+	if !shouldUpdateSelfSignedCertificate(plan.KeySize, state.KeySize, plan.SubjectDN, state.SubjectDN, plan.SubjectAltNames, state.SubjectAltNames) {
+		return
+	}
+
+	model, diags := createSelfSignedCACertificateFunc(r, ctx, plan)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	diags = resp.State.Set(ctx, model)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 }
 
 func (r *CACertificateSelfSignedResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	if req.State.Raw.IsNull() {
+		return
+	}
 	var state SelfSignedCACertificateResourceConfig
 	var respObj apiobjects.Certificate
 	diags := req.State.Get(ctx, &state)
@@ -413,4 +344,97 @@ func (r *CACertificateSelfSignedResource) Delete(ctx context.Context, req resour
 	}
 
 	resp.State.RemoveResource(ctx)
+}
+
+var createSelfSignedCACertificateFunc = func(r *CACertificateSelfSignedResource, ctx context.Context, plan SelfSignedCACertificateResourceConfig) (*SelfSignedCACertificateResourceConfig, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	var respObj apiobjects.Certificate
+
+	if plan.SubjectDN.IsNull() || plan.SubjectDN.IsUnknown() {
+		diags.AddError(
+			"Missing Subject DN",
+			"Subject DN with a non-empty Common Name (CN) is required to create a self-signed certificate.",
+		)
+		return nil, diags
+	}
+
+	dnStruct, d := expandSubjectDN(ctx, plan.SubjectDN)
+	diags.Append(d...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	subjectDN := buildSubjectDN(dnStruct)
+	planBody := map[string]any{
+		"type":      "selfsigned",
+		"keySize":   plan.KeySize.ValueInt64(),
+		"subjectDN": subjectDN,
+	}
+
+	if !plan.SubjectAltNames.IsNull() &&
+		!plan.SubjectAltNames.IsUnknown() {
+		var sanList []subjectAlternativeNames
+		d = plan.SubjectAltNames.ElementsAs(ctx, &sanList, false)
+		diags.Append(d...)
+		if diags.HasError() {
+			return nil, diags
+		}
+
+		if len(sanList) > 0 {
+			sanFields := []map[string]string{}
+			for _, san := range sanList {
+				sanFields = append(sanFields, map[string]string{
+					"type":  san.Type.ValueString(),
+					"value": san.Value.ValueString(),
+				})
+			}
+
+			planBody["subjectAltNames"] = sanFields
+		}
+	}
+
+	endpoint := endpoints.GetCACertificateEndpoint()
+
+	// Create Self-Signed Certificate
+	d = requestAndUnmarshalFunc(r.client, &respObj, "POST", endpoint, planBody, false)
+	diags.Append(d...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	// Get Certificate Metadata
+	d = requestAndUnmarshalFunc(r.client, &respObj, "GET", endpoint, nil, true)
+	diags.Append(d...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	// Generate Binary Certificate
+	certBytes, d := getCertificateBinaryFunc(r.client, endpoint)
+	diags.Append(d...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	pemBytes := pem.EncodeToMemory(&pem.Block{
+		Type:  "CERTIFICATE",
+		Bytes: certBytes,
+	})
+
+	certDiags := validatePEMData(string(pemBytes))
+	diags.Append(certDiags...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	responseModel, d := selfSignedCACertificateResourceValueFromFunc(ctx, respObj, dnStruct)
+	diags.Append(d...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	responseModel.KeySize = plan.KeySize
+	responseModel.CertificatePEM = types.StringValue(string(pemBytes))
+
+	return &responseModel, diags
 }

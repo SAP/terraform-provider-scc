@@ -69,15 +69,6 @@ func TestCACertificatePKCS12Certificate_Configure_WrongType(t *testing.T) {
 	assert.True(t, resp.Diagnostics.HasError())
 }
 
-func TestCACertificatePKCS12Certificate_Update_NotSupported(t *testing.T) {
-	r := NewCACertificatePKCS12CertificateResource()
-
-	resp := &resource.UpdateResponse{}
-	r.Update(context.Background(), resource.UpdateRequest{}, resp)
-
-	assert.True(t, resp.Diagnostics.HasError())
-}
-
 func TestCACertificatePKCS12Certificate_Read_NoState(t *testing.T) {
 	r := NewCACertificatePKCS12CertificateResource()
 
@@ -164,7 +155,7 @@ func TestCACertificatePKCS12Certificate_Create_ValidationFails(t *testing.T) {
 		PKCS12Certificate: types.StringValue(""),
 	}
 
-	_, diags := r.createInternal(context.Background(), plan)
+	_, diags := createPKCS12CACertificateFunc(r, context.Background(), plan)
 
 	assert.True(t, diags.HasError())
 }
@@ -188,7 +179,7 @@ func TestCACertificatePKCS12Certificate_Create_UploadFails(t *testing.T) {
 		Password:          types.StringValue("pass"),
 	}
 
-	_, diags := r.createInternal(context.Background(), plan)
+	_, diags := createPKCS12CACertificateFunc(r, context.Background(), plan)
 
 	assert.True(t, diags.HasError())
 }
@@ -220,7 +211,7 @@ func TestCACertificatePKCS12Certificate_Create_MetadataFails(t *testing.T) {
 		Password:          types.StringValue("pass"),
 	}
 
-	_, diags := r.createInternal(context.Background(), plan)
+	_, diags := createPKCS12CACertificateFunc(r, context.Background(), plan)
 
 	assert.True(t, diags.HasError())
 }
@@ -258,7 +249,7 @@ func TestCACertificatePKCS12Certificate_Create_BinaryFails(t *testing.T) {
 		Password:          types.StringValue("pass"),
 	}
 
-	_, diags := r.createInternal(context.Background(), plan)
+	_, diags := createPKCS12CACertificateFunc(r, context.Background(), plan)
 
 	assert.True(t, diags.HasError())
 }
@@ -299,7 +290,7 @@ func TestCACertificatePKCS12Certificate_Create_InvalidPEM(t *testing.T) {
 		Password:          types.StringValue("pass"),
 	}
 
-	_, diags := r.createInternal(context.Background(), plan)
+	_, diags := createPKCS12CACertificateFunc(r, context.Background(), plan)
 
 	assert.True(t, diags.HasError())
 }
@@ -347,7 +338,7 @@ func TestCACertificatePKCS12Certificate_Create_ModelConversionFails(t *testing.T
 		Password:          types.StringValue("pass"),
 	}
 
-	_, diags := r.createInternal(context.Background(), plan)
+	_, diags := createPKCS12CACertificateFunc(r, context.Background(), plan)
 
 	assert.True(t, diags.HasError())
 }
@@ -393,7 +384,7 @@ func TestCACertificatePKCS12Certificate_Create_Success(t *testing.T) {
 		Password:          types.StringValue("pass"),
 	}
 
-	state, diags := r.createInternal(context.Background(), plan)
+	state, diags := createPKCS12CACertificateFunc(r, context.Background(), plan)
 
 	assert.False(t, diags.HasError())
 	assert.NotNil(t, state)
@@ -408,4 +399,33 @@ func TestCACertificatePKCS12_Delete_NoState(t *testing.T) {
 	r.Delete(context.Background(), req, resp)
 
 	assert.False(t, resp.Diagnostics.HasError())
+}
+
+func TestCACertificatePKCS12Certificate_ShouldUpdate_NoChange(t *testing.T) {
+	plan := PKCS12CACertificateResourceConfig{
+		PKCS12Certificate: types.StringValue("abc"),
+		Password:          types.StringValue("pass"),
+	}
+
+	state := plan
+
+	result := shouldUpdatePKCS12(plan.PKCS12Certificate, state.PKCS12Certificate, plan.Password, state.Password, plan.KeyPassword, state.KeyPassword)
+
+	assert.False(t, result)
+}
+
+func TestCACertificatePKCS12Certificate_ShouldUpdate_Change(t *testing.T) {
+	plan := PKCS12CACertificateResourceConfig{
+		PKCS12Certificate: types.StringValue("new"),
+		Password:          types.StringValue("pass"),
+	}
+
+	state := PKCS12CACertificateResourceConfig{
+		PKCS12Certificate: types.StringValue("old"),
+		Password:          types.StringValue("pass"),
+	}
+
+	result := shouldUpdatePKCS12(plan.PKCS12Certificate, state.PKCS12Certificate, plan.Password, state.Password, plan.KeyPassword, state.KeyPassword)
+
+	assert.True(t, result)
 }

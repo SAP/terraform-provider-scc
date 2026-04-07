@@ -6,12 +6,16 @@ description: |-
   The PKCS#12 file must be created from a CSR generated in SAP Cloud Connector and signed by a trusted Certificate Authority (CA).
   Supports:
   • PKCS#12 Certificate: A certificate bundle that is signed by an external Certificate Authority (CA) and includes bundle containing private key and full certificate chain.
+  Behavior:
+  This resource supports in-place certificate rotation.Updating the pkcs12_certificate, password or key_password will upload a new certificate, replacing the existing certificate without deleting it.This avoids downtime and aligns with the Cloud Connector certificate lifecycle (CSR → sign → upload).
+  Renewal Note:
+  To renew a certificate, a new CSR must be generated from SAP Cloud Connector.The signed certificate must correspond to the most recently generated CSR, otherwise the upload will fail.
   Required Workflow:
   Generate a Certificate Signing Request (CSR) from the SAP Cloud Connector.Submit the CSR to a trusted Certificate Authority (CA).Obtain the signed certificate (leaf certificate) and the CA chain.Create a PKCS#12 bundle that includes:
   The signed leaf certificate.The private key corresponding to the CSR (exported from SAP Cloud Connector).Intermediate CA certificate(s) (if applicable)Root CA certificateProvide the chain to Terraform using either:
   filebase64("certificate.p12")Inline base64-encoded PKCS#12 string
   Notes:
-  Cloud Connector accepts only the latest CSRCertificate must match the CSR's public key and subject.The PKCS#12 file must include the private key.On deleting the CA certificate resource, the certificate is removed from the SAP Cloud Connector, and any existing connections that rely on that certificate will be disrupted until a new certificate is uploaded using a new CSR.Any change to the PKCS#12 content forces replacement since SAP Cloud Connector supports only one CA certificate.
+  Cloud Connector accepts only the latest CSRCertificate must match the CSR's public key and subject.The PKCS#12 file must include the private key.On deleting the CA certificate resource, the certificate is removed from the SAP Cloud Connector, and any existing connections that rely on that certificate will be disrupted until a new certificate is uploaded using a new CSR.
   Further documentation:
   https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/ca-certificate-for-principal-propagation-apis#upload-a-pkcs#12-certificate-as-ca-certificate-for-principal-propagation-(master-only)
 ---
@@ -23,6 +27,15 @@ The PKCS#12 file must be created from a CSR generated in SAP Cloud Connector and
 		
 **Supports:**
 • PKCS#12 Certificate: A certificate bundle that is signed by an external Certificate Authority (CA) and includes bundle containing private key and full certificate chain.
+
+**Behavior:**
+- This resource supports **in-place certificate rotation**.
+- Updating the pkcs12_certificate, password or key_password will **upload a new certificate**, replacing the existing certificate without deleting it.
+- This avoids downtime and aligns with the Cloud Connector certificate lifecycle (CSR → sign → upload).
+
+**Renewal Note:**
+- To renew a certificate, a **new CSR must be generated** from SAP Cloud Connector.
+- The signed certificate must correspond to the **most recently generated CSR**, otherwise the upload will fail.
 
 **Required Workflow:**
 1. Generate a Certificate Signing Request (CSR) from the SAP Cloud Connector.
@@ -42,7 +55,6 @@ The PKCS#12 file must be created from a CSR generated in SAP Cloud Connector and
 - Certificate must match the CSR's public key and subject.
 - The PKCS#12 file must include the private key.
 - On deleting the CA certificate resource, the certificate is removed from the SAP Cloud Connector, and any existing connections that rely on that certificate will be disrupted until a new certificate is uploaded using a new CSR.
-- Any change to the PKCS#12 content forces replacement since SAP Cloud Connector supports only one CA certificate.
 
 __Further documentation:__
 <https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/ca-certificate-for-principal-propagation-apis#upload-a-pkcs#12-certificate-as-ca-certificate-for-principal-propagation-(master-only)>

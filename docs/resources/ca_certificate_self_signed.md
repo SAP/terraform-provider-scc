@@ -5,8 +5,10 @@ description: |-
   Creates and manages a Self-Signed CA Certificate in SAP Cloud Connector.
   Supports:
   • Self-signed certificates
-  Note:
-  Any change to key_size or subject_dn forces replacement since SAP Cloud Connector supports only one principal propagation CA certificate.
+  Behavior:
+  This resource creates a self-signed CA certificate directly on the SAP Cloud Connector.Any change to key_size or subject_dn will result in replacement of the existing certificate, as only one CA certificate is supported.Replacement will create a new certificate and remove the existing one.
+  Notes:
+  SAP Cloud Connector supports only a single CA certificate for this purpose.Changing certificate properties (such as key size or subject) requires generating a new certificate.On terraform destroy, the CA certificate is removed from the SAP Cloud Connector, which may disrupt dependent configurations until a new certificate is created.
   Further documentation:
   https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/ca-certificate-for-principal-propagation-apis#create-a-self-signed-ca-certificate-for-principal-propagation-(master-only)
 ---
@@ -18,8 +20,15 @@ Creates and manages a **Self-Signed CA Certificate** in SAP Cloud Connector.
 **Supports:**
 • Self-signed certificates
 
-**Note:**
-Any change to key_size or subject_dn forces replacement since SAP Cloud Connector supports only one principal propagation CA certificate.
+**Behavior:**
+- This resource creates a self-signed CA certificate directly on the SAP Cloud Connector.
+- Any change to key_size or subject_dn will result in **replacement of the existing certificate**, as only one CA certificate is supported.
+- Replacement will create a new certificate and remove the existing one.
+
+**Notes:**
+- SAP Cloud Connector supports only a single CA certificate for this purpose.
+- Changing certificate properties (such as key size or subject) requires generating a new certificate.
+- On terraform destroy, the CA certificate is removed from the SAP Cloud Connector, which may disrupt dependent configurations until a new certificate is created.
 
 __Further documentation:__
 <https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/ca-certificate-for-principal-propagation-apis#create-a-self-signed-ca-certificate-for-principal-propagation-(master-only)>

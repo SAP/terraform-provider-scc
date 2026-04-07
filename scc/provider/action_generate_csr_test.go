@@ -143,7 +143,7 @@ func TestGenerateCSRAction_Invoke_WithSANs(t *testing.T) {
 
 		return &http.Response{
 			StatusCode: 200,
-			Body: io.NopCloser(strings.NewReader("-----BEGIN CERTIFICATE REQUEST-----\nTEST\n-----END CERTIFICATE REQUEST-----")),
+			Body:       io.NopCloser(strings.NewReader("-----BEGIN CERTIFICATE REQUEST-----\nTEST\n-----END CERTIFICATE REQUEST-----")),
 		}, nil
 	}
 
