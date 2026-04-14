@@ -6,9 +6,11 @@ import (
 
 	"github.com/SAP/terraform-provider-scc/internal/api"
 	apiobjects "github.com/SAP/terraform-provider-scc/internal/api/apiObjects"
+	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
 	"github.com/stretchr/testify/assert"
 )
@@ -66,13 +68,28 @@ func TestUICertificateSelfSigned_Configure_WrongType(t *testing.T) {
 	assert.True(t, resp.Diagnostics.HasError())
 }
 
-func TestUICertificateSelfSigned_Update(t *testing.T) {
-	r := NewUICertificateSelfSignedResource()
+func TestUICertificateSelfSigned_Update_NoChange(t *testing.T) {
+	plan := testValidSelfSignedUIPlan()
+	state := testValidSelfSignedUIPlan()
 
-	resp := &resource.UpdateResponse{}
-	r.Update(context.Background(), resource.UpdateRequest{}, resp)
+	noChange := plan.KeySize == state.KeySize &&
+		plan.SubjectDN.Equal(state.SubjectDN) &&
+		plan.SubjectAltNames.Equal(state.SubjectAltNames)
 
-	assert.True(t, resp.Diagnostics.HasError())
+	assert.True(t, noChange)
+}
+
+func TestUICertificateSelfSigned_Update_Change(t *testing.T) {
+	plan := testValidSelfSignedUIPlan()
+	state := testValidSelfSignedUIPlan()
+
+	plan.KeySize = types.Int64Value(2048)
+
+	changed := plan.KeySize != state.KeySize ||
+		!plan.SubjectDN.Equal(state.SubjectDN) ||
+		!plan.SubjectAltNames.Equal(state.SubjectAltNames)
+
+	assert.True(t, changed)
 }
 
 func TestUICertificateSelfSigned_Delete(t *testing.T) {
@@ -336,5 +353,29 @@ func buildSelfSignedPlan(ctx context.Context, r *UICertificateSelfSignedResource
 			tftypes.Object{AttributeTypes: attrTypes},
 			values,
 		),
+	}
+}
+
+func testValidSelfSignedUIPlan() SelfSignedUICertificateResourceConfig {
+	return SelfSignedUICertificateResourceConfig{
+		KeySize: types.Int64Value(4096),
+
+		CertificateWithSANConfig: CertificateWithSANConfig{
+			CertificateConfig: CertificateConfig{
+				SubjectDN: types.ObjectValueMust(
+					subjectDNAttrTypes.AttrTypes,
+					map[string]attr.Value{
+						"cn":    types.StringValue("example.com"),
+						"email": types.StringNull(),
+						"l":     types.StringNull(),
+						"ou":    types.StringNull(),
+						"o":     types.StringNull(),
+						"st":    types.StringNull(),
+						"c":     types.StringNull(),
+					},
+				),
+			},
+			SubjectAltNames: types.ListNull(subjectAlternativeNamesType),
+		},
 	}
 }

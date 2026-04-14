@@ -51,12 +51,20 @@ The PKCS#12 file must be created from a CSR generated in SAP Cloud Connector and
    - filebase64("certificate.p12")
    - Inline base64-encoded PKCS#12 string
 
+**Behavior:**
+- This resource supports **in-place certificate rotation**.
+- Updating the pkcs12_certificate, password or key_password will **upload a new certificate**, replacing the existing certificate without deleting it.
+- This avoids downtime and aligns with the Cloud Connector certificate lifecycle (CSR → sign → upload).
+
+**Renewal Note:**
+- To renew a certificate, a **new CSR must be generated** from SAP Cloud Connector.
+- The signed certificate must correspond to the **most recently generated CSR**, otherwise the upload will fail.
+
 **Notes:**
 - Cloud Connector accepts **only the latest CSR**
 - Certificate must match the CSR's public key and subject.
 - The PKCS#12 file must include the private key.
 - On deleting the UI certificate resource, Terraform only removes the resource from the state. The UI certificate remains configured in SAP Cloud Connector because the connector does not provide an API to delete UI certificates and will continue to be used until it is replaced by uploading a new certificate (for example, from a new CSR).
-- Any change to the PKCS#12 content forces replacement since SAP Cloud Connector supports only one UI certificate.
 
 __Further documentation:__
 <https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/authentication-and-ui-settings#upload-a-pkcs#12-certificate-as-ui-certificate>`,
@@ -71,16 +79,11 @@ This value may be provided as:
 The bundle must contain:
 - Leaf certificate
 - Private key
-- Full certificate chain
-
-This attribute is sensitive and forces replacement when changed.`,
+- Full certificate chain`,
 				Required:  true,
 				Sensitive: true,
 				Validators: []validator.String{
 					stringvalidator.LengthAtLeast(1),
-				},
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
 				},
 			},
 			"password": schema.StringAttribute{
@@ -90,9 +93,6 @@ This attribute is sensitive and forces replacement when changed.`,
 				Validators: []validator.String{
 					stringvalidator.LengthAtLeast(1),
 				},
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
 			},
 			"key_password": schema.StringAttribute{
 				MarkdownDescription: `Password used to encrypt the private key within the PKCS#12 file. 
@@ -100,9 +100,6 @@ This is often the same as the main password but can be different depending on ho
 If not set, the provider will omit this form field.`,
 				Optional:  true,
 				Sensitive: true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
 			},
 			"subject_dn": schema.SingleNestedAttribute{
 				MarkdownDescription: "Subject Distinguished Name (DN) of the certificate. The Common Name (CN) is mandatory, while other fields like L, OU, O, ST, C, or Email may be present depending on the issuing CA.",
@@ -219,7 +216,7 @@ func (r *UICertificatePKCS12CertificateResource) Create(ctx context.Context, req
 		return
 	}
 
-	responseModel, d := r.createInternal(ctx, plan)
+	responseModel, d := createPKCS12UICertificateFunc(r, ctx, plan)
 	resp.Diagnostics.Append(d...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -273,10 +270,35 @@ func (r *UICertificatePKCS12CertificateResource) Read(ctx context.Context, req r
 }
 
 func (r *UICertificatePKCS12CertificateResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	resp.Diagnostics.AddError(
-		"Update Not Supported",
-		"Updating a PKCS#12 UI certificate is not supported because SAP Cloud Connector only accepts the latest uploaded certificate. To update the certificate, you must create a new resource with the updated PKCS#12 content, which will replace the existing certificate in SAP Cloud Connector.",
-	)
+	var plan, state PKCS12UICertificateResourceConfig
+	diags := req.Plan.Get(ctx, &plan)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	diags = req.State.Get(ctx, &state)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if !shouldUpdatePKCS12(plan.PKCS12Certificate, state.PKCS12Certificate, plan.Password, state.Password, plan.KeyPassword, state.KeyPassword) {
+		// No changes to the certificate or passwords, so skip the update
+		return
+	}
+
+	responseModel, d := createPKCS12UICertificateFunc(r, ctx, plan)
+	resp.Diagnostics.Append(d...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	diags = resp.State.Set(ctx, responseModel)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 }
 
 func (r *UICertificatePKCS12CertificateResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -295,8 +317,7 @@ func (r *UICertificatePKCS12CertificateResource) Delete(ctx context.Context, req
 	resp.State.RemoveResource(ctx)
 }
 
-func (r *UICertificatePKCS12CertificateResource) createInternal(ctx context.Context, plan PKCS12UICertificateResourceConfig) (*PKCS12UICertificateResourceConfig, diag.Diagnostics) {
-
+var createPKCS12UICertificateFunc = func(r *UICertificatePKCS12CertificateResource, ctx context.Context, plan PKCS12UICertificateResourceConfig) (*PKCS12UICertificateResourceConfig, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	var respObj apiobjects.Certificate
 

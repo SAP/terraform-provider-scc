@@ -8,11 +8,13 @@ import (
 	apiobjects "github.com/SAP/terraform-provider-scc/internal/api/apiObjects"
 	"github.com/SAP/terraform-provider-scc/internal/api/endpoints"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 var _ resource.Resource = &UICertificateSignedChainResource{}
@@ -49,13 +51,20 @@ The uploaded certificate chain becomes the **UI certificate** used by the connec
    - file("signed_chain.pem")
    - or by directly pasting the PEM-encoded chain in the configuration.
 
+**Behavior:**
+- This resource supports **in-place certificate rotation**.
+- Updating the signed_chain will **upload a new certificate**, replacing the existing certificate without deleting it.
+- This avoids downtime and aligns with the Cloud Connector certificate lifecycle (CSR → sign → upload).
+
+**Renewal Note:**
+- To renew a certificate, a **new CSR must be generated** from SAP Cloud Connector.
+- The signed certificate must correspond to the **most recently generated CSR**, otherwise the upload will fail.
 
 **Notes:**
 - Cloud Connector accepts **only the latest CSR**
 - Certificate must match the CSR's public key and subject.
 - Chain must be PEM-encoded.
 - On deleting the UI certificate resource, Terraform only removes the resource from the state. The UI certificate remains configured in SAP Cloud Connector because the connector does not provide an API to delete UI certificates and will continue to be used until it is replaced by uploading a new certificate (for example, from a new CSR).
-- Any change to signed_chain forces replacement since SAP Cloud Connector supports only one UI certificate.
 
 __Further documentation:__
 <https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/authentication-and-ui-settings#upload-a-signed-certificate-chain-as-ui-certificate>`,
@@ -78,9 +87,6 @@ The provider validates PEM format before uploading.`,
 				Sensitive: true,
 				Validators: []validator.String{
 					stringvalidator.LengthAtLeast(1),
-				},
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
 				},
 			},
 			"subject_dn": schema.SingleNestedAttribute{
@@ -192,46 +198,19 @@ func (r *UICertificateSignedChainResource) Configure(ctx context.Context, req re
 
 func (r *UICertificateSignedChainResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var plan SignedChainUICertificateResourceConfig
-	var respObj apiobjects.Certificate
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	if !plan.SignedChain.IsNull() && !plan.SignedChain.IsUnknown() {
-		certDiags := validatePEMChainFunc(plan.SignedChain.ValueString())
-		resp.Diagnostics.Append(certDiags...)
-		if resp.Diagnostics.HasError() {
-			return
-		}
-	}
-
-	endpoint := endpoints.GetUICertificateEndpoint()
-
-	// Upload Signed Certificate Chain
-	diags = uploadSignedChainFunc(r.client, endpoint, plan.SignedChain.ValueString())
-	resp.Diagnostics.Append(diags...)
+	model, d := createSignedChainUICertificateFunc(r, ctx, plan.SignedChain.ValueString())
+	resp.Diagnostics.Append(d...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	// Get Certificate Metadata
-	diags = requestAndUnmarshalFunc(r.client, &respObj, "GET", endpoint, nil, true)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	responseModel, diags := signedChainUICertificateResourceValueFromFunc(ctx, respObj)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	responseModel.SignedChain = plan.SignedChain
-
-	diags = resp.State.Set(ctx, responseModel)
+	diags = resp.State.Set(ctx, model)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -277,10 +256,34 @@ func (r *UICertificateSignedChainResource) Read(ctx context.Context, req resourc
 }
 
 func (r *UICertificateSignedChainResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	resp.Diagnostics.AddError(
-		"Update Not Supported",
-		"Changing a signed UI certificate requires resource replacement.",
-	)
+	var plan, state SignedChainUICertificateResourceConfig
+	diags := req.Plan.Get(ctx, &plan)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	diags = req.State.Get(ctx, &state)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// If the signed chain is not changing, there is no need to update
+	if !shouldUpdateSignedChain(plan.SignedChain, state.SignedChain) {
+		return
+	}
+
+	model, diags := createSignedChainUICertificateFunc(r, ctx, plan.SignedChain.ValueString())
+	if diags.HasError() {
+		return
+	}
+
+	diags = resp.State.Set(ctx, model)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 }
 
 func (r *UICertificateSignedChainResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -297,4 +300,42 @@ func (r *UICertificateSignedChainResource) Delete(ctx context.Context, req resou
 			"another certificate.",
 	)
 	resp.State.RemoveResource(ctx)
+}
+
+var createSignedChainUICertificateFunc = func(r *UICertificateSignedChainResource, ctx context.Context, signedChain string) (*SignedChainUICertificateResourceConfig, diag.Diagnostics) {
+	var respObj apiobjects.Certificate
+	var diags diag.Diagnostics
+	if signedChain != "" {
+		certDiags := validatePEMChainFunc(signedChain)
+		diags.Append(certDiags...)
+		if diags.HasError() {
+			return nil, diags
+		}
+	}
+
+	endpoint := endpoints.GetUICertificateEndpoint()
+
+	// Upload Signed Certificate Chain
+	d := uploadSignedChainFunc(r.client, endpoint, signedChain)
+	diags.Append(d...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	// Get Certificate Metadata
+	d = requestAndUnmarshalFunc(r.client, &respObj, "GET", endpoint, nil, true)
+	diags.Append(d...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	responseModel, d := signedChainUICertificateResourceValueFromFunc(ctx, respObj)
+	diags.Append(d...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	responseModel.SignedChain = types.StringValue(signedChain)
+
+	return &responseModel, diags
 }

@@ -10,12 +10,11 @@ import (
 	"github.com/SAP/terraform-provider-scc/internal/api/endpoints"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/listplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -42,8 +41,10 @@ func (r *UICertificateSelfSignedResource) Schema(ctx context.Context, req resour
 **Supports:**
 - Self-signed certificates
 
-**Note:**
-- Any change to key_size or subject_dn forces replacement since SAP Cloud Connector supports only one principal propagation UI certificate.
+**Behavior:**
+- This resource creates a self-signed UI certificate directly on the SAP Cloud Connector.
+- Any change to key_size or subject_dn will result in **replacement of the existing certificate**, as only one UI certificate is supported.
+- Replacement will create a new certificate and remove the existing one.
 - On deleting the UI certificate resource, Terraform only removes the resource from the state. The UI certificate remains configured in SAP Cloud Connector because the connector does not provide an API to delete UI certificates and will continue to be used until it is replaced by creating a new self-signed certificate.
 
 
@@ -58,7 +59,6 @@ __Further documentation:__
 					int64validator.OneOf(2048, 4096),
 				},
 				PlanModifiers: []planmodifier.Int64{
-					int64planmodifier.RequiresReplace(),
 					int64planmodifier.UseStateForUnknown(),
 				},
 				Default: int64default.StaticInt64(4096),
@@ -66,9 +66,6 @@ __Further documentation:__
 			"subject_dn": schema.SingleNestedAttribute{
 				MarkdownDescription: "Subject Distinguished Name (DN) of the certificate. The Common Name (CN) is mandatory, while other fields like L, OU, O, ST, C, or Email may be present depending on the issuing CA.",
 				Required:            true,
-				PlanModifiers: []planmodifier.Object{
-					objectplanmodifier.RequiresReplace(),
-				},
 				Attributes: map[string]schema.Attribute{
 					"cn": schema.StringAttribute{
 						MarkdownDescription: "Common Name (CN) of the certificate, typically representing the domain name or identifier for which the certificate is issued.",
@@ -193,9 +190,6 @@ __Further documentation:__
 						},
 					},
 				},
-				PlanModifiers: []planmodifier.List{
-					listplanmodifier.RequiresReplace(),
-				},
 			},
 		},
 	}
@@ -222,81 +216,19 @@ func (r *UICertificateSelfSignedResource) Configure(ctx context.Context, req res
 
 func (r *UICertificateSelfSignedResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var plan SelfSignedUICertificateResourceConfig
-	var respObj apiobjects.Certificate
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	if plan.SubjectDN.IsNull() || plan.SubjectDN.IsUnknown() {
-		resp.Diagnostics.AddError(
-			"Missing Subject DN",
-			"Subject DN with a non-empty Common Name (CN) is required to create a self-signed certificate.",
-		)
-		return
-	}
-
-	dnStruct, diags := expandSubjectDN(ctx, plan.SubjectDN)
+	model, diags := createSelfSignedUICertificateFunc(r, ctx, plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	subjectDN := buildSubjectDN(dnStruct)
-	planBody := map[string]any{
-		"type":      "selfsigned",
-		"keySize":   plan.KeySize.ValueInt64(),
-		"subjectDN": subjectDN,
-	}
-
-	if !plan.SubjectAltNames.IsNull() &&
-		!plan.SubjectAltNames.IsUnknown() {
-		var sanList []subjectAlternativeNames
-		diags = plan.SubjectAltNames.ElementsAs(ctx, &sanList, false)
-		resp.Diagnostics.Append(diags...)
-		if resp.Diagnostics.HasError() {
-			return
-		}
-
-		if len(sanList) > 0 {
-			sanFields := []map[string]string{}
-			for _, san := range sanList {
-				sanFields = append(sanFields, map[string]string{
-					"type":  san.Type.ValueString(),
-					"value": san.Value.ValueString(),
-				})
-			}
-
-			planBody["subjectAltNames"] = sanFields
-		}
-	}
-
-	endpoint := endpoints.GetUICertificateEndpoint()
-
-	// Create Self-Signed Certificate
-	diags = requestAndUnmarshalFunc(r.client, &respObj, "POST", endpoint, planBody, false)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	// Get Certificate Metadata
-	diags = requestAndUnmarshalFunc(r.client, &respObj, "GET", endpoint, nil, true)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	responseModel, diags := selfSignedUICertificateResourceValueFromFunc(ctx, respObj, dnStruct)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	responseModel.KeySize = plan.KeySize
-
-	diags = resp.State.Set(ctx, responseModel)
+	diags = resp.State.Set(ctx, model)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -348,10 +280,34 @@ func (r *UICertificateSelfSignedResource) Read(ctx context.Context, req resource
 }
 
 func (r *UICertificateSelfSignedResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	resp.Diagnostics.AddError(
-		"Update Not Supported",
-		"Changing a self-signed UI certificate requires resource replacement.",
-	)
+	var plan, state SelfSignedUICertificateResourceConfig
+	diags := req.Plan.Get(ctx, &plan)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	diags = req.State.Get(ctx, &state)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if !shouldUpdateSelfSignedCertificate(plan.KeySize, state.KeySize, plan.SubjectDN, state.SubjectDN, plan.SubjectAltNames, state.SubjectAltNames) {
+		return
+	}
+
+	model, diags := createSelfSignedUICertificateFunc(r, ctx, plan)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	diags = resp.State.Set(ctx, model)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 }
 
 func (r *UICertificateSelfSignedResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -368,4 +324,78 @@ func (r *UICertificateSelfSignedResource) Delete(ctx context.Context, req resour
 			"another certificate.",
 	)
 	resp.State.RemoveResource(ctx)
+}
+
+var createSelfSignedUICertificateFunc = func(r *UICertificateSelfSignedResource, ctx context.Context, plan SelfSignedUICertificateResourceConfig) (*SelfSignedUICertificateResourceConfig, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	var respObj apiobjects.Certificate
+
+	if plan.SubjectDN.IsNull() || plan.SubjectDN.IsUnknown() {
+		diags.AddError(
+			"Missing Subject DN",
+			"Subject DN with a non-empty Common Name (CN) is required to create a self-signed certificate.",
+		)
+		return nil, diags
+	}
+
+	dnStruct, d := expandSubjectDN(ctx, plan.SubjectDN)
+	diags.Append(d...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	subjectDN := buildSubjectDN(dnStruct)
+	planBody := map[string]any{
+		"type":      "selfsigned",
+		"keySize":   plan.KeySize.ValueInt64(),
+		"subjectDN": subjectDN,
+	}
+
+	if !plan.SubjectAltNames.IsNull() &&
+		!plan.SubjectAltNames.IsUnknown() {
+		var sanList []subjectAlternativeNames
+		d = plan.SubjectAltNames.ElementsAs(ctx, &sanList, false)
+		diags.Append(d...)
+		if diags.HasError() {
+			return nil, diags
+		}
+
+		if len(sanList) > 0 {
+			sanFields := []map[string]string{}
+			for _, san := range sanList {
+				sanFields = append(sanFields, map[string]string{
+					"type":  san.Type.ValueString(),
+					"value": san.Value.ValueString(),
+				})
+			}
+
+			planBody["subjectAltNames"] = sanFields
+		}
+	}
+
+	endpoint := endpoints.GetUICertificateEndpoint()
+
+	// Create Self-Signed Certificate
+	d = requestAndUnmarshalFunc(r.client, &respObj, "POST", endpoint, planBody, false)
+	diags.Append(d...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	// Get Certificate Metadata
+	d = requestAndUnmarshalFunc(r.client, &respObj, "GET", endpoint, nil, true)
+	diags.Append(d...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	responseModel, d := selfSignedUICertificateResourceValueFromFunc(ctx, respObj, dnStruct)
+	diags.Append(d...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	responseModel.KeySize = plan.KeySize
+
+	return &responseModel, diags
 }
