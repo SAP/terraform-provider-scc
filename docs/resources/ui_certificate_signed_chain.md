@@ -11,8 +11,12 @@ description: |-
   Generate a Certificate Signing Request (CSR) from SAP Cloud Connector for Principal Propagation.Submit the CSR to a trusted Certificate Authority (CA) to obtain a signed certificate chain.Construct the PEM chain in the following order:
   Signed certificate (generated from the CSR)Intermediate CA certificate(s) (if applicable)Root CA certificateProvide the chain to Terraform using either:
   file("signed_chain.pem")or by directly pasting the PEM-encoded chain in the configuration.
+  Behavior:
+  This resource supports in-place certificate rotation.Updating the signed_chain will upload a new certificate, replacing the existing certificate without deleting it.This avoids downtime and aligns with the Cloud Connector certificate lifecycle (CSR → sign → upload).
+  Renewal Note:
+  To renew a certificate, a new CSR must be generated from SAP Cloud Connector.The signed certificate must correspond to the most recently generated CSR, otherwise the upload will fail.
   Notes:
-  Cloud Connector accepts only the latest CSRCertificate must match the CSR's public key and subject.Chain must be PEM-encoded.On deleting the UI certificate resource, Terraform only removes the resource from the state. The UI certificate remains configured in SAP Cloud Connector because the connector does not provide an API to delete UI certificates and will continue to be used until it is replaced by uploading a new certificate (for example, from a new CSR).Any change to signed_chain forces replacement since SAP Cloud Connector supports only one UI certificate.
+  Cloud Connector accepts only the latest CSRCertificate must match the CSR's public key and subject.Chain must be PEM-encoded.On deleting the UI certificate resource, Terraform only removes the resource from the state. The UI certificate remains configured in SAP Cloud Connector because the connector does not provide an API to delete UI certificates and will continue to be used until it is replaced by uploading a new certificate (for example, from a new CSR).
   Further documentation:
   https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/authentication-and-ui-settings#upload-a-signed-certificate-chain-as-ui-certificate
 ---
@@ -37,13 +41,20 @@ The uploaded certificate chain becomes the **UI certificate** used by the connec
    - file("signed_chain.pem")
    - or by directly pasting the PEM-encoded chain in the configuration.
 
+**Behavior:**
+- This resource supports **in-place certificate rotation**.
+- Updating the signed_chain will **upload a new certificate**, replacing the existing certificate without deleting it.
+- This avoids downtime and aligns with the Cloud Connector certificate lifecycle (CSR → sign → upload).
+
+**Renewal Note:**
+- To renew a certificate, a **new CSR must be generated** from SAP Cloud Connector.
+- The signed certificate must correspond to the **most recently generated CSR**, otherwise the upload will fail.
 
 **Notes:**
 - Cloud Connector accepts **only the latest CSR**
 - Certificate must match the CSR's public key and subject.
 - Chain must be PEM-encoded.
 - On deleting the UI certificate resource, Terraform only removes the resource from the state. The UI certificate remains configured in SAP Cloud Connector because the connector does not provide an API to delete UI certificates and will continue to be used until it is replaced by uploading a new certificate (for example, from a new CSR).
-- Any change to signed_chain forces replacement since SAP Cloud Connector supports only one UI certificate.
 
 __Further documentation:__
 <https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/authentication-and-ui-settings#upload-a-signed-certificate-chain-as-ui-certificate>
