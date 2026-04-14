@@ -69,13 +69,33 @@ func TestSystemCertificatePKCS12_Configure_WrongType(t *testing.T) {
 	assert.True(t, resp.Diagnostics.HasError())
 }
 
-func TestSystemCertificatePKCS12_Update_NotSupported(t *testing.T) {
-	r := NewSystemCertificatePKCS12CertificateResource()
+func TestSystemCertificatePKCS12Certificate_ShouldUpdate_NoChange(t *testing.T) {
+	plan := PKCS12SystemCertificateResourceConfig{
+		PKCS12Certificate: types.StringValue("abc"),
+		Password:          types.StringValue("pass"),
+	}
 
-	resp := &resource.UpdateResponse{}
-	r.Update(context.Background(), resource.UpdateRequest{}, resp)
+	state := plan
 
-	assert.True(t, resp.Diagnostics.HasError())
+	result := shouldUpdatePKCS12(plan.PKCS12Certificate, state.PKCS12Certificate, plan.Password, state.Password, types.StringNull(), types.StringNull())
+
+	assert.False(t, result)
+}
+
+func TestSystemCertificatePKCS12Certificate_ShouldUpdate_Change(t *testing.T) {
+	plan := PKCS12SystemCertificateResourceConfig{
+		PKCS12Certificate: types.StringValue("new"),
+		Password:          types.StringValue("pass"),
+	}
+
+	state := PKCS12SystemCertificateResourceConfig{
+		PKCS12Certificate: types.StringValue("old"),
+		Password:          types.StringValue("pass"),
+	}
+
+	result := shouldUpdatePKCS12(plan.PKCS12Certificate, state.PKCS12Certificate, plan.Password, state.Password, types.StringNull(), types.StringNull())
+
+	assert.True(t, result)
 }
 
 func TestSystemCertificatePKCS12_Read_NoState(t *testing.T) {
@@ -164,7 +184,7 @@ func TestCreateInternal_ValidationFails(t *testing.T) {
 		PKCS12Certificate: types.StringValue(""),
 	}
 
-	_, diags := r.createInternal(context.Background(), plan)
+	_, diags := createPKCS12SystemCertificateFunc(r, context.Background(), plan)
 
 	assert.True(t, diags.HasError())
 }
@@ -188,7 +208,7 @@ func TestCreateInternal_UploadFails(t *testing.T) {
 		Password:          types.StringValue("pass"),
 	}
 
-	_, diags := r.createInternal(context.Background(), plan)
+	_, diags := createPKCS12SystemCertificateFunc(r, context.Background(), plan)
 
 	assert.True(t, diags.HasError())
 }
@@ -220,7 +240,7 @@ func TestCreateInternal_MetadataFails(t *testing.T) {
 		Password:          types.StringValue("pass"),
 	}
 
-	_, diags := r.createInternal(context.Background(), plan)
+	_, diags := createPKCS12SystemCertificateFunc(r, context.Background(), plan)
 
 	assert.True(t, diags.HasError())
 }
@@ -258,7 +278,7 @@ func TestCreateInternal_BinaryFails(t *testing.T) {
 		Password:          types.StringValue("pass"),
 	}
 
-	_, diags := r.createInternal(context.Background(), plan)
+	_, diags := createPKCS12SystemCertificateFunc(r, context.Background(), plan)
 
 	assert.True(t, diags.HasError())
 }
@@ -299,7 +319,7 @@ func TestCreateInternal_InvalidPEM(t *testing.T) {
 		Password:          types.StringValue("pass"),
 	}
 
-	_, diags := r.createInternal(context.Background(), plan)
+	_, diags := createPKCS12SystemCertificateFunc(r, context.Background(), plan)
 
 	assert.True(t, diags.HasError())
 }
@@ -347,7 +367,7 @@ func TestCreateInternal_ModelConversionFails(t *testing.T) {
 		Password:          types.StringValue("pass"),
 	}
 
-	_, diags := r.createInternal(context.Background(), plan)
+	_, diags := createPKCS12SystemCertificateFunc(r, context.Background(), plan)
 
 	assert.True(t, diags.HasError())
 }
@@ -393,7 +413,7 @@ func TestCreateInternal_Success(t *testing.T) {
 		Password:          types.StringValue("pass"),
 	}
 
-	state, diags := r.createInternal(context.Background(), plan)
+	state, diags := createPKCS12SystemCertificateFunc(r, context.Background(), plan)
 
 	assert.False(t, diags.HasError())
 	assert.NotNil(t, state)

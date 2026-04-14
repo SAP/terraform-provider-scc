@@ -11,11 +11,11 @@ import (
 	"github.com/SAP/terraform-provider-scc/internal/api/endpoints"
 	"github.com/hashicorp/terraform-plugin-framework-validators/int64validator"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/objectplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -43,8 +43,15 @@ func (r *SystemCertificateSelfSignedResource) Schema(ctx context.Context, req re
 **Supports:**
 • Self-signed certificates
 
-**Note:**
-Any change to key_size or subject_dn forces replacement since SAP Cloud Connector supports only one system certificate.
+**Behavior:**
+- This resource creates a self-signed System certificate directly on the SAP Cloud Connector.
+- Any change to key_size or subject_dn will result in **replacement of the existing certificate**, as only one system certificate is supported.
+- Replacement will create a new certificate and remove the existing one.
+
+**Notes:**
+- SAP Cloud Connector supports only a single System certificate for this purpose.
+- Changing certificate properties (such as key size or subject) requires generating a new certificate.
+- On terraform destroy, the System certificate is removed from the SAP Cloud Connector, which may disrupt dependent configurations until a new certificate is created.
 
 __Further documentation:__
 <https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/system-certificate-apis#create-a-self-signed-system-certificate-(master-only)>`,
@@ -57,7 +64,6 @@ __Further documentation:__
 					int64validator.OneOf(2048, 4096),
 				},
 				PlanModifiers: []planmodifier.Int64{
-					int64planmodifier.RequiresReplace(),
 					int64planmodifier.UseStateForUnknown(),
 				},
 				Default: int64default.StaticInt64(4096),
@@ -65,9 +71,6 @@ __Further documentation:__
 			"subject_dn": schema.SingleNestedAttribute{
 				MarkdownDescription: "Subject Distinguished Name (DN) of the certificate. The Common Name (CN) is mandatory, while other fields like L, OU, O, ST, C, or Email may be present depending on the issuing CA.",
 				Required:            true,
-				PlanModifiers: []planmodifier.Object{
-					objectplanmodifier.RequiresReplace(),
-				},
 				Attributes: map[string]schema.Attribute{
 					"cn": schema.StringAttribute{
 						MarkdownDescription: "Common Name (CN) of the certificate, typically representing the domain name or identifier for which the certificate is issued.",
@@ -204,78 +207,19 @@ func (r *SystemCertificateSelfSignedResource) Configure(ctx context.Context, req
 
 func (r *SystemCertificateSelfSignedResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var plan SelfSignedSystemCertificateResourceConfig
-	var respObj apiobjects.Certificate
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	if plan.SubjectDN.IsNull() || plan.SubjectDN.IsUnknown() {
-		resp.Diagnostics.AddError(
-			"Missing Subject DN",
-			"Subject DN with a non-empty Common Name (CN) is required to create a self-signed certificate.",
-		)
-		return
-	}
-
-	dnStruct, diags := expandSubjectDN(ctx, plan.SubjectDN)
+	model, diags := createSelfSignedSystemCertificateFunc(r, ctx, plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	subjectDN := buildSubjectDN(dnStruct)
-	planBody := map[string]any{
-		"type":      "selfsigned",
-		"keySize":   plan.KeySize.ValueInt64(),
-		"subjectDN": subjectDN,
-	}
-
-	endpoint := endpoints.GetSystemCertificateEndpoint()
-
-	// Create Self-Signed Certificate
-	diags = requestAndUnmarshalFunc(r.client, &respObj, "POST", endpoint, planBody, false)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	// Get Certificate Metadata
-	diags = requestAndUnmarshalFunc(r.client, &respObj, "GET", endpoint, nil, true)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	// Generate Binary Certificate
-	certBytes, diags := getCertificateBinaryFunc(r.client, endpoint)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	pemBytes := pem.EncodeToMemory(&pem.Block{
-		Type:  "CERTIFICATE",
-		Bytes: certBytes,
-	})
-
-	certDiags := validatePEMData(string(pemBytes))
-	resp.Diagnostics.Append(certDiags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	responseModel, diags := selfSignedSystemCertificateResourceValueFromFunc(ctx, respObj, dnStruct)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	responseModel.KeySize = plan.KeySize
-	responseModel.CertificatePEM = types.StringValue(string(pemBytes))
-
-	diags = resp.State.Set(ctx, responseModel)
+	diags = resp.State.Set(ctx, model)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -283,6 +227,9 @@ func (r *SystemCertificateSelfSignedResource) Create(ctx context.Context, req re
 }
 
 func (r *SystemCertificateSelfSignedResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	if req.State.Raw.IsNull() {
+		return
+	}
 	var state SelfSignedSystemCertificateResourceConfig
 	var respObj apiobjects.Certificate
 	diags := req.State.Get(ctx, &state)
@@ -341,13 +288,34 @@ func (r *SystemCertificateSelfSignedResource) Read(ctx context.Context, req reso
 }
 
 func (r *SystemCertificateSelfSignedResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	resp.Diagnostics.AddError(
-		"Update Not Supported",
-		"Changing a self-signed system certificate requires resource replacement.",
-	)
+	var plan, state SelfSignedSystemCertificateResourceConfig
+	diags := req.Plan.Get(ctx, &plan)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if !shouldUpdateSelfSignedCertificate(plan.KeySize, state.KeySize, plan.SubjectDN, state.SubjectDN, types.ListNull(types.StringType), types.ListNull(types.StringType)) {
+		return
+	}
+
+	model, diags := createSelfSignedSystemCertificateFunc(r, ctx, plan)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	diags = resp.State.Set(ctx, model)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 }
 
 func (r *SystemCertificateSelfSignedResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	if req.State.Raw.IsNull() {
+		return
+	}
 	var state SelfSignedSystemCertificateResourceConfig
 	var respObj apiobjects.Certificate
 	diags := req.State.Get(ctx, &state)
@@ -365,4 +333,75 @@ func (r *SystemCertificateSelfSignedResource) Delete(ctx context.Context, req re
 	}
 
 	resp.State.RemoveResource(ctx)
+}
+
+var createSelfSignedSystemCertificateFunc = func(r *SystemCertificateSelfSignedResource, ctx context.Context, plan SelfSignedSystemCertificateResourceConfig) (*SelfSignedSystemCertificateResourceConfig, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	var respObj apiobjects.Certificate
+
+	if plan.SubjectDN.IsNull() || plan.SubjectDN.IsUnknown() {
+		diags.AddError(
+			"Missing Subject DN",
+			"Subject DN with a non-empty Common Name (CN) is required to create a self-signed certificate.",
+		)
+		return nil, diags
+	}
+
+	dnStruct, d := expandSubjectDN(ctx, plan.SubjectDN)
+	diags.Append(d...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	subjectDN := buildSubjectDN(dnStruct)
+	planBody := map[string]any{
+		"type":      "selfsigned",
+		"keySize":   plan.KeySize.ValueInt64(),
+		"subjectDN": subjectDN,
+	}
+
+	endpoint := endpoints.GetSystemCertificateEndpoint()
+
+	// Create Self-Signed Certificate
+	d = requestAndUnmarshalFunc(r.client, &respObj, "POST", endpoint, planBody, false)
+	diags.Append(d...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	// Get Certificate Metadata
+	d = requestAndUnmarshalFunc(r.client, &respObj, "GET", endpoint, nil, true)
+	diags.Append(d...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	// Generate Binary Certificate
+	certBytes, d := getCertificateBinaryFunc(r.client, endpoint)
+	diags.Append(d...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	pemBytes := pem.EncodeToMemory(&pem.Block{
+		Type:  "CERTIFICATE",
+		Bytes: certBytes,
+	})
+
+	certDiags := validatePEMData(string(pemBytes))
+	diags.Append(certDiags...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	responseModel, d := selfSignedSystemCertificateResourceValueFromFunc(ctx, respObj, dnStruct)
+	diags.Append(d...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	responseModel.KeySize = plan.KeySize
+	responseModel.CertificatePEM = types.StringValue(string(pemBytes))
+
+	return &responseModel, diags
 }
