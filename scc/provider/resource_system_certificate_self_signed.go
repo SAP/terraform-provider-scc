@@ -295,6 +295,12 @@ func (r *SystemCertificateSelfSignedResource) Update(ctx context.Context, req re
 		return
 	}
 
+	diags = req.State.Get(ctx, &state)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	if !shouldUpdateSelfSignedCertificate(plan.KeySize, state.KeySize, plan.SubjectDN, state.SubjectDN, types.ListNull(types.StringType), types.ListNull(types.StringType)) {
 		return
 	}
