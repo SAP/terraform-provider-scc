@@ -86,8 +86,6 @@ The bundle must contain:
 - Private key
 - Full certificate chain
 
-This attribute is sensitive and forces replacement when changed.
-
 ### Optional
 
 - `key_password` (String, Sensitive) Password used to encrypt the private key within the PKCS#12 file. 

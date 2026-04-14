@@ -9,6 +9,7 @@ import (
 	apiobjects "github.com/SAP/terraform-provider-scc/internal/api/apiObjects"
 	"github.com/SAP/terraform-provider-scc/internal/api/endpoints"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -48,13 +49,20 @@ downloaded from SAP Cloud Connector.
    - file("signed_chain.pem")
    - or by directly pasting the PEM-encoded chain in the configuration.
 
+**Behavior:**
+- This resource supports **in-place certificate rotation**.
+- Updating the signed_chain will **upload a new certificate**, replacing the existing certificate without deleting it.
+- This avoids downtime and aligns with the Cloud Connector certificate lifecycle (CSR → sign → upload).
+
+**Renewal Note:**
+- To renew a certificate, a **new CSR must be generated** from SAP Cloud Connector.
+- The signed certificate must correspond to the **most recently generated CSR**, otherwise the upload will fail.
 
 **Notes:**
 - Cloud Connector accepts **only the latest CSR**
 - Certificate must match the CSR's public key and subject.
 - Chain must be PEM-encoded.
 - On deleting the system certificate resource, the certificate is removed from the SAP Cloud Connector, and any existing connections that rely on that certificate will be disrupted until a new certificate is uploaded using a new CSR.
-- Any change to signed_chain forces replacement since SAP Cloud Connector supports only one system certificate.
 
 __Further documentation:__
 <https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/system-certificate-apis#upload-a-signed-certificate-chain-as-system-certificate-(master-only)>`,
@@ -77,7 +85,6 @@ The provider validates PEM format before uploading.`,
 					stringvalidator.LengthAtLeast(1),
 				},
 				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
 					stringplanmodifier.UseStateForUnknown(),
 				},
 			},
@@ -175,65 +182,19 @@ func (r *SystemCertificateSignedChainResource) Configure(ctx context.Context, re
 
 func (r *SystemCertificateSignedChainResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var plan SignedChainSystemCertificateResourceConfig
-	var respObj apiobjects.Certificate
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	if !plan.SignedChain.IsNull() && !plan.SignedChain.IsUnknown() {
-		certDiags := validatePEMChainFunc(plan.SignedChain.ValueString())
-		resp.Diagnostics.Append(certDiags...)
-		if resp.Diagnostics.HasError() {
-			return
-		}
-	}
-
-	endpoint := endpoints.GetSystemCertificateEndpoint()
-
-	// Upload Signed Certificate Chain
-	diags = uploadSignedChainFunc(r.client, endpoint, plan.SignedChain.ValueString())
+	model, diags := createSignedChainSystemCertificateFunc(r, ctx, plan.SignedChain.ValueString())
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	// Get Certificate Metadata
-	diags = requestAndUnmarshalFunc(r.client, &respObj, "GET", endpoint, nil, true)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	// Generate Binary Certificate
-	certBytes, diags := getCertificateBinaryFunc(r.client, endpoint)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	pemBytes := pem.EncodeToMemory(&pem.Block{
-		Type:  "CERTIFICATE",
-		Bytes: certBytes,
-	})
-
-	certDiags := validatePEMData(string(pemBytes))
-	resp.Diagnostics.Append(certDiags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	responseModel, diags := signedChainSystemCertificateResourceValueFromFunc(ctx, respObj)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	responseModel.SignedChain = plan.SignedChain
-	responseModel.CertificatePEM = types.StringValue(string(pemBytes))
-
-	diags = resp.State.Set(ctx, responseModel)
+	diags = resp.State.Set(ctx, model)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -298,10 +259,35 @@ func (r *SystemCertificateSignedChainResource) Read(ctx context.Context, req res
 }
 
 func (r *SystemCertificateSignedChainResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	resp.Diagnostics.AddError(
-		"Update Not Supported",
-		"Changing a signed system certificate requires resource replacement.",
-	)
+	var plan, state SignedChainSystemCertificateResourceConfig
+	diags := req.Plan.Get(ctx, &plan)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	diags = req.State.Get(ctx, &state)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// If the signed chain is not changing, there is no need to update
+	if !shouldUpdateSignedChain(plan.SignedChain, state.SignedChain) {
+		return
+	}
+
+	model, diags := createSignedChainSystemCertificateFunc(r, ctx, plan.SignedChain.ValueString())
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	diags = resp.State.Set(ctx, model)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 }
 
 func (r *SystemCertificateSignedChainResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -327,4 +313,59 @@ func (r *SystemCertificateSignedChainResource) Delete(ctx context.Context, req r
 	}
 
 	resp.State.RemoveResource(ctx)
+}
+
+var createSignedChainSystemCertificateFunc = func(r *SystemCertificateSignedChainResource, ctx context.Context, signedChain string) (*SignedChainSystemCertificateResourceConfig, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	var respObj apiobjects.Certificate
+
+	if signedChain != "" {
+		certDiags := validatePEMChainFunc(signedChain)
+		diags.Append(certDiags...)
+		if diags.HasError() {
+			return nil, diags
+		}
+	}
+
+	endpoint := endpoints.GetSystemCertificateEndpoint()
+
+	d := uploadSignedChainFunc(r.client, endpoint, signedChain)
+	diags.Append(d...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	d = requestAndUnmarshalFunc(r.client, &respObj, "GET", endpoint, nil, true)
+	diags.Append(d...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	certBytes, d := getCertificateBinaryFunc(r.client, endpoint)
+	diags.Append(d...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	pemBytes := pem.EncodeToMemory(&pem.Block{
+		Type:  "CERTIFICATE",
+		Bytes: certBytes,
+	})
+
+	certDiags := validatePEMData(string(pemBytes))
+	diags.Append(certDiags...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	responseModel, d := signedChainSystemCertificateResourceValueFromFunc(ctx, respObj)
+	diags.Append(d...)
+	if diags.HasError() {
+		return nil, diags
+	}
+
+	responseModel.SignedChain = types.StringValue(signedChain)
+	responseModel.CertificatePEM = types.StringValue(string(pemBytes))
+
+	return &responseModel, diags
 }

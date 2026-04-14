@@ -85,13 +85,28 @@ func TestSystemCertificateSignedChain_Create_InvalidPEM(t *testing.T) {
 	}
 }
 
-func TestSystemCertificateSignedChain_Update(t *testing.T) {
-	r := NewSystemCertificateSignedChainResource()
+func TestSystemCertificateSignedChain_Update_NoChange(t *testing.T) {
+	ctx := context.Background()
+
+	r := NewSystemCertificateSignedChainResource().(*SystemCertificateSignedChainResource)
+
+	plan := buildSignedChainPlan(ctx, r, "same-cert", false)
+	state := buildSignedChainState(ctx, r, "same-cert")
+
+	req := resource.UpdateRequest{
+		Plan:  plan,
+		State: state,
+	}
 
 	resp := &resource.UpdateResponse{}
-	r.Update(context.Background(), resource.UpdateRequest{}, resp)
 
-	assert.True(t, resp.Diagnostics.HasError())
+	r.Update(ctx, req, resp)
+
+	for _, d := range resp.Diagnostics {
+		t.Logf("Diagnostic: %s - %s", d.Summary(), d.Detail())
+	}
+
+	assert.False(t, resp.Diagnostics.HasError())
 }
 
 func TestSystemCertificateSignedChain_Delete(t *testing.T) {
@@ -540,4 +555,55 @@ func TestSystemCertificateSignedChain_Create_Success(t *testing.T) {
 	}
 
 	assert.False(t, resp.Diagnostics.HasError())
+}
+
+func buildSignedChainState(ctx context.Context, r *SystemCertificateSignedChainResource, chain string) tfsdk.State {
+	schemaResp := &resource.SchemaResponse{}
+	r.Schema(ctx, resource.SchemaRequest{}, schemaResp)
+
+	subjectDNType := tftypes.Object{
+		AttributeTypes: map[string]tftypes.Type{
+			"c":     tftypes.String,
+			"cn":    tftypes.String,
+			"email": tftypes.String,
+			"l":     tftypes.String,
+			"o":     tftypes.String,
+			"ou":    tftypes.String,
+			"st":    tftypes.String,
+		},
+	}
+
+	return tfsdk.State{
+		Schema: schemaResp.Schema,
+		Raw: tftypes.NewValue(
+			tftypes.Object{
+				AttributeTypes: map[string]tftypes.Type{
+					"signed_chain":    tftypes.String,
+					"certificate_pem": tftypes.String,
+					"issuer":          tftypes.String,
+					"serial_number":   tftypes.String,
+					"subject_dn":      subjectDNType,
+					"valid_from":      tftypes.String,
+					"valid_to":        tftypes.String,
+				},
+			},
+			map[string]tftypes.Value{
+				"signed_chain":    tftypes.NewValue(tftypes.String, chain),
+				"certificate_pem": tftypes.NewValue(tftypes.String, ""),
+				"issuer":          tftypes.NewValue(tftypes.String, ""),
+				"serial_number":   tftypes.NewValue(tftypes.String, ""),
+				"subject_dn": tftypes.NewValue(subjectDNType, map[string]tftypes.Value{
+					"c":     tftypes.NewValue(tftypes.String, ""),
+					"cn":    tftypes.NewValue(tftypes.String, ""),
+					"email": tftypes.NewValue(tftypes.String, ""),
+					"l":     tftypes.NewValue(tftypes.String, ""),
+					"o":     tftypes.NewValue(tftypes.String, ""),
+					"ou":    tftypes.NewValue(tftypes.String, ""),
+					"st":    tftypes.NewValue(tftypes.String, ""),
+				}),
+				"valid_from": tftypes.NewValue(tftypes.String, ""),
+				"valid_to":   tftypes.NewValue(tftypes.String, ""),
+			},
+		),
+	}
 }

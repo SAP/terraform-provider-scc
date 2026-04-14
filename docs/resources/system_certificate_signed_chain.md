@@ -10,8 +10,12 @@ description: |-
   Generate a Certificate Signing Request (CSR) from the SAP Cloud Connector.Submit the CSR to a trusted Certificate Authority (CA) to obtain a signed certificate chain.Create certificate chain in the order:
   leaf certificate -> intermediate CA (if applicable) -> root CA.Provide the chain to Terraform using either:
   file("signed_chain.pem")or by directly pasting the PEM-encoded chain in the configuration.
+  Behavior:
+  This resource supports in-place certificate rotation.Updating the signed_chain will upload a new certificate, replacing the existing certificate without deleting it.This avoids downtime and aligns with the Cloud Connector certificate lifecycle (CSR → sign → upload).
+  Renewal Note:
+  To renew a certificate, a new CSR must be generated from SAP Cloud Connector.The signed certificate must correspond to the most recently generated CSR, otherwise the upload will fail.
   Notes:
-  Cloud Connector accepts only the latest CSRCertificate must match the CSR's public key and subject.Chain must be PEM-encoded.On deleting the system certificate resource, the certificate is removed from the SAP Cloud Connector, and any existing connections that rely on that certificate will be disrupted until a new certificate is uploaded using a new CSR.Any change to signed_chain forces replacement since SAP Cloud Connector supports only one system certificate.
+  Cloud Connector accepts only the latest CSRCertificate must match the CSR's public key and subject.Chain must be PEM-encoded.On deleting the system certificate resource, the certificate is removed from the SAP Cloud Connector, and any existing connections that rely on that certificate will be disrupted until a new certificate is uploaded using a new CSR.
   Further documentation:
   https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/system-certificate-apis#upload-a-signed-certificate-chain-as-system-certificate-(master-only)
 ---
@@ -33,13 +37,20 @@ downloaded from SAP Cloud Connector.
    - file("signed_chain.pem")
    - or by directly pasting the PEM-encoded chain in the configuration.
 
+**Behavior:**
+- This resource supports **in-place certificate rotation**.
+- Updating the signed_chain will **upload a new certificate**, replacing the existing certificate without deleting it.
+- This avoids downtime and aligns with the Cloud Connector certificate lifecycle (CSR → sign → upload).
+
+**Renewal Note:**
+- To renew a certificate, a **new CSR must be generated** from SAP Cloud Connector.
+- The signed certificate must correspond to the **most recently generated CSR**, otherwise the upload will fail.
 
 **Notes:**
 - Cloud Connector accepts **only the latest CSR**
 - Certificate must match the CSR's public key and subject.
 - Chain must be PEM-encoded.
 - On deleting the system certificate resource, the certificate is removed from the SAP Cloud Connector, and any existing connections that rely on that certificate will be disrupted until a new certificate is uploaded using a new CSR.
-- Any change to signed_chain forces replacement since SAP Cloud Connector supports only one system certificate.
 
 __Further documentation:__
 <https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/system-certificate-apis#upload-a-signed-certificate-chain-as-system-certificate-(master-only)>

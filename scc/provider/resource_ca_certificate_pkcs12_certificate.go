@@ -79,9 +79,7 @@ This value may be provided as:
 The bundle must contain:
 - Leaf certificate
 - Private key
-- Full certificate chain
-
-This attribute is sensitive and forces replacement when changed.`,
+- Full certificate chain`,
 				Required:  true,
 				Sensitive: true,
 				Validators: []validator.String{
