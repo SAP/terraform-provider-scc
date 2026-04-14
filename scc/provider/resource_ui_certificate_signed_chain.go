@@ -275,6 +275,7 @@ func (r *UICertificateSignedChainResource) Update(ctx context.Context, req resou
 	}
 
 	model, diags := createSignedChainUICertificateFunc(r, ctx, plan.SignedChain.ValueString())
+	resp.Diagnostics.Append(diags...)
 	if diags.HasError() {
 		return
 	}
