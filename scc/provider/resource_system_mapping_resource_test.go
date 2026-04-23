@@ -67,14 +67,15 @@ func TestResourceSystemMappingResource(t *testing.T) {
 					},
 				},
 				// Update with mismatched configuration should throw error
-				{
+				/*{
 					Config: providerConfig(user) + ResourceSystemMappingResource("scc_smr", "cf.us10.hana.ondemand.com", subaccount, virtualHost, virtualPort, "/", "updated resource", false),
 					ConfigPlanChecks: resource.ConfigPlanChecks{
 						PreApply: []plancheck.PlanCheck{
 							plancheck.ExpectResourceAction("scc_system_mapping_resource.scc_smr", plancheck.ResourceActionDestroyBeforeCreate),
 						},
 					},
-				},
+					ExpectError: regexp.MustCompile(`Error: API Error`),
+				},*/
 
 				{
 					ResourceName:                         "scc_system_mapping_resource.scc_smr",
@@ -99,6 +100,47 @@ func TestResourceSystemMappingResource(t *testing.T) {
 					ImportState:   true,
 					ImportStateId: "cf.eu12.hana.ondemand.com,9f7390c8-f201-4b2d-b751-04c0a63c2671,testtfvirtualtesting,90,/,extra",
 					ExpectError:   regexp.MustCompile(`(?is)Expected import identifier with format:.*url_path.*Got:`),
+				},
+			},
+		})
+	})
+
+	t.Run("error path - requires replace", func(t *testing.T) {
+		rec, user := setupVCR(t, "fixtures/resource_system_mapping_resource.requires_replace")
+		defer stopQuietly(rec)
+
+		resource.Test(t, resource.TestCase{
+			IsUnitTest:               true,
+			ProtoV6ProviderFactories: getTestProviders(rec.GetDefaultClient()),
+			Steps: []resource.TestStep{
+				{
+					Config: providerConfig(user) + ResourceSystemMappingResource("scc_smr", regionHost, subaccount, virtualHost, virtualPort, "/", "create resource", true),
+					Check: resource.ComposeAggregateTestCheckFunc(
+						resource.TestCheckResourceAttr("scc_system_mapping_resource.scc_smr", "description", "create resource"),
+						resource.TestCheckResourceAttr("scc_system_mapping_resource.scc_smr", "enabled", "true"),
+					),
+					ConfigStateChecks: []statecheck.StateCheck{
+						statecheck.ExpectIdentity(
+							"scc_system_mapping_resource.scc_smr",
+							map[string]knownvalue.Check{
+								"region_host":  knownvalue.StringExact(regionHost),
+								"subaccount":   knownvalue.StringRegexp(regexpValidUUID),
+								"virtual_host": knownvalue.StringExact(virtualHost),
+								"virtual_port": knownvalue.StringExact(virtualPort),
+								"url_path":     knownvalue.StringExact("/"),
+							},
+						),
+					},
+				},
+				// Update with mismatched configuration should require replace
+				{
+					Config: providerConfig(user) + ResourceSystemMappingResource("scc_smr", "cf.us10.hana.ondemand.com", subaccount, virtualHost, virtualPort, "/", "create resource", true),
+					ConfigPlanChecks: resource.ConfigPlanChecks{
+						PreApply: []plancheck.PlanCheck{
+							plancheck.ExpectResourceAction("scc_system_mapping_resource.scc_smr", plancheck.ResourceActionDestroyBeforeCreate),
+						},
+					},
+					ExpectError: regexp.MustCompile(`Error: API Error`),
 				},
 			},
 		})
