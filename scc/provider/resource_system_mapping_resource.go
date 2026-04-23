@@ -57,6 +57,7 @@ __Further documentation:__
 				MarkdownDescription: "Region Host Name.",
 				Required:            true,
 				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
@@ -67,6 +68,7 @@ __Further documentation:__
 					uuidvalidator.ValidUUID(),
 				},
 				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
@@ -74,6 +76,7 @@ __Further documentation:__
 				MarkdownDescription: "Virtual host used on the cloud side.",
 				Required:            true,
 				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
@@ -81,6 +84,7 @@ __Further documentation:__
 				MarkdownDescription: "Virtual port used on the cloud side.",
 				Required:            true,
 				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
@@ -88,6 +92,7 @@ __Further documentation:__
 				MarkdownDescription: "The resource itself, which, depending on the owning system mapping, is either a URL path (or the leading section of it), or a RFC function name.",
 				Required:            true,
 				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
 					stringplanmodifier.RequiresReplace(),
 				},
 			},
