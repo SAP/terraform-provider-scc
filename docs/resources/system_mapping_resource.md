@@ -13,7 +13,7 @@ description: |-
 # scc_system_mapping_resource (Resource)
 
 Cloud Connector System Mapping Resource Resource.
-				
+
 __Tips:__
 * You must be assigned to the following roles:
 	* Administrator
@@ -52,7 +52,7 @@ resource "scc_system_mapping_resource" "scc_smr" {
 - `description` (String) Description of the system mapping resource.
 - `enabled` (Boolean) Boolean flag indicating whether the resource is enabled.
 - `path_only` (Boolean) Boolean flag determining whether access is granted only if the requested resource is an exact match.
-				
+
 __UI Equivalent:__ *Access Policy*
 
 - true → *Path Only (Sub-Paths Are Excluded)*
