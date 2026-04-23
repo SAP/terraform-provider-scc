@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/knownvalue"
+	"github.com/hashicorp/terraform-plugin-testing/plancheck"
 	"github.com/hashicorp/terraform-plugin-testing/statecheck"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
@@ -45,11 +46,6 @@ func TestResourceSystemMappingResource(t *testing.T) {
 						),
 					},
 				},
-				// Update with mismatched configuration should throw error
-				{
-					Config:      providerConfig(user) + ResourceSystemMappingResource("scc_smr", "cf.us10.hana.ondemand.com", subaccount, virtualHost, virtualPort, "/", "create resource", true),
-					ExpectError: regexp.MustCompile(`(?is)error updating the cloud connector system mapping resource.*mismatched\s+configuration values`),
-				},
 				{
 					// 🚀 This is the update step
 					Config: providerConfig(user) + ResourceSystemMappingResource("scc_smr", regionHost, subaccount, virtualHost, virtualPort, "/", "updated resource", false),
@@ -70,6 +66,16 @@ func TestResourceSystemMappingResource(t *testing.T) {
 						),
 					},
 				},
+				// Update with mismatched configuration should throw error
+				{
+					Config: providerConfig(user) + ResourceSystemMappingResource("scc_smr", "cf.us10.hana.ondemand.com", subaccount, virtualHost, virtualPort, "/", "updated resource", false),
+					ConfigPlanChecks: resource.ConfigPlanChecks{
+						PreApply: []plancheck.PlanCheck{
+							plancheck.ExpectResourceAction("scc_system_mapping_resource.scc_smr", plancheck.ResourceActionDestroyBeforeCreate),
+						},
+					},
+				},
+
 				{
 					ResourceName:                         "scc_system_mapping_resource.scc_smr",
 					ImportState:                          true,
