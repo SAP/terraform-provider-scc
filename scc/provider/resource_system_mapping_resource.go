@@ -13,6 +13,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
@@ -42,7 +44,7 @@ func (r *SystemMappingResourceResource) Metadata(ctx context.Context, req resour
 func (r *SystemMappingResourceResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: `Cloud Connector System Mapping Resource Resource.
-				
+
 __Tips:__
 * You must be assigned to the following roles:
 	* Administrator
@@ -54,6 +56,10 @@ __Further documentation:__
 			"region_host": schema.StringAttribute{
 				MarkdownDescription: "Region Host Name.",
 				Required:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 			"subaccount": schema.StringAttribute{
 				MarkdownDescription: "The ID of the subaccount.",
@@ -61,18 +67,34 @@ __Further documentation:__
 				Validators: []validator.String{
 					uuidvalidator.ValidUUID(),
 				},
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 			"virtual_host": schema.StringAttribute{
 				MarkdownDescription: "Virtual host used on the cloud side.",
 				Required:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 			"virtual_port": schema.StringAttribute{
 				MarkdownDescription: "Virtual port used on the cloud side.",
 				Required:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 			"url_path": schema.StringAttribute{
 				MarkdownDescription: "The resource itself, which, depending on the owning system mapping, is either a URL path (or the leading section of it), or a RFC function name.",
 				Required:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.UseStateForUnknown(),
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 			"enabled": schema.BoolAttribute{
 				MarkdownDescription: "Boolean flag indicating whether the resource is enabled.",
@@ -81,7 +103,7 @@ __Further documentation:__
 			},
 			"path_only": schema.BoolAttribute{
 				MarkdownDescription: `Boolean flag determining whether access is granted only if the requested resource is an exact match.
-				
+
 __UI Equivalent:__ *Access Policy*
 
 - true → *Path Only (Sub-Paths Are Excluded)*

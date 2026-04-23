@@ -19,8 +19,6 @@ interactions:
                 - '*/*'
             Authorization:
                 - redacted
-            Content-Type:
-                - application/json
         url: https://redacted.instance.url/api/v1/connector/version
         method: GET
       response:
@@ -40,9 +38,9 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 28 Jan 2026 05:10:13 GMT
+                - Thu, 23 Apr 2026 07:18:47 GMT
             Server:
-                - nginx/1.27.4
+                - nginx/1.27.5
             Set-Cookie:
                 - redacted
             Strict-Transport-Security:
@@ -50,10 +48,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 7a398555-8618-4a9c-7a2a-b312710d0fe6
+                - e8fdb857-8a83-4c53-5901-d2a502f4d36d
         status: 200 OK
         code: 200
-        duration: 902.492417ms
+        duration: 166.239625ms
     - id: 1
       request:
         proto: HTTP/1.1
@@ -72,8 +70,6 @@ interactions:
                 - '*/*'
             Authorization:
                 - redacted
-            Content-Type:
-                - application/json
         url: https://redacted.instance.url/api/v1/connector/version
         method: GET
       response:
@@ -93,9 +89,9 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 28 Jan 2026 05:10:13 GMT
+                - Thu, 23 Apr 2026 07:18:47 GMT
             Server:
-                - nginx/1.27.4
+                - nginx/1.27.5
             Set-Cookie:
                 - redacted
             Strict-Transport-Security:
@@ -103,10 +99,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 71214609-470d-4604-48aa-2aeac76546fe
+                - 42e3a689-e672-43e2-44d4-096e719330a2
         status: 200 OK
         code: 200
-        duration: 252.316375ms
+        duration: 51.672333ms
     - id: 2
       request:
         proto: HTTP/1.1
@@ -144,11 +140,11 @@ interactions:
             Content-Length:
                 - "0"
             Date:
-                - Wed, 28 Jan 2026 05:10:13 GMT
+                - Thu, 23 Apr 2026 07:18:47 GMT
             Location:
                 - redacted
             Server:
-                - nginx/1.27.4
+                - nginx/1.27.5
             Set-Cookie:
                 - redacted
             Strict-Transport-Security:
@@ -156,10 +152,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 5978904e-6c0b-451f-5e61-af8e5133fde8
+                - 135c132b-4241-448a-678b-8102fe01cabe
         status: 201 Created
         code: 201
-        duration: 282.668791ms
+        duration: 164.970751ms
     - id: 3
       request:
         proto: HTTP/1.1
@@ -178,8 +174,6 @@ interactions:
                 - '*/*'
             Authorization:
                 - redacted
-            Content-Type:
-                - application/json
         url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/9f7390c8-f201-4b2d-b751-04c0a63c2671/systemMappings/testtfvirtualtesting:90/resources/-
         method: GET
       response:
@@ -188,20 +182,20 @@ interactions:
         proto_minor: 1
         transfer_encoding: []
         trailer: {}
-        content_length: 382
+        content_length: 380
         uncompressed: false
-        body: '{"id":"/","enabled":true,"exactMatchOnly":false,"websocketUpgradeAllowed":false,"creationDate":"1769577013830","description":"create resource","_links":{"self":{"href": "https://redacted.url/path"}}}'
+        body: '{"id":"/","enabled":true,"exactMatchOnly":false,"websocketUpgradeAllowed":false,"creationDate":"1776928727716","description":"create resource","_links":{"self":{"href": "https://redacted.url/path"}}}'
         headers:
             Cache-Control:
                 - no-store
             Content-Length:
-                - "382"
+                - "380"
             Content-Type:
                 - application/json
             Date:
-                - Wed, 28 Jan 2026 05:10:14 GMT
+                - Thu, 23 Apr 2026 07:18:47 GMT
             Server:
-                - nginx/1.27.4
+                - nginx/1.27.5
             Set-Cookie:
                 - redacted
             Strict-Transport-Security:
@@ -209,10 +203,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 17f7932d-76c0-4d5a-664a-cce17729373e
+                - 490ebdb8-c6e8-48a6-76db-5d289ab85b45
         status: 200 OK
         code: 200
-        duration: 258.249584ms
+        duration: 48.842583ms
     - id: 4
       request:
         proto: HTTP/1.1
@@ -231,8 +225,6 @@ interactions:
                 - '*/*'
             Authorization:
                 - redacted
-            Content-Type:
-                - application/json
         url: https://redacted.instance.url/api/v1/connector/version
         method: GET
       response:
@@ -252,9 +244,9 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 28 Jan 2026 05:10:14 GMT
+                - Thu, 23 Apr 2026 07:18:48 GMT
             Server:
-                - nginx/1.27.4
+                - nginx/1.27.5
             Set-Cookie:
                 - redacted
             Strict-Transport-Security:
@@ -262,10 +254,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 30dc7bb8-1ec2-4ec2-5d48-d57bb9e4dbb4
+                - 8b643cb1-73db-4c9e-6bc9-400f31f352b7
         status: 200 OK
         code: 200
-        duration: 335.827709ms
+        duration: 45.112125ms
     - id: 5
       request:
         proto: HTTP/1.1
@@ -284,8 +276,6 @@ interactions:
                 - '*/*'
             Authorization:
                 - redacted
-            Content-Type:
-                - application/json
         url: https://redacted.instance.url/api/v1/connector/version
         method: GET
       response:
@@ -305,9 +295,9 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 28 Jan 2026 05:10:14 GMT
+                - Thu, 23 Apr 2026 07:18:48 GMT
             Server:
-                - nginx/1.27.4
+                - nginx/1.27.5
             Set-Cookie:
                 - redacted
             Strict-Transport-Security:
@@ -315,10 +305,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 8dfb5271-8f31-49c2-6459-22831e606640
+                - a5fa4788-fd2d-472d-43dc-c02e1eb5ab91
         status: 200 OK
         code: 200
-        duration: 266.501917ms
+        duration: 44.797125ms
     - id: 6
       request:
         proto: HTTP/1.1
@@ -337,8 +327,6 @@ interactions:
                 - '*/*'
             Authorization:
                 - redacted
-            Content-Type:
-                - application/json
         url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/9f7390c8-f201-4b2d-b751-04c0a63c2671/systemMappings/testtfvirtualtesting:90/resources/-
         method: GET
       response:
@@ -347,20 +335,20 @@ interactions:
         proto_minor: 1
         transfer_encoding: []
         trailer: {}
-        content_length: 382
+        content_length: 380
         uncompressed: false
-        body: '{"id":"/","enabled":true,"exactMatchOnly":false,"websocketUpgradeAllowed":false,"creationDate":"1769577013830","description":"create resource","_links":{"self":{"href": "https://redacted.url/path"}}}'
+        body: '{"id":"/","enabled":true,"exactMatchOnly":false,"websocketUpgradeAllowed":false,"creationDate":"1776928727716","description":"create resource","_links":{"self":{"href": "https://redacted.url/path"}}}'
         headers:
             Cache-Control:
                 - no-store
             Content-Length:
-                - "382"
+                - "380"
             Content-Type:
                 - application/json
             Date:
-                - Wed, 28 Jan 2026 05:10:15 GMT
+                - Thu, 23 Apr 2026 07:18:48 GMT
             Server:
-                - nginx/1.27.4
+                - nginx/1.27.5
             Set-Cookie:
                 - redacted
             Strict-Transport-Security:
@@ -368,10 +356,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 0bc020b2-9075-4556-6522-841dcda16256
+                - b905253e-0f6a-40f0-641e-ee1d6e641a31
         status: 200 OK
         code: 200
-        duration: 275.253792ms
+        duration: 50.821ms
     - id: 7
       request:
         proto: HTTP/1.1
@@ -390,8 +378,6 @@ interactions:
                 - '*/*'
             Authorization:
                 - redacted
-            Content-Type:
-                - application/json
         url: https://redacted.instance.url/api/v1/connector/version
         method: GET
       response:
@@ -411,9 +397,9 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 28 Jan 2026 05:10:15 GMT
+                - Thu, 23 Apr 2026 07:18:48 GMT
             Server:
-                - nginx/1.27.4
+                - nginx/1.27.5
             Set-Cookie:
                 - redacted
             Strict-Transport-Security:
@@ -421,10 +407,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 9be50fde-5203-4d9a-4702-3ab036cdd919
+                - 78eb4e5f-e89b-40aa-49d8-363e1ca8b0fb
         status: 200 OK
         code: 200
-        duration: 278.073417ms
+        duration: 49.98325ms
     - id: 8
       request:
         proto: HTTP/1.1
@@ -443,8 +429,6 @@ interactions:
                 - '*/*'
             Authorization:
                 - redacted
-            Content-Type:
-                - application/json
         url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/9f7390c8-f201-4b2d-b751-04c0a63c2671/systemMappings/testtfvirtualtesting:90/resources/-
         method: GET
       response:
@@ -453,20 +437,20 @@ interactions:
         proto_minor: 1
         transfer_encoding: []
         trailer: {}
-        content_length: 382
+        content_length: 380
         uncompressed: false
-        body: '{"id":"/","enabled":true,"exactMatchOnly":false,"websocketUpgradeAllowed":false,"creationDate":"1769577013830","description":"create resource","_links":{"self":{"href": "https://redacted.url/path"}}}'
+        body: '{"id":"/","enabled":true,"exactMatchOnly":false,"websocketUpgradeAllowed":false,"creationDate":"1776928727716","description":"create resource","_links":{"self":{"href": "https://redacted.url/path"}}}'
         headers:
             Cache-Control:
                 - no-store
             Content-Length:
-                - "382"
+                - "380"
             Content-Type:
                 - application/json
             Date:
-                - Wed, 28 Jan 2026 05:10:15 GMT
+                - Thu, 23 Apr 2026 07:18:48 GMT
             Server:
-                - nginx/1.27.4
+                - nginx/1.27.5
             Set-Cookie:
                 - redacted
             Strict-Transport-Security:
@@ -474,10 +458,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 498a7846-04f0-4e4a-6a37-e072e6aa91e4
+                - 5451167b-3cbc-4b8a-75ef-7d26235927e7
         status: 200 OK
         code: 200
-        duration: 458.181251ms
+        duration: 49.128125ms
     - id: 9
       request:
         proto: HTTP/1.1
@@ -496,8 +480,6 @@ interactions:
                 - '*/*'
             Authorization:
                 - redacted
-            Content-Type:
-                - application/json
         url: https://redacted.instance.url/api/v1/connector/version
         method: GET
       response:
@@ -517,9 +499,9 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 28 Jan 2026 05:10:16 GMT
+                - Thu, 23 Apr 2026 07:18:48 GMT
             Server:
-                - nginx/1.27.4
+                - nginx/1.27.5
             Set-Cookie:
                 - redacted
             Strict-Transport-Security:
@@ -527,170 +509,11 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 6563d90f-8780-4e88-4ae3-6ed68fe556c4
+                - 1a71ddab-9449-44d0-699b-43a391a503ed
         status: 200 OK
         code: 200
-        duration: 342.93975ms
+        duration: 49.464542ms
     - id: 10
-      request:
-        proto: HTTP/1.1
-        proto_major: 1
-        proto_minor: 1
-        content_length: 0
-        transfer_encoding: []
-        trailer: {}
-        host: https://redacted.instance.url
-        remote_addr: ""
-        request_uri: ""
-        body: ""
-        form: {}
-        headers:
-            Accept:
-                - '*/*'
-            Authorization:
-                - redacted
-            Content-Type:
-                - application/json
-        url: https://redacted.instance.url/api/v1/connector/version
-        method: GET
-      response:
-        proto: HTTP/1.1
-        proto_major: 1
-        proto_minor: 1
-        transfer_encoding: []
-        trailer: {}
-        content_length: 20
-        uncompressed: false
-        body: '{"version":"2.18.2"}'
-        headers:
-            Cache-Control:
-                - max-age=3600
-            Content-Length:
-                - "20"
-            Content-Type:
-                - application/json
-            Date:
-                - Wed, 28 Jan 2026 05:10:16 GMT
-            Server:
-                - nginx/1.27.4
-            Set-Cookie:
-                - redacted
-            Strict-Transport-Security:
-                - max-age=31536000; includeSubDomains; preload;
-            X-Csrf-Token:
-                - redacted
-            X-Vcap-Request-Id:
-                - d5545378-cdee-4726-6450-85fda3c0921d
-        status: 200 OK
-        code: 200
-        duration: 255.258333ms
-    - id: 11
-      request:
-        proto: HTTP/1.1
-        proto_major: 1
-        proto_minor: 1
-        content_length: 0
-        transfer_encoding: []
-        trailer: {}
-        host: https://redacted.instance.url
-        remote_addr: ""
-        request_uri: ""
-        body: ""
-        form: {}
-        headers:
-            Accept:
-                - '*/*'
-            Authorization:
-                - redacted
-            Content-Type:
-                - application/json
-        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/9f7390c8-f201-4b2d-b751-04c0a63c2671/systemMappings/testtfvirtualtesting:90/resources/-
-        method: GET
-      response:
-        proto: HTTP/1.1
-        proto_major: 1
-        proto_minor: 1
-        transfer_encoding: []
-        trailer: {}
-        content_length: 382
-        uncompressed: false
-        body: '{"id":"/","enabled":true,"exactMatchOnly":false,"websocketUpgradeAllowed":false,"creationDate":"1769577013830","description":"create resource","_links":{"self":{"href": "https://redacted.url/path"}}}'
-        headers:
-            Cache-Control:
-                - no-store
-            Content-Length:
-                - "382"
-            Content-Type:
-                - application/json
-            Date:
-                - Wed, 28 Jan 2026 05:10:16 GMT
-            Server:
-                - nginx/1.27.4
-            Set-Cookie:
-                - redacted
-            Strict-Transport-Security:
-                - max-age=31536000; includeSubDomains; preload;
-            X-Csrf-Token:
-                - redacted
-            X-Vcap-Request-Id:
-                - 943954d7-1a42-4ed1-4a3c-73c6645f694f
-        status: 200 OK
-        code: 200
-        duration: 249.247334ms
-    - id: 12
-      request:
-        proto: HTTP/1.1
-        proto_major: 1
-        proto_minor: 1
-        content_length: 0
-        transfer_encoding: []
-        trailer: {}
-        host: https://redacted.instance.url
-        remote_addr: ""
-        request_uri: ""
-        body: ""
-        form: {}
-        headers:
-            Accept:
-                - '*/*'
-            Authorization:
-                - redacted
-            Content-Type:
-                - application/json
-        url: https://redacted.instance.url/api/v1/connector/version
-        method: GET
-      response:
-        proto: HTTP/1.1
-        proto_major: 1
-        proto_minor: 1
-        transfer_encoding: []
-        trailer: {}
-        content_length: 20
-        uncompressed: false
-        body: '{"version":"2.18.2"}'
-        headers:
-            Cache-Control:
-                - max-age=3600
-            Content-Length:
-                - "20"
-            Content-Type:
-                - application/json
-            Date:
-                - Wed, 28 Jan 2026 05:10:17 GMT
-            Server:
-                - nginx/1.27.4
-            Set-Cookie:
-                - redacted
-            Strict-Transport-Security:
-                - max-age=31536000; includeSubDomains; preload;
-            X-Csrf-Token:
-                - redacted
-            X-Vcap-Request-Id:
-                - ca0c912c-e2d4-48c8-7cdd-35b31be06ae2
-        status: 200 OK
-        code: 200
-        duration: 251.470125ms
-    - id: 13
       request:
         proto: HTTP/1.1
         proto_major: 1
@@ -725,9 +548,9 @@ interactions:
             Cache-Control:
                 - no-store
             Date:
-                - Wed, 28 Jan 2026 05:10:17 GMT
+                - Thu, 23 Apr 2026 07:18:48 GMT
             Server:
-                - nginx/1.27.4
+                - nginx/1.27.5
             Set-Cookie:
                 - redacted
             Strict-Transport-Security:
@@ -735,10 +558,163 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 11384e80-c940-4c96-789d-86009de06a10
+                - 6398b9fa-484e-4235-4440-9b25c94b4bb5
         status: 204 No Content
         code: 204
-        duration: 285.418834ms
+        duration: 123.134584ms
+    - id: 11
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: https://redacted.instance.url
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/9f7390c8-f201-4b2d-b751-04c0a63c2671/systemMappings/testtfvirtualtesting:90/resources/-
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 382
+        uncompressed: false
+        body: '{"id":"/","enabled":false,"exactMatchOnly":false,"websocketUpgradeAllowed":false,"creationDate":"1776928727716","description":"updated resource","_links":{"self":{"href": "https://redacted.url/path"}}}'
+        headers:
+            Cache-Control:
+                - no-store
+            Content-Length:
+                - "382"
+            Content-Type:
+                - application/json
+            Date:
+                - Thu, 23 Apr 2026 07:18:48 GMT
+            Server:
+                - nginx/1.27.5
+            Set-Cookie:
+                - redacted
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            X-Csrf-Token:
+                - redacted
+            X-Vcap-Request-Id:
+                - 004c7ed7-baf7-4161-4a4d-75e23b344422
+        status: 200 OK
+        code: 200
+        duration: 47.693958ms
+    - id: 12
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: https://redacted.instance.url
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+        url: https://redacted.instance.url/api/v1/connector/version
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 20
+        uncompressed: false
+        body: '{"version":"2.18.2"}'
+        headers:
+            Cache-Control:
+                - max-age=3600
+            Content-Length:
+                - "20"
+            Content-Type:
+                - application/json
+            Date:
+                - Thu, 23 Apr 2026 07:18:48 GMT
+            Server:
+                - nginx/1.27.5
+            Set-Cookie:
+                - redacted
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            X-Csrf-Token:
+                - redacted
+            X-Vcap-Request-Id:
+                - 7fc5b6c3-2e37-4e82-73d4-cc712e6aabee
+        status: 200 OK
+        code: 200
+        duration: 57.149458ms
+    - id: 13
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: https://redacted.instance.url
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+        url: https://redacted.instance.url/api/v1/connector/version
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 20
+        uncompressed: false
+        body: '{"version":"2.18.2"}'
+        headers:
+            Cache-Control:
+                - max-age=3600
+            Content-Length:
+                - "20"
+            Content-Type:
+                - application/json
+            Date:
+                - Thu, 23 Apr 2026 07:18:48 GMT
+            Server:
+                - nginx/1.27.5
+            Set-Cookie:
+                - redacted
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            X-Csrf-Token:
+                - redacted
+            X-Vcap-Request-Id:
+                - 1ca2a0ea-5000-41f5-78a8-fac58a57fc44
+        status: 200 OK
+        code: 200
+        duration: 48.57675ms
     - id: 14
       request:
         proto: HTTP/1.1
@@ -757,8 +733,6 @@ interactions:
                 - '*/*'
             Authorization:
                 - redacted
-            Content-Type:
-                - application/json
         url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/9f7390c8-f201-4b2d-b751-04c0a63c2671/systemMappings/testtfvirtualtesting:90/resources/-
         method: GET
       response:
@@ -767,20 +741,20 @@ interactions:
         proto_minor: 1
         transfer_encoding: []
         trailer: {}
-        content_length: 384
+        content_length: 382
         uncompressed: false
-        body: '{"id":"/","enabled":false,"exactMatchOnly":false,"websocketUpgradeAllowed":false,"creationDate":"1769577013830","description":"updated resource","_links":{"self":{"href": "https://redacted.url/path"}}}'
+        body: '{"id":"/","enabled":false,"exactMatchOnly":false,"websocketUpgradeAllowed":false,"creationDate":"1776928727716","description":"updated resource","_links":{"self":{"href": "https://redacted.url/path"}}}'
         headers:
             Cache-Control:
                 - no-store
             Content-Length:
-                - "384"
+                - "382"
             Content-Type:
                 - application/json
             Date:
-                - Wed, 28 Jan 2026 05:10:17 GMT
+                - Thu, 23 Apr 2026 07:18:48 GMT
             Server:
-                - nginx/1.27.4
+                - nginx/1.27.5
             Set-Cookie:
                 - redacted
             Strict-Transport-Security:
@@ -788,10 +762,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 3b5db940-6051-4262-4aad-8f27f281a187
+                - 0c5a0187-30da-4eb0-466e-6ac7313b708c
         status: 200 OK
         code: 200
-        duration: 259.057625ms
+        duration: 47.268042ms
     - id: 15
       request:
         proto: HTTP/1.1
@@ -810,8 +784,6 @@ interactions:
                 - '*/*'
             Authorization:
                 - redacted
-            Content-Type:
-                - application/json
         url: https://redacted.instance.url/api/v1/connector/version
         method: GET
       response:
@@ -831,9 +803,9 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 28 Jan 2026 05:10:18 GMT
+                - Thu, 23 Apr 2026 07:18:49 GMT
             Server:
-                - nginx/1.27.4
+                - nginx/1.27.5
             Set-Cookie:
                 - redacted
             Strict-Transport-Security:
@@ -841,10 +813,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 97e2a9ae-b20a-4cde-6a4c-cf1cb9d20aeb
+                - 195ec03e-ce43-4149-670a-eaaa74110df8
         status: 200 OK
         code: 200
-        duration: 330.630084ms
+        duration: 46.881667ms
     - id: 16
       request:
         proto: HTTP/1.1
@@ -863,9 +835,7 @@ interactions:
                 - '*/*'
             Authorization:
                 - redacted
-            Content-Type:
-                - application/json
-        url: https://redacted.instance.url/api/v1/connector/version
+        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/9f7390c8-f201-4b2d-b751-04c0a63c2671/systemMappings/testtfvirtualtesting:90/resources/-
         method: GET
       response:
         proto: HTTP/1.1
@@ -873,20 +843,20 @@ interactions:
         proto_minor: 1
         transfer_encoding: []
         trailer: {}
-        content_length: 20
+        content_length: 382
         uncompressed: false
-        body: '{"version":"2.18.2"}'
+        body: '{"id":"/","enabled":false,"exactMatchOnly":false,"websocketUpgradeAllowed":false,"creationDate":"1776928727716","description":"updated resource","_links":{"self":{"href": "https://redacted.url/path"}}}'
         headers:
             Cache-Control:
-                - max-age=3600
+                - no-store
             Content-Length:
-                - "20"
+                - "382"
             Content-Type:
                 - application/json
             Date:
-                - Wed, 28 Jan 2026 05:10:18 GMT
+                - Thu, 23 Apr 2026 07:18:49 GMT
             Server:
-                - nginx/1.27.4
+                - nginx/1.27.5
             Set-Cookie:
                 - redacted
             Strict-Transport-Security:
@@ -894,10 +864,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - f9f514fe-8337-4f41-7a69-490329bcf4bf
+                - 1a3acbc6-10cd-48ff-7615-d9284d36d513
         status: 200 OK
         code: 200
-        duration: 286.8855ms
+        duration: 44.499292ms
     - id: 17
       request:
         proto: HTTP/1.1
@@ -916,9 +886,7 @@ interactions:
                 - '*/*'
             Authorization:
                 - redacted
-            Content-Type:
-                - application/json
-        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/9f7390c8-f201-4b2d-b751-04c0a63c2671/systemMappings/testtfvirtualtesting:90/resources/-
+        url: https://redacted.instance.url/api/v1/connector/version
         method: GET
       response:
         proto: HTTP/1.1
@@ -926,20 +894,20 @@ interactions:
         proto_minor: 1
         transfer_encoding: []
         trailer: {}
-        content_length: 384
+        content_length: 20
         uncompressed: false
-        body: '{"id":"/","enabled":false,"exactMatchOnly":false,"websocketUpgradeAllowed":false,"creationDate":"1769577013830","description":"updated resource","_links":{"self":{"href": "https://redacted.url/path"}}}'
+        body: '{"version":"2.18.2"}'
         headers:
             Cache-Control:
-                - no-store
+                - max-age=3600
             Content-Length:
-                - "384"
+                - "20"
             Content-Type:
                 - application/json
             Date:
-                - Wed, 28 Jan 2026 05:10:18 GMT
+                - Thu, 23 Apr 2026 07:18:49 GMT
             Server:
-                - nginx/1.27.4
+                - nginx/1.27.5
             Set-Cookie:
                 - redacted
             Strict-Transport-Security:
@@ -947,10 +915,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 14c55b3a-de1c-41bc-5481-66d43a0eb1b0
+                - c78d3828-baae-4483-6ad0-f14d7fab4bbb
         status: 200 OK
         code: 200
-        duration: 252.000751ms
+        duration: 51.242209ms
     - id: 18
       request:
         proto: HTTP/1.1
@@ -969,9 +937,7 @@ interactions:
                 - '*/*'
             Authorization:
                 - redacted
-            Content-Type:
-                - application/json
-        url: https://redacted.instance.url/api/v1/connector/version
+        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/9f7390c8-f201-4b2d-b751-04c0a63c2671/systemMappings/testtfvirtualtesting:90/resources/-
         method: GET
       response:
         proto: HTTP/1.1
@@ -979,20 +945,20 @@ interactions:
         proto_minor: 1
         transfer_encoding: []
         trailer: {}
-        content_length: 20
+        content_length: 382
         uncompressed: false
-        body: '{"version":"2.18.2"}'
+        body: '{"id":"/","enabled":false,"exactMatchOnly":false,"websocketUpgradeAllowed":false,"creationDate":"1776928727716","description":"updated resource","_links":{"self":{"href": "https://redacted.url/path"}}}'
         headers:
             Cache-Control:
-                - max-age=3600
+                - no-store
             Content-Length:
-                - "20"
+                - "382"
             Content-Type:
                 - application/json
             Date:
-                - Wed, 28 Jan 2026 05:10:19 GMT
+                - Thu, 23 Apr 2026 07:18:49 GMT
             Server:
-                - nginx/1.27.4
+                - nginx/1.27.5
             Set-Cookie:
                 - redacted
             Strict-Transport-Security:
@@ -1000,10 +966,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - fee54f3b-5cfa-4279-5dfa-6d361f1e9d45
+                - 2aa53c16-cb34-4a82-6267-b1871cce4f30
         status: 200 OK
         code: 200
-        duration: 327.534417ms
+        duration: 47.710125ms
     - id: 19
       request:
         proto: HTTP/1.1
@@ -1022,9 +988,7 @@ interactions:
                 - '*/*'
             Authorization:
                 - redacted
-            Content-Type:
-                - application/json
-        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/9f7390c8-f201-4b2d-b751-04c0a63c2671/systemMappings/testtfvirtualtesting:90/resources/-
+        url: https://redacted.instance.url/api/v1/connector/version
         method: GET
       response:
         proto: HTTP/1.1
@@ -1032,20 +996,20 @@ interactions:
         proto_minor: 1
         transfer_encoding: []
         trailer: {}
-        content_length: 384
+        content_length: 20
         uncompressed: false
-        body: '{"id":"/","enabled":false,"exactMatchOnly":false,"websocketUpgradeAllowed":false,"creationDate":"1769577013830","description":"updated resource","_links":{"self":{"href": "https://redacted.url/path"}}}'
+        body: '{"version":"2.18.2"}'
         headers:
             Cache-Control:
-                - no-store
+                - max-age=3600
             Content-Length:
-                - "384"
+                - "20"
             Content-Type:
                 - application/json
             Date:
-                - Wed, 28 Jan 2026 05:10:19 GMT
+                - Thu, 23 Apr 2026 07:18:49 GMT
             Server:
-                - nginx/1.27.4
+                - nginx/1.27.5
             Set-Cookie:
                 - redacted
             Strict-Transport-Security:
@@ -1053,10 +1017,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 35a1782a-1f4e-44cc-5a05-5ec77b192fa6
+                - 6aadcd37-d0d7-41eb-6bf5-2ec18d6f0e16
         status: 200 OK
         code: 200
-        duration: 320.898333ms
+        duration: 61.328416ms
     - id: 20
       request:
         proto: HTTP/1.1
@@ -1075,8 +1039,6 @@ interactions:
                 - '*/*'
             Authorization:
                 - redacted
-            Content-Type:
-                - application/json
         url: https://redacted.instance.url/api/v1/connector/version
         method: GET
       response:
@@ -1096,9 +1058,9 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 28 Jan 2026 05:10:20 GMT
+                - Thu, 23 Apr 2026 07:18:49 GMT
             Server:
-                - nginx/1.27.4
+                - nginx/1.27.5
             Set-Cookie:
                 - redacted
             Strict-Transport-Security:
@@ -1106,10 +1068,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 53deaec9-2989-4104-4ed2-88c1cb3a4542
+                - 3e58d5eb-b1b4-45d7-6e12-a39d19e407f1
         status: 200 OK
         code: 200
-        duration: 317.520542ms
+        duration: 42.698208ms
     - id: 21
       request:
         proto: HTTP/1.1
@@ -1128,9 +1090,7 @@ interactions:
                 - '*/*'
             Authorization:
                 - redacted
-            Content-Type:
-                - application/json
-        url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/9f7390c8-f201-4b2d-b751-04c0a63c2671/systemMappings/testtfvirtualtesting:90/resources/-
+        url: https://redacted.instance.url/api/v1/connector/version
         method: GET
       response:
         proto: HTTP/1.1
@@ -1138,20 +1098,20 @@ interactions:
         proto_minor: 1
         transfer_encoding: []
         trailer: {}
-        content_length: 384
+        content_length: 20
         uncompressed: false
-        body: '{"id":"/","enabled":false,"exactMatchOnly":false,"websocketUpgradeAllowed":false,"creationDate":"1769577013830","description":"updated resource","_links":{"self":{"href": "https://redacted.url/path"}}}'
+        body: '{"version":"2.18.2"}'
         headers:
             Cache-Control:
-                - no-store
+                - max-age=3600
             Content-Length:
-                - "384"
+                - "20"
             Content-Type:
                 - application/json
             Date:
-                - Wed, 28 Jan 2026 05:10:20 GMT
+                - Thu, 23 Apr 2026 07:18:49 GMT
             Server:
-                - nginx/1.27.4
+                - nginx/1.27.5
             Set-Cookie:
                 - redacted
             Strict-Transport-Security:
@@ -1159,10 +1119,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 719f8304-7054-435f-54dc-165f49a82b89
+                - 653d92a8-e12a-4abd-6e8e-109a2a2b159b
         status: 200 OK
         code: 200
-        duration: 277.506833ms
+        duration: 46.106ms
     - id: 22
       request:
         proto: HTTP/1.1
@@ -1181,8 +1141,6 @@ interactions:
                 - '*/*'
             Authorization:
                 - redacted
-            Content-Type:
-                - application/json
         url: https://redacted.instance.url/api/v1/connector/version
         method: GET
       response:
@@ -1202,9 +1160,9 @@ interactions:
             Content-Type:
                 - application/json
             Date:
-                - Wed, 28 Jan 2026 05:10:20 GMT
+                - Thu, 23 Apr 2026 07:18:49 GMT
             Server:
-                - nginx/1.27.4
+                - nginx/1.27.5
             Set-Cookie:
                 - redacted
             Strict-Transport-Security:
@@ -1212,10 +1170,10 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 3f4bd06f-b05a-43da-7f0d-8ba285184abe
+                - 89732044-e659-484b-772e-4d3624e6cd9c
         status: 200 OK
         code: 200
-        duration: 251.411292ms
+        duration: 56.905833ms
     - id: 23
       request:
         proto: HTTP/1.1
@@ -1234,167 +1192,6 @@ interactions:
                 - '*/*'
             Authorization:
                 - redacted
-            Content-Type:
-                - application/json
-        url: https://redacted.instance.url/api/v1/connector/version
-        method: GET
-      response:
-        proto: HTTP/1.1
-        proto_major: 1
-        proto_minor: 1
-        transfer_encoding: []
-        trailer: {}
-        content_length: 20
-        uncompressed: false
-        body: '{"version":"2.18.2"}'
-        headers:
-            Cache-Control:
-                - max-age=3600
-            Content-Length:
-                - "20"
-            Content-Type:
-                - application/json
-            Date:
-                - Wed, 28 Jan 2026 05:10:21 GMT
-            Server:
-                - nginx/1.27.4
-            Set-Cookie:
-                - redacted
-            Strict-Transport-Security:
-                - max-age=31536000; includeSubDomains; preload;
-            X-Csrf-Token:
-                - redacted
-            X-Vcap-Request-Id:
-                - fc132893-84fa-4f4a-5996-2a8ed7885629
-        status: 200 OK
-        code: 200
-        duration: 339.873501ms
-    - id: 24
-      request:
-        proto: HTTP/1.1
-        proto_major: 1
-        proto_minor: 1
-        content_length: 0
-        transfer_encoding: []
-        trailer: {}
-        host: https://redacted.instance.url
-        remote_addr: ""
-        request_uri: ""
-        body: ""
-        form: {}
-        headers:
-            Accept:
-                - '*/*'
-            Authorization:
-                - redacted
-            Content-Type:
-                - application/json
-        url: https://redacted.instance.url/api/v1/connector/version
-        method: GET
-      response:
-        proto: HTTP/1.1
-        proto_major: 1
-        proto_minor: 1
-        transfer_encoding: []
-        trailer: {}
-        content_length: 20
-        uncompressed: false
-        body: '{"version":"2.18.2"}'
-        headers:
-            Cache-Control:
-                - max-age=3600
-            Content-Length:
-                - "20"
-            Content-Type:
-                - application/json
-            Date:
-                - Wed, 28 Jan 2026 05:10:21 GMT
-            Server:
-                - nginx/1.27.4
-            Set-Cookie:
-                - redacted
-            Strict-Transport-Security:
-                - max-age=31536000; includeSubDomains; preload;
-            X-Csrf-Token:
-                - redacted
-            X-Vcap-Request-Id:
-                - 7cb63380-7e63-4bdf-5b2e-08bc2510c249
-        status: 200 OK
-        code: 200
-        duration: 313.544292ms
-    - id: 25
-      request:
-        proto: HTTP/1.1
-        proto_major: 1
-        proto_minor: 1
-        content_length: 0
-        transfer_encoding: []
-        trailer: {}
-        host: https://redacted.instance.url
-        remote_addr: ""
-        request_uri: ""
-        body: ""
-        form: {}
-        headers:
-            Accept:
-                - '*/*'
-            Authorization:
-                - redacted
-            Content-Type:
-                - application/json
-        url: https://redacted.instance.url/api/v1/connector/version
-        method: GET
-      response:
-        proto: HTTP/1.1
-        proto_major: 1
-        proto_minor: 1
-        transfer_encoding: []
-        trailer: {}
-        content_length: 20
-        uncompressed: false
-        body: '{"version":"2.18.2"}'
-        headers:
-            Cache-Control:
-                - max-age=3600
-            Content-Length:
-                - "20"
-            Content-Type:
-                - application/json
-            Date:
-                - Wed, 28 Jan 2026 05:10:21 GMT
-            Server:
-                - nginx/1.27.4
-            Set-Cookie:
-                - redacted
-            Strict-Transport-Security:
-                - max-age=31536000; includeSubDomains; preload;
-            X-Csrf-Token:
-                - redacted
-            X-Vcap-Request-Id:
-                - 51e104d6-2f74-4be0-40a2-33abfc15307e
-        status: 200 OK
-        code: 200
-        duration: 265.313751ms
-    - id: 26
-      request:
-        proto: HTTP/1.1
-        proto_major: 1
-        proto_minor: 1
-        content_length: 0
-        transfer_encoding: []
-        trailer: {}
-        host: https://redacted.instance.url
-        remote_addr: ""
-        request_uri: ""
-        body: ""
-        form: {}
-        headers:
-            Accept:
-                - '*/*'
-            Authorization:
-                - redacted
-            Content-Type:
-                - application/json
         url: https://redacted.instance.url/api/v1/configuration/subaccounts/cf.eu12.hana.ondemand.com/9f7390c8-f201-4b2d-b751-04c0a63c2671/systemMappings/testtfvirtualtesting:90/resources/-
         method: DELETE
       response:
@@ -1410,9 +1207,9 @@ interactions:
             Cache-Control:
                 - no-store
             Date:
-                - Wed, 28 Jan 2026 05:10:22 GMT
+                - Thu, 23 Apr 2026 07:18:49 GMT
             Server:
-                - nginx/1.27.4
+                - nginx/1.27.5
             Set-Cookie:
                 - redacted
             Strict-Transport-Security:
@@ -1420,7 +1217,7 @@ interactions:
             X-Csrf-Token:
                 - redacted
             X-Vcap-Request-Id:
-                - 054ab173-22d7-4e07-69c0-236f7a22517b
+                - 1196c9fb-69c5-4a5b-58bf-0365ffc686d3
         status: 204 No Content
         code: 204
-        duration: 257.195417ms
+        duration: 166.152ms
