@@ -107,7 +107,8 @@ jobs:
 
           tofu -chdir=${{ env.PATH_TO_TFSCRIPT }} apply \
             -auto-approve \
-            -no-color
+            -no-color \
+            ${{ env.TEMP_PLAN_OUTPUT }}
 
           EXIT_CODE=$?
 
