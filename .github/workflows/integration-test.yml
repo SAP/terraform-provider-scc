@@ -11,7 +11,7 @@ name: Integration Test - Terraform Provider
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 2 * * 1,3'
+    - cron: '0 7 * * 1,3'
 
 env:
   PATH_TO_TFSCRIPT: 'integration'
