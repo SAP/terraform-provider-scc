@@ -74,7 +74,6 @@ jobs:
         set +e
 
         tofu -chdir=${{ env.PATH_TO_TFSCRIPT }} plan \
-          -out=${{ env.TEMP_PLAN_OUTPUT }} \
           -no-color \
           -detailed-exitcode
 
@@ -108,7 +107,6 @@ jobs:
           tofu -chdir=${{ env.PATH_TO_TFSCRIPT }} apply \
             -auto-approve \
             -no-color \
-            ${{ env.TEMP_PLAN_OUTPUT }}
 
           EXIT_CODE=$?
 
