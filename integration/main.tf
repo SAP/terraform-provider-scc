@@ -59,3 +59,24 @@ resource "scc_subaccount_abap_service_channel" "scc_abap_sc" {
   connections            = 1
   enabled                = false
 }
+
+resource "scc_ca_certificate_self_signed" "scc_self_signed_ca_cert" {
+  key_size = 2048
+  subject_dn = {
+    cn = "scc"
+  }
+}
+
+resource "scc_system_certificate_self_signed" "scc_self_signed_ca_cert" {
+  key_size = 2048
+  subject_dn = {
+    cn = "scc"
+  }
+}
+
+resource "scc_ui_certificate_self_signed" "scc_self_signed_ca_cert" {
+  key_size = 2048
+  subject_dn = {
+    cn = "scc"
+  }
+}

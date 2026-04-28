@@ -1,6 +1,6 @@
 name: Integration Test - OpenTofu
 
-# Idea:
+# Idea: 
 # 1. Build the provider from the latest pull
 # 2. Setup OpenTofu
 # 3. Execute the integration test script
@@ -10,41 +10,21 @@ name: Integration Test - OpenTofu
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '0 2 * * 1,3'
 
 env:
   PATH_TO_TFSCRIPT: 'integration'
   DEV_OVERRIDE: 'config/provider-config-ghaction.txt'
-  TEMP_PLAN_OUTPUT : 'plan-output.txt'
+  TEMP_PLAN_OUTPUT : 'plan-output.tfplan'
 
 permissions:
   contents: read
+  issues: write
 
 jobs:
-  build:
-    name: Build
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - name: Check out Git repository
-        id: checkout_repo
-        uses: actions/checkout@v6
-      - name: Setup Go
-        uses: actions/setup-go@v6.4.0
-        with:
-          go-version-file: 'go.mod'
-          cache: false
-      - run: go mod download
-      - run: go mod tidy
-      - run: go build -v .
-      - name: Run linters
-        uses: golangci/golangci-lint-action@v9.2.0
-        with:
-          version: latest
-          skip-cache: true
-
   test:
-    name: Integration Test for OpenTofu
-    needs: build
+    name: Integration Test for OpenTofu Provider
     runs-on: ubuntu-latest
 
     env:
@@ -54,8 +34,7 @@ jobs:
       TF_VAR_subaccount: ${{ secrets.INTEGRATION_SUBACCOUNT_ID }}
       TF_VAR_cloud_user: ${{ secrets.CLOUD_USER }}
       TF_VAR_cloud_password: ${{ secrets.CLOUD_PASSWORD }}
-
-
+      
     steps:
     - name: Check out Git repository
       id: checkout_repo
@@ -79,20 +58,124 @@ jobs:
       shell: bash
       run: |
         go mod tidy && make install
+
     - name: Remove init data and place override
       id: set_to_override
       shell: bash
       run: |
-        rm -rf .terraform && rm -rf .terraform.lock.hcl && cp ${{ env.DEV_OVERRIDE }} ~/.terraformrc
-    - name: Tofu Apply with local provider
-      id: tofu_apply
+        rm -rf ${{ env.PATH_TO_TFSCRIPT }}/.terraform
+        rm -rf ${{ env.PATH_TO_TFSCRIPT }}/.terraform.lock.hcl 
+        cp ${{ env.DEV_OVERRIDE }} ~/.terraformrc
+
+    - name: Tofu Plan with local provider
+      id: tofu_plan_local
       shell: bash
       run: |
-        tofu -chdir=${{ env.PATH_TO_TFSCRIPT }} apply -auto-approve -no-color
+        set +e
 
+        tofu -chdir=${{ env.PATH_TO_TFSCRIPT }} plan \
+          -out=${{ env.TEMP_PLAN_OUTPUT }} \
+          -no-color \
+          -detailed-exitcode
+
+        EXIT_CODE=$?
+        echo "exitcode=$EXIT_CODE" >> $GITHUB_OUTPUT
+
+        if [ $EXIT_CODE -eq 1 ]; then
+          echo "Error during tofu plan execution"
+          exit 1
+        elif [ $EXIT_CODE -eq 2 ]; then
+          echo "Changes detected in tofu plan"
+        else
+          echo "No changes detected in tofu plan"
+        fi
+
+    - name: Tofu Apply with local provider
+      if: steps.tofu_plan_local.outputs.exitcode == '0' || steps.tofu_plan_local.outputs.exitcode == '2'
+      id: tofu_apply_local
+      shell: bash
+      run: |
+        set +e
+
+        MAX_RETRIES=3
+        RETRY_DELAY=10
+
+        echo "attempts=0" >> $GITHUB_OUTPUT
+
+        for i in $(seq 1 $MAX_RETRIES); do
+          echo "Tofu apply attempt $i..."
+
+          tofu -chdir=${{ env.PATH_TO_TFSCRIPT }} apply \
+            -auto-approve \
+            -no-color
+
+          EXIT_CODE=$?
+
+          if [ $EXIT_CODE -eq 0 ]; then
+            echo "Tofu apply succeeded"
+            echo "attempts=$i" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          echo "Tofu apply failed with exit code $EXIT_CODE"
+
+          if [ $i -lt $MAX_RETRIES ]; then
+            echo "Retrying in $RETRY_DELAY seconds..."
+            sleep $RETRY_DELAY
+          fi
+        done
+
+        echo "attempts=$MAX_RETRIES" >> $GITHUB_OUTPUT
+        echo "Tofu apply failed after retries"
+        exit 1
+    
     - name: Tofu Destroy with local provider
       if: always()
-      id: tofu_destroy
+      id: tofu_destroy_local
       shell: bash
       run: |
-        tofu -chdir=${{ env.PATH_TO_TFSCRIPT }} destroy -auto-approve -no-color
+        set +e
+
+        MAX_RETRIES=3
+        RETRY_DELAY=10
+
+        echo "attempts=0" >> $GITHUB_OUTPUT
+
+        for i in $(seq 1 $MAX_RETRIES); do
+          echo "Tofu destroy attempt $i..."
+
+          tofu -chdir=${{ env.PATH_TO_TFSCRIPT }} destroy \
+            -auto-approve \
+            -no-color
+
+          EXIT_CODE=$?
+
+          if [ $EXIT_CODE -eq 0 ]; then
+            echo "Tofu destroy succeeded"
+            echo "attempts=$i" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          echo "Tofu destroy failed with exit code $EXIT_CODE"
+
+          if [ $i -lt $MAX_RETRIES ]; then
+            echo "Retrying in $RETRY_DELAY seconds..."
+            sleep $RETRY_DELAY
+          fi
+        done
+
+        echo "attempts=$MAX_RETRIES" >> $GITHUB_OUTPUT
+        echo "Tofu destroy failed after retries"
+        exit 1
+
+  report-failure:
+    name: Report any failure in workflow
+    needs: [test]
+    if: always()
+    uses: ./.github/workflows/create-issue-on-failure.yml
+    with:
+      workflow_name: "OpenTofu Integration Tests"
+      job_results: |
+        test: ${{ needs.test.result }}
+      labels: '["integration-test","opentofu","failure"]'
+      test_type: "integration"

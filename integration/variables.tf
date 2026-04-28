@@ -1,7 +1,7 @@
 variable "region_host" {
   type        = string
   description = "The host of the Cloud Connector region that specifies the SAP BTP region where the subaccount will be connected."
-  default     = "cf.us10.hana.ondemand.com"
+  default     = "cf.eu12.hana.ondemand.com"
 }
 
 variable "subaccount" {
