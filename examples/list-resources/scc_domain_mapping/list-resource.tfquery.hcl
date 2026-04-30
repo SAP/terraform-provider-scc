@@ -27,7 +27,7 @@ list "scc_domain_mapping" "all" {
 # List block to discover SCC domain mapping with full resource details
 # Setting include_resource = true returns full resource objects (e.g., virtual_domain)
 list "scc_domain_mapping" "with_resource" {
-  provider = scc
+  provider         = scc
   include_resource = true
 
   # (Required)

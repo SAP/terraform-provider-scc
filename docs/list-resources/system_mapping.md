@@ -32,13 +32,13 @@ list "scc_system_mapping" "<label_name>" {
 
 # List block to discover system mappings
 list "scc_system_mapping" "all" {
-  provider = scc
-  include_resource  = true
+  provider         = scc
+  include_resource = true
 
   # (Required)
   config {
-    region_host  = "cf.ap21.hana.ondemand.com"
-    subaccount   = "7ecb7280-c7d4-4db6-b7da-7af3cdb13505"
+    region_host = "cf.ap21.hana.ondemand.com"
+    subaccount  = "7ecb7280-c7d4-4db6-b7da-7af3cdb13505"
   }
 }
 ```

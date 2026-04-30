@@ -14,8 +14,8 @@ list "scc_system_mapping_resource" "<label_name>" {
 
 # List block to discover system mappings resource
 list "scc_system_mapping_resource" "all" {
-  provider = scc
-  include_resource  = true
+  provider         = scc
+  include_resource = true
 
   # (Required)
   config {

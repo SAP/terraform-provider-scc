@@ -45,7 +45,7 @@ list "scc_subaccount_abap_service_channel" "all" {
 # List block to discover scc subaccount abap service channel with full resource details
 # Setting include_resource = true returns full resource objects
 list "scc_subaccount_abap_service_channel" "with_resource" {
-  provider = scc
+  provider         = scc
   include_resource = true
 
   # (Required)
