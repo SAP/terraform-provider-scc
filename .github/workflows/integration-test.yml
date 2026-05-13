@@ -48,7 +48,7 @@ jobs:
 
     - name: Setup Terraform
       id : setup_terraform
-      uses: hashicorp/setup-terraform@v4
+      uses: hashicorp/setup-terraform@v4.0.1
       with:
         terraform_wrapper: false
         terraform_version: latest
