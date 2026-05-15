@@ -29,7 +29,7 @@ jobs:
         shell: bash
         run: |
           EXIT_CODE=0
-          echo "Checking format of $file with terraform fmt"
+          echo "Checking format of ./examples with terraform fmt"
           terraform -chdir='./examples' fmt -check -recursive -no-color || EXIT_CODE=$?
           echo "Result is $EXIT_CODE"
           exit $EXIT_CODE
