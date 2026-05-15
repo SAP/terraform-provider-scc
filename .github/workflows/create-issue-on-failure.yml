@@ -16,7 +16,6 @@ on:
         required: true
         type: string # "integration"
 
-
 permissions:
   issues: write
   contents: read

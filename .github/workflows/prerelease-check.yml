@@ -6,6 +6,9 @@ name: Terraform Provider Pre-Release Check
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   call-workflow-test:
     uses: ./.github/workflows/test.yml

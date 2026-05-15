@@ -5,6 +5,9 @@ on:
     types:
       - opened
 
+permissions:
+  issues: write
+
 jobs:
   community_note:
     name: 'Add Community Note'
