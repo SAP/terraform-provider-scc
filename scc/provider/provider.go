@@ -273,60 +273,19 @@ func ValidatePEMBlock(pemString, attribute, title string, resp *provider.Configu
 }
 
 func (c *CloudConnectorProvider) DataSources(_ context.Context) []func() datasource.DataSource {
-	return []func() datasource.DataSource{
-		datasources.NewSubaccountsDataSource,
-		datasources.NewSubaccountConfigurationDataSource,
-		datasources.NewSystemMappingsDataSource,
-		datasources.NewSystemMappingDataSource,
-		datasources.NewSystemMappingResourcesDataSource,
-		datasources.NewSystemMappingResourceDataSource,
-		datasources.NewDomainMappingsDataSource,
-		datasources.NewDomainMappingDataSource,
-		datasources.NewSubaccountK8SServiceChannelDataSource,
-		datasources.NewSubaccountK8SServiceChannelsDataSource,
-		datasources.NewSubaccountABAPServiceChannelDataSource,
-		datasources.NewSubaccountABAPServiceChannelsDataSource,
-		datasources.NewSystemCertificateDataSource,
-		datasources.NewCACertificateDataSource,
-	}
+	return datasources.All()
 }
 
 // Resources defines the resources implemented in the provider.
 func (c *CloudConnectorProvider) Resources(_ context.Context) []func() resource.Resource {
-	return []func() resource.Resource{
-		resources.NewSubaccountResource,
-		resources.NewSubaccountUsingAuthResource,
-		resources.NewSystemMappingResource,
-		resources.NewSystemMappingResourceResource,
-		resources.NewDomainMappingResource,
-		resources.NewSubaccountK8SServiceChannelResource,
-		resources.NewSubaccountABAPServiceChannelResource,
-		resources.NewSystemCertificateSelfSignedResource,
-		resources.NewSystemCertificateSignedChainResource,
-		resources.NewSystemCertificatePKCS12CertificateResource,
-		resources.NewCACertificateSelfSignedResource,
-		resources.NewCACertificateSignedChainResource,
-		resources.NewCACertificatePKCS12CertificateResource,
-		resources.NewUICertificateSelfSignedResource,
-		resources.NewUICertificateSignedChainResource,
-		resources.NewUICertificatePKCS12CertificateResource,
-	}
+	return resources.All()
 }
 
 // ListResources defines the ListResources implemented in the provider.
 func (p *CloudConnectorProvider) ListResources(_ context.Context) []func() list.ListResource {
-	return []func() list.ListResource{
-		listresources.NewSubaccountListResource,
-		listresources.NewDomainMappingListResource,
-		listresources.NewSystemMappingListResource,
-		listresources.NewSystemMappingResourceListResource,
-		listresources.NewSubaccountABAPServiceChannelListResource,
-		listresources.NewSubaccountK8SServiceChannelListResource,
-	}
+	return listresources.All()
 }
 
 func (p *CloudConnectorProvider) Actions(_ context.Context) []func() action.Action {
-	return []func() action.Action{
-		actions.NewGenerateCSRAction,
-	}
+	return actions.All()
 }

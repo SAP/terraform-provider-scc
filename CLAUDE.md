@@ -33,7 +33,14 @@ go test -v -run "TestResourceSubaccount/happy_path" ./scc/provider/
 ### Package Layout
 
 - **`main.go`** - Entry point; `go:generate` directives for `terraform-plugin-docs`
-- **`scc/provider/`** - All provider logic (resources, data sources, list resources, actions, tests)
+- **`scc/provider/provider.go`** - Provider registration (`Resources`, `DataSources`, `ListResources`, `Actions`)
+- **`scc/provider/resources/`** - Resource implementations; fixtures in `resources/fixtures/`
+- **`scc/provider/datasources/`** - Data source implementations; fixtures in `datasources/fixtures/`
+- **`scc/provider/listresources/`** - List resource implementations; fixtures in `listresources/fixtures/`
+- **`scc/provider/actions/`** - Action implementations (e.g., `scc_generate_csr`)
+- **`scc/provider/helpers/`** - Shared API helpers (`helper.go`, `helper_certificate.go`)
+- **`scc/provider/model/`** - Terraform model types shared across resources/datasources
+- **`scc/provider/tfutils/`** - Test utilities: VCR setup, provider factories, redaction hooks
 - **`internal/api/`** - REST API client (`RestApiClient`) with Basic Auth and mTLS support
 - **`internal/api/apiObjects/`** - Go structs mapping to SCC API JSON responses
 - **`internal/api/endpoints/`** - URL path builders for each API resource
@@ -41,7 +48,9 @@ go test -v -run "TestResourceSubaccount/happy_path" ./scc/provider/
 
 ### Provider Configuration
 
-The provider (`cloudConnectorProvider`) accepts Basic Auth OR mTLS certificate auth (mutually exclusive). Configuration values resolve from HCL attributes first, then environment variables: `SCC_INSTANCE_URL`, `SCC_USERNAME`, `SCC_PASSWORD`, `SCC_CA_CERTIFICATE`, `SCC_CLIENT_CERTIFICATE`, `SCC_CLIENT_KEY`.
+The provider accepts Basic Auth OR mTLS certificate auth (mutually exclusive). Configuration values resolve from HCL attributes first, then environment variables: `SCC_INSTANCE_URL`, `SCC_USERNAME`, `SCC_PASSWORD`, `SCC_CA_CERTIFICATE`, `SCC_CLIENT_CERTIFICATE`, `SCC_CLIENT_KEY`.
+
+The provider implements `ProviderWithListResources` and `ProviderWithActions` from the Terraform Plugin Framework in addition to the standard resource/datasource interfaces.
 
 ### Resource Implementation Pattern
 
@@ -49,20 +58,24 @@ Each resource follows this structure (example: `resource_subaccount.go`):
 1. Struct holding `*api.RestApiClient`
 2. `New*Resource()` constructor registered in `provider.go`'s `Resources()` method
 3. Implements: `Metadata`, `Schema`, `Configure`, `Create`, `Read`, `Update`, `Delete`, `ImportState`
-4. Uses `sendRequest()` or `requestAndUnmarshal[T]()` from `helper.go` for API calls
+4. Uses helpers from `scc/provider/helpers/` for API calls
 5. API objects from `internal/api/apiObjects/` and endpoint paths from `internal/api/endpoints/`
+6. Terraform model types from `scc/provider/model/`
 
 Data sources and list resources follow the same pattern but are read-only.
 
 ### Testing with VCR (go-vcr)
 
-Tests use HTTP record/replay via `go-vcr`. Fixtures are YAML cassettes stored in `scc/provider/fixtures/`.
+Tests use HTTP record/replay via `go-vcr`. Fixtures are YAML cassettes stored alongside their test package:
+- `scc/provider/resources/fixtures/`
+- `scc/provider/datasources/fixtures/`
+- `scc/provider/listresources/fixtures/`
 
 - **Replay mode (default):** Tests run offline using recorded fixtures. No env vars needed.
-- **Record mode:** Set `TEST_RECORD=true` plus `SCC_USERNAME`, `SCC_PASSWORD`, `SCC_INSTANCE_URL` (and `TF_VAR_*` vars for specific resources). Sensitive data is automatically redacted by hooks in `provider_test.go`.
+- **Record mode:** Set `TEST_RECORD=true` plus `SCC_USERNAME`, `SCC_PASSWORD`, `SCC_INSTANCE_URL` (and `TF_VAR_*` vars for specific resources). Sensitive data is automatically redacted by hooks in `tfutils/vcr.go`.
 
-Key test infrastructure in `provider_test.go`:
-- `setupVCR(t, cassetteName)` - Creates recorder, returns `(*recorder.Recorder, User)`
+Key test infrastructure in `scc/provider/tfutils/`:
+- `tfutils.SetupVCR(t, cassetteName)` - Creates recorder, returns `(*recorder.Recorder, User)`
 - `tfutils.GetTestProviders(httpClient)` - Builds provider factories for tests
 - `tfutils.ProviderConfig(user)` - Generates HCL provider block
 - `tfutils.StopQuietly(rec)` - Deferred recorder cleanup
@@ -72,7 +85,7 @@ Test pattern:
 func TestResource*(t *testing.T) {
     t.Parallel()
     t.Run("happy path", func(t *testing.T) {
-        rec, user := setupVCR(t, "fixtures/<cassette_name>")
+        rec, user := tfutils.SetupVCR(t, "fixtures/<cassette_name>")
         defer tfutils.StopQuietly(rec)
         resource.Test(t, resource.TestCase{
             IsUnitTest:               true,
@@ -88,7 +101,7 @@ func TestResource*(t *testing.T) {
 
 ### CI Checks
 
-CI validates: build, lint, `go fix`, `go generate` (doc drift), fixture drift detection, and tests across Terraform 1.12-1.14. Fixture changes must be committed; CI detects untracked modifications.
+CI validates: build, lint, `go fix`, `go generate` (doc drift), fixture drift detection, and tests across Terraform 1.13-1.15. Fixture changes must be committed; CI detects untracked modifications.
 
 ### Documentation Generation
 
