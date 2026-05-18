@@ -63,9 +63,9 @@ Tests use HTTP record/replay via `go-vcr`. Fixtures are YAML cassettes stored in
 
 Key test infrastructure in `provider_test.go`:
 - `setupVCR(t, cassetteName)` - Creates recorder, returns `(*recorder.Recorder, User)`
-- `getTestProviders(httpClient)` - Builds provider factories for tests
-- `providerConfig(user)` - Generates HCL provider block
-- `stopQuietly(rec)` - Deferred recorder cleanup
+- `tfutils.GetTestProviders(httpClient)` - Builds provider factories for tests
+- `tfutils.ProviderConfig(user)` - Generates HCL provider block
+- `tfutils.StopQuietly(rec)` - Deferred recorder cleanup
 
 Test pattern:
 ```go
@@ -73,12 +73,12 @@ func TestResource*(t *testing.T) {
     t.Parallel()
     t.Run("happy path", func(t *testing.T) {
         rec, user := setupVCR(t, "fixtures/<cassette_name>")
-        defer stopQuietly(rec)
+        defer tfutils.StopQuietly(rec)
         resource.Test(t, resource.TestCase{
             IsUnitTest:               true,
-            ProtoV6ProviderFactories: getTestProviders(rec.GetDefaultClient()),
+            ProtoV6ProviderFactories: tfutils.GetTestProviders(rec.GetDefaultClient()),
             Steps: []resource.TestStep{
-                { Config: providerConfig(user) + ..., Check: ... },
+                { Config: tfutils.ProviderConfig(user) + ..., Check: ... },
                 { ResourceName: ..., ImportState: true, ImportStateVerify: true },
             },
         })
