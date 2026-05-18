@@ -9,6 +9,11 @@ import (
 	"regexp"
 
 	"github.com/SAP/terraform-provider-scc/internal/api"
+	"github.com/SAP/terraform-provider-scc/scc/provider/actions"
+	"github.com/SAP/terraform-provider-scc/scc/provider/datasources"
+	"github.com/SAP/terraform-provider-scc/scc/provider/helpers"
+	"github.com/SAP/terraform-provider-scc/scc/provider/listresources"
+	"github.com/SAP/terraform-provider-scc/scc/provider/resources"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/action"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
@@ -23,7 +28,7 @@ import (
 )
 
 var (
-	_ provider.ProviderWithListResources = &cloudConnectorProvider{}
+	_ provider.ProviderWithListResources = &CloudConnectorProvider{}
 )
 
 func New() provider.Provider {
@@ -31,16 +36,16 @@ func New() provider.Provider {
 }
 
 func NewWithClient(httpClient *http.Client) provider.Provider {
-	return &cloudConnectorProvider{
-		httpClient: httpClient,
+	return &CloudConnectorProvider{
+		HttpClient: httpClient,
 	}
 }
 
-type cloudConnectorProvider struct {
-	httpClient *http.Client
+type CloudConnectorProvider struct {
+	HttpClient *http.Client
 }
 
-type cloudConnectorProviderData struct {
+type CloudConnectorProviderData struct {
 	InstanceURL       types.String `tfsdk:"instance_url"`
 	Username          types.String `tfsdk:"username"`
 	Password          types.String `tfsdk:"password"`
@@ -49,11 +54,11 @@ type cloudConnectorProviderData struct {
 	ClientKey         types.String `tfsdk:"client_key"`
 }
 
-func (c *cloudConnectorProvider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
+func (c *CloudConnectorProvider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
 	resp.TypeName = "scc"
 }
 
-func (c *cloudConnectorProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp *provider.SchemaResponse) {
+func (c *CloudConnectorProvider) Schema(_ context.Context, _ provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: "The Terraform Provider for SAP Cloud Connector allows users to manage and configure SAP Cloud Connector instances within SAP BTP (Business Technology Platform). It enables automation of connectivity between SAP BTP subaccounts and on-premise systems using Terraform.",
 		Attributes: map[string]schema.Attribute{
@@ -106,8 +111,8 @@ Use **file(\"path/to/client_key.pem\")** in the provider block to load from a fi
 	}
 }
 
-func (c *cloudConnectorProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
-	var config cloudConnectorProviderData
+func (c *CloudConnectorProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
+	var config CloudConnectorProviderData
 	diags := req.Config.Get(ctx, &config)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -121,26 +126,23 @@ func (c *cloudConnectorProvider) Configure(ctx context.Context, req provider.Con
 	instanceURL, username, password, caCertificate, clientCertificate, clientKey := resolveAttributes(config)
 
 	// Validate values from config
-	if !validateConfig(instanceURL, username, password, caCertificate, clientCertificate, clientKey, resp) {
+	if !ValidateConfig(instanceURL, username, password, caCertificate, clientCertificate, clientKey, resp) {
 		return
 	}
 
 	// Parse Instance URL
-	parsedURL := parseInstanceURL(instanceURL, resp)
+	parsedURL := ParseInstanceURL(instanceURL, resp)
 	if parsedURL == nil {
 		return
 	}
 	// Create Client
-	client := createClient(c.httpClient, parsedURL, username, password, caCertificate, clientCertificate, clientKey, resp)
+	client := CreateClient(c.HttpClient, parsedURL, username, password, caCertificate, clientCertificate, clientKey, resp)
 	if client == nil {
 		return
 	}
 	// Test Provider Connection
-	if err := testProviderConnection(client); err != nil {
-		resp.Diagnostics.AddError(
-			"Cloud Connector Authentication Failed",
-			fmt.Sprintf("Authentication or connectivity check failed: %v", err),
-		)
+	if diags := TestProviderConnection(client); diags.HasError() {
+		resp.Diagnostics.Append(diags...)
 		return
 	}
 
@@ -150,7 +152,7 @@ func (c *cloudConnectorProvider) Configure(ctx context.Context, req provider.Con
 	resp.ActionData = client
 }
 
-func resolveAttributes(config cloudConnectorProviderData) (string, string, string, string, string, string) {
+func resolveAttributes(config CloudConnectorProviderData) (string, string, string, string, string, string) {
 	return getNonEmptyAttribute(config.InstanceURL, "SCC_INSTANCE_URL"),
 		getNonEmptyAttribute(config.Username, "SCC_USERNAME"),
 		getNonEmptyAttribute(config.Password, "SCC_PASSWORD"),
@@ -166,7 +168,7 @@ func getNonEmptyAttribute(attr types.String, envVar string) string {
 	return os.Getenv(envVar)
 }
 
-func validateConfig(instanceURL, username, password, caCertificate, clientCertificate, clientKey string, resp *provider.ConfigureResponse) bool {
+func ValidateConfig(instanceURL, username, password, caCertificate, clientCertificate, clientKey string, resp *provider.ConfigureResponse) bool {
 	if instanceURL == "" {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("instance_url"),
@@ -176,13 +178,13 @@ func validateConfig(instanceURL, username, password, caCertificate, clientCertif
 		return false
 	}
 
-	if caCertificate != "" && !validatePEMBlock(caCertificate, "ca_certificate", "CA Certificate", resp) {
+	if caCertificate != "" && !ValidatePEMBlock(caCertificate, "ca_certificate", "CA Certificate", resp) {
 		return false
 	}
-	if clientCertificate != "" && !validatePEMBlock(clientCertificate, "client_certificate", "Client Certificate", resp) {
+	if clientCertificate != "" && !ValidatePEMBlock(clientCertificate, "client_certificate", "Client Certificate", resp) {
 		return false
 	}
-	if clientKey != "" && !validatePEMBlock(clientKey, "client_key", "Client Key", resp) {
+	if clientKey != "" && !ValidatePEMBlock(clientKey, "client_key", "Client Key", resp) {
 		return false
 	}
 
@@ -206,7 +208,7 @@ func validateConfig(instanceURL, username, password, caCertificate, clientCertif
 
 	return true
 }
-func parseInstanceURL(instanceURL string, resp *provider.ConfigureResponse) *url.URL {
+func ParseInstanceURL(instanceURL string, resp *provider.ConfigureResponse) *url.URL {
 	parsedURL, err := url.Parse(instanceURL)
 	if err != nil {
 		resp.Diagnostics.AddAttributeError(
@@ -218,7 +220,7 @@ func parseInstanceURL(instanceURL string, resp *provider.ConfigureResponse) *url
 	}
 	return parsedURL
 }
-func createClient(httpClient *http.Client, parsedURL *url.URL, username, password, caCertificate, clientCertificate, clientKey string, resp *provider.ConfigureResponse) *api.RestApiClient {
+func CreateClient(httpClient *http.Client, parsedURL *url.URL, username, password, caCertificate, clientCertificate, clientKey string, resp *provider.ConfigureResponse) *api.RestApiClient {
 	client, diags := api.NewRestApiClient(
 		httpClient,
 		parsedURL,
@@ -237,7 +239,7 @@ func createClient(httpClient *http.Client, parsedURL *url.URL, username, passwor
 	}
 	return client
 }
-func testProviderConnection(client *api.RestApiClient) diag.Diagnostics {
+func TestProviderConnection(client *api.RestApiClient) diag.Diagnostics {
 	resp, diags := client.GetRequest("/api/v1/connector/version")
 	if diags.HasError() {
 		return diags
@@ -255,8 +257,8 @@ func testProviderConnection(client *api.RestApiClient) diag.Diagnostics {
 	return diags
 }
 
-func validatePEMBlock(pemString, attribute, title string, resp *provider.ConfigureResponse) bool {
-	diags := validatePEMData(pemString)
+func ValidatePEMBlock(pemString, attribute, title string, resp *provider.ConfigureResponse) bool {
+	diags := helpers.ValidatePEMDataFunc(pemString)
 	if diags.HasError() {
 		for _, d := range diags {
 			resp.Diagnostics.AddAttributeError(
@@ -270,62 +272,20 @@ func validatePEMBlock(pemString, attribute, title string, resp *provider.Configu
 	return true
 }
 
-// DataSources defines the data sources implemented in the provider.
-func (c *cloudConnectorProvider) DataSources(_ context.Context) []func() datasource.DataSource {
-	return []func() datasource.DataSource{
-		NewSubaccountsDataSource,
-		NewSubaccountConfigurationDataSource,
-		NewSystemMappingsDataSource,
-		NewSystemMappingDataSource,
-		NewSystemMappingResourcesDataSource,
-		NewSystemMappingResourceDataSource,
-		NewDomainMappingsDataSource,
-		NewDomainMappingDataSource,
-		NewSubaccountK8SServiceChannelDataSource,
-		NewSubaccountK8SServiceChannelsDataSource,
-		NewSubaccountABAPServiceChannelDataSource,
-		NewSubaccountABAPServiceChannelsDataSource,
-		NewSystemCertificateDataSource,
-		NewCACertificateDataSource,
-	}
+func (c *CloudConnectorProvider) DataSources(_ context.Context) []func() datasource.DataSource {
+	return datasources.All()
 }
 
 // Resources defines the resources implemented in the provider.
-func (c *cloudConnectorProvider) Resources(_ context.Context) []func() resource.Resource {
-	return []func() resource.Resource{
-		NewSubaccountResource,
-		NewSubaccountUsingAuthResource,
-		NewSystemMappingResource,
-		NewSystemMappingResourceResource,
-		NewDomainMappingResource,
-		NewSubaccountK8SServiceChannelResource,
-		NewSubaccountABAPServiceChannelResource,
-		NewSystemCertificateSelfSignedResource,
-		NewSystemCertificateSignedChainResource,
-		NewSystemCertificatePKCS12CertificateResource,
-		NewCACertificateSelfSignedResource,
-		NewCACertificateSignedChainResource,
-		NewCACertificatePKCS12CertificateResource,
-		NewUICertificateSelfSignedResource,
-		NewUICertificateSignedChainResource,
-		NewUICertificatePKCS12CertificateResource,
-	}
+func (c *CloudConnectorProvider) Resources(_ context.Context) []func() resource.Resource {
+	return resources.All()
 }
 
 // ListResources defines the ListResources implemented in the provider.
-func (p *cloudConnectorProvider) ListResources(_ context.Context) []func() list.ListResource {
-	return []func() list.ListResource{
-		NewSubaccountListResource,
-		NewDomainMappingListResource,
-		NewSystemMappingListResource,
-		NewSystemMappingResourceListResource,
-		NewSubaccountABAPServiceChannelListResource,
-		NewSubaccountK8SServiceChannelListResource,
-	}
+func (p *CloudConnectorProvider) ListResources(_ context.Context) []func() list.ListResource {
+	return listresources.All()
 }
 
-func (p *cloudConnectorProvider) Actions(_ context.Context) []func() action.Action {
-	return []func() action.Action{
-		NewGenerateCSRAction,
-	}
+func (p *CloudConnectorProvider) Actions(_ context.Context) []func() action.Action {
+	return actions.All()
 }

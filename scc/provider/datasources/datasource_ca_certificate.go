@@ -1,0 +1,197 @@
+package datasources
+
+import (
+	"context"
+	"encoding/pem"
+	"fmt"
+	"regexp"
+
+	"github.com/SAP/terraform-provider-scc/internal/api"
+	apiobjects "github.com/SAP/terraform-provider-scc/internal/api/apiObjects"
+	"github.com/SAP/terraform-provider-scc/internal/api/endpoints"
+	"github.com/SAP/terraform-provider-scc/scc/provider/helpers"
+	"github.com/SAP/terraform-provider-scc/scc/provider/model"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/datasource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework/types"
+)
+
+var _ datasource.DataSource = &CACertificateDataSource{}
+
+func NewCACertificateDataSource() datasource.DataSource {
+	return &CACertificateDataSource{}
+}
+
+type CACertificateDataSource struct {
+	Client *api.RestApiClient
+}
+
+func (d *CACertificateDataSource) Metadata(ctx context.Context, req datasource.MetadataRequest, resp *datasource.MetadataResponse) {
+	resp.TypeName = req.ProviderTypeName + "_ca_certificate"
+}
+
+func (r *CACertificateDataSource) Schema(ctx context.Context, req datasource.SchemaRequest, resp *datasource.SchemaResponse) {
+	resp.Schema = schema.Schema{
+		MarkdownDescription: `Cloud Connector CA Certificate Data Source.
+				
+Provides metadata about the Certificate Authority (CA) certificate trusted by the Cloud Connector.
+This information can be used to verify the issuing authority, certificate validity period, and trust configuration.
+
+__Further documentation:__
+<https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/ca-certificate-for-principal-propagation-apis#get-description-for-a-ca-certificate-for-principal-propagation>
+<https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/ca-certificate-for-principal-propagation-apis#get-binary-content-of-a-ca-certificate-for-principal-propagation>`,
+		Attributes: map[string]schema.Attribute{
+			"valid_to": schema.StringAttribute{
+				MarkdownDescription: "Timestamp of the end of the validity period.",
+				Computed:            true,
+			},
+			"valid_from": schema.StringAttribute{
+				MarkdownDescription: "Timestamp of the beginning of the validity period.",
+				Computed:            true,
+			},
+			"subject_dn": schema.SingleNestedAttribute{
+				MarkdownDescription: "Subject Distinguished Name (DN) of the issuing **Certificate Authority (CA)** certificate.",
+				Computed:            true,
+				Attributes: map[string]schema.Attribute{
+					"cn": schema.StringAttribute{
+						MarkdownDescription: "Common Name (CN) of the CA certificate, typically representing the CA name.",
+						Computed:            true,
+						Validators: []validator.String{
+							stringvalidator.LengthAtLeast(1),
+							stringvalidator.RegexMatches(
+								regexp.MustCompile(`^[^,=\\]+$`),
+								"CN must not contain ',', '=', or '\\'",
+							),
+						},
+					},
+					"email": schema.StringAttribute{
+						MarkdownDescription: "Email address associated with the CA subject.",
+						Computed:            true,
+					},
+					"l": schema.StringAttribute{
+						MarkdownDescription: "Locality (L) of the CA subject, such as a city or town.",
+						Computed:            true,
+					},
+					"ou": schema.StringAttribute{
+						MarkdownDescription: "Organizational Unit (OU) of the CA subject, representing a department or division within an organization.",
+						Computed:            true,
+					},
+					"o": schema.StringAttribute{
+						MarkdownDescription: "Organization (O) of the CA subject, representing the name of the organization.",
+						Computed:            true,
+					},
+					"st": schema.StringAttribute{
+						MarkdownDescription: "State or Province (ST) of the CA subject.",
+						Computed:            true,
+					},
+					"c": schema.StringAttribute{
+						MarkdownDescription: "Country (C) of the CA subject, typically represented as a two-letter ISO country code.",
+						Computed:            true,
+					},
+				},
+			},
+			"issuer": schema.StringAttribute{
+				MarkdownDescription: "Distinguished Name (DN) of the issuing Certificate Authority. For self-signed root CAs, this is the same as the subject.",
+				Computed:            true,
+			},
+			"serial_number": schema.StringAttribute{
+				MarkdownDescription: "Serial number assigned to the CA certificate by its issuing authority.",
+				Computed:            true,
+			},
+			"subject_alternative_names": schema.ListNestedAttribute{
+				MarkdownDescription: "Subject Alternative Names (SANs) for the certificate, allowing additional identities to be associated with the certificate beyond the Common Name (CN).",
+				Computed:            true,
+				NestedObject: schema.NestedAttributeObject{
+					Attributes: map[string]schema.Attribute{
+						"type": schema.StringAttribute{
+							MarkdownDescription: "The type of SAN, such as DNS, IP, RFC822 or URI.",
+							Computed:            true,
+							Validators: []validator.String{
+								stringvalidator.OneOf("DNS", "IP", "RFC822", "URI"),
+							},
+						},
+						"value": schema.StringAttribute{
+							MarkdownDescription: "The value of the SAN, such as a domain name for DNS, an IP address for IP, an email address for RFC822, or a URI for URI.",
+							Computed:            true,
+							Validators: []validator.String{
+								stringvalidator.LengthAtLeast(1),
+							},
+						},
+					},
+				},
+			},
+			"certificate_pem": schema.StringAttribute{
+				MarkdownDescription: "CA certificate in PEM format, which can be used to configure trust stores or verify certificate chains.",
+				Computed:            true,
+				Sensitive:           true,
+			},
+		},
+	}
+}
+
+func (d *CACertificateDataSource) Configure(ctx context.Context, req datasource.ConfigureRequest, resp *datasource.ConfigureResponse) {
+	if req.ProviderData == nil {
+		return
+	}
+
+	client, ok := req.ProviderData.(*api.RestApiClient)
+
+	if !ok {
+		resp.Diagnostics.AddError(
+			"Unexpected Data Source Configure Type",
+			fmt.Sprintf("Expected *api.RestApiClient, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+		)
+
+		return
+	}
+
+	d.Client = client
+}
+
+func (d *CACertificateDataSource) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
+	var data model.CACertificateDataSourceConfig
+	var respObj apiobjects.Certificate
+	diags := req.Config.Get(ctx, &data)
+
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	endpoint := endpoints.GetCACertificateEndpoint()
+
+	// Get Certificate Metadata
+	diags = helpers.RequestAndUnmarshalCertificateFunc(d.Client, &respObj, "GET", endpoint, nil, true)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Generate Binary Certificate
+	certBytes, diags := helpers.GetCertificateBinaryFunc(d.Client, endpoint)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	pemBytes := pem.EncodeToMemory(&pem.Block{
+		Type:  "CERTIFICATE",
+		Bytes: certBytes,
+	})
+
+	responseModel, diags := model.CACertificateDataSourceValueFrom(ctx, respObj)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	responseModel.CertificatePEM = types.StringValue(string(pemBytes))
+
+	diags = resp.State.Set(ctx, &responseModel)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+}
