@@ -6,6 +6,8 @@ description: |-
   Tips:
   You must be assigned to the following roles:
   AdministratorSubaccount Administrator
+  Important:
+  Automatic renewal requires two steps. Configure it in this resource, and also enable it in the SAP BTP Cockpit. For details, see KBA https://me.sap.com/notes/0003632133.
   Further documentation:
   https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/subaccount
 ---
@@ -13,11 +15,14 @@ description: |-
 # scc_subaccount (Resource)
 
 Cloud Connector Subaccount resource.
-		
+
 __Tips:__
 * You must be assigned to the following roles:
 	* Administrator
 	* Subaccount Administrator
+
+__Important:__
+Automatic renewal requires two steps. Configure it in this resource, and also enable it in the SAP BTP Cockpit. For details, see KBA <https://me.sap.com/notes/0003632133>.
 
 __Further documentation:__
 <https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/subaccount>
@@ -61,15 +66,15 @@ This attribute is optional in the schema to support `terraform import`, but must
 - **true** → attempts to establish a tunnel connection.
 - **false** → disconnects the subaccount from the Cloud Connector.
 
-The value is persisted in state based on what you configure (not overwritten by runtime status).  
+The value is persisted in state based on what you configure (not overwritten by runtime status).
 The actual tunnel status is reported by the Cloud Connector and may differ:
 
 - *Connected* → tunnel established successfully.
 - *Disconnected* → tunnel was intentionally or unintentionally closed.
-- *ConnectFailure* → tunnel could not be established (e.g., invalid credentials, network issues).  
+- *ConnectFailure* → tunnel could not be established (e.g., invalid credentials, network issues).
 
-**Important:**  
-In case of *ConnectFailure*, the provider will issue a warning but will **not reset** the value of connected.  
+**Important:**
+In case of *ConnectFailure*, the provider will issue a warning but will **not reset** the value of connected.
 To recover, set connected = false, apply, and then set it back to true to retry the connection.
 - `description` (String) Description of the subaccount.
 - `display_name` (String) Display name of the subaccount.
