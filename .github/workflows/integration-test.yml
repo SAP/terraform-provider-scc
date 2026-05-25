@@ -24,11 +24,7 @@ permissions:
 jobs:
   test:
     name: Integration Test for Terraform Provider
-    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-
-    environment:
-      name: scc
 
     env:
       SCC_USERNAME: ${{ secrets.SCC_USERNAME }}
