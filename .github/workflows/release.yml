@@ -20,6 +20,8 @@ jobs:
     secrets: inherit
   goreleaser:
     runs-on: ubuntu-latest
+    environment:
+      name: scc
     needs:
       - call-workflow-test
     steps:
