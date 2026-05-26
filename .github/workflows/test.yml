@@ -157,8 +157,6 @@ jobs:
     name: SonarCloud
     needs: test
     runs-on: ubuntu-latest
-    environment:
-      name: scc
     steps:
       - uses: actions/checkout@v6
         with:
