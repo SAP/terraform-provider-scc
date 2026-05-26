@@ -158,7 +158,7 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     environment:
-      name: scc
+          name: scc
     steps:
       - uses: actions/checkout@v6
         with:

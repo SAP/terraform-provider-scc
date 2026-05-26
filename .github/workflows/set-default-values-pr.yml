@@ -16,7 +16,7 @@ jobs:
   set-default-values:
     runs-on: ubuntu-latest
     environment:
-      name: scc
+          name: scc
     steps:
       - name: Add PR to default project
         uses: actions/add-to-project@v2.0.0
