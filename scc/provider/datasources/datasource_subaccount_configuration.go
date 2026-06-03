@@ -66,6 +66,14 @@ __Further documentation:__
 				MarkdownDescription: "Description of the subaccount.",
 				Computed:            true,
 			},
+			"auto_certificate_renewal": schema.BoolAttribute{
+				MarkdownDescription: "Indicates whether auto-renewal of the subaccount certificate is enabled (as of version 2.19).",
+				Computed:            true,
+			},
+			"is_managed": schema.BoolAttribute{
+				MarkdownDescription: "Indicates whether the subaccount is a managed subaccount (as of version 2.19).",
+				Computed:            true,
+			},
 			"tunnel": schema.SingleNestedAttribute{
 				MarkdownDescription: "Array of connection tunnels used by the subaccount.",
 				Computed:            true,
