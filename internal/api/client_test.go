@@ -112,7 +112,7 @@ func TestRestApiClient_BothAuthProvidedFails(t *testing.T) {
 	baseURL, _ := url.Parse("https://localhost")
 	certPEM, keyPEM, _, _ := generateSelfSignedCert()
 	// Provided both basic authentication(username/password) and certificate based authentication to the function
-	client, diags := NewRestApiClient(nil, baseURL, "user", "pass", certPEM, certPEM, keyPEM)
+	client, diags := NewRestApiClient(nil, baseURL, "user", "pass", certPEM, certPEM, keyPEM, false)
 
 	assert.Nil(t, client, "expected client to be nil when both auth methods are provided")
 	assert.True(t, diags.HasError(), "expected diagnostics to have error")
@@ -125,7 +125,7 @@ func TestRestApiClient_BothAuthProvidedFails(t *testing.T) {
 func TestRestApiClient_NoAuthProvidedFails(t *testing.T) {
 	baseURL, _ := url.Parse("https://localhost")
 	// Provided neither basic authentication(username/password) nor certificate based authentication to the function
-	client, diags := NewRestApiClient(nil, baseURL, "", "", nil, nil, nil)
+	client, diags := NewRestApiClient(nil, baseURL, "", "", nil, nil, nil, false)
 	assert.Nil(t, client)
 	assert.True(t, diags.HasError(), "expected error for no auth provided")
 
@@ -138,7 +138,7 @@ func TestRestApiClient_InvalidClientCertFails(t *testing.T) {
 	baseURL, _ := url.Parse("https://localhost")
 	// Generate invalid client certificate and key and provided to the function
 	invalidPEM := []byte("not a valid pem")
-	client, diags := NewRestApiClient(nil, baseURL, "", "", nil, invalidPEM, invalidPEM)
+	client, diags := NewRestApiClient(nil, baseURL, "", "", nil, invalidPEM, invalidPEM, false)
 
 	assert.Nil(t, client)
 	assert.True(t, diags.HasError(), "expected error for invalid client cert")
@@ -154,7 +154,7 @@ func TestRestApiClient_InvalidCACertFails(t *testing.T) {
 	certPEM, keyPEM, _, _ := generateSelfSignedCert()
 	// Generate invalid CA Certificate
 	invalidCA := []byte("not valid pem")
-	client, diags := NewRestApiClient(nil, baseURL, "", "", invalidCA, certPEM, keyPEM)
+	client, diags := NewRestApiClient(nil, baseURL, "", "", invalidCA, certPEM, keyPEM, false)
 
 	assert.Nil(t, client)
 	assert.True(t, diags.HasError(), "expected CA cert parse error")
@@ -286,7 +286,7 @@ func createBasicAuthClient(serverURL string) (*RestApiClient, diag.Diagnostics) 
 		return nil, diags
 	}
 
-	return NewRestApiClient(nil, baseURL, "testuser", "testpassword", nil, nil, nil)
+	return NewRestApiClient(nil, baseURL, "testuser", "testpassword", nil, nil, nil, false)
 }
 
 func createCertAuthClient(serverURL string, serverCACert, clientCert, clientKey []byte) (*RestApiClient, diag.Diagnostics) {
@@ -297,7 +297,7 @@ func createCertAuthClient(serverURL string, serverCACert, clientCert, clientKey 
 		return nil, diags
 	}
 
-	return NewRestApiClient(nil, baseURL, "", "", serverCACert, clientCert, clientKey)
+	return NewRestApiClient(nil, baseURL, "", "", serverCACert, clientCert, clientKey, false)
 }
 
 func TestRestApiClient_DoRequest_BinaryResponse(t *testing.T) {

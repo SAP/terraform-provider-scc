@@ -52,6 +52,7 @@ type CloudConnectorProviderData struct {
 	CaCertificate     types.String `tfsdk:"ca_certificate"`
 	ClientCertificate types.String `tfsdk:"client_certificate"`
 	ClientKey         types.String `tfsdk:"client_key"`
+	SkipSSLValidation types.Bool   `tfsdk:"skip_ssl_validation"`
 }
 
 func (c *CloudConnectorProvider) Metadata(_ context.Context, _ provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -107,6 +108,10 @@ Use **file(\"path/to/client_key.pem\")** in the provider block to load from a fi
 				Optional:  true,
 				Sensitive: true,
 			},
+			"skip_ssl_validation": schema.BoolAttribute{
+				MarkdownDescription: "Whether to skip SSL certificate validation when connecting to the Cloud Connector instance. This is not recommended for production use. Defaults to false.",
+				Optional:            true,
+			},
 		},
 	}
 }
@@ -123,10 +128,10 @@ func (c *CloudConnectorProvider) Configure(ctx context.Context, req provider.Con
 		return
 	}
 
-	instanceURL, username, password, caCertificate, clientCertificate, clientKey := resolveAttributes(config)
+	instanceURL, username, password, caCertificate, clientCertificate, clientKey, skipSSLValidation := resolveAttributes(config)
 
 	// Validate values from config
-	if !ValidateConfig(instanceURL, username, password, caCertificate, clientCertificate, clientKey, resp) {
+	if !ValidateConfig(instanceURL, username, password, caCertificate, clientCertificate, clientKey, skipSSLValidation, resp) {
 		return
 	}
 
@@ -136,7 +141,7 @@ func (c *CloudConnectorProvider) Configure(ctx context.Context, req provider.Con
 		return
 	}
 	// Create Client
-	client := CreateClient(c.HttpClient, parsedURL, username, password, caCertificate, clientCertificate, clientKey, resp)
+	client := CreateClient(c.HttpClient, parsedURL, username, password, caCertificate, clientCertificate, clientKey, skipSSLValidation, resp)
 	if client == nil {
 		return
 	}
@@ -152,13 +157,21 @@ func (c *CloudConnectorProvider) Configure(ctx context.Context, req provider.Con
 	resp.ActionData = client
 }
 
-func resolveAttributes(config CloudConnectorProviderData) (string, string, string, string, string, string) {
+func resolveAttributes(config CloudConnectorProviderData) (string, string, string, string, string, string, bool) {
 	return getNonEmptyAttribute(config.InstanceURL, "SCC_INSTANCE_URL"),
 		getNonEmptyAttribute(config.Username, "SCC_USERNAME"),
 		getNonEmptyAttribute(config.Password, "SCC_PASSWORD"),
 		getNonEmptyAttribute(config.CaCertificate, "SCC_CA_CERTIFICATE"),
 		getNonEmptyAttribute(config.ClientCertificate, "SCC_CLIENT_CERTIFICATE"),
-		getNonEmptyAttribute(config.ClientKey, "SCC_CLIENT_KEY")
+		getNonEmptyAttribute(config.ClientKey, "SCC_CLIENT_KEY"),
+		getBoolAttribute(config.SkipSSLValidation, "SCC_SKIP_SSL_VALIDATION")
+}
+
+func getBoolAttribute(attr types.Bool, envVar string) bool {
+	if !attr.IsNull() {
+		return attr.ValueBool()
+	}
+	return os.Getenv(envVar) == "true"
 }
 
 func getNonEmptyAttribute(attr types.String, envVar string) string {
@@ -168,7 +181,7 @@ func getNonEmptyAttribute(attr types.String, envVar string) string {
 	return os.Getenv(envVar)
 }
 
-func ValidateConfig(instanceURL, username, password, caCertificate, clientCertificate, clientKey string, resp *provider.ConfigureResponse) bool {
+func ValidateConfig(instanceURL, username, password, caCertificate, clientCertificate, clientKey string, skipSSLValidation bool, resp *provider.ConfigureResponse) bool {
 	if instanceURL == "" {
 		resp.Diagnostics.AddAttributeError(
 			path.Root("instance_url"),
@@ -186,6 +199,13 @@ func ValidateConfig(instanceURL, username, password, caCertificate, clientCertif
 	}
 	if clientKey != "" && !ValidatePEMBlock(clientKey, "client_key", "Client Key", resp) {
 		return false
+	}
+
+	if skipSSLValidation && caCertificate != "" {
+		resp.Diagnostics.AddWarning(
+			"CA Certificate Ignored",
+			"The ca_certificate attribute is ignored when skip_ssl_validation is set to true.",
+		)
 	}
 
 	basicAuth := username != "" && password != ""
@@ -220,7 +240,7 @@ func ParseInstanceURL(instanceURL string, resp *provider.ConfigureResponse) *url
 	}
 	return parsedURL
 }
-func CreateClient(httpClient *http.Client, parsedURL *url.URL, username, password, caCertificate, clientCertificate, clientKey string, resp *provider.ConfigureResponse) *api.RestApiClient {
+func CreateClient(httpClient *http.Client, parsedURL *url.URL, username, password, caCertificate, clientCertificate, clientKey string, skipSSLValidation bool, resp *provider.ConfigureResponse) *api.RestApiClient {
 	client, diags := api.NewRestApiClient(
 		httpClient,
 		parsedURL,
@@ -229,6 +249,7 @@ func CreateClient(httpClient *http.Client, parsedURL *url.URL, username, passwor
 		[]byte(caCertificate),
 		[]byte(clientCertificate),
 		[]byte(clientKey),
+		skipSSLValidation,
 	)
 	if diags.HasError() {
 		resp.Diagnostics.AddError(

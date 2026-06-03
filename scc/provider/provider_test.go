@@ -161,7 +161,7 @@ func TestSCCProvider_AllActions(t *testing.T) {
 
 func TestSCCProvider_MissingURL(t *testing.T) {
 	var resp tfprovider.ConfigureResponse
-	ok := provider.ValidateConfig("", "admin", "pass", "", "", "", &resp)
+	ok := provider.ValidateConfig("", "admin", "pass", "", "", "", false, &resp)
 
 	assert.False(t, ok)
 	assert.True(t, resp.Diagnostics.HasError())
@@ -173,7 +173,7 @@ func TestSCCProvider_ErrorParseURL(t *testing.T) {
 	// Build invalid URL using non-constant expression to bypass staticcheck
 	invalidURL := fmt.Sprintf("ht%ctp://bad-url", '!')
 
-	ok := provider.ValidateConfig(invalidURL, "admin", "pass", "", "", "", &resp)
+	ok := provider.ValidateConfig(invalidURL, "admin", "pass", "", "", "", false, &resp)
 
 	_, err := url.Parse(invalidURL)
 	if err != nil {
@@ -191,7 +191,7 @@ func TestSCCProvider_ErrorParseURL(t *testing.T) {
 
 func TestSCCProvider_BasicAuthOnly(t *testing.T) {
 	var resp tfprovider.ConfigureResponse
-	ok := provider.ValidateConfig("https://example.com", "admin", "pass", "", "", "", &resp)
+	ok := provider.ValidateConfig("https://example.com", "admin", "pass", "", "", "", false, &resp)
 
 	assert.True(t, ok)
 	assert.False(t, resp.Diagnostics.HasError())
@@ -199,7 +199,7 @@ func TestSCCProvider_BasicAuthOnly(t *testing.T) {
 
 func TestSCCProvider_ConflictingAuth(t *testing.T) {
 	var resp tfprovider.ConfigureResponse
-	ok := provider.ValidateConfig("https://example.com", "admin", "pass", "", "cert", "key", &resp)
+	ok := provider.ValidateConfig("https://example.com", "admin", "pass", "", "cert", "key", false, &resp)
 
 	assert.False(t, ok)
 	assert.True(t, resp.Diagnostics.HasError())
@@ -218,7 +218,7 @@ IwQYMBaAFENZqO6v+u1eZzZTVDNj0uUCkN8gMAwGA1UdEwQFMAMBAf8wCgYIKoZI
 zj0EAwIDSAAwRQIgTTb7LtqRQon2OHxMOyuvl+e8FQZXzSH14Yc7u9s9n9ICIQDE
 CEGH5OML6z7C7oCSys7ce4GkTbtJ4rNZoxVOxFwPvA==
 -----END CERTIFICATE-----`
-	ok := provider.ValidateConfig("https://example.com", "", "", dummyPEM, dummyPEM, dummyPEM, &resp)
+	ok := provider.ValidateConfig("https://example.com", "", "", dummyPEM, dummyPEM, dummyPEM, false, &resp)
 
 	assert.True(t, ok)
 	assert.False(t, resp.Diagnostics.HasError())
@@ -227,7 +227,7 @@ CEGH5OML6z7C7oCSys7ce4GkTbtJ4rNZoxVOxFwPvA==
 // Test that empty auth results in error.
 func TestSCCProvider_NoAuth(t *testing.T) {
 	var resp tfprovider.ConfigureResponse
-	ok := provider.ValidateConfig("https://example.com", "", "", "", "", "", &resp)
+	ok := provider.ValidateConfig("https://example.com", "", "", "", "", "", false, &resp)
 
 	assert.False(t, ok)
 	assert.True(t, resp.Diagnostics.HasError())
@@ -274,7 +274,7 @@ CEGH5OML6z7C7oCSys7ce4GkTbtJ4rNZoxVOxFwPvA==
 	username := "admin"
 	password := "password"
 
-	ok := provider.ValidateConfig(instanceURL, username, password, dummyPEM, dummyPEM, dummyPEM, &resp)
+	ok := provider.ValidateConfig(instanceURL, username, password, dummyPEM, dummyPEM, dummyPEM, false, &resp)
 
 	assert.False(t, ok)
 	assert.True(t, resp.Diagnostics.HasError())
@@ -373,7 +373,7 @@ func TestSCCProvider_CreateClient_Success(t *testing.T) {
 	httpClient := &http.Client{}
 	parsedURL := mustParseURL(t, "https://example.com")
 
-	client := provider.CreateClient(httpClient, parsedURL, "user", "pass", "", "", "", &resp)
+	client := provider.CreateClient(httpClient, parsedURL, "user", "pass", "", "", "", false, &resp)
 
 	assert.NotNil(t, client)
 	assert.False(t, resp.Diagnostics.HasError())
@@ -386,7 +386,7 @@ func TestSCCProvider_CreateClient_Failure_InvalidCert(t *testing.T) {
 
 	invalidCert := "-----BEGIN BAD-----"
 
-	client := provider.CreateClient(httpClient, parsedURL, "", "", invalidCert, invalidCert, invalidCert, &resp)
+	client := provider.CreateClient(httpClient, parsedURL, "", "", invalidCert, invalidCert, invalidCert, false, &resp)
 
 	assert.Nil(t, client)
 	assert.True(t, resp.Diagnostics.HasError())
