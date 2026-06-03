@@ -27,7 +27,7 @@ type ErrorResponse struct {
 	Message string `json:"message"`
 }
 
-func NewRestApiClient(client *http.Client, baseURL *url.URL, username, password string, caCertBytes []byte, clientCertBytes []byte, clientCertKey []byte) (*RestApiClient, diag.Diagnostics) {
+func NewRestApiClient(client *http.Client, baseURL *url.URL, username, password string, caCertBytes []byte, clientCertBytes []byte, clientCertKey []byte, skipSSLValidation bool) (*RestApiClient, diag.Diagnostics) {
 	useBasicAuth, useCertAuth := isBasicAuthProvided(username, password), isCertAuthProvided(clientCertBytes, clientCertKey)
 
 	diags := validateAuthMode(useBasicAuth, useCertAuth)
@@ -35,7 +35,7 @@ func NewRestApiClient(client *http.Client, baseURL *url.URL, username, password 
 		return nil, diags
 	}
 
-	tlsConfig, diags := buildTLSConfig(caCertBytes, clientCertBytes, clientCertKey, useCertAuth)
+	tlsConfig, diags := buildTLSConfig(caCertBytes, clientCertBytes, clientCertKey, useCertAuth, skipSSLValidation)
 	if diags.HasError() {
 		return nil, diags
 	}
@@ -78,23 +78,29 @@ func validateAuthMode(useBasicAuth, useCertAuth bool) diag.Diagnostics {
 	}
 }
 
-func buildTLSConfig(caCert, clientCert, clientKey []byte, useCertAuth bool) (*tls.Config, diag.Diagnostics) {
-	// if Certificate based authentication, it is mandatory to provide CA Certificate
+func buildTLSConfig(caCert, clientCert, clientKey []byte, useCertAuth bool, skipSSLValidation bool) (*tls.Config, diag.Diagnostics) {
+	// if Certificate based authentication without SSL skip, it is mandatory to provide CA Certificate
 	var diags diag.Diagnostics
-	if len(caCert) == 0 && useCertAuth {
+	if len(caCert) == 0 && useCertAuth && !skipSSLValidation {
 		diags.AddError("Missing CA Certificate", "When using certificate-based authentication, a CA certificate must be provided.")
 		return nil, diags
 	}
 
-	tlsConfig := &tls.Config{}
+	tlsConfig := &tls.Config{
+		InsecureSkipVerify: skipSSLValidation,
+	}
 
-	if len(caCert) > 0 {
+	if !skipSSLValidation && len(caCert) > 0 {
 		caCertPool := x509.NewCertPool()
+
 		if ok := caCertPool.AppendCertsFromPEM(caCert); !ok {
-			// If the CA certificate is not valid PEM-encoded data, return an error
-			diags.AddError("Invalid CA Certificate", "The provided CA certificate is not valid PEM-encoded data.")
+			diags.AddError(
+				"Invalid CA Certificate",
+				"The provided CA certificate is not valid PEM-encoded data.",
+			)
 			return nil, diags
 		}
+
 		tlsConfig.RootCAs = caCertPool
 	}
 

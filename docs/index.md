@@ -62,5 +62,6 @@ Use **file(\"path/to/client_key.pem\")** in the provider block to load from a fi
 - This key must match the client certificate provided in client_certificate attribute.
 - `instance_url` (String) The URL of the Cloud Connector instance. This can also be sourced from the `SCC_INSTANCE_URL` environment variable.
 - `password` (String, Sensitive) The password used for Basic Authentication with the Cloud Connector instance. This can also be sourced from the `SCC_PASSWORD` environment variable (useful when storing and retrieving secrets from secure stores).
+- `skip_ssl_validation` (Boolean) Whether to skip SSL certificate validation when connecting to the Cloud Connector instance. This can also be sourced from the `SCC_SKIP_SSL_VALIDATION` environment variable. This is not recommended for production use. Defaults to false.
 - `username` (String) The username used for Basic Authentication with the Cloud Connector instance. This can also be sourced from the `SCC_USERNAME` environment variable (useful when storing and retrieving secrets from secure stores).
 
