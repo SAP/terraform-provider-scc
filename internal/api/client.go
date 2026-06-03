@@ -79,9 +79,9 @@ func validateAuthMode(useBasicAuth, useCertAuth bool) diag.Diagnostics {
 }
 
 func buildTLSConfig(caCert, clientCert, clientKey []byte, useCertAuth bool, skipSSLValidation bool) (*tls.Config, diag.Diagnostics) {
-	// if Certificate based authentication, it is mandatory to provide CA Certificate
+	// if Certificate based authentication without SSL skip, it is mandatory to provide CA Certificate
 	var diags diag.Diagnostics
-	if len(caCert) == 0 && useCertAuth {
+	if len(caCert) == 0 && useCertAuth && !skipSSLValidation {
 		diags.AddError("Missing CA Certificate", "When using certificate-based authentication, a CA certificate must be provided.")
 		return nil, diags
 	}

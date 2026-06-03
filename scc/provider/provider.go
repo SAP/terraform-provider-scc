@@ -109,7 +109,7 @@ Use **file(\"path/to/client_key.pem\")** in the provider block to load from a fi
 				Sensitive: true,
 			},
 			"skip_ssl_validation": schema.BoolAttribute{
-				MarkdownDescription: "Whether to skip SSL certificate validation when connecting to the Cloud Connector instance. This is not recommended for production use. Defaults to false.",
+				MarkdownDescription: "Whether to skip SSL certificate validation when connecting to the Cloud Connector instance. This can also be sourced from the `SCC_SKIP_SSL_VALIDATION` environment variable. This is not recommended for production use. Defaults to false.",
 				Optional:            true,
 			},
 		},
