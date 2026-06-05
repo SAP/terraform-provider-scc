@@ -51,6 +51,12 @@ __Tips:__
 	* Administrator
 	* Subaccount Administrator
 
+__Operational notes:__
+* The SCC API serializes mutations on service channels within the same subaccount using an internal lock.
+  Creating multiple K8S service channels in parallel will fail with a ` + "`ConcurrentModificationException`" + ` (HTTP 400)
+  because concurrent requests contend on that lock. Use ` + "`-parallelism=1`" + ` or add explicit ` + "`depends_on`" + `
+  between channel resources to serialize creation.
+
 __Further documentation:__
 <https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/subaccount-service-channels>`,
 		Attributes: map[string]schema.Attribute{
@@ -205,9 +211,18 @@ func (r *SubaccountK8SServiceChannelResource) Create(ctx context.Context, req re
 
 	if !plan.Enabled.IsNull() {
 		endpoint = endpoints.GetSubaccountServiceChannelEndpoint(regionHost, subaccount, "K8S", id)
-		diags = r.enableSubaccountK8SServiceChannel(plan, *serviceChannelRespObj, endpoint+"/state")
-		resp.Diagnostics.Append(diags...)
-		if resp.Diagnostics.HasError() {
+		enableDiags := r.enableSubaccountK8SServiceChannel(plan, *serviceChannelRespObj, endpoint+"/state")
+		if enableDiags.HasError() {
+			partialModel, partialDiags := model.SubaccountK8SServiceChannelValueFrom(ctx, plan, *serviceChannelRespObj)
+			if !partialDiags.HasError() {
+				_ = resp.State.Set(ctx, partialModel)
+				_ = resp.Identity.Set(ctx, subaccountK8SServiceChannelResourceIdentityModel{
+					Subaccount: plan.Subaccount,
+					RegionHost: plan.RegionHost,
+					ID:         partialModel.ID,
+				})
+			}
+			resp.Diagnostics.Append(enableDiags...)
 			return
 		}
 

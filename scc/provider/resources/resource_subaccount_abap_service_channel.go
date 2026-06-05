@@ -53,6 +53,17 @@ __Tips:__
 	* Administrator
 	* Subaccount Administrator
 
+__Operational notes:__
+* The SCC API serializes mutations on service channels within the same subaccount using an internal lock.
+  Creating multiple ABAP service channels in parallel will fail with a ` + "`ConcurrentModificationException`" + ` (HTTP 400)
+  because concurrent requests contend on that lock. Use ` + "`-parallelism=1`" + ` or add explicit ` + "`depends_on`" + `
+  between channel resources to serialize creation.
+* Channel creation and activation are two separate API calls. If activation fails (e.g. HTTP 500 because SCC cannot
+  resolve or reach ` + "`abap_cloud_tenant_host`" + `), the channel already exists in SCC in a **disabled** state.
+  The provider saves this partial state so Terraform tracks the resource — no ` + "`terraform import`" + ` is needed.
+  Fix the DNS/connectivity issue and re-run ` + "`terraform apply`" + ` to enable the channel.
+* Use ` + "`enabled = false`" + ` as the safe default until SCC host DNS/connectivity to the ABAP tenant host is verified.
+
 __Further documentation:__
 <https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/subaccount-service-channels>`,
 		Attributes: map[string]schema.Attribute{
@@ -96,9 +107,13 @@ __Further documentation:__
 				Computed:            true,
 			},
 			"enabled": schema.BoolAttribute{
-				MarkdownDescription: "Boolean flag indicating whether the channel is enabled and therefore should be open.",
-				Optional:            true,
-				Computed:            true,
+				MarkdownDescription: "Boolean flag indicating whether the channel is enabled and therefore should be open. " +
+					"Defaults to `false`. Setting `enabled = false` is the recommended safe default until SCC host DNS/connectivity " +
+					"to `abap_cloud_tenant_host` is verified — activation is a separate API call and will fail with HTTP 500 if SCC " +
+					"cannot reach the ABAP tenant host. When activation fails the channel is left in a disabled state in SCC; " +
+					"the provider saves this state so no `terraform import` is needed. Fix connectivity and re-apply to enable.",
+				Optional: true,
+				Computed: true,
 			},
 			"connections": schema.Int64Attribute{
 				MarkdownDescription: "Maximal number of open connections.",
@@ -209,9 +224,22 @@ func (r *SubaccountABAPServiceChannelResource) Create(ctx context.Context, req r
 
 	if !plan.Enabled.IsNull() {
 		endpoint = endpoints.GetSubaccountServiceChannelEndpoint(regionHost, subaccount, "ABAPCloud", id)
-		diags = r.enableSubaccountABAPServiceChannel(plan, *serviceChannelRespObj, endpoint+"/state")
-		resp.Diagnostics.Append(diags...)
-		if resp.Diagnostics.HasError() {
+		enableDiags := r.enableSubaccountABAPServiceChannel(plan, *serviceChannelRespObj, endpoint+"/state")
+		if enableDiags.HasError() {
+			// The channel was created but enabling failed (e.g. HTTP 500 when SCC
+			// cannot reach the ABAP tenant host). Save the created-but-disabled state
+			// so Terraform tracks the resource and the user can fix connectivity and
+			// re-apply (or destroy) without having to run `terraform import` first.
+			partialModel, partialDiags := model.SubaccountABAPServiceChannelValueFrom(ctx, plan, *serviceChannelRespObj)
+			if !partialDiags.HasError() {
+				_ = resp.State.Set(ctx, partialModel)
+				_ = resp.Identity.Set(ctx, subaccountABAPServiceChannelResourceIdentityModel{
+					Subaccount: plan.Subaccount,
+					RegionHost: plan.RegionHost,
+					ID:         partialModel.ID,
+				})
+			}
+			resp.Diagnostics.Append(enableDiags...)
 			return
 		}
 

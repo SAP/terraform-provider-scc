@@ -52,6 +52,12 @@ __Tips:__
 	* Administrator
 	* Subaccount Administrator
 
+__Operational notes:__
+* The SCC API serializes mutations on system mapping resources within the same subaccount using an internal lock.
+  Creating multiple system mapping resources in parallel will fail with a ` + "`ConcurrentModificationException`" + ` (HTTP 400)
+  because concurrent requests contend on that lock. Use ` + "`-parallelism=1`" + ` or add explicit ` + "`depends_on`" + `
+  between resources to serialize creation.
+
 __Further documentation:__
 <https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/system-mapping-resources>`,
 		Attributes: map[string]schema.Attribute{
