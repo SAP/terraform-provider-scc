@@ -6,6 +6,11 @@ description: |-
   Tips:
   You must be assigned to the following roles:
   AdministratorSubaccount Administrator
+  Operational notes:
+  The SCC API serializes mutations on system mappings within the same subaccount using an internal lock.
+  Creating multiple system mappings in parallel will fail with a ConcurrentModificationException (HTTP 400)
+  because concurrent requests contend on that lock. Use -parallelism=1 or add explicit depends_on
+  between system mapping resources to serialize creation.
   Further documentation:
   https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/system-mappings
 ---
@@ -13,11 +18,17 @@ description: |-
 # scc_system_mapping (Resource)
 
 Cloud Connector System Mapping Resource.
-				
+
 __Tips:__
 * You must be assigned to the following roles:
 	* Administrator
 	* Subaccount Administrator
+
+__Operational notes:__
+* The SCC API serializes mutations on system mappings within the same subaccount using an internal lock.
+  Creating multiple system mappings in parallel will fail with a `ConcurrentModificationException` (HTTP 400)
+  because concurrent requests contend on that lock. Use `-parallelism=1` or add explicit `depends_on`
+  between system mapping resources to serialize creation.
 
 __Further documentation:__
 <https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/system-mappings>

@@ -54,11 +54,17 @@ func (r *SystemMappingResource) Metadata(ctx context.Context, req resource.Metad
 func (r *SystemMappingResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: `Cloud Connector System Mapping Resource.
-				
+
 __Tips:__
 * You must be assigned to the following roles:
 	* Administrator
 	* Subaccount Administrator
+
+__Operational notes:__
+* The SCC API serializes mutations on system mappings within the same subaccount using an internal lock.
+  Creating multiple system mappings in parallel will fail with a ` + "`ConcurrentModificationException`" + ` (HTTP 400)
+  because concurrent requests contend on that lock. Use ` + "`-parallelism=1`" + ` or add explicit ` + "`depends_on`" + `
+  between system mapping resources to serialize creation.
 
 __Further documentation:__
 <https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/system-mappings>`,

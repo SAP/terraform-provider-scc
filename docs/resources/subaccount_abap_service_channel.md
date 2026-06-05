@@ -6,6 +6,14 @@ description: |-
   Tips:
   You must be assigned to the following roles:
   AdministratorSubaccount Administrator
+  Operational notes:
+  The SCC API serializes mutations on service channels within the same subaccount using an internal lock.
+  Creating multiple ABAP service channels in parallel will fail with a ConcurrentModificationException (HTTP 400)
+  because concurrent requests contend on that lock. Use -parallelism=1 or add explicit depends_on
+  between channel resources to serialize creation.Channel creation and activation are two separate API calls. If activation fails (e.g. HTTP 500 because SCC cannot
+  resolve or reach abap_cloud_tenant_host), the channel already exists in SCC in a disabled state.
+  The provider saves this partial state so Terraform tracks the resource — no terraform import is needed.
+  Fix the DNS/connectivity issue and re-run terraform apply to enable the channel.Use enabled = false as the safe default until SCC host DNS/connectivity to the ABAP tenant host is verified.
   Further documentation:
   https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/subaccount-service-channels
 ---
@@ -18,6 +26,17 @@ __Tips:__
 * You must be assigned to the following roles:
 	* Administrator
 	* Subaccount Administrator
+
+__Operational notes:__
+* The SCC API serializes mutations on service channels within the same subaccount using an internal lock.
+  Creating multiple ABAP service channels in parallel will fail with a `ConcurrentModificationException` (HTTP 400)
+  because concurrent requests contend on that lock. Use `-parallelism=1` or add explicit `depends_on`
+  between channel resources to serialize creation.
+* Channel creation and activation are two separate API calls. If activation fails (e.g. HTTP 500 because SCC cannot
+  resolve or reach `abap_cloud_tenant_host`), the channel already exists in SCC in a **disabled** state.
+  The provider saves this partial state so Terraform tracks the resource — no `terraform import` is needed.
+  Fix the DNS/connectivity issue and re-run `terraform apply` to enable the channel.
+* Use `enabled = false` as the safe default until SCC host DNS/connectivity to the ABAP tenant host is verified.
 
 __Further documentation:__
 <https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/subaccount-service-channels>
@@ -49,7 +68,7 @@ resource "scc_subaccount_abap_service_channel" "scc_sc" {
 ### Optional
 
 - `comment` (String) Comment or short description. This property is not supplied if no comment was provided.
-- `enabled` (Boolean) Boolean flag indicating whether the channel is enabled and therefore should be open.
+- `enabled` (Boolean) Boolean flag indicating whether the channel is enabled and therefore should be open. Defaults to `false`. Setting `enabled = false` is the recommended safe default until SCC host DNS/connectivity to `abap_cloud_tenant_host` is verified — activation is a separate API call and will fail with HTTP 500 if SCC cannot reach the ABAP tenant host. When activation fails the channel is left in a disabled state in SCC; the provider saves this state so no `terraform import` is needed. Fix connectivity and re-apply to enable.
 
 ### Read-Only
 

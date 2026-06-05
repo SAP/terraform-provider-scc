@@ -95,6 +95,32 @@ func TestResourceSubaccountK8SServiceChannel(t *testing.T) {
 
 	})
 
+	t.Run("error path - enable fails with 500, partial state saved", func(t *testing.T) {
+		rec, user := tfutils.SetupVCR(t, "fixtures/resource_subaccount_k8s_service_channel_enable_fail")
+		if len(user.K8SCluster) == 0 {
+			user.K8SCluster = k8ClusterHost
+		}
+		if len(user.K8SService) == 0 {
+			user.K8SService = k8ServiceID
+		}
+		defer tfutils.StopQuietly(rec)
+
+		resource.Test(t, resource.TestCase{
+			IsUnitTest:               true,
+			ProtoV6ProviderFactories: tfutils.GetTestProviders(rec.GetDefaultClient()),
+			Steps: []resource.TestStep{
+				{
+					// enabled=true triggers the activate PUT which returns 500.
+					// The channel is created in SCC (id=23) but enable fails.
+					// The provider saves partial state so the framework's cleanup
+					// DELETE succeeds — without partial state the channel would leak in SCC.
+					Config:      tfutils.ProviderConfig(user) + ResourceSubaccountK8SServiceChannel("scc_k8_sc", regionHost, subaccount, user.K8SCluster, user.K8SService, 3000, 1, true, "Created"),
+					ExpectError: regexp.MustCompile(`(?i)Service channel could not be opened`),
+				},
+			},
+		})
+	})
+
 	t.Run("update path - description and connections update", func(t *testing.T) {
 		rec, user := tfutils.SetupVCR(t, "fixtures/resource_subaccount_k8s_service_channel_update")
 		if len(user.K8SCluster) == 0 {

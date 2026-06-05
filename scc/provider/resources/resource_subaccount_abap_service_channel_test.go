@@ -95,6 +95,38 @@ func TestResourceSubaccountABAPServiceChannel(t *testing.T) {
 
 	})
 
+	t.Run("error path - enable fails with 500, partial state saved", func(t *testing.T) {
+		rec, user := tfutils.SetupVCR(t, "fixtures/resource_subaccount_abap_service_channel_enable_fail")
+		if len(user.ABAPCloudTenantHost) == 0 {
+			user.ABAPCloudTenantHost = abapCloudTenantHost
+		}
+		defer tfutils.StopQuietly(rec)
+
+		resource.Test(t, resource.TestCase{
+			IsUnitTest:               true,
+			ProtoV6ProviderFactories: tfutils.GetTestProviders(rec.GetDefaultClient()),
+			Steps: []resource.TestStep{
+				{
+					// enabled=true triggers the activate PUT which returns 500.
+					// The channel is created in SCC (id=21) but enable fails.
+					// The provider saves partial state so the framework's cleanup
+					// DELETE succeeds — without partial state the channel would leak in SCC.
+					Config:      tfutils.ProviderConfig(user) + ResourceSubaccountABAPServiceChannel("scc_abap_sc", regionHost, subaccount, user.ABAPCloudTenantHost, 20, 1, true, "Created"),
+					ExpectError: regexp.MustCompile(`(?i)Service channel could not be opened`),
+				},
+				{
+					// Re-apply with enabled=false after fixing connectivity.
+					// Issues an Update (PUT on id=22) not a new POST, proving state was saved.
+					Config: tfutils.ProviderConfig(user) + ResourceSubaccountABAPServiceChannel("scc_abap_sc", regionHost, subaccount, user.ABAPCloudTenantHost, 20, 1, false, "Created"),
+					Check: resource.ComposeAggregateTestCheckFunc(
+						resource.TestCheckResourceAttr("scc_subaccount_abap_service_channel.scc_abap_sc", "enabled", "false"),
+						resource.TestCheckResourceAttrSet("scc_subaccount_abap_service_channel.scc_abap_sc", "id"),
+					),
+				},
+			},
+		})
+	})
+
 	t.Run("update path - comment and connections update", func(t *testing.T) {
 		rec, user := tfutils.SetupVCR(t, "fixtures/resource_subaccount_abap_service_channel_update")
 		if len(user.ABAPCloudTenantHost) == 0 {
