@@ -43,11 +43,14 @@ func (r *SubaccountUsingAuthResource) Metadata(ctx context.Context, req resource
 func (r *SubaccountUsingAuthResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		MarkdownDescription: `Cloud Connector Subaccount resource using Authentication Data.
-		
+
 __Tips:__
 * You must be assigned to the following roles:
 	* Administrator
 	* Subaccount Administrator
+
+__Important:__
+Automatic renewal requires two steps. Configure it in this resource, and also enable it in the SAP BTP Cockpit. For details, see KBA <https://me.sap.com/notes/0003632133>.
 
 __Further documentation:__
 <https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/subaccount>`,
@@ -112,6 +115,21 @@ To recover, set connected = false, apply, and then set it back to true to retry 
 				Optional: true,
 				Computed: true,
 				Default:  booldefault.StaticBool(true),
+			},
+			"is_managed": schema.BoolAttribute{
+				MarkdownDescription: "Indicates whether the subaccount to be created should be a managed subaccount (as of version 2.19). Cannot be changed after creation.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"auto_certificate_renewal": schema.BoolAttribute{
+				MarkdownDescription: "Indicates whether auto-renewal of the subaccount certificate should be enabled (as of version 2.19). " +
+					"When set to `true`, the Cloud Connector handles certificate renewal natively.\n\n" +
+					"**How native auto-renewal works:**\n" +
+					"- Renewal is triggered `n + 7` days before certificate expiry, where `n` is the alert threshold configured under *Observation Configuration → Alerting*.\n" +
+					"- If the renewal attempt fails, it is retried every 12 hours. If not successful within 7 days, the automatic renewal is cancelled.\n" +
+					"- No user credentials are required. Authentication is handled by the currently valid subaccount certificate, provided that an administrator has also enabled auto-renewal for the subaccount in the SAP BTP Cockpit.",
+				Optional: true,
+				Computed: true,
 			},
 			"tunnel": schema.SingleNestedAttribute{
 				MarkdownDescription: "Details of connection tunnel used by the subaccount.",
@@ -272,6 +290,14 @@ func (r *SubaccountUsingAuthResource) Create(ctx context.Context, req resource.C
 		"displayName":        plan.DisplayName.ValueString(),
 	}
 
+	if !plan.IsManaged.IsNull() && !plan.IsManaged.IsUnknown() {
+		planBody["isManaged"] = plan.IsManaged.ValueBool()
+	}
+
+	if !plan.AutoCertificateRenewal.IsNull() && !plan.AutoCertificateRenewal.IsUnknown() {
+		planBody["autoCertRenewal"] = plan.AutoCertificateRenewal.ValueBool()
+	}
+
 	diags = helpers.RequestAndUnmarshal(r.Client, &respObj, "POST", endpoint, planBody, true)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -366,6 +392,8 @@ func (r *SubaccountUsingAuthResource) Read(ctx context.Context, req resource.Rea
 	}
 
 	responseModel.AuthenticationData = state.AuthenticationData
+	responseModel.AutoCertificateRenewal = state.AutoCertificateRenewal
+	responseModel.IsManaged = state.IsManaged
 
 	diags = resp.State.Set(ctx, &responseModel)
 	resp.Diagnostics.Append(diags...)
@@ -408,6 +436,10 @@ func (r *SubaccountUsingAuthResource) Update(ctx context.Context, req resource.U
 		"locationID":  plan.LocationID.ValueString(),
 		"displayName": plan.DisplayName.ValueString(),
 		"description": plan.Description.ValueString(),
+	}
+
+	if !plan.AutoCertificateRenewal.IsNull() && !plan.AutoCertificateRenewal.IsUnknown() {
+		updateBody["autoCertRenewal"] = plan.AutoCertificateRenewal.ValueBool()
 	}
 
 	diags = helpers.RequestAndUnmarshal(r.Client, &respObj, "PUT", endpoint, updateBody, true)
@@ -529,6 +561,13 @@ func validateAuthDataInputs(plan, state model.SubaccountUsingAuthConfig) diag.Di
 			"failed to update the cloud connector subaccount due to mismatched configuration values",
 		)
 		return diags
+	}
+	if !plan.IsManaged.IsNull() && !state.IsManaged.IsNull() &&
+		plan.IsManaged.ValueBool() != state.IsManaged.ValueBool() {
+		diags.AddError(
+			"Update Failed",
+			"`is_managed` cannot be changed after the subaccount has been created.",
+		)
 	}
 	return diags
 }

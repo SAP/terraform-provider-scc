@@ -38,6 +38,8 @@ func TestResourceSubaccount(t *testing.T) {
 						resource.TestCheckResourceAttr("scc_subaccount.scc_sa", "description", "subaccount added via terraform tests"),
 						resource.TestCheckResourceAttr("scc_subaccount.scc_sa", "location_id", ""),
 						resource.TestCheckResourceAttr("scc_subaccount.scc_sa", "auto_renew_before_days", "14"),
+						resource.TestCheckNoResourceAttr("scc_subaccount.scc_sa", "is_managed"),
+						resource.TestCheckNoResourceAttr("scc_subaccount.scc_sa", "auto_certificate_renewal"),
 
 						resource.TestMatchResourceAttr("scc_subaccount.scc_sa", "tunnel.connected_since", tfutils.RegexpValidTimeStamp),
 						resource.TestCheckResourceAttr("scc_subaccount.scc_sa", "tunnel.connections", "0"),

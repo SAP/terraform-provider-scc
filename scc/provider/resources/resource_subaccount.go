@@ -20,7 +20,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64default"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -131,16 +130,29 @@ To recover, set connected = false, apply, and then set it back to true to retry 
 				Default:  booldefault.StaticBool(true),
 			},
 			"auto_renew_before_days": schema.Int64Attribute{
-				MarkdownDescription: "Number of days before certificate expiration when the certificate should be renewed automatically. Minimum is 7 days, maximum is 45 days.",
-				Optional:            true,
-				Computed:            true,
-				Default:             int64default.StaticInt64(14),
+				MarkdownDescription: "Number of days before certificate expiration when the provider should renew the certificate automatically. Minimum is 7 days, maximum is 45 days.\n\n" +
+					"This check is skipped when `auto_certificate_renewal` is `true`, because the Cloud Connector handles renewal natively in that case.",
+				Optional: true,
+				Computed: true,
+				Default:  int64default.StaticInt64(14),
 				Validators: []validator.Int64{
 					int64validator.Between(7, 45),
 				},
-				PlanModifiers: []planmodifier.Int64{
-					int64planmodifier.UseStateForUnknown(),
-				},
+			},
+			"is_managed": schema.BoolAttribute{
+				MarkdownDescription: "Indicates whether the subaccount to be created should be a managed subaccount (as of version 2.19). Cannot be changed after creation.",
+				Optional:            true,
+				Computed:            true,
+			},
+			"auto_certificate_renewal": schema.BoolAttribute{
+				MarkdownDescription: "Indicates whether auto-renewal of the subaccount certificate should be enabled (as of version 2.19). " +
+					"When set to `true`, the Cloud Connector handles certificate renewal natively and the provider-side `auto_renew_before_days` threshold check is skipped.\n\n" +
+					"**How native auto-renewal works:**\n" +
+					"- Renewal is triggered `n + 7` days before certificate expiry, where `n` is the alert threshold configured under *Observation Configuration → Alerting*.\n" +
+					"- If the renewal attempt fails, it is retried every 12 hours. If not successful within 7 days, the automatic renewal is cancelled.\n" +
+					"- No user credentials are required. Authentication is handled by the currently valid subaccount certificate, provided that an administrator has also enabled auto-renewal for the subaccount in the SAP BTP Cockpit.",
+				Optional: true,
+				Computed: true,
 			},
 			"tunnel": schema.SingleNestedAttribute{
 				MarkdownDescription: "Details of connection tunnel used by the subaccount.",
@@ -308,6 +320,14 @@ func (r *SubaccountResource) Create(ctx context.Context, req resource.CreateRequ
 		"displayName":   plan.DisplayName.ValueString(),
 	}
 
+	if !plan.IsManaged.IsNull() && !plan.IsManaged.IsUnknown() {
+		planBody["isManaged"] = plan.IsManaged.ValueBool()
+	}
+
+	if !plan.AutoCertificateRenewal.IsNull() && !plan.AutoCertificateRenewal.IsUnknown() {
+		planBody["autoCertRenewal"] = plan.AutoCertificateRenewal.ValueBool()
+	}
+
 	diags = helpers.RequestAndUnmarshal(r.Client, &respObj, "POST", endpoint, planBody, true)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -387,7 +407,8 @@ func (r *SubaccountResource) Read(ctx context.Context, req resource.ReadRequest,
 		return
 	}
 
-	shouldRenew := shouldRenewCertificate(respObj.Tunnel.SubaccountCertificate.NotAfterTimeStamp, state.AutoRenewBeforeDays.ValueInt64())
+	shouldRenew := !state.AutoCertificateRenewal.ValueBool() &&
+		shouldRenewCertificate(respObj.Tunnel.SubaccountCertificate.NotAfterTimeStamp, state.AutoRenewBeforeDays.ValueInt64())
 
 	if shouldRenew {
 		renewedRespObj, diags := r.renewCertificate(state, regionHost, subaccount)
@@ -418,6 +439,8 @@ func (r *SubaccountResource) Read(ctx context.Context, req resource.ReadRequest,
 
 	responseModel.CloudUser = state.CloudUser
 	responseModel.CloudPassword = state.CloudPassword
+	responseModel.AutoCertificateRenewal = state.AutoCertificateRenewal
+	responseModel.IsManaged = state.IsManaged
 
 	if state.AutoRenewBeforeDays.IsNull() {
 		responseModel.AutoRenewBeforeDays = types.Int64Value(14)
@@ -468,6 +491,10 @@ func (r *SubaccountResource) Update(ctx context.Context, req resource.UpdateRequ
 		"description": plan.Description.ValueString(),
 	}
 
+	if !plan.AutoCertificateRenewal.IsNull() && !plan.AutoCertificateRenewal.IsUnknown() {
+		updateBody["autoCertRenewal"] = plan.AutoCertificateRenewal.ValueBool()
+	}
+
 	diags = helpers.RequestAndUnmarshal(r.Client, &respObj, "PUT", endpoint, updateBody, true)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -493,7 +520,8 @@ func (r *SubaccountResource) Update(ctx context.Context, req resource.UpdateRequ
 		)
 	}
 
-	if !plan.AutoRenewBeforeDays.IsNull() && !plan.AutoRenewBeforeDays.IsUnknown() {
+	if !plan.AutoCertificateRenewal.ValueBool() &&
+		!plan.AutoRenewBeforeDays.IsNull() && !plan.AutoRenewBeforeDays.IsUnknown() {
 		if shouldRenewCertificate(respObj.Tunnel.SubaccountCertificate.NotAfterTimeStamp, plan.AutoRenewBeforeDays.ValueInt64()) {
 			renewedRespObj, diags := r.renewCertificate(plan, regionHost, subaccount)
 			resp.Diagnostics.Append(diags...)
@@ -551,6 +579,13 @@ func validateUpdateInputs(plan, state model.SubaccountConfig) diag.Diagnostics {
 			"failed to update the cloud connector subaccount due to mismatched configuration values",
 		)
 		return diags
+	}
+	if !plan.IsManaged.IsNull() && !state.IsManaged.IsNull() &&
+		plan.IsManaged.ValueBool() != state.IsManaged.ValueBool() {
+		diags.AddError(
+			"Update Failed",
+			"`is_managed` cannot be changed after the subaccount has been created.",
+		)
 	}
 	return diags
 }

@@ -104,27 +104,31 @@ type SubaccountsConfig struct {
 }
 
 type SubaccountConfig struct {
-	RegionHost          types.String `tfsdk:"region_host"`
-	Subaccount          types.String `tfsdk:"subaccount"`
-	CloudUser           types.String `tfsdk:"cloud_user"`
-	CloudPassword       types.String `tfsdk:"cloud_password"`
-	LocationID          types.String `tfsdk:"location_id"`
-	DisplayName         types.String `tfsdk:"display_name"`
-	Description         types.String `tfsdk:"description"`
-	Tunnel              types.Object `tfsdk:"tunnel"`
-	Connected           types.Bool   `tfsdk:"connected"`
-	AutoRenewBeforeDays types.Int64  `tfsdk:"auto_renew_before_days"`
+	RegionHost             types.String `tfsdk:"region_host"`
+	Subaccount             types.String `tfsdk:"subaccount"`
+	CloudUser              types.String `tfsdk:"cloud_user"`
+	CloudPassword          types.String `tfsdk:"cloud_password"`
+	LocationID             types.String `tfsdk:"location_id"`
+	DisplayName            types.String `tfsdk:"display_name"`
+	Description            types.String `tfsdk:"description"`
+	Tunnel                 types.Object `tfsdk:"tunnel"`
+	Connected              types.Bool   `tfsdk:"connected"`
+	AutoRenewBeforeDays    types.Int64  `tfsdk:"auto_renew_before_days"`
+	IsManaged              types.Bool   `tfsdk:"is_managed"`
+	AutoCertificateRenewal types.Bool   `tfsdk:"auto_certificate_renewal"`
 }
 
 type SubaccountUsingAuthConfig struct {
-	RegionHost         types.String `tfsdk:"region_host"`
-	Subaccount         types.String `tfsdk:"subaccount"`
-	AuthenticationData types.String `tfsdk:"authentication_data"`
-	LocationID         types.String `tfsdk:"location_id"`
-	DisplayName        types.String `tfsdk:"display_name"`
-	Description        types.String `tfsdk:"description"`
-	Tunnel             types.Object `tfsdk:"tunnel"`
-	Connected          types.Bool   `tfsdk:"connected"`
+	RegionHost             types.String `tfsdk:"region_host"`
+	Subaccount             types.String `tfsdk:"subaccount"`
+	AuthenticationData     types.String `tfsdk:"authentication_data"`
+	LocationID             types.String `tfsdk:"location_id"`
+	DisplayName            types.String `tfsdk:"display_name"`
+	Description            types.String `tfsdk:"description"`
+	Tunnel                 types.Object `tfsdk:"tunnel"`
+	Connected              types.Bool   `tfsdk:"connected"`
+	IsManaged              types.Bool   `tfsdk:"is_managed"`
+	AutoCertificateRenewal types.Bool   `tfsdk:"auto_certificate_renewal"`
 }
 
 type SubaccountListFilterModel struct {
@@ -294,14 +298,30 @@ func SubaccountResourceValueFrom(ctx context.Context, plan SubaccountConfig, val
 		return SubaccountConfig{}, diags
 	}
 
+	autoCertRenewal := types.BoolNull()
+	if value.AutoCertificateRenewal != nil {
+		autoCertRenewal = types.BoolValue(*value.AutoCertificateRenewal)
+	} else if !plan.AutoCertificateRenewal.IsNull() && !plan.AutoCertificateRenewal.IsUnknown() {
+		autoCertRenewal = plan.AutoCertificateRenewal
+	}
+
+	isManaged := types.BoolNull()
+	if value.IsManaged != nil {
+		isManaged = types.BoolValue(*value.IsManaged)
+	} else if !plan.IsManaged.IsNull() && !plan.IsManaged.IsUnknown() {
+		isManaged = plan.IsManaged
+	}
+
 	model := &SubaccountConfig{
-		RegionHost:  types.StringValue(value.RegionHost),
-		Subaccount:  types.StringValue(value.Subaccount),
-		LocationID:  types.StringValue(value.LocationID),
-		DisplayName: types.StringValue(value.DisplayName),
-		Description: types.StringValue(value.Description),
-		Tunnel:      tunnel,
-		Connected:   types.BoolValue(value.Tunnel.State == "Connected"),
+		RegionHost:             types.StringValue(value.RegionHost),
+		Subaccount:             types.StringValue(value.Subaccount),
+		LocationID:             types.StringValue(value.LocationID),
+		DisplayName:            types.StringValue(value.DisplayName),
+		Description:            types.StringValue(value.Description),
+		Tunnel:                 tunnel,
+		Connected:              types.BoolValue(value.Tunnel.State == "Connected"),
+		IsManaged:              isManaged,
+		AutoCertificateRenewal: autoCertRenewal,
 	}
 	return *model, diag.Diagnostics{}
 }
@@ -368,14 +388,30 @@ func SubaccountUsingAuthResourceValueFrom(ctx context.Context, plan SubaccountUs
 		return SubaccountUsingAuthConfig{}, diags
 	}
 
+	autoCertRenewal := types.BoolNull()
+	if value.AutoCertificateRenewal != nil {
+		autoCertRenewal = types.BoolValue(*value.AutoCertificateRenewal)
+	} else if !plan.AutoCertificateRenewal.IsNull() && !plan.AutoCertificateRenewal.IsUnknown() {
+		autoCertRenewal = plan.AutoCertificateRenewal
+	}
+
+	isManaged := types.BoolNull()
+	if value.IsManaged != nil {
+		isManaged = types.BoolValue(*value.IsManaged)
+	} else if !plan.IsManaged.IsNull() && !plan.IsManaged.IsUnknown() {
+		isManaged = plan.IsManaged
+	}
+
 	model := &SubaccountUsingAuthConfig{
-		RegionHost:  types.StringValue(value.RegionHost),
-		Subaccount:  types.StringValue(value.Subaccount),
-		LocationID:  types.StringValue(value.LocationID),
-		DisplayName: types.StringValue(value.DisplayName),
-		Description: types.StringValue(value.Description),
-		Tunnel:      tunnel,
-		Connected:   types.BoolValue(value.Tunnel.State == "Connected"),
+		RegionHost:             types.StringValue(value.RegionHost),
+		Subaccount:             types.StringValue(value.Subaccount),
+		LocationID:             types.StringValue(value.LocationID),
+		DisplayName:            types.StringValue(value.DisplayName),
+		Description:            types.StringValue(value.Description),
+		Tunnel:                 tunnel,
+		Connected:              types.BoolValue(value.Tunnel.State == "Connected"),
+		IsManaged:              isManaged,
+		AutoCertificateRenewal: autoCertRenewal,
 	}
 	return *model, diag.Diagnostics{}
 }
