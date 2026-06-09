@@ -37,6 +37,9 @@ resource "scc_subaccount" "scc_sa" {
   cloud_password = "Cloud Password"
   display_name   = "Subaccount_Terraform"
   description    = "Description for Subaccount added via Terraform."
+  // Following attributes are applicable for Cloud Connector version 2.19
+  auto_certificate_renewal = true
+  is_managed = true
 }
 ```
 
@@ -50,7 +53,15 @@ resource "scc_subaccount" "scc_sa" {
 
 ### Optional
 
-- `auto_renew_before_days` (Number) Number of days before certificate expiration when the certificate should be renewed automatically. Minimum is 7 days, maximum is 45 days.
+- `auto_certificate_renewal` (Boolean) Indicates whether auto-renewal of the subaccount certificate should be enabled (as of version 2.19). When set to `true`, the Cloud Connector handles certificate renewal natively and the provider-side `auto_renew_before_days` threshold check is skipped.
+
+**How native auto-renewal works:**
+- Renewal is triggered `n + 7` days before certificate expiry, where `n` is the alert threshold configured under *Observation Configuration → Alerting*.
+- If the renewal attempt fails, it is retried every 12 hours. If not successful within 7 days, the automatic renewal is cancelled.
+- No user credentials are required. Authentication is handled by the currently valid subaccount certificate, provided that an administrator has also enabled auto-renewal for the subaccount in the SAP BTP Cockpit.
+- `auto_renew_before_days` (Number) Number of days before certificate expiration when the provider should renew the certificate automatically. Minimum is 7 days, maximum is 45 days.
+
+This check is skipped when `auto_certificate_renewal` is `true`, because the Cloud Connector handles renewal natively in that case.
 - `cloud_password` (String, Sensitive) Password for the cloud user.
 
 **Required when creating the resource.**
@@ -78,6 +89,7 @@ In case of *ConnectFailure*, the provider will issue a warning but will **not re
 To recover, set connected = false, apply, and then set it back to true to retry the connection.
 - `description` (String) Description of the subaccount.
 - `display_name` (String) Display name of the subaccount.
+- `is_managed` (Boolean) Indicates whether the subaccount to be created should be a managed subaccount (as of version 2.19). Cannot be changed after creation.
 - `location_id` (String) Location identifier for the Cloud Connector instance.
 
 ### Read-Only
