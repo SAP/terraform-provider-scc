@@ -301,11 +301,15 @@ func SubaccountResourceValueFrom(ctx context.Context, plan SubaccountConfig, val
 	autoCertRenewal := types.BoolNull()
 	if value.AutoCertificateRenewal != nil {
 		autoCertRenewal = types.BoolValue(*value.AutoCertificateRenewal)
+	} else if !plan.AutoCertificateRenewal.IsNull() && !plan.AutoCertificateRenewal.IsUnknown() {
+		autoCertRenewal = plan.AutoCertificateRenewal
 	}
 
 	isManaged := types.BoolNull()
 	if value.IsManaged != nil {
 		isManaged = types.BoolValue(*value.IsManaged)
+	} else if !plan.IsManaged.IsNull() && !plan.IsManaged.IsUnknown() {
+		isManaged = plan.IsManaged
 	}
 
 	model := &SubaccountConfig{
@@ -387,11 +391,15 @@ func SubaccountUsingAuthResourceValueFrom(ctx context.Context, plan SubaccountUs
 	autoCertRenewal := types.BoolNull()
 	if value.AutoCertificateRenewal != nil {
 		autoCertRenewal = types.BoolValue(*value.AutoCertificateRenewal)
+	} else if !plan.AutoCertificateRenewal.IsNull() && !plan.AutoCertificateRenewal.IsUnknown() {
+		autoCertRenewal = plan.AutoCertificateRenewal
 	}
 
 	isManaged := types.BoolNull()
 	if value.IsManaged != nil {
 		isManaged = types.BoolValue(*value.IsManaged)
+	} else if !plan.IsManaged.IsNull() && !plan.IsManaged.IsUnknown() {
+		isManaged = plan.IsManaged
 	}
 
 	model := &SubaccountUsingAuthConfig{

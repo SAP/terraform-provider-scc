@@ -392,6 +392,8 @@ func (r *SubaccountUsingAuthResource) Read(ctx context.Context, req resource.Rea
 	}
 
 	responseModel.AuthenticationData = state.AuthenticationData
+	responseModel.AutoCertificateRenewal = state.AutoCertificateRenewal
+	responseModel.IsManaged = state.IsManaged
 
 	diags = resp.State.Set(ctx, &responseModel)
 	resp.Diagnostics.Append(diags...)
