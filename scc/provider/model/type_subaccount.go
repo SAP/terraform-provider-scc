@@ -11,12 +11,14 @@ import (
 )
 
 type SubaccountData struct {
-	RegionHost  types.String `tfsdk:"region_host"`
-	Subaccount  types.String `tfsdk:"subaccount"`
-	LocationID  types.String `tfsdk:"location_id"`
-	DisplayName types.String `tfsdk:"display_name"`
-	Description types.String `tfsdk:"description"`
-	Tunnel      types.Object `tfsdk:"tunnel"`
+	RegionHost             types.String `tfsdk:"region_host"`
+	Subaccount             types.String `tfsdk:"subaccount"`
+	LocationID             types.String `tfsdk:"location_id"`
+	DisplayName            types.String `tfsdk:"display_name"`
+	Description            types.String `tfsdk:"description"`
+	Tunnel                 types.Object `tfsdk:"tunnel"`
+	AutoCertificateRenewal types.Bool   `tfsdk:"auto_certificate_renewal"`
+	IsManaged              types.Bool   `tfsdk:"is_managed"`
 }
 
 type SubaccountTunnelData struct {
@@ -207,13 +209,25 @@ func SubaccountDataSourceValueFrom(ctx context.Context, value apiobjects.Subacco
 		return SubaccountData{}, diags
 	}
 
+	autoCertRenewal := types.BoolNull()
+	if value.AutoCertificateRenewal != nil {
+		autoCertRenewal = types.BoolValue(*value.AutoCertificateRenewal)
+	}
+
+	isManaged := types.BoolNull()
+	if value.IsManaged != nil {
+		isManaged = types.BoolValue(*value.IsManaged)
+	}
+
 	model := &SubaccountData{
-		RegionHost:  types.StringValue(value.RegionHost),
-		Subaccount:  types.StringValue(value.Subaccount),
-		LocationID:  types.StringValue(value.LocationID),
-		DisplayName: types.StringValue(value.DisplayName),
-		Description: types.StringValue(value.Description),
-		Tunnel:      tunnel,
+		RegionHost:             types.StringValue(value.RegionHost),
+		Subaccount:             types.StringValue(value.Subaccount),
+		LocationID:             types.StringValue(value.LocationID),
+		DisplayName:            types.StringValue(value.DisplayName),
+		Description:            types.StringValue(value.Description),
+		AutoCertificateRenewal: autoCertRenewal,
+		IsManaged:              isManaged,
+		Tunnel:                 tunnel,
 	}
 	return *model, diag.Diagnostics{}
 }

@@ -1,12 +1,14 @@
 package apiobjects
 
 type Subaccount struct {
-	RegionHost  string           `json:"regionHost"`
-	Subaccount  string           `json:"subaccount"`
-	LocationID  string           `json:"locationID"`
-	DisplayName string           `json:"displayName"`
-	Description string           `json:"description"`
-	Tunnel      SubaccountTunnel `json:"tunnel"`
+	RegionHost             string           `json:"regionHost"`
+	Subaccount             string           `json:"subaccount"`
+	LocationID             string           `json:"locationID"`
+	DisplayName            string           `json:"displayName"`
+	Description            string           `json:"description"`
+	AutoCertificateRenewal *bool            `json:"autoCertRenewal,omitempty"`
+	IsManaged              *bool            `json:"isManaged,omitempty"`
+	Tunnel                 SubaccountTunnel `json:"tunnel"`
 }
 
 type Subaccounts struct {

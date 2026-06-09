@@ -43,8 +43,10 @@ data "scc_subaccount_configuration" "by_id" {
 
 ### Read-Only
 
+- `auto_certificate_renewal` (Boolean) Indicates whether auto-renewal of the subaccount certificate is enabled (as of version 2.19).
 - `description` (String) Description of the subaccount.
 - `display_name` (String) Display name of the subaccount.
+- `is_managed` (Boolean) Indicates whether the subaccount is a managed subaccount (as of version 2.19).
 - `location_id` (String) Location identifier for the Cloud Connector instance. This property is not available if the default location ID is in use.
 - `tunnel` (Attributes) Array of connection tunnels used by the subaccount. (see [below for nested schema](#nestedatt--tunnel))
 
