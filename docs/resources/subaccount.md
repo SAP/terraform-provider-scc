@@ -39,7 +39,7 @@ resource "scc_subaccount" "scc_sa" {
   description    = "Description for Subaccount added via Terraform."
   // Following attributes are applicable for Cloud Connector version 2.19
   auto_certificate_renewal = true
-  is_managed = true
+  is_managed               = true
 }
 ```
 
