@@ -81,10 +81,19 @@ func ProxySettingsResourceValueFrom(ctx context.Context, plan ProxySettingsResou
 		portValue = types.Int64Value(port)
 	}
 
+	const maskedPassword = "***"
 	if value.Password == "" {
 		passwordValue = types.StringNull()
+	} else if value.Password == maskedPassword && !plan.Password.IsNull() && !plan.Password.IsUnknown() {
+		// API masks the real value; preserve what the caller already knows.
+		passwordValue = plan.Password
+	} else if value.Password == maskedPassword {
+		// Import case: API indicates a password is configured but the real value is
+		// unrecoverable. Store the masked sentinel so state reflects that a password
+		// exists rather than falsely indicating none is set.
+		passwordValue = types.StringValue(maskedPassword)
 	} else {
-		passwordValue = plan.Password // Preserve the password from the plan since it's write-only and not returned by the API
+		passwordValue = types.StringValue(value.Password)
 	}
 
 	model := &ProxySettingsResourceConfig{
