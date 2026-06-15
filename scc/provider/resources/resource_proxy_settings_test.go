@@ -110,12 +110,15 @@ func TestResourceProxySettings(t *testing.T) {
 	})
 
 	t.Run("error path - invalid import id", func(t *testing.T) {
+		rec, user := tfutils.SetupVCR(t, "fixtures/resource_proxy_settings_invalid_import")
+		defer tfutils.StopQuietly(rec)
+
 		resource.Test(t, resource.TestCase{
 			IsUnitTest:               true,
-			ProtoV6ProviderFactories: tfutils.GetTestProviders(nil),
+			ProtoV6ProviderFactories: tfutils.GetTestProviders(rec.GetDefaultClient()),
 			Steps: []resource.TestStep{
 				{
-					Config: ResourceProxySettings(
+					Config: tfutils.ProviderConfig(user) + ResourceProxySettings(
 						"scc_ps",
 						"testHost",
 						123,
@@ -127,10 +130,9 @@ func TestResourceProxySettings(t *testing.T) {
 					ResourceName:  "scc_proxy_settings.scc_ps",
 					ImportState:   true,
 					ImportStateId: "invalid",
-					ExpectError:   regexp.MustCompile("Expected import identifier"),
-					ImportStateVerifyIgnore: []string{
-						"password",
-					},
+					ExpectError: regexp.MustCompile(
+						`Expected import identifier`,
+					),
 				},
 			},
 		})
