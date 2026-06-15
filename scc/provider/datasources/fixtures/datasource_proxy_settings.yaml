@@ -1,0 +1,411 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: https://redacted.instance.url
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+        url: https://redacted.instance.url/api/v1/connector/version
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 20
+        uncompressed: false
+        body: '{"version":"2.18.2"}'
+        headers:
+            Cache-Control:
+                - max-age=3600
+            Content-Length:
+                - "20"
+            Content-Type:
+                - application/json
+            Date:
+                - Mon, 15 Jun 2026 08:52:17 GMT
+            Server:
+                - nginx/1.27.5
+            Set-Cookie:
+                - redacted
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            X-Csrf-Token:
+                - redacted
+            X-Vcap-Request-Id:
+                - f5bbffb3-0fd3-4b12-4d74-469f67d21c29
+        status: 200 OK
+        code: 200
+        duration: 943.882584ms
+    - id: 1
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: https://redacted.instance.url
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+        url: https://redacted.instance.url/api/v1/configuration/connector/proxy
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 57
+        uncompressed: false
+        body: '{"host":"aaa","port":"111","user":"aaa","password":"***"}'
+        headers:
+            Cache-Control:
+                - no-store
+            Content-Length:
+                - "57"
+            Content-Type:
+                - application/json
+            Date:
+                - Mon, 15 Jun 2026 08:52:17 GMT
+            Server:
+                - nginx/1.27.5
+            Set-Cookie:
+                - redacted
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            X-Csrf-Token:
+                - redacted
+            X-Vcap-Request-Id:
+                - 00a6f317-3ceb-4109-79a2-fe9ddb20636a
+        status: 200 OK
+        code: 200
+        duration: 242.103209ms
+    - id: 2
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: https://redacted.instance.url
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+        url: https://redacted.instance.url/api/v1/connector/version
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 20
+        uncompressed: false
+        body: '{"version":"2.18.2"}'
+        headers:
+            Cache-Control:
+                - max-age=3600
+            Content-Length:
+                - "20"
+            Content-Type:
+                - application/json
+            Date:
+                - Mon, 15 Jun 2026 08:52:18 GMT
+            Server:
+                - nginx/1.27.5
+            Set-Cookie:
+                - redacted
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            X-Csrf-Token:
+                - redacted
+            X-Vcap-Request-Id:
+                - 0418ffdf-7961-464a-7b8b-7c486ac855f7
+        status: 200 OK
+        code: 200
+        duration: 251.097667ms
+    - id: 3
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: https://redacted.instance.url
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+        url: https://redacted.instance.url/api/v1/connector/version
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 20
+        uncompressed: false
+        body: '{"version":"2.18.2"}'
+        headers:
+            Cache-Control:
+                - max-age=3600
+            Content-Length:
+                - "20"
+            Content-Type:
+                - application/json
+            Date:
+                - Mon, 15 Jun 2026 08:52:18 GMT
+            Server:
+                - nginx/1.27.5
+            Set-Cookie:
+                - redacted
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            X-Csrf-Token:
+                - redacted
+            X-Vcap-Request-Id:
+                - 070e01e0-8e85-4926-4acf-06b3bab3d8f1
+        status: 200 OK
+        code: 200
+        duration: 241.547583ms
+    - id: 4
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: https://redacted.instance.url
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+        url: https://redacted.instance.url/api/v1/configuration/connector/proxy
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 57
+        uncompressed: false
+        body: '{"host":"aaa","port":"111","user":"aaa","password":"***"}'
+        headers:
+            Cache-Control:
+                - no-store
+            Content-Length:
+                - "57"
+            Content-Type:
+                - application/json
+            Date:
+                - Mon, 15 Jun 2026 08:52:18 GMT
+            Server:
+                - nginx/1.27.5
+            Set-Cookie:
+                - redacted
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            X-Csrf-Token:
+                - redacted
+            X-Vcap-Request-Id:
+                - eaba664a-9eb7-41ba-7487-64f9cc049c39
+        status: 200 OK
+        code: 200
+        duration: 243.462292ms
+    - id: 5
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: https://redacted.instance.url
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+        url: https://redacted.instance.url/api/v1/connector/version
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 20
+        uncompressed: false
+        body: '{"version":"2.18.2"}'
+        headers:
+            Cache-Control:
+                - max-age=3600
+            Content-Length:
+                - "20"
+            Content-Type:
+                - application/json
+            Date:
+                - Mon, 15 Jun 2026 08:52:18 GMT
+            Server:
+                - nginx/1.27.5
+            Set-Cookie:
+                - redacted
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            X-Csrf-Token:
+                - redacted
+            X-Vcap-Request-Id:
+                - 19b054ad-59ef-4be4-62aa-9026c309902e
+        status: 200 OK
+        code: 200
+        duration: 280.592084ms
+    - id: 6
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: https://redacted.instance.url
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+        url: https://redacted.instance.url/api/v1/configuration/connector/proxy
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 57
+        uncompressed: false
+        body: '{"host":"aaa","port":"111","user":"aaa","password":"***"}'
+        headers:
+            Cache-Control:
+                - no-store
+            Content-Length:
+                - "57"
+            Content-Type:
+                - application/json
+            Date:
+                - Mon, 15 Jun 2026 08:52:19 GMT
+            Server:
+                - nginx/1.27.5
+            Set-Cookie:
+                - redacted
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            X-Csrf-Token:
+                - redacted
+            X-Vcap-Request-Id:
+                - 97b0aceb-3246-4a01-6235-f67db93553b9
+        status: 200 OK
+        code: 200
+        duration: 300.977667ms
+    - id: 7
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: https://redacted.instance.url
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+        url: https://redacted.instance.url/api/v1/connector/version
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 20
+        uncompressed: false
+        body: '{"version":"2.18.2"}'
+        headers:
+            Cache-Control:
+                - max-age=3600
+            Content-Length:
+                - "20"
+            Content-Type:
+                - application/json
+            Date:
+                - Mon, 15 Jun 2026 08:52:19 GMT
+            Server:
+                - nginx/1.27.5
+            Set-Cookie:
+                - redacted
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            X-Csrf-Token:
+                - redacted
+            X-Vcap-Request-Id:
+                - 7475de3d-a873-4ba0-6a8f-eb94f5583043
+        status: 200 OK
+        code: 200
+        duration: 325.594125ms

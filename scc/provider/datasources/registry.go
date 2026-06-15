@@ -18,6 +18,7 @@ func All() []func() datasource.DataSource {
 		NewSubaccountABAPServiceChannelsDataSource,
 		NewSystemCertificateDataSource,
 		NewCACertificateDataSource,
+		NewProxySettingsDataSource,
 	}
 
 }

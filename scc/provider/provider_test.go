@@ -39,6 +39,7 @@ func TestSCCProvider_AllResources(t *testing.T) {
 		"scc_ui_certificate_self_signed",
 		"scc_ui_certificate_signed_chain",
 		"scc_ui_certificate_pkcs12_certificate",
+		"scc_proxy_settings",
 	}
 
 	ctx := context.Background()
@@ -72,6 +73,7 @@ func TestSCCProvider_AllDataSources(t *testing.T) {
 		"scc_subaccount_abap_service_channels",
 		"scc_system_certificate",
 		"scc_ca_certificate",
+		"scc_proxy_settings",
 	}
 
 	ctx := context.Background()
