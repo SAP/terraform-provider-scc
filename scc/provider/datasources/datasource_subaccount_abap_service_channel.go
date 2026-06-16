@@ -55,6 +55,10 @@ __Further documentation:__
 					uuidvalidator.ValidUUID(),
 				},
 			},
+			"snc_encrypted": schema.BoolAttribute{
+				MarkdownDescription: "Boolean flag indicating whether the channel is encrypted using SNC (Secure Network Connection).",
+				Required:            true,
+			},
 			"abap_cloud_tenant_host": schema.StringAttribute{
 				MarkdownDescription: "Host name to access the Host of ABAP Cloud Tenant.",
 				Computed:            true,
@@ -146,7 +150,14 @@ func (d *SubaccountABAPServiceChannelDataSource) Read(ctx context.Context, req d
 	subaccount := data.Subaccount.ValueString()
 	id := data.ID.ValueInt64()
 
-	endpoint := endpoints.GetSubaccountServiceChannelEndpoint(regionHost, subaccount, "ABAPCloud", id)
+	var serviceChannelType string
+	if data.SNCEncrypted.ValueBool() {
+		serviceChannelType = "ABAPCloudSNC"
+	} else {
+		serviceChannelType = "ABAPCloud"
+	}
+
+	endpoint := endpoints.GetSubaccountServiceChannelEndpoint(regionHost, subaccount, serviceChannelType, id)
 
 	diags = helpers.RequestAndUnmarshal(d.Client, &respObj, "GET", endpoint, nil, true)
 	resp.Diagnostics.Append(diags...)
@@ -159,6 +170,8 @@ func (d *SubaccountABAPServiceChannelDataSource) Read(ctx context.Context, req d
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	responseModel.SNCEncrypted = data.SNCEncrypted
 
 	diags = resp.State.Set(ctx, &responseModel)
 	resp.Diagnostics.Append(diags...)

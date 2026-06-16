@@ -37,8 +37,9 @@ list "scc_subaccount_abap_service_channel" "all" {
 
   # (Required)
   config {
-    region_host = "cf.us10.hana.ondemand.com"
-    subaccount  = "3ecb7280-c7d4-4db6-b7da-7af3cdb13505"
+    region_host   = "cf.us10.hana.ondemand.com"
+    subaccount    = "3ecb7280-c7d4-4db6-b7da-7af3cdb13505"
+    snc_encrypted = false
   }
 }
 
@@ -50,8 +51,9 @@ list "scc_subaccount_abap_service_channel" "with_resource" {
 
   # (Required)
   config {
-    region_host = "cf.us10.hana.ondemand.com"
-    subaccount  = "3ecb7280-c7d4-4db6-b7da-7af3cdb13505"
+    region_host   = "cf.us10.hana.ondemand.com"
+    subaccount    = "3ecb7280-c7d4-4db6-b7da-7af3cdb13505"
+    snc_encrypted = false
   }
 }
 ```
@@ -62,4 +64,5 @@ list "scc_subaccount_abap_service_channel" "with_resource" {
 ### Required
 
 - `region_host` (String) The host URL of the region (e.g., `cf.eu12.hana.ondemand.com`).
+- `snc_encrypted` (Boolean) Boolean flag indicating whether the channels are encrypted using SNC (Secure Network Connection).
 - `subaccount` (String) The GUID of the SAP subaccount.

@@ -28,9 +28,10 @@ __Further documentation:__
 
 ```terraform
 data "scc_subaccount_abap_service_channel" "by_id" {
-  region_host = "cf.eu12.hana.ondemand.com"
-  subaccount  = "12345678-90ab-cdef-1234-567890abcdef"
-  id          = 1
+  region_host   = "cf.eu12.hana.ondemand.com"
+  subaccount    = "12345678-90ab-cdef-1234-567890abcdef"
+  id            = 1
+  snc_encrypted = false
 }
 ```
 
@@ -41,6 +42,7 @@ data "scc_subaccount_abap_service_channel" "by_id" {
 
 - `id` (Number) Unique identifier for the subaccount service channel (a positive integer number, starting with 1). This identifier is unique across all types of subaccount service channels.
 - `region_host` (String) Region Host Name.
+- `snc_encrypted` (Boolean) Boolean flag indicating whether the channel is encrypted using SNC (Secure Network Connection).
 - `subaccount` (String) The ID of the subaccount.
 
 ### Read-Only

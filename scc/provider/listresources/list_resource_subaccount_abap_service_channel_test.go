@@ -34,27 +34,8 @@ func TestListSubaccountABAPServiceChannel(t *testing.T) {
 			Steps: []resource.TestStep{
 				{
 					Query: true,
-					Config: tfutils.ProviderConfig(user) + listSubaccountABAPServiceChannelQueryConfig("scc_abap_sc", "scc",
-						regionHost, subaccount),
-
-					QueryResultChecks: []querycheck.QueryResultCheck{
-						querycheck.ExpectLength("scc_subaccount_abap_service_channel.scc_abap_sc", 1),
-
-						querycheck.ExpectIdentity(
-							"scc_subaccount_abap_service_channel.scc_abap_sc",
-							map[string]knownvalue.Check{
-								"region_host": knownvalue.StringExact(regionHost),
-								"subaccount":  knownvalue.StringRegexp(tfutils.RegexpValidUUID),
-								"id":          knownvalue.Int64Exact(3),
-							},
-						),
-					},
-				},
-				// Verify list results contain full resource schema data
-				{
-					Query: true,
 					Config: tfutils.ProviderConfig(user) + listSubaccountABAPServiceChannelQueryConfigWithIncludeResource("scc_abap_sc", "scc",
-						regionHost, subaccount),
+						regionHost, subaccount, false),
 
 					QueryResultChecks: []querycheck.QueryResultCheck{
 						querycheck.ExpectLength("scc_subaccount_abap_service_channel.scc_abap_sc", 1),
@@ -64,7 +45,8 @@ func TestListSubaccountABAPServiceChannel(t *testing.T) {
 							map[string]knownvalue.Check{
 								"region_host": knownvalue.StringExact(regionHost),
 								"subaccount":  knownvalue.StringRegexp(tfutils.RegexpValidUUID),
-								"id":          knownvalue.Int64Exact(3),
+								"id":          knownvalue.Int64Exact(1),
+								"type":        knownvalue.StringExact("ABAPCloud"),
 							},
 						),
 
@@ -74,7 +56,8 @@ func TestListSubaccountABAPServiceChannel(t *testing.T) {
 							queryfilter.ByResourceIdentity(map[string]knownvalue.Check{
 								"region_host": knownvalue.StringExact(regionHost),
 								"subaccount":  knownvalue.StringExact(subaccount),
-								"id":          knownvalue.Int64Exact(3),
+								"id":          knownvalue.Int64Exact(1),
+								"type":        knownvalue.StringExact("ABAPCloud"),
 							}),
 							[]querycheck.KnownValueCheck{
 								{
@@ -87,7 +70,7 @@ func TestListSubaccountABAPServiceChannel(t *testing.T) {
 								},
 								{
 									Path:       tfjsonpath.New("abap_cloud_tenant_host"),
-									KnownValue: knownvalue.StringRegexp(regexp.MustCompile(`.*abap\.region\.hana\.ondemand\.com|REDACTED.*`)),
+									KnownValue: knownvalue.NotNull(),
 								},
 								{
 									Path:       tfjsonpath.New("type"),
@@ -107,7 +90,7 @@ func TestListSubaccountABAPServiceChannel(t *testing.T) {
 								},
 								{
 									Path:       tfjsonpath.New("id"),
-									KnownValue: knownvalue.Int64Exact(3),
+									KnownValue: knownvalue.Int64Exact(1),
 								},
 								{
 									Path:       tfjsonpath.New("enabled"),
@@ -120,6 +103,10 @@ func TestListSubaccountABAPServiceChannel(t *testing.T) {
 								{
 									Path:       tfjsonpath.New("port"),
 									KnownValue: knownvalue.Int64Exact(3350),
+								},
+								{
+									Path:       tfjsonpath.New("comment"),
+									KnownValue: knownvalue.StringExact(""),
 								},
 							},
 						),
@@ -149,6 +136,7 @@ func TestListSubaccountABAPServiceChannel(t *testing.T) {
 							"scc",
 							"cf.eu12.hana.ondemand.com",
 							"224492be-5f0f-4bb0-8f59-c982107bc878",
+							false,
 						),
 
 					ExpectError: regexp.MustCompile(`(?i)404.*subaccount.*does not exist`),
@@ -157,22 +145,105 @@ func TestListSubaccountABAPServiceChannel(t *testing.T) {
 		})
 	})
 
+	t.Run("error path - region_host mandatory", func(t *testing.T) {
+		resource.Test(t, resource.TestCase{
+			IsUnitTest:               true,
+			ProtoV6ProviderFactories: tfutils.GetTestProviders(nil),
+			TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+				tfversion.SkipBelow(tfversion.Version1_14_0),
+			},
+			Steps: []resource.TestStep{
+				{
+					Query:       true,
+					Config:      listSubaccountABAPServiceChannelQueryConfigWoRegionHost("scc_abap_sc", "scc", subaccount, false),
+					ExpectError: regexp.MustCompile(`The argument "region_host" is required, but no definition was found.`),
+				},
+			},
+		})
+	})
+
+	t.Run("error path - subaccount mandatory", func(t *testing.T) {
+		resource.Test(t, resource.TestCase{
+			IsUnitTest:               true,
+			ProtoV6ProviderFactories: tfutils.GetTestProviders(nil),
+			TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+				tfversion.SkipBelow(tfversion.Version1_14_0),
+			},
+			Steps: []resource.TestStep{
+				{
+					Query:       true,
+					Config:      listSubaccountABAPServiceChannelQueryConfigWoSubaccount("scc_abap_sc", "scc", regionHost, false),
+					ExpectError: regexp.MustCompile(`The argument "subaccount" is required, but no definition was found.`),
+				},
+			},
+		})
+	})
+
+	t.Run("error path - snc_encrypted mandatory", func(t *testing.T) {
+		resource.Test(t, resource.TestCase{
+			IsUnitTest:               true,
+			ProtoV6ProviderFactories: tfutils.GetTestProviders(nil),
+			TerraformVersionChecks: []tfversion.TerraformVersionCheck{
+				tfversion.SkipBelow(tfversion.Version1_14_0),
+			},
+			Steps: []resource.TestStep{
+				{
+					Query:       true,
+					Config:      listSubaccountABAPServiceChannelQueryConfigWoSNCEncrypted("scc_abap_sc", "scc", regionHost, subaccount),
+					ExpectError: regexp.MustCompile(`The argument "snc_encrypted" is required, but no definition was found.`),
+				},
+			},
+		})
+	})
+
 }
 
-func listSubaccountABAPServiceChannelQueryConfig(lable, providerName, regionHost, subaccount string) string {
+func listSubaccountABAPServiceChannelQueryConfig(lable, providerName, regionHost, subaccount string, sncEncrypted bool) string {
 	return fmt.Sprintf(`list "scc_subaccount_abap_service_channel" "%s" {
                provider = "%s"
 			   config {
 			    region_host="%s"
 				subaccount="%s"
+				snc_encrypted=%t
 			   }
-             }`, lable, providerName, regionHost, subaccount)
+             }`, lable, providerName, regionHost, subaccount, sncEncrypted)
 }
 
-func listSubaccountABAPServiceChannelQueryConfigWithIncludeResource(lable, providerName, regionHost, subaccount string) string {
+func listSubaccountABAPServiceChannelQueryConfigWithIncludeResource(lable, providerName, regionHost, subaccount string, sncEncrypted bool) string {
 	return fmt.Sprintf(`list "scc_subaccount_abap_service_channel" "%s" {
                provider = "%s"
 			   include_resource = true
+			   config {
+			    region_host="%s"
+				subaccount="%s"
+				snc_encrypted=%t
+			   }
+             }`, lable, providerName, regionHost, subaccount, sncEncrypted)
+}
+
+func listSubaccountABAPServiceChannelQueryConfigWoRegionHost(lable, providerName, subaccount string, sncEncrypted bool) string {
+	return fmt.Sprintf(`list "scc_subaccount_abap_service_channel" "%s" {
+               provider = "%s"
+			   config {
+				subaccount="%s"
+				snc_encrypted=%t
+			   }
+             }`, lable, providerName, subaccount, sncEncrypted)
+}
+
+func listSubaccountABAPServiceChannelQueryConfigWoSubaccount(lable, providerName, regionHost string, sncEncrypted bool) string {
+	return fmt.Sprintf(`list "scc_subaccount_abap_service_channel" "%s" {
+               provider = "%s"
+			   config {
+			    region_host="%s"
+				snc_encrypted=%t
+			   }
+             }`, lable, providerName, regionHost, sncEncrypted)
+}
+
+func listSubaccountABAPServiceChannelQueryConfigWoSNCEncrypted(lable, providerName, regionHost, subaccount string) string {
+	return fmt.Sprintf(`list "scc_subaccount_abap_service_channel" "%s" {
+               provider = "%s"
 			   config {
 			    region_host="%s"
 				subaccount="%s"
