@@ -18,6 +18,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/boolplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
@@ -82,6 +83,9 @@ __Further documentation:__
 			"snc_encrypted": schema.BoolAttribute{
 				MarkdownDescription: "Boolean flag indicating whether the channel is encrypted using SNC (Secure Network Connection).",
 				Required:            true,
+				PlanModifiers: []planmodifier.Bool{
+					boolplanmodifier.RequiresReplace(),
+				},
 			},
 			"abap_cloud_tenant_host": schema.StringAttribute{
 				MarkdownDescription: "Host name to access the Host of ABAP Cloud Tenant.",
@@ -252,7 +256,7 @@ func (r *SubaccountABAPServiceChannelResource) Create(ctx context.Context, req r
 					Subaccount: plan.Subaccount,
 					RegionHost: plan.RegionHost,
 					ID:         partialModel.ID,
-					Type:       partialModel.Type,
+					Type:       types.StringValue(serviceChannelType),
 				})
 			}
 			resp.Diagnostics.Append(enableDiags...)
@@ -370,7 +374,7 @@ func (r *SubaccountABAPServiceChannelResource) Update(ctx context.Context, req r
 	}
 	// Update Service Channel
 	var serviceChannelType string
-	if plan.SNCEncrypted.ValueBool() {
+	if state.SNCEncrypted.ValueBool() {
 		serviceChannelType = "ABAPCloudSNC"
 	} else {
 		serviceChannelType = "ABAPCloud"
@@ -530,8 +534,8 @@ func (rs *SubaccountABAPServiceChannelResource) ImportState(ctx context.Context,
 			return
 		}
 
-		intID, diags := strconv.Atoi(idStr)
-		if diags != nil {
+		intID, err := strconv.Atoi(idStr)
+		if err != nil {
 			resp.Diagnostics.AddError(
 				"Invalid ID Format",
 				fmt.Sprintf("The 'id' part must be an integer. Got: %q", idStr),
