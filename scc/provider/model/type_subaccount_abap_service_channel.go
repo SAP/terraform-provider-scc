@@ -36,6 +36,7 @@ var SubaccountABAPServiceChannelStateType = map[string]attr.Type{
 type SubaccountABAPServiceChannelConfig struct {
 	RegionHost          types.String `tfsdk:"region_host"`
 	Subaccount          types.String `tfsdk:"subaccount"`
+	SNCEncrypted        types.Bool   `tfsdk:"snc_encrypted"`
 	ABAPCloudTenantHost types.String `tfsdk:"abap_cloud_tenant_host"`
 	InstanceNumber      types.Int64  `tfsdk:"instance_number"`
 	ID                  types.Int64  `tfsdk:"id"`
@@ -50,12 +51,14 @@ type SubaccountABAPServiceChannelConfig struct {
 type SubaccountABAPServiceChannelsConfig struct {
 	RegionHost                    types.String                   `tfsdk:"region_host"`
 	Subaccount                    types.String                   `tfsdk:"subaccount"`
+	SNCEncrypted                  types.Bool                     `tfsdk:"snc_encrypted"`
 	SubaccountABAPServiceChannels []SubaccountABAPServiceChannel `tfsdk:"subaccount_abap_service_channels"`
 }
 
 type SubaccountABAPServiceChannelListResourceFilterModel struct {
-	RegionHost types.String `tfsdk:"region_host"`
-	Subaccount types.String `tfsdk:"subaccount"`
+	RegionHost   types.String `tfsdk:"region_host"`
+	Subaccount   types.String `tfsdk:"subaccount"`
+	SNCEncrypted types.Bool   `tfsdk:"snc_encrypted"`
 }
 
 func SubaccountABAPServiceChannelValueFrom(ctx context.Context, plan SubaccountABAPServiceChannelConfig, value apiobjects.SubaccountABAPServiceChannel) (SubaccountABAPServiceChannelConfig, diag.Diagnostics) {
@@ -73,6 +76,7 @@ func SubaccountABAPServiceChannelValueFrom(ctx context.Context, plan SubaccountA
 	model := &SubaccountABAPServiceChannelConfig{
 		RegionHost:          plan.RegionHost,
 		Subaccount:          plan.Subaccount,
+		SNCEncrypted:        plan.SNCEncrypted,
 		ABAPCloudTenantHost: types.StringValue(value.ABAPCloudTenantHost),
 		InstanceNumber:      types.Int64Value(value.InstanceNumber),
 		ID:                  types.Int64Value(value.ID),
@@ -118,6 +122,7 @@ func SubaccountABAPServiceChannelsValueFrom(ctx context.Context, plan Subaccount
 	model := &SubaccountABAPServiceChannelsConfig{
 		RegionHost:                    plan.RegionHost,
 		Subaccount:                    plan.Subaccount,
+		SNCEncrypted:                  plan.SNCEncrypted,
 		SubaccountABAPServiceChannels: serviceChannels,
 	}
 
@@ -139,6 +144,7 @@ func SubaccountABAPServiceChannelListValueFrom(ctx context.Context, filter Subac
 	listRes := &SubaccountABAPServiceChannelConfig{
 		RegionHost:          filter.RegionHost,
 		Subaccount:          filter.Subaccount,
+		SNCEncrypted:        filter.SNCEncrypted,
 		ABAPCloudTenantHost: types.StringValue(value.ABAPCloudTenantHost),
 		InstanceNumber:      types.Int64Value(value.InstanceNumber),
 		ID:                  types.Int64Value(value.ID),

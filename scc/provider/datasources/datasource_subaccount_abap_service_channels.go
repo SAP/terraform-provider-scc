@@ -55,6 +55,10 @@ __Further documentation:__
 					uuidvalidator.ValidUUID(),
 				},
 			},
+			"snc_encrypted": schema.BoolAttribute{
+				MarkdownDescription: "Boolean flag indicating whether the channels are encrypted using SNC (Secure Network Connection).",
+				Required:            true,
+			},
 			"subaccount_abap_service_channels": schema.ListNestedAttribute{
 				Computed: true,
 				NestedObject: schema.NestedAttributeObject{
@@ -152,7 +156,14 @@ func (d *SubaccountABAPServiceChannelsDataSource) Read(ctx context.Context, req 
 	regionHost := data.RegionHost.ValueString()
 	subaccount := data.Subaccount.ValueString()
 
-	endpoint := endpoints.GetSubaccountServiceChannelBaseEndpoint(regionHost, subaccount, "ABAPCloud")
+	var serviceChannelType string
+	if data.SNCEncrypted.ValueBool() {
+		serviceChannelType = "ABAPCloudSNC"
+	} else {
+		serviceChannelType = "ABAPCloud"
+	}
+
+	endpoint := endpoints.GetSubaccountServiceChannelBaseEndpoint(regionHost, subaccount, serviceChannelType)
 
 	diags = helpers.RequestAndUnmarshal(d.Client, &respObj.SubaccountABAPServiceChannels, "GET", endpoint, nil, true)
 	resp.Diagnostics.Append(diags...)

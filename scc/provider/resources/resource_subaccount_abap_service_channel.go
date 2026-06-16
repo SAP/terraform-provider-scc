@@ -37,6 +37,7 @@ type SubaccountABAPServiceChannelResource struct {
 type subaccountABAPServiceChannelResourceIdentityModel struct {
 	Subaccount types.String `tfsdk:"subaccount"`
 	RegionHost types.String `tfsdk:"region_host"`
+	Type       types.String `tfsdk:"type"`
 	ID         types.Int64  `tfsdk:"id"`
 }
 
@@ -77,6 +78,10 @@ __Further documentation:__
 				Validators: []validator.String{
 					uuidvalidator.ValidUUID(),
 				},
+			},
+			"snc_encrypted": schema.BoolAttribute{
+				MarkdownDescription: "Boolean flag indicating whether the channel is encrypted using SNC (Secure Network Connection).",
+				Required:            true,
 			},
 			"abap_cloud_tenant_host": schema.StringAttribute{
 				MarkdownDescription: "Host name to access the Host of ABAP Cloud Tenant.",
@@ -155,6 +160,9 @@ func (rs *SubaccountABAPServiceChannelResource) IdentitySchema(_ context.Context
 			"region_host": identityschema.StringAttribute{
 				RequiredForImport: true,
 			},
+			"type": identityschema.StringAttribute{
+				RequiredForImport: true,
+			},
 			"id": identityschema.Int64Attribute{
 				RequiredForImport: true,
 			},
@@ -193,7 +201,14 @@ func (r *SubaccountABAPServiceChannelResource) Create(ctx context.Context, req r
 
 	regionHost := plan.RegionHost.ValueString()
 	subaccount := plan.Subaccount.ValueString()
-	endpoint := endpoints.GetSubaccountServiceChannelBaseEndpoint(regionHost, subaccount, "ABAPCloud")
+
+	var serviceChannelType string
+	if plan.SNCEncrypted.ValueBool() {
+		serviceChannelType = "ABAPCloudSNC"
+	} else {
+		serviceChannelType = "ABAPCloud"
+	}
+	endpoint := endpoints.GetSubaccountServiceChannelBaseEndpoint(regionHost, subaccount, serviceChannelType)
 
 	planBody := map[string]any{
 		"abapCloudTenantHost": plan.ABAPCloudTenantHost.ValueString(),
@@ -223,7 +238,7 @@ func (r *SubaccountABAPServiceChannelResource) Create(ctx context.Context, req r
 	id := serviceChannelRespObj.ID
 
 	if !plan.Enabled.IsNull() {
-		endpoint = endpoints.GetSubaccountServiceChannelEndpoint(regionHost, subaccount, "ABAPCloud", id)
+		endpoint = endpoints.GetSubaccountServiceChannelEndpoint(regionHost, subaccount, serviceChannelType, id)
 		enableDiags := r.enableSubaccountABAPServiceChannel(plan, *serviceChannelRespObj, endpoint+"/state")
 		if enableDiags.HasError() {
 			// The channel was created but enabling failed (e.g. HTTP 500 when SCC
@@ -237,6 +252,7 @@ func (r *SubaccountABAPServiceChannelResource) Create(ctx context.Context, req r
 					Subaccount: plan.Subaccount,
 					RegionHost: plan.RegionHost,
 					ID:         partialModel.ID,
+					Type:       partialModel.Type,
 				})
 			}
 			resp.Diagnostics.Append(enableDiags...)
@@ -256,6 +272,8 @@ func (r *SubaccountABAPServiceChannelResource) Create(ctx context.Context, req r
 		return
 	}
 
+	responseModel.SNCEncrypted = plan.SNCEncrypted
+
 	diags = resp.State.Set(ctx, responseModel)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -266,6 +284,7 @@ func (r *SubaccountABAPServiceChannelResource) Create(ctx context.Context, req r
 		Subaccount: plan.Subaccount,
 		RegionHost: plan.RegionHost,
 		ID:         responseModel.ID,
+		Type:       types.StringValue(serviceChannelType),
 	}
 
 	diags = resp.Identity.Set(ctx, identity)
@@ -284,7 +303,14 @@ func (r *SubaccountABAPServiceChannelResource) Read(ctx context.Context, req res
 	regionHost := state.RegionHost.ValueString()
 	subaccount := state.Subaccount.ValueString()
 	id := state.ID.ValueInt64()
-	endpoint := endpoints.GetSubaccountServiceChannelEndpoint(regionHost, subaccount, "ABAPCloud", id)
+
+	var serviceChannelType string
+	if state.SNCEncrypted.ValueBool() {
+		serviceChannelType = "ABAPCloudSNC"
+	} else {
+		serviceChannelType = "ABAPCloud"
+	}
+	endpoint := endpoints.GetSubaccountServiceChannelEndpoint(regionHost, subaccount, serviceChannelType, id)
 
 	diags = helpers.RequestAndUnmarshal(r.Client, &respObj, "GET", endpoint, nil, true)
 	resp.Diagnostics.Append(diags...)
@@ -298,6 +324,8 @@ func (r *SubaccountABAPServiceChannelResource) Read(ctx context.Context, req res
 		return
 	}
 
+	responseModel.SNCEncrypted = state.SNCEncrypted
+
 	diags = resp.State.Set(ctx, &responseModel)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -308,6 +336,7 @@ func (r *SubaccountABAPServiceChannelResource) Read(ctx context.Context, req res
 		Subaccount: state.Subaccount,
 		RegionHost: state.RegionHost,
 		ID:         state.ID,
+		Type:       types.StringValue(serviceChannelType),
 	}
 
 	diags = resp.Identity.Set(ctx, identity)
@@ -340,7 +369,13 @@ func (r *SubaccountABAPServiceChannelResource) Update(ctx context.Context, req r
 		return
 	}
 	// Update Service Channel
-	endpoint := endpoints.GetSubaccountServiceChannelEndpoint(regionHost, subaccount, "ABAPCloud", id)
+	var serviceChannelType string
+	if plan.SNCEncrypted.ValueBool() {
+		serviceChannelType = "ABAPCloudSNC"
+	} else {
+		serviceChannelType = "ABAPCloud"
+	}
+	endpoint := endpoints.GetSubaccountServiceChannelEndpoint(regionHost, subaccount, serviceChannelType, id)
 	diags = r.updateSubaccountABAPServiceChannel(plan, respObj, endpoint)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -356,7 +391,7 @@ func (r *SubaccountABAPServiceChannelResource) Update(ctx context.Context, req r
 		}
 	}
 
-	endpoint = endpoints.GetSubaccountServiceChannelEndpoint(regionHost, subaccount, "ABAPCloud", id)
+	endpoint = endpoints.GetSubaccountServiceChannelEndpoint(regionHost, subaccount, serviceChannelType, id)
 
 	diags = helpers.RequestAndUnmarshal(r.Client, &respObj, "GET", endpoint, nil, true)
 	resp.Diagnostics.Append(diags...)
@@ -370,6 +405,8 @@ func (r *SubaccountABAPServiceChannelResource) Update(ctx context.Context, req r
 		return
 	}
 
+	responseModel.SNCEncrypted = plan.SNCEncrypted
+
 	diags = resp.State.Set(ctx, responseModel)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -380,6 +417,7 @@ func (r *SubaccountABAPServiceChannelResource) Update(ctx context.Context, req r
 		Subaccount: state.Subaccount,
 		RegionHost: state.RegionHost,
 		ID:         state.ID,
+		Type:       types.StringValue(serviceChannelType),
 	}
 
 	diags = resp.Identity.Set(ctx, identity)
@@ -399,7 +437,14 @@ func (r *SubaccountABAPServiceChannelResource) Delete(ctx context.Context, req r
 	subaccount := state.Subaccount.ValueString()
 	id := state.ID.ValueInt64()
 
-	endpoint := endpoints.GetSubaccountServiceChannelEndpoint(regionHost, subaccount, "ABAPCloud", id)
+	var serviceChannelType string
+	if state.SNCEncrypted.ValueBool() {
+		serviceChannelType = "ABAPCloudSNC"
+	} else {
+		serviceChannelType = "ABAPCloud"
+	}
+
+	endpoint := endpoints.GetSubaccountServiceChannelEndpoint(regionHost, subaccount, serviceChannelType, id)
 
 	diags = helpers.RequestAndUnmarshal(r.Client, &respObj, "DELETE", endpoint, nil, false)
 	resp.Diagnostics.Append(diags...)
@@ -407,17 +452,7 @@ func (r *SubaccountABAPServiceChannelResource) Delete(ctx context.Context, req r
 		return
 	}
 
-	responseModel, diags := model.SubaccountABAPServiceChannelValueFrom(ctx, state, respObj)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	diags = resp.State.Set(ctx, responseModel)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
+	resp.State.RemoveResource(ctx)
 }
 
 func (r *SubaccountABAPServiceChannelResource) getSubaccountABAPServiceChannel(serviceChannels apiobjects.SubaccountABAPServiceChannels, targetABAPCloudTenantHost string) (*apiobjects.SubaccountABAPServiceChannel, diag.Diagnostics) {
@@ -464,25 +499,50 @@ func (rs *SubaccountABAPServiceChannelResource) ImportState(ctx context.Context,
 	if req.ID != "" {
 		idParts := strings.Split(req.ID, ",")
 
-		if len(idParts) != 3 || idParts[0] == "" || idParts[1] == "" || idParts[2] == "" {
+		if len(idParts) != 4 ||
+			idParts[0] == "" ||
+			idParts[1] == "" ||
+			idParts[2] == "" ||
+			idParts[3] == "" {
 			resp.Diagnostics.AddError(
 				"Unexpected Import Identifier",
-				fmt.Sprintf("Expected import identifier with format: region_host, subaccount, id. Got: %q", req.ID),
+				fmt.Sprintf("Expected import identifier with format: region_host, subaccount, type, id. Got: %q", req.ID),
 			)
 			return
 		}
 
-		intID, diags := strconv.Atoi(idParts[2])
+		regionHost := strings.TrimSpace(idParts[0])
+		subaccount := strings.TrimSpace(idParts[1])
+		serviceChannelType := strings.TrimSpace(idParts[2])
+		idStr := strings.TrimSpace(idParts[3])
+
+		var sncEncrypted bool
+		switch serviceChannelType {
+		case "ABAPCloudSNC":
+			sncEncrypted = true
+		case "ABAPCloud":
+			sncEncrypted = false
+		default:
+			resp.Diagnostics.AddError(
+				"Invalid Service Channel Type",
+				fmt.Sprintf("The 'type' part of the import identifier must be either 'ABAPCloud' or 'ABAPCloudSNC'. Got: %q", serviceChannelType),
+			)
+			return
+		}
+
+		intID, diags := strconv.Atoi(idStr)
 		if diags != nil {
 			resp.Diagnostics.AddError(
 				"Invalid ID Format",
-				fmt.Sprintf("The 'id' part must be an integer. Got: %q", idParts[2]),
+				fmt.Sprintf("The 'id' part must be an integer. Got: %q", idStr),
 			)
 			return
 		}
 
-		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("region_host"), idParts[0])...)
-		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("subaccount"), idParts[1])...)
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("region_host"), regionHost)...)
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("subaccount"), subaccount)...)
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("type"), serviceChannelType)...)
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("snc_encrypted"), sncEncrypted)...)
 		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), intID)...)
 
 		return
@@ -497,6 +557,8 @@ func (rs *SubaccountABAPServiceChannelResource) ImportState(ctx context.Context,
 
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("subaccount"), identity.Subaccount)...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("region_host"), identity.RegionHost)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("type"), identity.Type)...)
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("snc_encrypted"), identity.Type.ValueString() == "ABAPCloudSNC")...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("id"), identity.ID)...)
 
 }

@@ -23,7 +23,7 @@ func TestDataSourceSubaccountABAPServiceChannel(t *testing.T) {
 			ProtoV6ProviderFactories: tfutils.GetTestProviders(rec.GetDefaultClient()),
 			Steps: []resource.TestStep{
 				{
-					Config: tfutils.ProviderConfig(user) + DataSourceSubaccountABAPServiceChannel("scc_abap_sc", regionHost, subaccount, 1),
+					Config: tfutils.ProviderConfig(user) + DataSourceSubaccountABAPServiceChannel("scc_abap_sc", regionHost, subaccount, 1, false),
 					Check: resource.ComposeAggregateTestCheckFunc(
 						resource.TestCheckResourceAttr("data.scc_subaccount_abap_service_channel.scc_abap_sc", "region_host", regionHost),
 						resource.TestMatchResourceAttr("data.scc_subaccount_abap_service_channel.scc_abap_sc", "subaccount", tfutils.RegexpValidUUID),
@@ -32,6 +32,7 @@ func TestDataSourceSubaccountABAPServiceChannel(t *testing.T) {
 						resource.TestCheckResourceAttr("data.scc_subaccount_abap_service_channel.scc_abap_sc", "port", "3350"),
 						resource.TestCheckResourceAttr("data.scc_subaccount_abap_service_channel.scc_abap_sc", "connections", "1"),
 						resource.TestCheckResourceAttr("data.scc_subaccount_abap_service_channel.scc_abap_sc", "type", "ABAPCloud"),
+						resource.TestCheckResourceAttr("data.scc_subaccount_abap_service_channel.scc_abap_sc", "snc_encrypted", "false"),
 						resource.TestCheckResourceAttr("data.scc_subaccount_abap_service_channel.scc_abap_sc", "enabled", "false"),
 						resource.TestCheckResourceAttrSet("data.scc_subaccount_abap_service_channel.scc_abap_sc", "id"),
 						resource.TestCheckResourceAttr("data.scc_subaccount_abap_service_channel.scc_abap_sc", "state.connected", "false"),
@@ -50,7 +51,7 @@ func TestDataSourceSubaccountABAPServiceChannel(t *testing.T) {
 			ProtoV6ProviderFactories: tfutils.GetTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      DataSourceSubaccountABAPServiceChannelWoRegionHost("scc_abap_sc", subaccount, 3),
+					Config:      DataSourceSubaccountABAPServiceChannelWoRegionHost("scc_abap_sc", subaccount, 3, false),
 					ExpectError: regexp.MustCompile(`The argument "region_host" is required, but no definition was found.`),
 				},
 			},
@@ -63,7 +64,7 @@ func TestDataSourceSubaccountABAPServiceChannel(t *testing.T) {
 			ProtoV6ProviderFactories: tfutils.GetTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      DataSourceSubaccountABAPServiceChannelWoSubaccount("scc_abap_sc", regionHost, 3),
+					Config:      DataSourceSubaccountABAPServiceChannelWoSubaccount("scc_abap_sc", regionHost, 3, false),
 					ExpectError: regexp.MustCompile(`The argument "subaccount" is required, but no definition was found.`),
 				},
 			},
@@ -76,8 +77,21 @@ func TestDataSourceSubaccountABAPServiceChannel(t *testing.T) {
 			ProtoV6ProviderFactories: tfutils.GetTestProviders(nil),
 			Steps: []resource.TestStep{
 				{
-					Config:      DataSourceSubaccountABAPServiceChannelWoID("scc_abap_sc", regionHost, subaccount),
+					Config:      DataSourceSubaccountABAPServiceChannelWoID("scc_abap_sc", regionHost, subaccount, false),
 					ExpectError: regexp.MustCompile(`The argument "id" is required, but no definition was found.`),
+				},
+			},
+		})
+	})
+
+	t.Run("error path - SNC Encrypted mandatory", func(t *testing.T) {
+		resource.Test(t, resource.TestCase{
+			IsUnitTest:               true,
+			ProtoV6ProviderFactories: tfutils.GetTestProviders(nil),
+			Steps: []resource.TestStep{
+				{
+					Config:      DataSourceSubaccountABAPServiceChannelWoSNCEncrypted("scc_abap_sc", regionHost, subaccount, 3),
+					ExpectError: regexp.MustCompile(`The argument "snc_encrypted" is required, but no definition was found.`),
 				},
 			},
 		})
@@ -85,7 +99,48 @@ func TestDataSourceSubaccountABAPServiceChannel(t *testing.T) {
 
 }
 
-func DataSourceSubaccountABAPServiceChannel(datasourceName string, regionHost string, subaccountID string, id int64) string {
+func DataSourceSubaccountABAPServiceChannel(datasourceName string, regionHost string, subaccountID string, id int64, sncEncrypted bool) string {
+	return fmt.Sprintf(`
+	data "scc_subaccount_abap_service_channel" "%s" {
+	region_host = "%s"
+	subaccount = "%s"
+	id = "%d"
+	snc_encrypted = "%t"
+	}
+	`, datasourceName, regionHost, subaccountID, id, sncEncrypted)
+}
+
+func DataSourceSubaccountABAPServiceChannelWoSubaccount(datasourceName string, regionHost string, id int64, sncEncrypted bool) string {
+	return fmt.Sprintf(`
+	data "scc_subaccount_abap_service_channel" "%s" {
+	region_host = "%s"
+	id = "%d"
+	snc_encrypted = "%t"
+	}
+	`, datasourceName, regionHost, id, sncEncrypted)
+}
+
+func DataSourceSubaccountABAPServiceChannelWoRegionHost(datasourceName string, subaccountID string, id int64, sncEncrypted bool) string {
+	return fmt.Sprintf(`
+	data "scc_subaccount_abap_service_channel" "%s" {
+	subaccount = "%s"
+	id = "%d"
+	snc_encrypted = "%t"
+	}
+	`, datasourceName, subaccountID, id, sncEncrypted)
+}
+
+func DataSourceSubaccountABAPServiceChannelWoID(datasourceName string, regionHost string, subaccountID string, sncEncrypted bool) string {
+	return fmt.Sprintf(`
+	data "scc_subaccount_abap_service_channel" "%s" {
+	region_host = "%s"
+	subaccount = "%s"
+	snc_encrypted = "%t"
+	}
+	`, datasourceName, regionHost, subaccountID, sncEncrypted)
+}
+
+func DataSourceSubaccountABAPServiceChannelWoSNCEncrypted(datasourceName string, regionHost string, subaccountID string, id int64) string {
 	return fmt.Sprintf(`
 	data "scc_subaccount_abap_service_channel" "%s" {
 	region_host = "%s"
@@ -93,31 +148,4 @@ func DataSourceSubaccountABAPServiceChannel(datasourceName string, regionHost st
 	id = "%d"
 	}
 	`, datasourceName, regionHost, subaccountID, id)
-}
-
-func DataSourceSubaccountABAPServiceChannelWoSubaccount(datasourceName string, regionHost string, id int64) string {
-	return fmt.Sprintf(`
-	data "scc_subaccount_abap_service_channel" "%s" {
-	region_host = "%s"
-	id = "%d"
-	}
-	`, datasourceName, regionHost, id)
-}
-
-func DataSourceSubaccountABAPServiceChannelWoRegionHost(datasourceName string, subaccountID string, id int64) string {
-	return fmt.Sprintf(`
-	data "scc_subaccount_abap_service_channel" "%s" {
-	subaccount = "%s"
-	id = "%d"
-	}
-	`, datasourceName, subaccountID, id)
-}
-
-func DataSourceSubaccountABAPServiceChannelWoID(datasourceName string, regionHost string, subaccountID string) string {
-	return fmt.Sprintf(`
-	data "scc_subaccount_abap_service_channel" "%s" {
-	region_host = "%s"
-	subaccount = "%s"
-	}
-	`, datasourceName, regionHost, subaccountID)
 }

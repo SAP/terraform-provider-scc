@@ -30,6 +30,7 @@ __Further documentation:__
 data "scc_subaccount_abap_service_channels" "all" {
   region_host = "cf.eu12.hana.ondemand.com"
   subaccount  = "12345678-90ab-cdef-1234-567890abcdef"
+  snc_encrypted = false
 }
 ```
 
@@ -39,6 +40,7 @@ data "scc_subaccount_abap_service_channels" "all" {
 ### Required
 
 - `region_host` (String) Region Host Name.
+- `snc_encrypted` (Boolean) Boolean flag indicating whether the channels are encrypted using SNC (Secure Network Connection).
 - `subaccount` (String) The ID of the subaccount.
 
 ### Read-Only

@@ -71,6 +71,10 @@ This list resource retrieves Subaccount ABAP service channel for a specific regi
 				MarkdownDescription: "The GUID of the SAP subaccount.",
 				Required:            true,
 			},
+			"snc_encrypted": schema.BoolAttribute{
+				MarkdownDescription: "Boolean flag indicating whether the channels are encrypted using SNC (Secure Network Connection).",
+				Required:            true,
+			},
 		},
 	}
 }
@@ -91,7 +95,14 @@ func (r *SubaccountABAPServiceChannelListResource) List(
 		return
 	}
 
-	endpoint = endpoints.GetSubaccountServiceChannelBaseEndpoint(filter.RegionHost.ValueString(), filter.Subaccount.ValueString(), "ABAPCloud")
+	var serviceChannelType string
+	if filter.SNCEncrypted.ValueBool() {
+		serviceChannelType = "ABAPCloudSNC"
+	} else {
+		serviceChannelType = "ABAPCloud"
+	}
+
+	endpoint = endpoints.GetSubaccountServiceChannelBaseEndpoint(filter.RegionHost.ValueString(), filter.Subaccount.ValueString(), serviceChannelType)
 
 	diags := helpers.RequestAndUnmarshal(r.Client, &respObj.SubaccountABAPServiceChannels, "GET", endpoint, nil, true)
 	if diags.HasError() {
@@ -107,6 +118,12 @@ func (r *SubaccountABAPServiceChannelListResource) List(
 			result.Diagnostics.Append(result.Identity.SetAttribute(ctx, path.Root("subaccount"), filter.Subaccount)...)
 			result.Diagnostics.Append(result.Identity.SetAttribute(ctx, path.Root("region_host"), filter.RegionHost)...)
 			result.Diagnostics.Append(result.Identity.SetAttribute(ctx, path.Root("id"), types.Int64Value(sm.ID))...)
+
+			serviceChannelType := "ABAPCloud"
+			if filter.SNCEncrypted.ValueBool() {
+				serviceChannelType = "ABAPCloudSNC"
+			}
+			result.Diagnostics.Append(result.Identity.SetAttribute(ctx, path.Root("type"), types.StringValue(serviceChannelType))...)
 
 			if req.IncludeResource {
 				resDm, dgs := model.SubaccountABAPServiceChannelListValueFrom(ctx, filter, sm)
