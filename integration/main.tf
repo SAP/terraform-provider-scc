@@ -58,6 +58,7 @@ resource "scc_subaccount_abap_service_channel" "scc_abap_sc" {
   instance_number        = 11
   connections            = 1
   enabled                = false
+  snc_encrypted          = false
 }
 
 resource "scc_ca_certificate_self_signed" "scc_self_signed_ca_cert" {
