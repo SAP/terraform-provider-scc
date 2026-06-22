@@ -133,6 +133,7 @@ func TestSCCProvider_AllActions(t *testing.T) {
 
 	expected := []string{
 		"scc_generate_csr",
+		"scc_create_backup",
 	}
 
 	p := provider.New()

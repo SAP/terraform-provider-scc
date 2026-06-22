@@ -175,20 +175,6 @@ func (a *GenerateCSRAction) Configure(ctx context.Context, req action.ConfigureR
 	a.Client = client
 }
 
-func safeProgress(resp *action.InvokeResponse, msg string) {
-	if resp == nil {
-		return
-	}
-
-	defer func() {
-		if r := recover(); r != nil {
-			_ = r
-		}
-	}()
-
-	resp.SendProgress(action.InvokeProgressEvent{Message: msg})
-}
-
 func (a *GenerateCSRAction) InvokeWithPlan(ctx context.Context, plan model.CSRActionConfig, resp *action.InvokeResponse) {
 	if plan.SubjectDN.IsNull() || plan.SubjectDN.IsUnknown() {
 		resp.Diagnostics.AddError(
@@ -301,8 +287,8 @@ func (a *GenerateCSRAction) InvokeWithPlan(ctx context.Context, plan model.CSRAc
 		return
 	}
 
-	safeProgress(resp, "CSR generated successfully")
-	safeProgress(resp, fmt.Sprintf("CSR saved to %s", filePath))
+	helpers.SafeProgress(resp, "CSR generated successfully")
+	helpers.SafeProgress(resp, fmt.Sprintf("CSR saved to %s", filePath))
 }
 
 func (a *GenerateCSRAction) Invoke(ctx context.Context, req action.InvokeRequest, resp *action.InvokeResponse) {
