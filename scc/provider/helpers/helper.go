@@ -10,6 +10,7 @@ import (
 
 	"github.com/SAP/terraform-provider-scc/internal/api"
 	apiobjects "github.com/SAP/terraform-provider-scc/internal/api/apiObjects"
+	"github.com/hashicorp/terraform-plugin-framework/action"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
@@ -146,4 +147,17 @@ func ConvertMillisToTimes(millis any) FormattedTimes {
 		UTC:          types.StringValue(t.Format("2006-01-02 15:04:05")),
 		WithTimezone: types.StringValue(t.Format("2006-01-02 15:04:05 -0700")),
 	}
+}
+
+func SafeProgress(resp *action.InvokeResponse, msg string) {
+	if resp == nil {
+		return
+	}
+
+	defer func() {
+		if r := recover(); r != nil {
+			_ = r
+		}
+	}()
+	resp.SendProgress(action.InvokeProgressEvent{Message: msg})
 }
