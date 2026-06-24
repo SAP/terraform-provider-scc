@@ -15,9 +15,10 @@ func validateAuthenticationMode(protocol, authMode string) diag.Diagnostics {
 
 	allowed := map[string][]string{
 		"HTTP":  {"NONE", "KERBEROS"},
-		"HTTPS": {"NONE", "X509_GENERAL", "X509_RESTRICTED", "KERBEROS"},
+		"HTTPS": {"NONE", "NONE_RESTRICTED", "X509_GENERAL", "X509_RESTRICTED", "KERBEROS"},
 		"RFC":   {"NONE"},
 		"RFCS":  {"NONE", "X509_GENERAL", "X509_RESTRICTED"},
+		"RFCWS": {"NONE", "X509_GENERAL"},
 		"LDAP":  {"NONE"},
 		"LDAPS": {"NONE"},
 		"TCP":   {"NONE"},

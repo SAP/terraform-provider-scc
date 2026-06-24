@@ -58,14 +58,15 @@ resource "scc_system_mapping" "scc_sm" {
 - `backend_type` (String) Type of the backend system. Valid values are:
   | backend | description | 
   | --- | --- | 
-  | abapSys | ABAP-based SAP system | 
-  | netweaverCE | SAP NetWeaver Composition Environment | 
-  | netweaverGW | SAP NetWeaver Gateway | 
-  | applServerJava | Java-based application server | 
-  | PI | SAP Process Integration system | 
-  | hana | SAP HANA system | 
-  | otherSAPsys | Other SAP system | 
-  | nonSAPsys | Non-SAP system |
+  | abapSys | ABAP System | 
+  | hana | SAP HANA | 
+  | applServerJava | SAP Application Server Java | 
+  | netweaverCE | SAP Composition Environment | 
+  | BC | SAP Business Connector | 
+  | PI | SAP Process Integration | 
+  | netweaverGW | SAP Gateway | 
+  | otherSAPsys | Other SAP System | 
+  | nonSAPsys | Non-SAP System |
 - `internal_host` (String) Host on the on-premise side.
 				Host names with underscore ('_') may cause problems. We recommend refraining from using underscore in host names.
 Note: In the UI, this attribute may appear with different names depending on the protocol used:
@@ -89,6 +90,7 @@ __Allowed formats:__
   | HTTPS | Secure HTTP protocol | 
   | RFC | Remote Function Call protocol | 
   | RFCS | Secure RFC protocol | 
+  | RFCWS | Websocket RFC protocol | 
   | LDAP | Lightweight Directory Access Protocol | 
   | LDAPS | Secure LDAP | 
   | TCP | Transmission Control Protocol | 

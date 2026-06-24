@@ -3,6 +3,7 @@ package systemMapping
 import (
 	"context"
 	"fmt"
+	"slices"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -11,13 +12,82 @@ import (
 
 func validateProtocolBackend(protocol, backendType string) diag.Diagnostics {
 	var diags diag.Diagnostics
-	if (protocol == "LDAP" || protocol == "LDAPS") && backendType != "nonSAPsys" {
+
+	allowed := map[string][]string{
+		"HTTP": {
+			"abapSys",
+			"hana",
+			"applServerJava",
+			"netweaverCE",
+			"BC",
+			"PI",
+			"netweaverGW",
+			"otherSAPsys",
+			"nonSAPsys",
+		},
+		"HTTPS": {
+			"abapSys",
+			"hana",
+			"applServerJava",
+			"netweaverCE",
+			"BC",
+			"PI",
+			"netweaverGW",
+			"otherSAPsys",
+			"nonSAPsys",
+		},
+		"RFC": {
+			"abapSys",
+			"netweaverGW",
+		},
+		"RFCS": {
+			"abapSys",
+			"netweaverGW",
+		},
+		"RFCWS": {
+			"abapSys",
+			"netweaverGW",
+		},
+		"LDAP": {
+			"nonSAPsys",
+		},
+		"LDAPS": {
+			"nonSAPsys",
+		},
+		"TCP": {
+			"abapSys",
+			"hana",
+			"netweaverGW",
+			"otherSAPsys",
+			"nonSAPsys",
+		},
+		"TCPS": {
+			"abapSys",
+			"hana",
+			"netweaverGW",
+			"otherSAPsys",
+			"nonSAPsys",
+		},
+	}
+
+	validBackends, ok := allowed[protocol]
+	if !ok {
+		return diags
+	}
+
+	if !slices.Contains(validBackends, backendType) {
 		diags.AddAttributeError(
 			path.Empty(),
-			"Invalid protocol for backend_type",
-			fmt.Sprintf("Protocol %q is only valid when backend_type is \"nonSAPsys\" (got %q).", protocol, backendType),
+			"Invalid backend_type for protocol",
+			fmt.Sprintf(
+				"backend_type %q is not valid for protocol %q. Allowed values: %v",
+				backendType,
+				protocol,
+				validBackends,
+			),
 		)
 	}
+
 	return diags
 }
 
@@ -25,10 +95,10 @@ func validateProtocolBackend(protocol, backendType string) diag.Diagnostics {
 type ProtocolBackendValidator struct{}
 
 func (v ProtocolBackendValidator) Description(_ context.Context) string {
-	return "Ensures LDAP/LDAPS protocols are only allowed when backend_type is nonSAPsys"
+	return "Ensures the selected protocol is supported by the chosen backend_type."
 }
 func (v ProtocolBackendValidator) MarkdownDescription(_ context.Context) string {
-	return "Ensures **protocol** = `LDAP`/`LDAPS` is only allowed when **backend_type** = `nonSAPsys`."
+	return "Validates that the selected **protocol** is supported by the configured **backend_type**."
 }
 func (v ProtocolBackendValidator) ValidateString(ctx context.Context, req validator.StringRequest, resp *validator.StringResponse) {
 	if req.ConfigValue.IsNull() || req.ConfigValue.IsUnknown() {

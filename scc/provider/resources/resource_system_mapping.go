@@ -166,13 +166,14 @@ __Allowed formats:__
 					helpers.GetFormattedValueAsTableRow("HTTPS", "Secure HTTP protocol") +
 					helpers.GetFormattedValueAsTableRow("RFC", "Remote Function Call protocol") +
 					helpers.GetFormattedValueAsTableRow("RFCS", "Secure RFC protocol") +
+					helpers.GetFormattedValueAsTableRow("RFCWS", "Websocket RFC protocol") +
 					helpers.GetFormattedValueAsTableRow("LDAP", "Lightweight Directory Access Protocol") +
 					helpers.GetFormattedValueAsTableRow("LDAPS", "Secure LDAP") +
 					helpers.GetFormattedValueAsTableRow("TCP", "Transmission Control Protocol") +
 					helpers.GetFormattedValueAsTableRow("TCPS", "Secure TCP"),
 				Required: true,
 				Validators: []validator.String{
-					stringvalidator.OneOf("HTTP", "HTTPS", "RFC", "RFCS", "LDAP", "LDAPS", "TCP", "TCPS"),
+					stringvalidator.OneOf("HTTP", "HTTPS", "RFC", "RFCS", "RFCWS", "LDAP", "LDAPS", "TCP", "TCPS"),
 					systemMapping.ValidateProtocolBackend(),
 				},
 			},
@@ -180,17 +181,28 @@ __Allowed formats:__
 				MarkdownDescription: "Type of the backend system. Valid values are:" +
 					helpers.GetFormattedValueAsTableRow("backend", "description") +
 					helpers.GetFormattedValueAsTableRow("---", "---") +
-					helpers.GetFormattedValueAsTableRow("abapSys", "ABAP-based SAP system") +
-					helpers.GetFormattedValueAsTableRow("netweaverCE", "SAP NetWeaver Composition Environment") +
-					helpers.GetFormattedValueAsTableRow("netweaverGW", "SAP NetWeaver Gateway") +
-					helpers.GetFormattedValueAsTableRow("applServerJava", "Java-based application server") +
-					helpers.GetFormattedValueAsTableRow("PI", "SAP Process Integration system") +
-					helpers.GetFormattedValueAsTableRow("hana", "SAP HANA system") +
-					helpers.GetFormattedValueAsTableRow("otherSAPsys", "Other SAP system") +
-					helpers.GetFormattedValueAsTableRow("nonSAPsys", "Non-SAP system"),
+					helpers.GetFormattedValueAsTableRow("abapSys", "ABAP System") +
+					helpers.GetFormattedValueAsTableRow("hana", "SAP HANA") +
+					helpers.GetFormattedValueAsTableRow("applServerJava", "SAP Application Server Java") +
+					helpers.GetFormattedValueAsTableRow("netweaverCE", "SAP Composition Environment") +
+					helpers.GetFormattedValueAsTableRow("BC", "SAP Business Connector") +
+					helpers.GetFormattedValueAsTableRow("PI", "SAP Process Integration") +
+					helpers.GetFormattedValueAsTableRow("netweaverGW", "SAP Gateway") +
+					helpers.GetFormattedValueAsTableRow("otherSAPsys", "Other SAP System") +
+					helpers.GetFormattedValueAsTableRow("nonSAPsys", "Non-SAP System"),
 				Required: true,
 				Validators: []validator.String{
-					stringvalidator.OneOf("abapSys", "netweaverCE", "netweaverGW", "applServerJava", "PI", "hana", "otherSAPsys", "nonSAPsys"),
+					stringvalidator.OneOf(
+						"abapSys",
+						"hana",
+						"applServerJava",
+						"netweaverCE",
+						"BC",
+						"PI",
+						"netweaverGW",
+						"otherSAPsys",
+						"nonSAPsys",
+					),
 				},
 			},
 			"authentication_mode": schema.StringAttribute{
@@ -276,7 +288,7 @@ __Format rules:__
 					listvalidator.ValueStringsAre(
 						stringvalidator.LengthBetween(3, 3),
 					),
-					systemMapping.ValidateProtocolList([]string{"RFC", "RFCS"}),
+					systemMapping.ValidateProtocolList([]string{"RFC", "RFCS", "RFCWS"}),
 				},
 			},
 			"blacklisted_users": schema.ListNestedAttribute{
@@ -299,7 +311,7 @@ __Format rules:__
 					},
 				},
 				Validators: []validator.List{
-					systemMapping.ValidateProtocolList([]string{"RFC", "RFCS"}),
+					systemMapping.ValidateProtocolList([]string{"RFC", "RFCS", "RFCWS"}),
 				},
 			},
 		},
