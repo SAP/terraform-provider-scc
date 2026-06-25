@@ -116,6 +116,7 @@ __Allowed formats:__
   | HTTPS | Secure HTTP protocol | 
   | RFC | Remote Function Call protocol | 
   | RFCS | Secure RFC protocol | 
+  | RFCWS | Websocket RFC protocol | 
   | LDAP | Lightweight Directory Access Protocol | 
   | LDAPS | Secure LDAP | 
   | TCP | Transmission Control Protocol | 

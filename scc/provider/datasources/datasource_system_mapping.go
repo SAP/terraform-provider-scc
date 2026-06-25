@@ -137,13 +137,14 @@ __Allowed formats:__
 					helpers.GetFormattedValueAsTableRow("HTTPS", "Secure HTTP protocol") +
 					helpers.GetFormattedValueAsTableRow("RFC", "Remote Function Call protocol") +
 					helpers.GetFormattedValueAsTableRow("RFCS", "Secure RFC protocol") +
+					helpers.GetFormattedValueAsTableRow("RFCWS", "Websocket RFC protocol") +
 					helpers.GetFormattedValueAsTableRow("LDAP", "Lightweight Directory Access Protocol") +
 					helpers.GetFormattedValueAsTableRow("LDAPS", "Secure LDAP") +
 					helpers.GetFormattedValueAsTableRow("TCP", "Transmission Control Protocol") +
 					helpers.GetFormattedValueAsTableRow("TCPS", "Secure TCP"),
 				Computed: true,
 				Validators: []validator.String{
-					stringvalidator.OneOf("HTTP", "HTTPS", "RFC", "RFCS", "LDAP", "LDAPS", "TCP", "TCPS"),
+					stringvalidator.OneOf("HTTP", "HTTPS", "RFC", "RFCS", "RFCWS", "LDAP", "LDAPS", "TCP", "TCPS"),
 					systemMapping.ValidateProtocolBackend(),
 				},
 			},
@@ -240,7 +241,7 @@ __Format rules:__
 					listvalidator.ValueStringsAre(
 						stringvalidator.LengthBetween(3, 3),
 					),
-					systemMapping.ValidateProtocolList([]string{"RFC", "RFCS"}),
+					systemMapping.ValidateProtocolList([]string{"RFC", "RFCS", "RFCWS"}),
 				},
 			},
 			"blacklisted_users": schema.ListNestedAttribute{
@@ -262,7 +263,7 @@ __Format rules:__
 					},
 				},
 				Validators: []validator.List{
-					systemMapping.ValidateProtocolList([]string{"RFC", "RFCS"}),
+					systemMapping.ValidateProtocolList([]string{"RFC", "RFCS", "RFCWS"}),
 				},
 			},
 		},

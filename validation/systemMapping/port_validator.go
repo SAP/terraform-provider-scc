@@ -45,7 +45,7 @@ func (v PortValidator) ValidateString(ctx context.Context, req validator.StringR
 	protocolValue := protocol.ValueString()
 
 	switch protocolValue {
-	case "HTTP", "HTTPS", "TCP", "TCPS", "LDAP", "LDAPS":
+	case "HTTP", "HTTPS", "TCP", "TCPS", "LDAP", "LDAPS", "RFCWS":
 		// Only numeric 1–65535
 		if !isNumericInRange(portValue, 1, 65535) {
 			resp.Diagnostics.AddAttributeError(
