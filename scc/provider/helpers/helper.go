@@ -20,6 +20,7 @@ const (
 	ActionCreateRequest = "Create"
 	ActionUpdateRequest = "Update"
 	ActionDeleteRequest = "Delete"
+	ActionPatchRequest  = "Patch"
 )
 
 type FormattedTimes struct {
@@ -64,6 +65,8 @@ func sendRequest(client *api.RestApiClient, planBody map[string]any, endpoint st
 		response, diags = client.PutRequest(endpoint, requestByteBody)
 	case ActionDeleteRequest:
 		response, diags = client.DeleteRequest(endpoint)
+	case ActionPatchRequest:
+		response, diags = client.PatchRequest(endpoint, requestByteBody)
 	default:
 		diags.AddError("Invalid Action", fmt.Sprintf("unsupported action type: %s", action))
 		return nil, diags
@@ -88,6 +91,8 @@ func RequestAndUnmarshal[T any](client *api.RestApiClient, respObj *T, requestTy
 		response, diags = sendRequest(client, planBody, endpoint, ActionUpdateRequest)
 	case "DELETE":
 		response, diags = sendRequest(client, nil, endpoint, ActionDeleteRequest)
+	case "PATCH":
+		response, diags = sendRequest(client, planBody, endpoint, ActionPatchRequest)
 	default:
 		diags.AddError("Invalid Request Type", fmt.Sprintf("unsupported request type: %s", requestType))
 		return diags

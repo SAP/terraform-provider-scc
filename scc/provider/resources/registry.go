@@ -21,5 +21,6 @@ func All() []func() resource.Resource {
 		NewUICertificateSignedChainResource,
 		NewUICertificatePKCS12CertificateResource,
 		NewProxySettingsResource,
+		NewBackendTrustStoreResource,
 	}
 }

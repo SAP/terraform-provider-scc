@@ -261,3 +261,7 @@ func (c *RestApiClient) PutRequest(endpoint string, body []byte) (*http.Response
 func (c *RestApiClient) DeleteRequest(endpoint string) (*http.Response, diag.Diagnostics) {
 	return c.DoRequest(http.MethodDelete, endpoint, nil, "", "")
 }
+
+func (c *RestApiClient) PatchRequest(endpoint string, body []byte) (*http.Response, diag.Diagnostics) {
+	return c.DoRequest(http.MethodPatch, endpoint, body, "", "")
+}
