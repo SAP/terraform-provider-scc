@@ -5,6 +5,7 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
+	"strings"
 
 	"github.com/SAP/terraform-provider-scc/internal/api"
 	apiobjects "github.com/SAP/terraform-provider-scc/internal/api/apiObjects"
@@ -13,12 +14,17 @@ import (
 	"github.com/SAP/terraform-provider-scc/scc/provider/model"
 	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/resource/identityschema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 var _ resource.Resource = &BackendTrustStoreResource{}
+var _ resource.ResourceWithImportState = &BackendTrustStoreResource{}
+var _ resource.ResourceWithIdentity = &BackendTrustStoreResource{}
 
 func NewBackendTrustStoreResource() resource.Resource {
 	return &BackendTrustStoreResource{}
@@ -26,6 +32,10 @@ func NewBackendTrustStoreResource() resource.Resource {
 
 type BackendTrustStoreResource struct {
 	Client *api.RestApiClient
+}
+
+type backendTrustStoreResourceIdentityModel struct {
+	Alias types.String `tfsdk:"alias"`
 }
 
 func (r *BackendTrustStoreResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -130,6 +140,16 @@ The provider validates that the value is a valid PEM-encoded certificate before 
 	}
 }
 
+func (rs *BackendTrustStoreResource) IdentitySchema(_ context.Context, _ resource.IdentitySchemaRequest, resp *resource.IdentitySchemaResponse) {
+	resp.IdentitySchema = identityschema.Schema{
+		Attributes: map[string]identityschema.Attribute{
+			"alias": identityschema.StringAttribute{
+				RequiredForImport: true,
+			},
+		},
+	}
+}
+
 func (r *BackendTrustStoreResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
@@ -168,6 +188,15 @@ func (r *BackendTrustStoreResource) Create(ctx context.Context, req resource.Cre
 	if resp.Diagnostics.HasError() {
 		return
 	}
+
+	if resp.Identity != nil {
+		identity := backendTrustStoreResourceIdentityModel{
+			Alias: model.Alias,
+		}
+
+		diags = resp.Identity.Set(ctx, identity)
+		resp.Diagnostics.Append(diags...)
+	}
 }
 
 func (r *BackendTrustStoreResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -184,6 +213,7 @@ func (r *BackendTrustStoreResource) Read(ctx context.Context, req resource.ReadR
 		return
 	}
 
+	alias := state.Alias.ValueString()
 	endpoint := endpoints.GetBackendTrustStoreBaseEndpoint()
 
 	diags = helpers.RequestAndUnmarshal(
@@ -200,14 +230,11 @@ func (r *BackendTrustStoreResource) Read(ctx context.Context, req resource.ReadR
 	}
 
 	for _, trustedBackend := range trustStore.TrustedBackends {
-		if trustedBackend.Alias != state.Alias.ValueString() {
+		if trustedBackend.Alias != alias {
 			continue
 		}
 
-		resourceModel, d := model.BackendTrustStoreResourceValueFrom(
-			state.Certificate.ValueString(),
-			trustedBackend,
-		)
+		resourceModel, d := r.buildBackendTrustStoreModel(trustedBackend)
 		resp.Diagnostics.Append(d...)
 		if resp.Diagnostics.HasError() {
 			return
@@ -215,34 +242,31 @@ func (r *BackendTrustStoreResource) Read(ctx context.Context, req resource.ReadR
 
 		diags = resp.State.Set(ctx, &resourceModel)
 		resp.Diagnostics.Append(diags...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
+
+		if resp.Identity != nil {
+			identity := backendTrustStoreResourceIdentityModel{
+				Alias: resourceModel.Alias,
+			}
+
+			diags = resp.Identity.Set(ctx, identity)
+			resp.Diagnostics.Append(diags...)
+			if resp.Diagnostics.HasError() {
+				return
+			}
+		}
 		return
 	}
 
-	// Certificate no longer exists
-	resp.State.RemoveResource(ctx)
+	resp.Diagnostics.AddError(
+		"Backend trust store certificate not found",
+		fmt.Sprintf("No backend trust store certificate with alias %q exists.", alias),
+	)
 }
 
 func (r *BackendTrustStoreResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var plan, state model.BackendTrustStoreResourceConfig
-
-	diags := req.Plan.Get(ctx, &plan)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	diags = req.State.Get(ctx, &state)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
-	if plan.Certificate.Equal(state.Certificate) {
-		diags = resp.State.Set(ctx, &state)
-		resp.Diagnostics.Append(diags...)
-		return
-	}
-
 	resp.Diagnostics.AddError(
 		"Updating Backend Trust Store Certificates is Not Supported",
 		"SAP Cloud Connector does not provide an API to update an existing backend trust store certificate. Delete the resource and create it again with the new certificate.",
@@ -326,7 +350,7 @@ var UploadBackendCertificateFunc = func(r *BackendTrustStoreResource, ctx contex
 			continue
 		}
 
-		resourceModel, d := model.BackendTrustStoreResourceValueFrom(certificate, trustedBackend)
+		resourceModel, d := r.buildBackendTrustStoreModel(trustedBackend)
 		diags.Append(d...)
 		if diags.HasError() {
 			return nil, diags
@@ -337,8 +361,59 @@ var UploadBackendCertificateFunc = func(r *BackendTrustStoreResource, ctx contex
 
 	diags.AddError(
 		"Failed to Find Uploaded Certificate",
-		"The uploaded certificate was not found in the Back-End Trust Store. Please ensure that the certificate was uploaded successfully.",
+		"The uploaded certificate was not found in the Back-End Trust Store. Ensure that the certificate was uploaded successfully.",
 	)
 
 	return nil, diags
+}
+
+func (rs *BackendTrustStoreResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	if req.ID != "" {
+		idParts := strings.Split(req.ID, ",")
+
+		if len(idParts) != 1 || idParts[0] == "" {
+			resp.Diagnostics.AddError(
+				"Unexpected Import Identifier",
+				fmt.Sprintf("Expected import identifier with format: alias. Got: %q", req.ID),
+			)
+			return
+		}
+
+		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("alias"), idParts[0])...)
+
+		return
+	}
+
+	var identity backendTrustStoreResourceIdentityModel
+	diags := resp.Identity.Get(ctx, &identity)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("alias"), identity.Alias)...)
+}
+
+func (r *BackendTrustStoreResource) buildBackendTrustStoreModel(trustedBackend apiobjects.TrustedBackends) (model.BackendTrustStoreResourceConfig, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	certEndpoint := endpoints.GetBackendTrustStoreCertificateEndpoint() + "/" + trustedBackend.Alias
+
+	certBytes, d := helpers.GetCertificateBinaryFunc(r.Client, certEndpoint)
+	diags.Append(d...)
+	if diags.HasError() {
+		return model.BackendTrustStoreResourceConfig{}, diags
+	}
+
+	pemBytes := pem.EncodeToMemory(&pem.Block{
+		Type:  "CERTIFICATE",
+		Bytes: certBytes,
+	})
+
+	resourceModel, d := model.BackendTrustStoreResourceValueFrom(string(pemBytes), trustedBackend)
+	diags.Append(d...)
+	if diags.HasError() {
+		return model.BackendTrustStoreResourceConfig{}, diags
+	}
+
+	return resourceModel, diags
 }
