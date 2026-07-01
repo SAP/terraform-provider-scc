@@ -90,6 +90,15 @@ func (a *ChangeTrustStoreAction) InvokeWithPlan(ctx context.Context, plan model.
 		return
 	}
 
+	defer func() {
+		if err := backendResponse.Body.Close(); err != nil {
+			resp.Diagnostics.AddError(
+				"Failed to Close Response Body",
+				fmt.Sprintf("failed to close response body: %v", err),
+			)
+		}
+	}()
+
 	if backendResponse.StatusCode != http.StatusNoContent {
 		body, err := io.ReadAll(backendResponse.Body)
 		closeErr := backendResponse.Body.Close()
