@@ -40,6 +40,7 @@ func TestSCCProvider_AllResources(t *testing.T) {
 		"scc_ui_certificate_signed_chain",
 		"scc_ui_certificate_pkcs12_certificate",
 		"scc_proxy_settings",
+		"scc_backend_trust_store",
 	}
 
 	ctx := context.Background()
@@ -74,6 +75,7 @@ func TestSCCProvider_AllDataSources(t *testing.T) {
 		"scc_system_certificate",
 		"scc_ca_certificate",
 		"scc_proxy_settings",
+		"scc_backend_trust_store",
 	}
 
 	ctx := context.Background()
@@ -134,6 +136,7 @@ func TestSCCProvider_AllActions(t *testing.T) {
 	expected := []string{
 		"scc_generate_csr",
 		"scc_create_backup",
+		"scc_change_trust_store",
 	}
 
 	p := provider.New()

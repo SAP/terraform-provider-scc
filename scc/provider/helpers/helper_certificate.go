@@ -24,6 +24,7 @@ import (
 var GetCertificateBinaryFunc = getCertificateBinary
 var ValidatePEMChainFunc = validatePEMChain
 var UploadSignedChainFunc = uploadSignedChain
+var UploadBackendTrustStoreCertificateFunc = uploadBackendTrustStoreCertificate
 var UploadPKCS12CertificateFunc = uploadPKCS12Certificate
 var ExpandSubjectDNFunc = expandSubjectDN
 var BuildSubjectDNFunc = buildSubjectDN
@@ -196,12 +197,12 @@ func buildSubjectDNObject(dn *CertificateSubjectDNConfig) types.Object {
 	return obj
 }
 
-func uploadSignedChain(c *api.RestApiClient, endpoint, cert string) diag.Diagnostics {
+func uploadCertificate(c *api.RestApiClient, method, endpoint, formField, fileName, cert string) diag.Diagnostics {
 	var diags diag.Diagnostics
 	var body bytes.Buffer
 	writer := multipart.NewWriter(&body)
 
-	part, err := writer.CreateFormFile("signedCertificate", "signed_chain.pem")
+	part, err := writer.CreateFormFile(formField, fileName)
 	if err != nil {
 		diags.AddError(
 			"Failed to Create Multipart Form",
@@ -227,7 +228,7 @@ func uploadSignedChain(c *api.RestApiClient, endpoint, cert string) diag.Diagnos
 		return diags
 	}
 
-	resp, diags := c.DoRequest(http.MethodPatch, endpoint, body.Bytes(), "", writer.FormDataContentType())
+	resp, diags := c.DoRequest(method, endpoint, body.Bytes(), "", writer.FormDataContentType())
 	if diags.HasError() {
 		return diags
 	}
@@ -244,12 +245,34 @@ func uploadSignedChain(c *api.RestApiClient, endpoint, cert string) diag.Diagnos
 	if resp.StatusCode >= 400 {
 		bodyBytes, _ := io.ReadAll(resp.Body)
 		diags.AddError(
-			"Failed to Upload Signed Certificate Chain",
+			"Failed to Upload Certificate",
 			fmt.Sprintf("status code: %d, response: %s", resp.StatusCode, string(bodyBytes)),
 		)
 	}
 
 	return diags
+}
+
+func uploadSignedChain(c *api.RestApiClient, endpoint, cert string) diag.Diagnostics {
+	return uploadCertificate(
+		c,
+		http.MethodPatch,
+		endpoint,
+		"signedCertificate",
+		"signed_chain.pem",
+		cert,
+	)
+}
+
+func uploadBackendTrustStoreCertificate(c *api.RestApiClient, endpoint, cert string) diag.Diagnostics {
+	return uploadCertificate(
+		c,
+		http.MethodPost,
+		endpoint,
+		"certificate",
+		"certificate.pem",
+		cert,
+	)
 }
 
 func uploadPKCS12Certificate(c *api.RestApiClient, endpoint string, pkcs12Bytes []byte, password, keyPassword string) diag.Diagnostics {
@@ -543,4 +566,56 @@ func shouldUpdateSelfSignedCertificate(planKeySize, stateKeySize types.Int64, pl
 	return !planKeySize.Equal(stateKeySize) ||
 		!planSubjectDN.Equal(stateSubjectDN) ||
 		!planSubjectAltNames.Equal(stateSubjectAltNames)
+}
+
+func MatchesBackendCertificate(
+	backend apiobjects.TrustedBackends,
+	cert *x509.Certificate,
+) bool {
+
+	apiDN := ParseSubjectDNFunc(backend.SubjectDN)
+
+	if apiDN.CommonName.ValueString() != cert.Subject.CommonName {
+		return false
+	}
+
+	if len(cert.Subject.Organization) > 0 &&
+		apiDN.Organization.ValueString() != cert.Subject.Organization[0] {
+		return false
+	}
+
+	if len(cert.Subject.OrganizationalUnit) > 0 &&
+		apiDN.OrganizationalUnit.ValueString() != cert.Subject.OrganizationalUnit[0] {
+		return false
+	}
+
+	if len(cert.Subject.Locality) > 0 &&
+		apiDN.Locality.ValueString() != cert.Subject.Locality[0] {
+		return false
+	}
+
+	if len(cert.Subject.Province) > 0 &&
+		apiDN.State.ValueString() != cert.Subject.Province[0] {
+		return false
+	}
+
+	if len(cert.Subject.Country) > 0 &&
+		apiDN.Country.ValueString() != cert.Subject.Country[0] {
+		return false
+	}
+
+	if !apiDN.Email.IsNull() {
+		if len(cert.EmailAddresses) == 0 {
+			return false
+		}
+		if apiDN.Email.ValueString() != cert.EmailAddresses[0] {
+			return false
+		}
+	}
+
+	if backend.ValidTo != cert.NotAfter.UnixMilli() {
+		return false
+	}
+
+	return true
 }

@@ -6,5 +6,6 @@ func All() []func() action.Action {
 	return []func() action.Action{
 		NewGenerateCSRAction,
 		NewCreateBackupAction,
+		NewChangeTrustStoreAction,
 	}
 }

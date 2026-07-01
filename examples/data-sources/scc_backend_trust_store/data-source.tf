@@ -1,0 +1,1 @@
+data "scc_backend_trust_store" "scc_bts" {}
