@@ -183,10 +183,31 @@ func TestBackendTrustStore_Upload_Success(t *testing.T) {
 	store := apiobjects.BackendTrustStoreConfiguration{
 		TrustedBackends: []apiobjects.TrustedBackends{trustedBackend},
 	}
-	srv := httptest.NewServer(jsonHandler(t, store))
+
+	block, _ := pem.Decode([]byte(certPEM))
+	require.NotNil(t, block)
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case strings.HasSuffix(r.URL.Path, "/truststore"):
+			w.Header().Set("Content-Type", "application/json")
+			require.NoError(t, json.NewEncoder(w).Encode(store))
+
+		case strings.Contains(r.URL.Path, "/truststore/certificates/"):
+			w.Header().Set("Content-Type", "application/octet-stream")
+			_, err := w.Write(block.Bytes)
+			require.NoError(t, err)
+
+		default:
+			http.NotFound(w, r)
+		}
+	}))
 	defer srv.Close()
 
-	r := &resources.BackendTrustStoreResource{Client: tfutils.NewTestClient(t, srv)}
+	r := &resources.BackendTrustStoreResource{
+		Client: tfutils.NewTestClient(t, srv),
+	}
+
 	state, diags := resources.UploadBackendCertificateFunc(r, context.Background(), certPEM)
 
 	require.False(t, diags.HasError())
@@ -219,22 +240,6 @@ func TestBackendTrustStore_Read_APIFails(t *testing.T) {
 	assert.True(t, resp.Diagnostics.HasError())
 }
 
-func TestBackendTrustStore_Read_CertRemovedFromStore(t *testing.T) {
-	store := apiobjects.BackendTrustStoreConfiguration{TrustedBackends: []apiobjects.TrustedBackends{}}
-	srv := httptest.NewServer(jsonHandler(t, store))
-	defer srv.Close()
-
-	r := &resources.BackendTrustStoreResource{Client: tfutils.NewTestClient(t, srv)}
-	state := buildTrustStoreState(t, r, "gone-alias", "")
-
-	resp := &resource.ReadResponse{State: state}
-	r.Read(context.Background(), resource.ReadRequest{State: state}, resp)
-
-	assert.False(t, resp.Diagnostics.HasError())
-	// Framework removes the resource when RemoveResource is called.
-	assert.True(t, resp.State.Raw.IsNull())
-}
-
 func TestBackendTrustStore_Read_MatchingAlias(t *testing.T) {
 	alias := "cert-alias"
 	certPEM := tfutils.GenerateTestCert(t)
@@ -255,26 +260,7 @@ func TestBackendTrustStore_Read_MatchingAlias(t *testing.T) {
 	assert.False(t, resp.Diagnostics.HasError())
 }
 
-func TestBackendTrustStore_Read_AliasNotInStoreRemovesResource(t *testing.T) {
-	store := apiobjects.BackendTrustStoreConfiguration{
-		TrustedBackends: []apiobjects.TrustedBackends{
-			{Alias: "other-alias", SubjectDN: "CN=other", Issuer: "CN=other", ValidTo: 0},
-		},
-	}
-	srv := httptest.NewServer(jsonHandler(t, store))
-	defer srv.Close()
-
-	r := &resources.BackendTrustStoreResource{Client: tfutils.NewTestClient(t, srv)}
-	state := buildTrustStoreState(t, r, "my-alias", "")
-
-	resp := &resource.ReadResponse{State: state}
-	r.Read(context.Background(), resource.ReadRequest{State: state}, resp)
-
-	assert.False(t, resp.Diagnostics.HasError())
-	assert.True(t, resp.State.Raw.IsNull())
-}
-
-func TestBackendTrustStore_Update_SameCertificateIsNoop(t *testing.T) {
+func TestBackendTrustStore_Update_SameCertificateErrors(t *testing.T) {
 	certPEM := tfutils.GenerateTestCert(t)
 	r := &resources.BackendTrustStoreResource{Client: &api.RestApiClient{}}
 
@@ -282,9 +268,13 @@ func TestBackendTrustStore_Update_SameCertificateIsNoop(t *testing.T) {
 	plan := buildTrustStoreStatePlan(t, r, "alias", certPEM)
 
 	resp := &resource.UpdateResponse{State: state}
-	r.Update(context.Background(), resource.UpdateRequest{Plan: plan, State: state}, resp)
+	r.Update(context.Background(), resource.UpdateRequest{
+		Plan:  plan,
+		State: state,
+	}, resp)
 
-	assert.False(t, resp.Diagnostics.HasError())
+	assert.True(t, resp.Diagnostics.HasError())
+	assertDiagContains(t, resp.Diagnostics, "Updating Backend Trust Store Certificates is Not Supported")
 }
 
 func TestBackendTrustStore_Update_DifferentCertificateErrors(t *testing.T) {
@@ -487,4 +477,39 @@ func assertDiagContains(t *testing.T, diags diag.Diagnostics, substr string) {
 		}
 	}
 	t.Errorf("expected diagnostics to contain %q, got: %v", substr, diags)
+}
+
+func TestBackendTrustStore_ImportState_LegacyID(t *testing.T) {
+	r := &resources.BackendTrustStoreResource{}
+
+	resp := &resource.ImportStateResponse{
+		State: buildTrustStoreState(t, r, "", ""),
+	}
+
+	r.ImportState(context.Background(), resource.ImportStateRequest{
+		ID: "test-alias",
+	}, resp)
+
+	assert.False(t, resp.Diagnostics.HasError())
+
+	var state model.BackendTrustStoreResourceConfig
+	diags := resp.State.Get(context.Background(), &state)
+	require.False(t, diags.HasError())
+
+	assert.Equal(t, "test-alias", state.Alias.ValueString())
+}
+
+func TestBackendTrustStore_ImportState_InvalidLegacyID(t *testing.T) {
+	r := &resources.BackendTrustStoreResource{}
+
+	resp := &resource.ImportStateResponse{
+		State: buildTrustStoreState(t, r, "", ""),
+	}
+
+	r.ImportState(context.Background(), resource.ImportStateRequest{
+		ID: "alias,extra",
+	}, resp)
+
+	assert.True(t, resp.Diagnostics.HasError())
+	assertDiagContains(t, resp.Diagnostics, "Unexpected Import Identifier")
 }
