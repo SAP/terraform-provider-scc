@@ -1,0 +1,207 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: https://redacted.instance.url
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+        url: https://redacted.instance.url/api/v1/connector/version
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 22
+        uncompressed: false
+        body: '{"version":"2.19.0.2"}'
+        headers:
+            Cache-Control:
+                - max-age=3600
+            Content-Length:
+                - "22"
+            Content-Type:
+                - application/json
+            Date:
+                - Tue, 28 Jul 2026 09:23:05 GMT
+            Server:
+                - nginx/1.29.7
+            Set-Cookie:
+                - redacted
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            X-Csrf-Token:
+                - redacted
+            X-Vcap-Request-Id:
+                - e0e9e7e4-3b8a-48cf-7bc2-5e24ead39b69
+        status: 200 OK
+        code: 200
+        duration: 797.238208ms
+    - id: 1
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: https://redacted.instance.url
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+        url: https://redacted.instance.url/api/v1/configuration/connector/onPremises/subjectPatternRules
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 63
+        uncompressed: false
+        body: '[{"condition":"always true","subjectPattern":{"CN":"${name}"}}]'
+        headers:
+            Cache-Control:
+                - no-store
+            Content-Length:
+                - "63"
+            Content-Type:
+                - application/json
+            Date:
+                - Tue, 28 Jul 2026 09:23:06 GMT
+            Server:
+                - nginx/1.29.7
+            Set-Cookie:
+                - redacted
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            X-Csrf-Token:
+                - redacted
+            X-Vcap-Request-Id:
+                - 045f159a-a753-40b8-79ad-50391a5f908f
+        status: 200 OK
+        code: 200
+        duration: 254.968625ms
+    - id: 2
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: https://redacted.instance.url
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+        url: https://redacted.instance.url/api/v1/connector/version
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 22
+        uncompressed: false
+        body: '{"version":"2.19.0.2"}'
+        headers:
+            Cache-Control:
+                - max-age=3600
+            Content-Length:
+                - "22"
+            Content-Type:
+                - application/json
+            Date:
+                - Tue, 28 Jul 2026 09:23:06 GMT
+            Server:
+                - nginx/1.29.7
+            Set-Cookie:
+                - redacted
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            X-Csrf-Token:
+                - redacted
+            X-Vcap-Request-Id:
+                - b81b0629-d8dc-4d87-761b-90bedf5db8b8
+        status: 200 OK
+        code: 200
+        duration: 253.104209ms
+    - id: 3
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: https://redacted.instance.url
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+        url: https://redacted.instance.url/api/v1/configuration/connector/onPremises/subjectPatternRules
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 63
+        uncompressed: false
+        body: '[{"condition":"always true","subjectPattern":{"CN":"${name}"}}]'
+        headers:
+            Cache-Control:
+                - no-store
+            Content-Length:
+                - "63"
+            Content-Type:
+                - application/json
+            Date:
+                - Tue, 28 Jul 2026 09:23:06 GMT
+            Server:
+                - nginx/1.29.7
+            Set-Cookie:
+                - redacted
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            X-Csrf-Token:
+                - redacted
+            X-Vcap-Request-Id:
+                - bdbdba27-f95e-424d-52f1-3885dab379ef
+        status: 200 OK
+        code: 200
+        duration: 256.25425ms

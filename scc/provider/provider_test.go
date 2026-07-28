@@ -41,6 +41,7 @@ func TestSCCProvider_AllResources(t *testing.T) {
 		"scc_ui_certificate_pkcs12_certificate",
 		"scc_proxy_settings",
 		"scc_backend_trust_store",
+		"scc_subject_pattern_rule",
 	}
 
 	ctx := context.Background()
@@ -76,6 +77,8 @@ func TestSCCProvider_AllDataSources(t *testing.T) {
 		"scc_ca_certificate",
 		"scc_proxy_settings",
 		"scc_backend_trust_store",
+		"scc_subject_pattern_rule",
+		"scc_subject_pattern_rules",
 	}
 
 	ctx := context.Background()
@@ -102,6 +105,7 @@ func TestSCCProvider_ListResources(t *testing.T) {
 		"scc_system_mapping",
 		"scc_subaccount_k8s_service_channel",
 		"scc_subaccount_abap_service_channel",
+		"scc_subject_pattern_rule",
 	}
 
 	p := provider.New()

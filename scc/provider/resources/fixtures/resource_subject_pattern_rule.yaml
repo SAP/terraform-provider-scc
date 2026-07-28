@@ -1,0 +1,664 @@
+---
+version: 2
+interactions:
+    - id: 0
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: https://redacted.instance.url
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+        url: https://redacted.instance.url/api/v1/connector/version
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 22
+        uncompressed: false
+        body: '{"version":"2.19.0.2"}'
+        headers:
+            Cache-Control:
+                - max-age=3600
+            Content-Length:
+                - "22"
+            Content-Type:
+                - application/json
+            Date:
+                - Tue, 28 Jul 2026 08:48:27 GMT
+            Server:
+                - nginx/1.29.7
+            Set-Cookie:
+                - redacted
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            X-Csrf-Token:
+                - redacted
+            X-Vcap-Request-Id:
+                - 1c0e9c63-e3c7-410b-440c-97db2123fa36
+        status: 200 OK
+        code: 200
+        duration: 879.896376ms
+    - id: 1
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: https://redacted.instance.url
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+        url: https://redacted.instance.url/api/v1/connector/version
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 22
+        uncompressed: false
+        body: '{"version":"2.19.0.2"}'
+        headers:
+            Cache-Control:
+                - max-age=3600
+            Content-Length:
+                - "22"
+            Content-Type:
+                - application/json
+            Date:
+                - Tue, 28 Jul 2026 08:48:28 GMT
+            Server:
+                - nginx/1.29.7
+            Set-Cookie:
+                - redacted
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            X-Csrf-Token:
+                - redacted
+            X-Vcap-Request-Id:
+                - be31a71a-a3e9-4957-5d49-00e0dff8a178
+        status: 200 OK
+        code: 200
+        duration: 246.99075ms
+    - id: 2
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 277
+        transfer_encoding: []
+        trailer: {}
+        host: https://redacted.instance.url
+        remote_addr: ""
+        request_uri: ""
+        body: '{"condition":{"operator":"is","value":"Terraform","variable":"name"},"description":"subject pattern rule added via terraform tests","subjectPattern":{"CN":"Terraform","EMAIL":"terraform@example.com","L":"Test Locality","OU":"Test OU","O":"Test Org","ST":"Test State","C":"TC"}}'
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+            Content-Type:
+                - application/json
+        url: https://redacted.instance.url/api/v1/configuration/connector/onPremises/subjectPatternRules
+        method: POST
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 0
+        uncompressed: false
+        body: ""
+        headers:
+            Cache-Control:
+                - no-store
+            Content-Length:
+                - "0"
+            Date:
+                - Tue, 28 Jul 2026 08:48:28 GMT
+            Location:
+                - redacted
+            Server:
+                - nginx/1.29.7
+            Set-Cookie:
+                - redacted
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            X-Csrf-Token:
+                - redacted
+            X-Vcap-Request-Id:
+                - 765c74b9-824c-46ae-5c24-bd749a45aeaf
+        status: 201 Created
+        code: 201
+        duration: 368.855292ms
+    - id: 3
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: https://redacted.instance.url
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+        url: https://redacted.instance.url/api/v1/configuration/connector/onPremises/subjectPatternRules
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 305
+        uncompressed: false
+        body: '[{"description":"subject pattern rule added via terraform tests","condition":"name is Terraform","subjectPattern":{"CN":"Terraform","EMAIL":"terraform@example.com","L":"Test Locality","OU":"Test OU","O":"Test Org","ST":"Test State","C":"TC"}},{"condition":"always true","subjectPattern":{"CN":"${name}"}}]'
+        headers:
+            Cache-Control:
+                - no-store
+            Content-Length:
+                - "305"
+            Content-Type:
+                - application/json
+            Date:
+                - Tue, 28 Jul 2026 08:48:28 GMT
+            Server:
+                - nginx/1.29.7
+            Set-Cookie:
+                - redacted
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            X-Csrf-Token:
+                - redacted
+            X-Vcap-Request-Id:
+                - 419223e1-62a5-4472-5929-95625e76b494
+        status: 200 OK
+        code: 200
+        duration: 251.467459ms
+    - id: 4
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: https://redacted.instance.url
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+        url: https://redacted.instance.url/api/v1/connector/version
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 22
+        uncompressed: false
+        body: '{"version":"2.19.0.2"}'
+        headers:
+            Cache-Control:
+                - max-age=3600
+            Content-Length:
+                - "22"
+            Content-Type:
+                - application/json
+            Date:
+                - Tue, 28 Jul 2026 08:48:29 GMT
+            Server:
+                - nginx/1.29.7
+            Set-Cookie:
+                - redacted
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            X-Csrf-Token:
+                - redacted
+            X-Vcap-Request-Id:
+                - d1cf959a-5983-4464-57c7-c8f1c0ce8dbd
+        status: 200 OK
+        code: 200
+        duration: 250.892584ms
+    - id: 5
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: https://redacted.instance.url
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+        url: https://redacted.instance.url/api/v1/connector/version
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 22
+        uncompressed: false
+        body: '{"version":"2.19.0.2"}'
+        headers:
+            Cache-Control:
+                - max-age=3600
+            Content-Length:
+                - "22"
+            Content-Type:
+                - application/json
+            Date:
+                - Tue, 28 Jul 2026 08:48:29 GMT
+            Server:
+                - nginx/1.29.7
+            Set-Cookie:
+                - redacted
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            X-Csrf-Token:
+                - redacted
+            X-Vcap-Request-Id:
+                - 6b4f12c1-a3f0-4a3d-6de5-4c9a181649d3
+        status: 200 OK
+        code: 200
+        duration: 317.900583ms
+    - id: 6
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: https://redacted.instance.url
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+        url: https://redacted.instance.url/api/v1/configuration/connector/onPremises/subjectPatternRules
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 305
+        uncompressed: false
+        body: '[{"description":"subject pattern rule added via terraform tests","condition":"name is Terraform","subjectPattern":{"CN":"Terraform","EMAIL":"terraform@example.com","L":"Test Locality","OU":"Test OU","O":"Test Org","ST":"Test State","C":"TC"}},{"condition":"always true","subjectPattern":{"CN":"${name}"}}]'
+        headers:
+            Cache-Control:
+                - no-store
+            Content-Length:
+                - "305"
+            Content-Type:
+                - application/json
+            Date:
+                - Tue, 28 Jul 2026 08:48:29 GMT
+            Server:
+                - nginx/1.29.7
+            Set-Cookie:
+                - redacted
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            X-Csrf-Token:
+                - redacted
+            X-Vcap-Request-Id:
+                - 25808c0a-e172-467a-7a39-63520e9e9479
+        status: 200 OK
+        code: 200
+        duration: 247.905459ms
+    - id: 7
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: https://redacted.instance.url
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+        url: https://redacted.instance.url/api/v1/connector/version
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 22
+        uncompressed: false
+        body: '{"version":"2.19.0.2"}'
+        headers:
+            Cache-Control:
+                - max-age=3600
+            Content-Length:
+                - "22"
+            Content-Type:
+                - application/json
+            Date:
+                - Tue, 28 Jul 2026 08:48:30 GMT
+            Server:
+                - nginx/1.29.7
+            Set-Cookie:
+                - redacted
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            X-Csrf-Token:
+                - redacted
+            X-Vcap-Request-Id:
+                - 6fbc83d1-507a-48a7-5637-14a591a1ad63
+        status: 200 OK
+        code: 200
+        duration: 247.046708ms
+    - id: 8
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: https://redacted.instance.url
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+        url: https://redacted.instance.url/api/v1/configuration/connector/onPremises/subjectPatternRules
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 305
+        uncompressed: false
+        body: '[{"description":"subject pattern rule added via terraform tests","condition":"name is Terraform","subjectPattern":{"CN":"Terraform","EMAIL":"terraform@example.com","L":"Test Locality","OU":"Test OU","O":"Test Org","ST":"Test State","C":"TC"}},{"condition":"always true","subjectPattern":{"CN":"${name}"}}]'
+        headers:
+            Cache-Control:
+                - no-store
+            Content-Length:
+                - "305"
+            Content-Type:
+                - application/json
+            Date:
+                - Tue, 28 Jul 2026 08:48:30 GMT
+            Server:
+                - nginx/1.29.7
+            Set-Cookie:
+                - redacted
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            X-Csrf-Token:
+                - redacted
+            X-Vcap-Request-Id:
+                - ccc4c207-e617-488c-5ce6-1ace47634877
+        status: 200 OK
+        code: 200
+        duration: 275.247667ms
+    - id: 9
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: https://redacted.instance.url
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+        url: https://redacted.instance.url/api/v1/connector/version
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 22
+        uncompressed: false
+        body: '{"version":"2.19.0.2"}'
+        headers:
+            Cache-Control:
+                - max-age=3600
+            Content-Length:
+                - "22"
+            Content-Type:
+                - application/json
+            Date:
+                - Tue, 28 Jul 2026 08:48:30 GMT
+            Server:
+                - nginx/1.29.7
+            Set-Cookie:
+                - redacted
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            X-Csrf-Token:
+                - redacted
+            X-Vcap-Request-Id:
+                - 8f901248-bd0a-4450-4711-ec87c86860cc
+        status: 200 OK
+        code: 200
+        duration: 245.987459ms
+    - id: 10
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: https://redacted.instance.url
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+        url: https://redacted.instance.url/api/v1/connector/version
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 22
+        uncompressed: false
+        body: '{"version":"2.19.0.2"}'
+        headers:
+            Cache-Control:
+                - max-age=3600
+            Content-Length:
+                - "22"
+            Content-Type:
+                - application/json
+            Date:
+                - Tue, 28 Jul 2026 08:48:30 GMT
+            Server:
+                - nginx/1.29.7
+            Set-Cookie:
+                - redacted
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            X-Csrf-Token:
+                - redacted
+            X-Vcap-Request-Id:
+                - d29a74c5-54e4-41e4-612e-dd18211b2440
+        status: 200 OK
+        code: 200
+        duration: 250.698792ms
+    - id: 11
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: https://redacted.instance.url
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+        url: https://redacted.instance.url/api/v1/configuration/connector/onPremises/subjectPatternRules
+        method: GET
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 305
+        uncompressed: false
+        body: '[{"description":"subject pattern rule added via terraform tests","condition":"name is Terraform","subjectPattern":{"CN":"Terraform","EMAIL":"terraform@example.com","L":"Test Locality","OU":"Test OU","O":"Test Org","ST":"Test State","C":"TC"}},{"condition":"always true","subjectPattern":{"CN":"${name}"}}]'
+        headers:
+            Cache-Control:
+                - no-store
+            Content-Length:
+                - "305"
+            Content-Type:
+                - application/json
+            Date:
+                - Tue, 28 Jul 2026 08:48:31 GMT
+            Server:
+                - nginx/1.29.7
+            Set-Cookie:
+                - redacted
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            X-Csrf-Token:
+                - redacted
+            X-Vcap-Request-Id:
+                - 36753cd6-ff60-42fc-6493-9ee2648d4f5c
+        status: 200 OK
+        code: 200
+        duration: 249.489333ms
+    - id: 12
+      request:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        content_length: 0
+        transfer_encoding: []
+        trailer: {}
+        host: https://redacted.instance.url
+        remote_addr: ""
+        request_uri: ""
+        body: ""
+        form: {}
+        headers:
+            Accept:
+                - '*/*'
+            Authorization:
+                - redacted
+        url: https://redacted.instance.url/api/v1/configuration/connector/onPremises/subjectPatternRules/0
+        method: DELETE
+      response:
+        proto: HTTP/1.1
+        proto_major: 1
+        proto_minor: 1
+        transfer_encoding: []
+        trailer: {}
+        content_length: 0
+        uncompressed: false
+        body: ""
+        headers:
+            Cache-Control:
+                - no-store
+            Date:
+                - Tue, 28 Jul 2026 08:48:31 GMT
+            Server:
+                - nginx/1.29.7
+            Set-Cookie:
+                - redacted
+            Strict-Transport-Security:
+                - max-age=31536000; includeSubDomains; preload;
+            X-Csrf-Token:
+                - redacted
+            X-Vcap-Request-Id:
+                - d673a512-a36a-48c4-6d5c-9a5b203d829c
+        status: 204 No Content
+        code: 204
+        duration: 361.517167ms

@@ -10,5 +10,6 @@ func All() []func() list.ListResource {
 		NewSystemMappingResourceListResource,
 		NewSubaccountABAPServiceChannelListResource,
 		NewSubaccountK8SServiceChannelListResource,
+		NewSubjectPatternRuleListResource,
 	}
 }

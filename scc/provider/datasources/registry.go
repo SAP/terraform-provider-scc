@@ -20,5 +20,7 @@ func All() []func() datasource.DataSource {
 		NewCACertificateDataSource,
 		NewProxySettingsDataSource,
 		NewBackendTrustStoreDataSource,
+		NewSubjectPatternRulesDataSource,
+		NewSubjectPatternRuleDataSource,
 	}
 }
