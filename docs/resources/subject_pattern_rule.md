@@ -2,29 +2,30 @@
 page_title: "scc_subject_pattern_rule Resource - scc"
 subcategory: ""
 description: |-
-  Cloud Connector Subject Pattern Rules Data Source.
+  Manages a Subject Pattern Rule in the SAP Cloud Connector instance.
   Tips:
   You must be assigned to the following roles:
-  AdministratorAssociate AdministratorSubaccount AdministratorDisplaySupportMonitoring
+  AdministratorAssociate AdministratorSubaccount AdministratorDisplaySupportMonitoringThe system-level rule with condition "always true" cannot be managed by this resource. Attempting to import it will return an error.
   Further documentation:
-  https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/proxy-settings
+  https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/subject-pattern-rules
 ---
 
 # scc_subject_pattern_rule (Resource)
 
-Cloud Connector Subject Pattern Rules Data Source.
+Manages a Subject Pattern Rule in the SAP Cloud Connector instance.
 
 __Tips:__
 * You must be assigned to the following roles:
 	* Administrator
 	* Associate Administrator
-	* Subaccount Administrator 
+	* Subaccount Administrator
 	* Display
 	* Support
 	* Monitoring
+* The system-level rule with condition "always true" cannot be managed by this resource. Attempting to import it will return an error.
 
 __Further documentation:__
-<https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/proxy-settings>
+<https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/subject-pattern-rules>
 
 ## Example Usage
 

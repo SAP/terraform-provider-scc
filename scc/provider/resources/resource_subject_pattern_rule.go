@@ -47,19 +47,20 @@ func (d *SubjectPatternRuleResource) Metadata(ctx context.Context, req resource.
 
 func (d *SubjectPatternRuleResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		MarkdownDescription: `Cloud Connector Subject Pattern Rules Data Source.
+		MarkdownDescription: `Manages a Subject Pattern Rule in the SAP Cloud Connector instance.
 
 __Tips:__
 * You must be assigned to the following roles:
 	* Administrator
 	* Associate Administrator
-	* Subaccount Administrator 
+	* Subaccount Administrator
 	* Display
 	* Support
 	* Monitoring
+* The system-level rule with condition "always true" cannot be managed by this resource. Attempting to import it will return an error.
 
 __Further documentation:__
-<https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/proxy-settings>`,
+<https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/subject-pattern-rules>`,
 		Attributes: map[string]schema.Attribute{
 			"index": schema.Int64Attribute{
 				MarkdownDescription: "Index of the subject pattern rule to retrieve.",
@@ -319,6 +320,18 @@ func (r *SubjectPatternRuleResource) Read(ctx context.Context, req resource.Read
 
 	state.Index = types.Int64Value(int64(newIndex))
 
+	if strings.TrimSpace(rule.Condition) == "always true" {
+		resp.Diagnostics.AddError(
+			"Rule cannot be managed",
+			fmt.Sprintf(
+				"The subject pattern rule at index %d has an \"always true\" condition. "+
+					"This is a system-level rule that cannot be managed by Terraform.",
+				newIndex,
+			),
+		)
+		return
+	}
+
 	model, diags := model.SubjectPatternRuleValueFrom(ctx, state, *rule)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -434,7 +447,7 @@ func (r *SubjectPatternRuleResource) Update(ctx context.Context, req resource.Up
 	}
 
 	identity := subjectPatternRuleResourceIdentityModel{
-		Index: state.Index,
+		Index: plan.Index,
 	}
 
 	diags = resp.Identity.Set(ctx, identity)
