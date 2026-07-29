@@ -166,3 +166,10 @@ func SafeProgress(resp *action.InvokeResponse, msg string) {
 	}()
 	resp.SendProgress(action.InvokeProgressEvent{Message: msg})
 }
+
+func StringValueOrNull(s string) types.String {
+	if s == "" {
+		return types.StringNull()
+	}
+	return types.StringValue(s)
+}

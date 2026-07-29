@@ -1,0 +1,1 @@
+data "scc_subject_pattern_rules" "all" {}
