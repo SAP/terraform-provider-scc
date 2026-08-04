@@ -67,6 +67,7 @@ type SubaccountResource struct {
 	IsManaged              *bool            `json:"isManaged,omitempty"`
 	AutoCertificateRenewal *bool            `json:"autoCertRenewal,omitempty"`
 	Tunnel                 SubaccountTunnel `json:"tunnel"`
+	AutoTrustSync          *bool            `json:"autoSyncTrustEnabled,omitempty"`
 }
 
 type SubaccountUsingAuthResource struct {

@@ -61,6 +61,7 @@ resource "scc_subaccount_using_auth" "scc_sa_auth" {
 - Renewal is triggered `n + 7` days before certificate expiry, where `n` is the alert threshold configured under *Observation Configuration → Alerting*.
 - If the renewal attempt fails, it is retried every 12 hours. If not successful within 7 days, the automatic renewal is cancelled.
 - No user credentials are required. Authentication is handled by the currently valid subaccount certificate, provided that an administrator has also enabled auto-renewal for the subaccount in the SAP BTP Cockpit.
+- `auto_trust_sync` (Boolean) Indicates whether automatic trust configuration synchronization is enabled for this subaccount. When set to `true`, the provider will automatically synchronize the trust configuration for the subaccount whenever the tunnel is connected. This ensures that the trust settings are up-to-date without requiring manual intervention.
 - `connected` (Boolean) Specifies whether the subaccount should be connected to the Cloud Connector.
 
 - **true** → attempts to establish a tunnel connection.
