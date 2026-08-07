@@ -27,14 +27,15 @@ func TestResourceSubaccountUsingAuth(t *testing.T) {
 			ProtoV6ProviderFactories: tfutils.GetTestProviders(rec.GetDefaultClient()),
 			Steps: []resource.TestStep{
 				{
-					Config: tfutils.ProviderConfig(user) + ResourceSubaccountUsingAuth("scc_sa_auth", user.CloudAuthenticationData, "subaccount added via terraform tests"),
+					Config: tfutils.ProviderConfig(user) + ResourceSubaccountUsingAuth("scc_sa_auth", user.CloudAuthenticationData, "subaccount added via terraform tests", true, true, true),
 					Check: resource.ComposeAggregateTestCheckFunc(
 						resource.TestCheckResourceAttr("scc_subaccount_using_auth.scc_sa_auth", "region_host", "cf.eu12.hana.ondemand.com"),
 						resource.TestMatchResourceAttr("scc_subaccount_using_auth.scc_sa_auth", "subaccount", tfutils.RegexpValidUUID),
 						resource.TestCheckResourceAttr("scc_subaccount_using_auth.scc_sa_auth", "description", "subaccount added via terraform tests"),
 						resource.TestCheckResourceAttr("scc_subaccount_using_auth.scc_sa_auth", "location_id", ""),
-						resource.TestCheckResourceAttrSet("scc_subaccount_using_auth.scc_sa_auth", "is_managed"),
-						resource.TestCheckResourceAttrSet("scc_subaccount_using_auth.scc_sa_auth", "auto_certificate_renewal"),
+						resource.TestCheckResourceAttr("scc_subaccount_using_auth.scc_sa_auth", "is_managed", "true"),
+						resource.TestCheckResourceAttr("scc_subaccount_using_auth.scc_sa_auth", "auto_certificate_renewal", "true"),
+						resource.TestCheckResourceAttr("scc_subaccount_using_auth.scc_sa_auth", "auto_trust_sync", "true"),
 
 						resource.TestMatchResourceAttr("scc_subaccount_using_auth.scc_sa_auth", "tunnel.connected_since", tfutils.RegexpValidTimeStamp),
 						resource.TestCheckResourceAttr("scc_subaccount_using_auth.scc_sa_auth", "tunnel.connections", "0"),
@@ -69,6 +70,7 @@ func TestResourceSubaccountUsingAuth(t *testing.T) {
 						"authentication_data",
 						"connected",
 						"auto_renew_before_days",
+						"auto_trust_sync",
 					},
 				},
 				{
@@ -187,13 +189,16 @@ func TestResourceSubaccountUsingAuth(t *testing.T) {
 	})
 }
 
-func ResourceSubaccountUsingAuth(datasourceName, authenticationData, description string) string {
+func ResourceSubaccountUsingAuth(datasourceName, authenticationData, description string, isManaged, autoCertificateRenewal, autoTrustSync bool) string {
 	return fmt.Sprintf(`
 	resource "scc_subaccount_using_auth" "%s" {
     authentication_data = "%s"
     description= "%s"
+    is_managed = "%t"
+    auto_certificate_renewal = "%t"
+    auto_trust_sync = "%t"
 	}
-	`, datasourceName, authenticationData, description)
+	`, datasourceName, authenticationData, description, isManaged, autoCertificateRenewal, autoTrustSync)
 }
 
 func ResourceSubaccountUsingAuthWoAuthenticationData(datasourceName, description string) string {

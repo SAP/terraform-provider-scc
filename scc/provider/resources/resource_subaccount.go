@@ -154,6 +154,14 @@ To recover, set connected = false, apply, and then set it back to true to retry 
 				Optional: true,
 				Computed: true,
 			},
+			"auto_trust_sync": schema.BoolAttribute{
+				MarkdownDescription: "Indicates whether automatic trust configuration synchronization is enabled for this subaccount. When `false` (default), performs a one-time manual trust sync on every connect. " +
+					"When `true`, also enables server-side automatic re-sync after the initial manual sync; " +
+					"requires the Cloud Connector version to support `Automatic Trust Synchronization`.",
+				Optional: true,
+				Computed: true,
+				Default:  booldefault.StaticBool(false),
+			},
 			"tunnel": schema.SingleNestedAttribute{
 				MarkdownDescription: "Details of connection tunnel used by the subaccount.",
 				Computed:            true,
@@ -355,7 +363,8 @@ func (r *SubaccountResource) Create(ctx context.Context, req resource.CreateRequ
 
 	if respObj.Tunnel.State == "Connected" {
 		// Trigger trust configuration sync for the subaccount without persisting to Terraform state
-		diags = r.syncTrustConfiguration(regionHost, subaccount, &respObj)
+		autoTrustSync := plan.AutoTrustSync.ValueBool()
+		diags = r.syncTrustConfiguration(regionHost, subaccount, &respObj, autoTrustSync)
 		resp.Diagnostics.Append(diags...)
 		if resp.Diagnostics.HasError() {
 			return
@@ -371,6 +380,7 @@ func (r *SubaccountResource) Create(ctx context.Context, req resource.CreateRequ
 	responseModel.CloudUser = plan.CloudUser
 	responseModel.CloudPassword = plan.CloudPassword
 	responseModel.AutoRenewBeforeDays = plan.AutoRenewBeforeDays
+	responseModel.AutoTrustSync = plan.AutoTrustSync
 
 	diags = resp.State.Set(ctx, responseModel)
 	resp.Diagnostics.Append(diags...)
@@ -423,8 +433,7 @@ func (r *SubaccountResource) Read(ctx context.Context, req resource.ReadRequest,
 	}
 
 	if respObj.Tunnel.State == "Connected" {
-		// Trigger trust configuration sync for the subaccount without persisting to Terraform state
-		diags = r.syncTrustConfiguration(regionHost, subaccount, &respObj)
+		diags = r.syncTrustConfiguration(regionHost, subaccount, &respObj, state.AutoTrustSync.ValueBool())
 		resp.Diagnostics.Append(diags...)
 		if resp.Diagnostics.HasError() {
 			return
@@ -439,6 +448,14 @@ func (r *SubaccountResource) Read(ctx context.Context, req resource.ReadRequest,
 
 	responseModel.CloudUser = state.CloudUser
 	responseModel.CloudPassword = state.CloudPassword
+
+	// auto_trust_sync is not returned by the API — preserve existing state value.
+	// On import state.AutoTrustSync is null, so fall back to the schema default (false).
+	if state.AutoTrustSync.IsNull() || state.AutoTrustSync.IsUnknown() {
+		responseModel.AutoTrustSync = types.BoolValue(false)
+	} else {
+		responseModel.AutoTrustSync = state.AutoTrustSync
+	}
 
 	if state.AutoRenewBeforeDays.IsNull() {
 		responseModel.AutoRenewBeforeDays = types.Int64Value(14)
@@ -534,8 +551,7 @@ func (r *SubaccountResource) Update(ctx context.Context, req resource.UpdateRequ
 	}
 
 	if respObj.Tunnel.State == "Connected" {
-		// Trigger trust configuration sync for the subaccount without persisting to Terraform state
-		diags = r.syncTrustConfiguration(regionHost, subaccount, &respObj)
+		diags = r.syncTrustConfiguration(regionHost, subaccount, &respObj, plan.AutoTrustSync.ValueBool())
 		resp.Diagnostics.Append(diags...)
 		if resp.Diagnostics.HasError() {
 			return
@@ -551,6 +567,7 @@ func (r *SubaccountResource) Update(ctx context.Context, req resource.UpdateRequ
 	responseModel.CloudUser = plan.CloudUser
 	responseModel.CloudPassword = plan.CloudPassword
 	responseModel.AutoRenewBeforeDays = plan.AutoRenewBeforeDays
+	responseModel.AutoTrustSync = plan.AutoTrustSync
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, responseModel)...)
 
@@ -588,14 +605,33 @@ func validateUpdateInputs(plan, state model.SubaccountConfig) diag.Diagnostics {
 	return diags
 }
 
-func (r *SubaccountResource) syncTrustConfiguration(regionHost, subaccount string, respObj *apiobjects.SubaccountResource) diag.Diagnostics {
+func (r *SubaccountResource) syncTrustConfiguration(regionHost, subaccount string, respObj *apiobjects.SubaccountResource, autoTrustSync bool) diag.Diagnostics {
 	endpoint := endpoints.GetSubaccountEndpoint(regionHost, subaccount) + "/trust"
 
-	diags := helpers.RequestAndUnmarshal(r.Client, &respObj, "POST", endpoint, nil, false)
+	// Manual sync always runs first — required before auto sync can be enabled,
+	// and the only path on older SCC versions.
+	diags := helpers.RequestAndUnmarshal(r.Client, respObj, "POST", endpoint, nil, false)
 	if diags.HasError() {
 		return diags
 	}
 
+	// Only attempt to enable auto sync when the user explicitly requests it.
+	// Skipping the PUT when false avoids a needless failure on older SCC versions
+	// that don't support the autoSyncTrustEnabled field.
+	if !autoTrustSync {
+		return diags
+	}
+
+	putBody := map[string]any{"autoSyncTrustEnabled": true}
+	diags = helpers.RequestAndUnmarshal(r.Client, respObj, "PUT", endpoint, putBody, false)
+	if diags.HasError() {
+		diags.AddError(
+			"Failed to enable automatic trust synchronization",
+			"Could not enable auto_trust_sync for this subaccount. Possible causes: the subaccount was not found, "+
+				"no trust configuration exists yet for this subaccount, or the value provided is invalid. "+
+				"See the error above for details.",
+		)
+	}
 	return diags
 }
 

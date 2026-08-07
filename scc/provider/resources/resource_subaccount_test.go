@@ -29,7 +29,7 @@ func TestResourceSubaccount(t *testing.T) {
 			ProtoV6ProviderFactories: tfutils.GetTestProviders(rec.GetDefaultClient()),
 			Steps: []resource.TestStep{
 				{
-					Config: tfutils.ProviderConfig(user) + ResourceSubaccount("scc_sa", regionHost, subaccount, user.CloudUsername, user.CloudPassword, "subaccount added via terraform tests"),
+					Config: tfutils.ProviderConfig(user) + ResourceSubaccount("scc_sa", regionHost, subaccount, user.CloudUsername, user.CloudPassword, "subaccount added via terraform tests", true, true, true),
 					Check: resource.ComposeAggregateTestCheckFunc(
 						resource.TestCheckResourceAttr("scc_subaccount.scc_sa", "region_host", regionHost),
 						resource.TestMatchResourceAttr("scc_subaccount.scc_sa", "subaccount", tfutils.RegexpValidUUID),
@@ -38,8 +38,9 @@ func TestResourceSubaccount(t *testing.T) {
 						resource.TestCheckResourceAttr("scc_subaccount.scc_sa", "description", "subaccount added via terraform tests"),
 						resource.TestCheckResourceAttr("scc_subaccount.scc_sa", "location_id", ""),
 						resource.TestCheckResourceAttr("scc_subaccount.scc_sa", "auto_renew_before_days", "14"),
-						resource.TestCheckResourceAttrSet("scc_subaccount.scc_sa", "is_managed"),
-						resource.TestCheckResourceAttrSet("scc_subaccount.scc_sa", "auto_certificate_renewal"),
+						resource.TestCheckResourceAttr("scc_subaccount.scc_sa", "is_managed", "true"),
+						resource.TestCheckResourceAttr("scc_subaccount.scc_sa", "auto_certificate_renewal", "true"),
+						resource.TestCheckResourceAttr("scc_subaccount.scc_sa", "auto_trust_sync", "true"),
 
 						resource.TestMatchResourceAttr("scc_subaccount.scc_sa", "tunnel.connected_since", tfutils.RegexpValidTimeStamp),
 						resource.TestCheckResourceAttr("scc_subaccount.scc_sa", "tunnel.connections", "0"),
@@ -76,6 +77,7 @@ func TestResourceSubaccount(t *testing.T) {
 						"cloud_password",
 						"connected",
 						"auto_renew_before_days",
+						"auto_trust_sync",
 					},
 				},
 				{
@@ -286,7 +288,7 @@ func TestResourceSubaccount(t *testing.T) {
 	})
 }
 
-func ResourceSubaccount(datasourceName string, regionHost string, subaccount string, cloudUser string, cloudPassword string, description string) string {
+func ResourceSubaccount(datasourceName string, regionHost string, subaccount string, cloudUser string, cloudPassword string, description string, isManaged, autoCertificateRenewal, autoTrustSync bool) string {
 	return fmt.Sprintf(`
 	resource "scc_subaccount" "%s" {
     region_host= "%s"
@@ -294,8 +296,11 @@ func ResourceSubaccount(datasourceName string, regionHost string, subaccount str
     cloud_user= "%s"
     cloud_password= "%s" 
     description= "%s"
+	is_managed= "%t"
+    auto_certificate_renewal= "%t"
+    auto_trust_sync= "%t"
 	}
-	`, datasourceName, regionHost, subaccount, cloudUser, cloudPassword, description)
+	`, datasourceName, regionHost, subaccount, cloudUser, cloudPassword, description, isManaged, autoCertificateRenewal, autoTrustSync)
 }
 
 func ResourceSubaccountWoRegionHost(datasourceName string, subaccount string, cloudUser string, cloudPassword string, description string) string {

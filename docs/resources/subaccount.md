@@ -62,6 +62,7 @@ resource "scc_subaccount" "scc_sa" {
 - `auto_renew_before_days` (Number) Number of days before certificate expiration when the provider should renew the certificate automatically. Minimum is 7 days, maximum is 45 days.
 
 This check is skipped when `auto_certificate_renewal` is `true`, because the Cloud Connector handles renewal natively in that case.
+- `auto_trust_sync` (Boolean) Indicates whether automatic trust configuration synchronization is enabled for this subaccount. When `false` (default), performs a one-time manual trust sync on every connect. When `true`, also enables server-side automatic re-sync after the initial manual sync; requires the Cloud Connector version to support `Automatic Trust Synchronization`.
 - `cloud_password` (String, Sensitive) Password for the cloud user.
 
 **Required when creating the resource.**
