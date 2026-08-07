@@ -155,10 +155,12 @@ To recover, set connected = false, apply, and then set it back to true to retry 
 				Computed: true,
 			},
 			"auto_trust_sync": schema.BoolAttribute{
-				MarkdownDescription: "Indicates whether automatic trust configuration synchronization is enabled for this subaccount. When set to `true`, the provider will automatically synchronize the trust configuration for the subaccount whenever the tunnel is connected. This ensures that the trust settings are up-to-date without requiring manual intervention.",
-				Optional:            true,
-				Computed:            true,
-				Default:             booldefault.StaticBool(false),
+				MarkdownDescription: "Indicates whether automatic trust configuration synchronization is enabled for this subaccount. When `false` (default), performs a one-time manual trust sync on every connect. " +
+					"When `true`, also enables server-side automatic re-sync after the initial manual sync; " +
+					"requires the Cloud Connector version to support `Automatic Trust Synchronization`.",
+				Optional: true,
+				Computed: true,
+				Default:  booldefault.StaticBool(false),
 			},
 			"tunnel": schema.SingleNestedAttribute{
 				MarkdownDescription: "Details of connection tunnel used by the subaccount.",
@@ -604,27 +606,32 @@ func validateUpdateInputs(plan, state model.SubaccountConfig) diag.Diagnostics {
 }
 
 func (r *SubaccountResource) syncTrustConfiguration(regionHost, subaccount string, respObj *apiobjects.SubaccountResource, autoTrustSync bool) diag.Diagnostics {
-	// Manual sync is always required first — it is the initial sync and the only path on older SCC versions.
 	endpoint := endpoints.GetSubaccountEndpoint(regionHost, subaccount) + "/trust"
+
+	// Manual sync always runs first — required before auto sync can be enabled,
+	// and the only path on older SCC versions.
 	diags := helpers.RequestAndUnmarshal(r.Client, respObj, "POST", endpoint, nil, false)
 	if diags.HasError() {
 		return diags
 	}
 
-	// Best-effort: configure auto sync flag on newer SCC versions that support the endpoint.
-	// A 404/405 from an older version is silently ignored.
-	if autoTrustSync {
-		planBody := map[string]any{
-			"autoSyncTrustEnabled": autoTrustSync,
-		}
-
-		diags = helpers.RequestAndUnmarshal(r.Client, respObj, "PUT", endpoint, planBody, false)
-		if diags.HasError() {
-			return diags
-		}
-
+	// Only attempt to enable auto sync when the user explicitly requests it.
+	// Skipping the PUT when false avoids a needless failure on older SCC versions
+	// that don't support the autoSyncTrustEnabled field.
+	if !autoTrustSync {
+		return diags
 	}
 
+	putBody := map[string]any{"autoSyncTrustEnabled": true}
+	diags = helpers.RequestAndUnmarshal(r.Client, respObj, "PUT", endpoint, putBody, false)
+	if diags.HasError() {
+		diags.AddError(
+			"Failed to enable automatic trust synchronization",
+			"Could not enable auto_trust_sync for this subaccount. Possible causes: the subaccount was not found, "+
+				"no trust configuration exists yet for this subaccount, or the value provided is invalid. "+
+				"See the error above for details.",
+		)
+	}
 	return diags
 }
 
