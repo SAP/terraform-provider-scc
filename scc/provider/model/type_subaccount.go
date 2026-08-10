@@ -116,6 +116,7 @@ type SubaccountConfig struct {
 	AutoRenewBeforeDays    types.Int64  `tfsdk:"auto_renew_before_days"`
 	IsManaged              types.Bool   `tfsdk:"is_managed"`
 	AutoCertificateRenewal types.Bool   `tfsdk:"auto_certificate_renewal"`
+	AutoTrustSync          types.Bool   `tfsdk:"auto_trust_sync"`
 }
 
 type SubaccountUsingAuthConfig struct {
@@ -129,6 +130,7 @@ type SubaccountUsingAuthConfig struct {
 	Connected              types.Bool   `tfsdk:"connected"`
 	IsManaged              types.Bool   `tfsdk:"is_managed"`
 	AutoCertificateRenewal types.Bool   `tfsdk:"auto_certificate_renewal"`
+	AutoTrustSync          types.Bool   `tfsdk:"auto_trust_sync"`
 }
 
 type SubaccountListFilterModel struct {
