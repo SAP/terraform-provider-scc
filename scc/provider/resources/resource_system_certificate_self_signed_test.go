@@ -413,3 +413,193 @@ func testValidSelfSignedSystemPlan() model.SelfSignedSystemCertificateResourceCo
 		},
 	}
 }
+
+func TestSystemCertificateSelfSigned_Create_ModelFails(t *testing.T) {
+	r := &resources.SystemCertificateSelfSignedResource{
+		Client: &api.RestApiClient{},
+	}
+
+	oldReq := helpers.RequestAndUnmarshalCertificateFunc
+	oldBin := helpers.GetCertificateBinaryFunc
+	oldValue := model.SelfSignedSystemCertificateResourceValueFromFunc
+	defer func() {
+		helpers.RequestAndUnmarshalCertificateFunc = oldReq
+		helpers.GetCertificateBinaryFunc = oldBin
+		model.SelfSignedSystemCertificateResourceValueFromFunc = oldValue
+	}()
+
+	helpers.RequestAndUnmarshalCertificateFunc = func(*api.RestApiClient, *apiobjects.Certificate, string, string, map[string]any, bool) diag.Diagnostics {
+		return nil
+	}
+	helpers.GetCertificateBinaryFunc = func(*api.RestApiClient, string) ([]byte, diag.Diagnostics) {
+		return tfutils.GenerateValidDERCert(t), nil
+	}
+	model.SelfSignedSystemCertificateResourceValueFromFunc = func(ctx context.Context, obj apiobjects.Certificate, dn *helpers.CertificateSubjectDNConfig) (model.SelfSignedSystemCertificateResourceConfig, diag.Diagnostics) {
+		var d diag.Diagnostics
+		d.AddError("model error", "fail")
+		return model.SelfSignedSystemCertificateResourceConfig{}, d
+	}
+
+	plan := testValidSelfSignedSystemPlan()
+	_, diags := resources.CreateSelfSignedSystemCertificateFunc(r, context.Background(), plan)
+	assert.True(t, diags.HasError())
+}
+
+func TestSystemCertificateSelfSigned_Read_NullState(t *testing.T) {
+	r := &resources.SystemCertificateSelfSignedResource{Client: &api.RestApiClient{}}
+
+	req := resource.ReadRequest{}
+	resp := &resource.ReadResponse{}
+	r.Read(context.Background(), req, resp)
+	assert.False(t, resp.Diagnostics.HasError())
+}
+
+func TestSystemCertificateSelfSigned_Read_PEMError(t *testing.T) {
+	r := &resources.SystemCertificateSelfSignedResource{Client: &api.RestApiClient{}}
+
+	oldReq := helpers.RequestAndUnmarshalCertificateFunc
+	oldBin := helpers.GetCertificateBinaryFunc
+	oldValidate := helpers.ValidatePEMDataFunc
+	defer func() {
+		helpers.RequestAndUnmarshalCertificateFunc = oldReq
+		helpers.GetCertificateBinaryFunc = oldBin
+		helpers.ValidatePEMDataFunc = oldValidate
+	}()
+
+	helpers.RequestAndUnmarshalCertificateFunc = func(*api.RestApiClient, *apiobjects.Certificate, string, string, map[string]any, bool) diag.Diagnostics {
+		return nil
+	}
+	helpers.GetCertificateBinaryFunc = func(*api.RestApiClient, string) ([]byte, diag.Diagnostics) {
+		return []byte("notcert"), nil
+	}
+	helpers.ValidatePEMDataFunc = func(string) diag.Diagnostics {
+		var d diag.Diagnostics
+		d.AddError("Invalid PEM", "pem error")
+		return d
+	}
+
+	schemaResp := &resource.SchemaResponse{}
+	r.Schema(context.Background(), resource.SchemaRequest{}, schemaResp)
+	tfState := tfsdk.State{Schema: schemaResp.Schema}
+	state := testValidSelfSignedSystemPlan()
+	diags := tfState.Set(context.Background(), &state)
+	assert.False(t, diags.HasError())
+
+	req := resource.ReadRequest{State: tfState}
+	resp := &resource.ReadResponse{}
+	r.Read(context.Background(), req, resp)
+	assert.True(t, resp.Diagnostics.HasError())
+}
+
+func TestSystemCertificateSelfSigned_Read_ModelError(t *testing.T) {
+	r := &resources.SystemCertificateSelfSignedResource{Client: &api.RestApiClient{}}
+
+	oldReq := helpers.RequestAndUnmarshalCertificateFunc
+	oldBin := helpers.GetCertificateBinaryFunc
+	oldValue := model.SelfSignedSystemCertificateResourceValueFromFunc
+	defer func() {
+		helpers.RequestAndUnmarshalCertificateFunc = oldReq
+		helpers.GetCertificateBinaryFunc = oldBin
+		model.SelfSignedSystemCertificateResourceValueFromFunc = oldValue
+	}()
+
+	helpers.RequestAndUnmarshalCertificateFunc = func(*api.RestApiClient, *apiobjects.Certificate, string, string, map[string]any, bool) diag.Diagnostics {
+		return nil
+	}
+	helpers.GetCertificateBinaryFunc = func(*api.RestApiClient, string) ([]byte, diag.Diagnostics) {
+		return tfutils.GenerateValidDERCert(t), nil
+	}
+	model.SelfSignedSystemCertificateResourceValueFromFunc = func(ctx context.Context, obj apiobjects.Certificate, dn *helpers.CertificateSubjectDNConfig) (model.SelfSignedSystemCertificateResourceConfig, diag.Diagnostics) {
+		var d diag.Diagnostics
+		d.AddError("model error", "fail")
+		return model.SelfSignedSystemCertificateResourceConfig{}, d
+	}
+
+	schemaResp := &resource.SchemaResponse{}
+	r.Schema(context.Background(), resource.SchemaRequest{}, schemaResp)
+	tfState := tfsdk.State{Schema: schemaResp.Schema}
+	state := testValidSelfSignedSystemPlan()
+	diags := tfState.Set(context.Background(), &state)
+	assert.False(t, diags.HasError())
+
+	req := resource.ReadRequest{State: tfState}
+	resp := &resource.ReadResponse{}
+	r.Read(context.Background(), req, resp)
+	assert.True(t, resp.Diagnostics.HasError())
+}
+
+func TestSystemCertificateSelfSigned_Update_ShouldUpdateFalse(t *testing.T) {
+	r := &resources.SystemCertificateSelfSignedResource{Client: &api.RestApiClient{}}
+
+	oldShould := helpers.ShouldUpdateSelfSignedCertificateFunc
+	defer func() { helpers.ShouldUpdateSelfSignedCertificateFunc = oldShould }()
+
+	helpers.ShouldUpdateSelfSignedCertificateFunc = func(
+		planKeySize, stateKeySize types.Int64,
+		planSubjectDN, stateSubjectDN types.Object,
+		planSubjectAltNames, stateSubjectAltNames types.List,
+	) bool {
+		return false
+	}
+
+	schemaResp := &resource.SchemaResponse{}
+	r.Schema(context.Background(), resource.SchemaRequest{}, schemaResp)
+
+	plan := testValidSelfSignedSystemPlan()
+	state := testValidSelfSignedSystemPlan()
+
+	tfPlan := tfsdk.Plan{Schema: schemaResp.Schema}
+	tfState := tfsdk.State{Schema: schemaResp.Schema}
+	diags := tfPlan.Set(context.Background(), &plan)
+	assert.False(t, diags.HasError())
+	diags = tfState.Set(context.Background(), &state)
+	assert.False(t, diags.HasError())
+
+	req := resource.UpdateRequest{Plan: tfPlan, State: tfState}
+	resp := &resource.UpdateResponse{State: tfsdk.State{Schema: schemaResp.Schema}}
+	r.Update(context.Background(), req, resp)
+	assert.False(t, resp.Diagnostics.HasError())
+}
+
+func TestSystemCertificateSelfSigned_Update_CreateFails(t *testing.T) {
+	r := &resources.SystemCertificateSelfSignedResource{Client: &api.RestApiClient{}}
+
+	oldShould := helpers.ShouldUpdateSelfSignedCertificateFunc
+	oldCreate := resources.CreateSelfSignedSystemCertificateFunc
+	defer func() {
+		helpers.ShouldUpdateSelfSignedCertificateFunc = oldShould
+		resources.CreateSelfSignedSystemCertificateFunc = oldCreate
+	}()
+
+	helpers.ShouldUpdateSelfSignedCertificateFunc = func(
+		planKeySize, stateKeySize types.Int64,
+		planSubjectDN, stateSubjectDN types.Object,
+		planSubjectAltNames, stateSubjectAltNames types.List,
+	) bool {
+		return true
+	}
+	resources.CreateSelfSignedSystemCertificateFunc = func(r *resources.SystemCertificateSelfSignedResource, ctx context.Context, plan model.SelfSignedSystemCertificateResourceConfig) (*model.SelfSignedSystemCertificateResourceConfig, diag.Diagnostics) {
+		var d diag.Diagnostics
+		d.AddError("create failed", "error")
+		return nil, d
+	}
+
+	schemaResp := &resource.SchemaResponse{}
+	r.Schema(context.Background(), resource.SchemaRequest{}, schemaResp)
+
+	plan := testValidSelfSignedSystemPlan()
+	plan.KeySize = types.Int64Value(2048)
+	state := testValidSelfSignedSystemPlan()
+
+	tfPlan := tfsdk.Plan{Schema: schemaResp.Schema}
+	tfState := tfsdk.State{Schema: schemaResp.Schema}
+	diags := tfPlan.Set(context.Background(), &plan)
+	assert.False(t, diags.HasError())
+	diags = tfState.Set(context.Background(), &state)
+	assert.False(t, diags.HasError())
+
+	req := resource.UpdateRequest{Plan: tfPlan, State: tfState}
+	resp := &resource.UpdateResponse{State: tfsdk.State{Schema: schemaResp.Schema}}
+	r.Update(context.Background(), req, resp)
+	assert.True(t, resp.Diagnostics.HasError())
+}

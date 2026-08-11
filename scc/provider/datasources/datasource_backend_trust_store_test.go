@@ -1,11 +1,19 @@
 package datasources_test
 
 import (
+	"context"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
+	"github.com/SAP/terraform-provider-scc/scc/provider/datasources"
 	"github.com/SAP/terraform-provider-scc/scc/provider/tfutils"
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-go/tftypes"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestDataSourceBackendTrustStore(t *testing.T) {
@@ -40,4 +48,25 @@ func TestDataSourceBackendTrustStore(t *testing.T) {
 
 func DataSourceBackendTrustStore(datasourceName string) string {
 	return fmt.Sprintf(`data "scc_backend_trust_store" "%s" {}`, datasourceName)
+}
+
+func TestDataSourceBackendTrustStore_Read_APIError(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	}))
+	defer srv.Close()
+
+	ds := &datasources.BackendTrustStoreDataSource{Client: tfutils.NewTestClient(t, srv)}
+
+	schemaResp := &datasource.SchemaResponse{}
+	ds.Schema(context.Background(), datasource.SchemaRequest{}, schemaResp)
+
+	schemaType := schemaResp.Schema.Type().TerraformType(context.Background())
+	raw := tftypes.NewValue(schemaType, nil)
+
+	req := datasource.ReadRequest{Config: tfsdk.Config{Schema: schemaResp.Schema, Raw: raw}}
+	resp := &datasource.ReadResponse{}
+	ds.Read(context.Background(), req, resp)
+
+	assert.True(t, resp.Diagnostics.HasError())
 }

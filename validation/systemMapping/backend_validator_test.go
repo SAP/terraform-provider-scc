@@ -63,3 +63,11 @@ func TestValidateProtocolBackend(t *testing.T) {
 		})
 	}
 }
+
+// Unknown protocol returns empty diagnostics (no-op branch)
+func TestValidateProtocolBackend_UnknownProtocol(t *testing.T) {
+	diags := validateProtocolBackend("UNKNOWN_PROTO", "abapSys")
+	if diags.HasError() {
+		t.Errorf("expected no error for unknown protocol, got: %v", diags)
+	}
+}

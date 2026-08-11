@@ -514,3 +514,167 @@ func TestDoRequest_BaseQueryPreserved(t *testing.T) {
 	// Decide behavior: override OR merge
 	assert.Equal(t, "foo=bar", receivedQuery)
 }
+
+// --- PostRequest ---
+
+func TestRestApiClient_PostRequest(t *testing.T) {
+	var receivedMethod string
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		receivedMethod = r.Method
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	client, diags := createBasicAuthClient(server.URL)
+	require.False(t, diags.HasError())
+
+	resp, diags := client.PostRequest("/resource", []byte(`{"key":"value"}`))
+
+	require.False(t, diags.HasError())
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+	assert.Equal(t, http.MethodPost, receivedMethod)
+}
+
+// --- PutRequest ---
+
+func TestRestApiClient_PutRequest(t *testing.T) {
+	var receivedMethod string
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		receivedMethod = r.Method
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	client, diags := createBasicAuthClient(server.URL)
+	require.False(t, diags.HasError())
+
+	resp, diags := client.PutRequest("/resource", []byte(`{"key":"value"}`))
+
+	require.False(t, diags.HasError())
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+	assert.Equal(t, http.MethodPut, receivedMethod)
+}
+
+// --- DeleteRequest ---
+
+func TestRestApiClient_DeleteRequest(t *testing.T) {
+	var receivedMethod string
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		receivedMethod = r.Method
+		w.WriteHeader(http.StatusNoContent)
+	}))
+	defer server.Close()
+
+	client, diags := createBasicAuthClient(server.URL)
+	require.False(t, diags.HasError())
+
+	resp, diags := client.DeleteRequest("/resource")
+
+	require.False(t, diags.HasError())
+	assert.Equal(t, http.StatusNoContent, resp.StatusCode)
+	assert.Equal(t, http.MethodDelete, receivedMethod)
+}
+
+// --- PatchRequest ---
+
+func TestRestApiClient_PatchRequest(t *testing.T) {
+	var receivedMethod string
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		receivedMethod = r.Method
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	client, diags := createBasicAuthClient(server.URL)
+	require.False(t, diags.HasError())
+
+	resp, diags := client.PatchRequest("/resource", []byte(`{"key":"value"}`))
+
+	require.False(t, diags.HasError())
+	assert.Equal(t, http.StatusOK, resp.StatusCode)
+	assert.Equal(t, http.MethodPatch, receivedMethod)
+}
+
+// --- validatePEMBlock ---
+
+func TestValidatePEMBlock_ValidPEM(t *testing.T) {
+	certPEM, _, _, diags := generateSelfSignedCert()
+	require.False(t, diags.HasError())
+
+	pemDiags := validatePEMBlock(certPEM, "test certificate")
+	assert.False(t, pemDiags.HasError())
+}
+
+func TestValidatePEMBlock_InvalidPEM(t *testing.T) {
+	invalidPEM := []byte("this is not valid PEM data")
+
+	pemDiags := validatePEMBlock(invalidPEM, "test certificate")
+	require.True(t, pemDiags.HasError())
+	assert.Contains(t, pemDiags[0].Summary(), "Invalid PEM Data")
+	assert.Contains(t, pemDiags[0].Detail(), "test certificate")
+}
+
+// --- withTLSClient ---
+
+// customRoundTripper is a non-*http.Transport RoundTripper used to test
+// the fallback branch in withTLSClient.
+type customRoundTripper struct{}
+
+func (c *customRoundTripper) RoundTrip(_ *http.Request) (*http.Response, error) {
+	return nil, fmt.Errorf("not implemented")
+}
+
+func TestWithTLSClient_NilClient(t *testing.T) {
+	tlsConfig := &tls.Config{MinVersion: tls.VersionTLS12}
+
+	result := withTLSClient(nil, tlsConfig)
+
+	require.NotNil(t, result)
+	transport, ok := result.Transport.(*http.Transport)
+	require.True(t, ok, "expected *http.Transport")
+	assert.Equal(t, tlsConfig, transport.TLSClientConfig)
+}
+
+func TestWithTLSClient_NilTransport(t *testing.T) {
+	tlsConfig := &tls.Config{MinVersion: tls.VersionTLS12}
+	existing := &http.Client{} // Transport is nil
+
+	result := withTLSClient(existing, tlsConfig)
+
+	require.NotNil(t, result)
+	transport, ok := result.Transport.(*http.Transport)
+	require.True(t, ok, "expected *http.Transport")
+	assert.Equal(t, tlsConfig, transport.TLSClientConfig)
+}
+
+func TestWithTLSClient_ExistingHTTPTransport(t *testing.T) {
+	tlsConfig := &tls.Config{MinVersion: tls.VersionTLS12}
+	originalTransport := &http.Transport{}
+	existing := &http.Client{Transport: originalTransport}
+
+	result := withTLSClient(existing, tlsConfig)
+
+	require.NotNil(t, result)
+	transport, ok := result.Transport.(*http.Transport)
+	require.True(t, ok, "expected cloned *http.Transport")
+	// The result transport must carry the TLS config we supplied.
+	assert.Equal(t, tlsConfig, transport.TLSClientConfig)
+	// The result transport must be a clone, not the original.
+	assert.NotSame(t, originalTransport, transport)
+}
+
+func TestWithTLSClient_CustomTransport(t *testing.T) {
+	tlsConfig := &tls.Config{MinVersion: tls.VersionTLS12}
+	custom := &customRoundTripper{}
+	existing := &http.Client{Transport: custom}
+
+	result := withTLSClient(existing, tlsConfig)
+
+	// When transport is not *http.Transport the client is returned unchanged.
+	require.NotNil(t, result)
+	assert.Equal(t, custom, result.Transport)
+}
