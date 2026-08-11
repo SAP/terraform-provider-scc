@@ -18,7 +18,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-
 func TestSystemCertificateSelfSigned_Metadata(t *testing.T) {
 	r := resources.NewSystemCertificateSelfSignedResource()
 

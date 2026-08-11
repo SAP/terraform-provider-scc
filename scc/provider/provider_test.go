@@ -441,9 +441,6 @@ func TestSCCProvider_Schema(t *testing.T) {
 // ---------------------------------------------------------------------------
 
 func TestSCCProvider_ValidateConfig_SkipSSLWithCACertWarning(t *testing.T) {
-	var resp tfprovider.ConfigureResponse
-	ok := provider.ValidateConfig("https://example.com", "admin", "pass", "some-ca-cert", "", "", true, &resp)
-	// ValidatePEMBlock will fail for "some-ca-cert" before the warning, so use a valid PEM
 	dummyPEM := `-----BEGIN CERTIFICATE-----
 MIIBhTCCASugAwIBAgIJAIk+Cm3ekmKaMAoGCCqGSM49BAMCMBIxEDAOBgNVBAMM
 B1Rlc3QgQ0EwHhcNMjAwMTAxMDAwMDAwWhcNMzAwMTAxMDAwMDAwWjASMRAwDgYD
@@ -454,12 +451,11 @@ IwQYMBaAFENZqO6v+u1eZzZTVDNj0uUCkN8gMAwGA1UdEwQFMAMBAf8wCgYIKoZI
 zj0EAwIDSAAwRQIgTTb7LtqRQon2OHxMOyuvl+e8FQZXzSH14Yc7u9s9n9ICIQDE
 CEGH5OML6z7C7oCSys7ce4GkTbtJ4rNZoxVOxFwPvA==
 -----END CERTIFICATE-----`
-	resp = tfprovider.ConfigureResponse{}
-	ok = provider.ValidateConfig("https://example.com", "admin", "pass", dummyPEM, "", "", true, &resp)
+	var resp tfprovider.ConfigureResponse
+	ok := provider.ValidateConfig("https://example.com", "admin", "pass", dummyPEM, "", "", true, &resp)
 
 	assert.True(t, ok)
 	assert.False(t, resp.Diagnostics.HasError())
-	// A warning should be present about the ignored CA cert
 	assert.True(t, resp.Diagnostics.WarningsCount() > 0, "expected a warning about ignored ca_certificate")
 }
 
@@ -545,12 +541,12 @@ func TestSCCProvider_Configure_Success(t *testing.T) {
 	raw := tftypes.NewValue(
 		tftypes.Object{
 			AttributeTypes: map[string]tftypes.Type{
-				"instance_url":       tftypes.String,
-				"username":           tftypes.String,
-				"password":           tftypes.String,
-				"ca_certificate":     tftypes.String,
-				"client_certificate": tftypes.String,
-				"client_key":         tftypes.String,
+				"instance_url":        tftypes.String,
+				"username":            tftypes.String,
+				"password":            tftypes.String,
+				"ca_certificate":      tftypes.String,
+				"client_certificate":  tftypes.String,
+				"client_key":          tftypes.String,
 				"skip_ssl_validation": tftypes.Bool,
 			},
 		},

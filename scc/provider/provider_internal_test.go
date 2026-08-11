@@ -4,7 +4,6 @@ package provider
 // These live in package provider (not provider_test) to access unexported symbols.
 
 import (
-	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -32,7 +31,7 @@ func TestGetBoolAttribute_NullFallsBackToEnv_True(t *testing.T) {
 }
 
 func TestGetBoolAttribute_NullFallsBackToEnv_Missing(t *testing.T) {
-	os.Unsetenv("SCC_TEST_BOOL_MISSING")
+	t.Setenv("SCC_TEST_BOOL_MISSING", "")
 	result := getBoolAttribute(types.BoolNull(), "SCC_TEST_BOOL_MISSING")
 	assert.False(t, result)
 }
@@ -59,7 +58,7 @@ func TestGetNonEmptyAttribute_NullFallsBackToEnv(t *testing.T) {
 }
 
 func TestGetNonEmptyAttribute_NullNoEnv(t *testing.T) {
-	os.Unsetenv("SCC_TEST_ATTR_MISSING")
+	t.Setenv("SCC_TEST_ATTR_MISSING", "")
 	result := getNonEmptyAttribute(types.StringNull(), "SCC_TEST_ATTR_MISSING")
 	assert.Equal(t, "", result)
 }
