@@ -382,3 +382,159 @@ func testValidSelfSignedUIPlan() model.SelfSignedUICertificateResourceConfig {
 		},
 	}
 }
+
+func TestUICertificateSelfSigned_Read_ModelError(t *testing.T) {
+	r := &resources.UICertificateSelfSignedResource{Client: &api.RestApiClient{}}
+
+	oldReq := helpers.RequestAndUnmarshalCertificateFunc
+	oldValue := model.SelfSignedUICertificateResourceValueFromFunc
+	defer func() {
+		helpers.RequestAndUnmarshalCertificateFunc = oldReq
+		model.SelfSignedUICertificateResourceValueFromFunc = oldValue
+	}()
+
+	helpers.RequestAndUnmarshalCertificateFunc = func(*api.RestApiClient, *apiobjects.Certificate, string, string, map[string]any, bool) diag.Diagnostics {
+		return nil
+	}
+	model.SelfSignedUICertificateResourceValueFromFunc = func(ctx context.Context, obj apiobjects.Certificate, dn *helpers.CertificateSubjectDNConfig) (model.SelfSignedUICertificateResourceConfig, diag.Diagnostics) {
+		var d diag.Diagnostics
+		d.AddError("model error", "fail")
+		return model.SelfSignedUICertificateResourceConfig{}, d
+	}
+
+	schemaResp := &resource.SchemaResponse{}
+	r.Schema(context.Background(), resource.SchemaRequest{}, schemaResp)
+	tfState := tfsdk.State{Schema: schemaResp.Schema}
+	state := testValidSelfSignedUIPlan()
+	diags := tfState.Set(context.Background(), &state)
+	assert.False(t, diags.HasError())
+
+	req := resource.ReadRequest{State: tfState}
+	resp := &resource.ReadResponse{}
+	r.Read(context.Background(), req, resp)
+	assert.True(t, resp.Diagnostics.HasError())
+}
+
+func TestUICertificateSelfSigned_Read_Success_WithState(t *testing.T) {
+	r := &resources.UICertificateSelfSignedResource{Client: &api.RestApiClient{}}
+
+	oldReq := helpers.RequestAndUnmarshalCertificateFunc
+	oldValue := model.SelfSignedUICertificateResourceValueFromFunc
+	defer func() {
+		helpers.RequestAndUnmarshalCertificateFunc = oldReq
+		model.SelfSignedUICertificateResourceValueFromFunc = oldValue
+	}()
+
+	helpers.RequestAndUnmarshalCertificateFunc = func(*api.RestApiClient, *apiobjects.Certificate, string, string, map[string]any, bool) diag.Diagnostics {
+		return nil
+	}
+	model.SelfSignedUICertificateResourceValueFromFunc = func(ctx context.Context, obj apiobjects.Certificate, dn *helpers.CertificateSubjectDNConfig) (model.SelfSignedUICertificateResourceConfig, diag.Diagnostics) {
+		return testValidSelfSignedUIPlan(), nil
+	}
+
+	schemaResp := &resource.SchemaResponse{}
+	r.Schema(context.Background(), resource.SchemaRequest{}, schemaResp)
+	tfState := tfsdk.State{Schema: schemaResp.Schema}
+	state := testValidSelfSignedUIPlan()
+	diags := tfState.Set(context.Background(), &state)
+	assert.False(t, diags.HasError())
+
+	resp := &resource.ReadResponse{State: tfsdk.State{Schema: schemaResp.Schema}}
+	req := resource.ReadRequest{State: tfState}
+	r.Read(context.Background(), req, resp)
+	assert.False(t, resp.Diagnostics.HasError())
+}
+
+func TestUICertificateSelfSigned_Delete_WithState(t *testing.T) {
+	r := &resources.UICertificateSelfSignedResource{}
+
+	schemaResp := &resource.SchemaResponse{}
+	r.Schema(context.Background(), resource.SchemaRequest{}, schemaResp)
+	tfState := tfsdk.State{Schema: schemaResp.Schema}
+	state := testValidSelfSignedUIPlan()
+	diags := tfState.Set(context.Background(), &state)
+	assert.False(t, diags.HasError())
+
+	req := resource.DeleteRequest{State: tfState}
+	// resp.State must have the schema so RemoveResource doesn't dereference a nil schema
+	resp := &resource.DeleteResponse{State: tfsdk.State{Schema: schemaResp.Schema}}
+	r.Delete(context.Background(), req, resp)
+	// UI cert delete only adds warning, no error
+	assert.False(t, resp.Diagnostics.HasError())
+}
+
+func TestUICertificateSelfSigned_Update_ShouldUpdateFalse(t *testing.T) {
+	r := &resources.UICertificateSelfSignedResource{Client: &api.RestApiClient{}}
+
+	oldShould := helpers.ShouldUpdateSelfSignedCertificateFunc
+	defer func() { helpers.ShouldUpdateSelfSignedCertificateFunc = oldShould }()
+
+	helpers.ShouldUpdateSelfSignedCertificateFunc = func(
+		planKeySize, stateKeySize types.Int64,
+		planSubjectDN, stateSubjectDN types.Object,
+		planSubjectAltNames, stateSubjectAltNames types.List,
+	) bool {
+		return false
+	}
+
+	schemaResp := &resource.SchemaResponse{}
+	r.Schema(context.Background(), resource.SchemaRequest{}, schemaResp)
+
+	plan := testValidSelfSignedUIPlan()
+	state := testValidSelfSignedUIPlan()
+
+	tfPlan := tfsdk.Plan{Schema: schemaResp.Schema}
+	tfState := tfsdk.State{Schema: schemaResp.Schema}
+	diags := tfPlan.Set(context.Background(), &plan)
+	assert.False(t, diags.HasError())
+	diags = tfState.Set(context.Background(), &state)
+	assert.False(t, diags.HasError())
+
+	req := resource.UpdateRequest{Plan: tfPlan, State: tfState}
+	resp := &resource.UpdateResponse{State: tfsdk.State{Schema: schemaResp.Schema}}
+	r.Update(context.Background(), req, resp)
+	assert.False(t, resp.Diagnostics.HasError())
+}
+
+func TestUICertificateSelfSigned_Update_CreateFails(t *testing.T) {
+	r := &resources.UICertificateSelfSignedResource{Client: &api.RestApiClient{}}
+
+	oldShould := helpers.ShouldUpdateSelfSignedCertificateFunc
+	oldCreate := resources.CreateSelfSignedUICertificateFunc
+	defer func() {
+		helpers.ShouldUpdateSelfSignedCertificateFunc = oldShould
+		resources.CreateSelfSignedUICertificateFunc = oldCreate
+	}()
+
+	helpers.ShouldUpdateSelfSignedCertificateFunc = func(
+		planKeySize, stateKeySize types.Int64,
+		planSubjectDN, stateSubjectDN types.Object,
+		planSubjectAltNames, stateSubjectAltNames types.List,
+	) bool {
+		return true
+	}
+	resources.CreateSelfSignedUICertificateFunc = func(r *resources.UICertificateSelfSignedResource, ctx context.Context, plan model.SelfSignedUICertificateResourceConfig) (*model.SelfSignedUICertificateResourceConfig, diag.Diagnostics) {
+		var d diag.Diagnostics
+		d.AddError("create failed", "error")
+		return nil, d
+	}
+
+	schemaResp := &resource.SchemaResponse{}
+	r.Schema(context.Background(), resource.SchemaRequest{}, schemaResp)
+
+	plan := testValidSelfSignedUIPlan()
+	plan.KeySize = types.Int64Value(2048)
+	state := testValidSelfSignedUIPlan()
+
+	tfPlan := tfsdk.Plan{Schema: schemaResp.Schema}
+	tfState := tfsdk.State{Schema: schemaResp.Schema}
+	diags := tfPlan.Set(context.Background(), &plan)
+	assert.False(t, diags.HasError())
+	diags = tfState.Set(context.Background(), &state)
+	assert.False(t, diags.HasError())
+
+	req := resource.UpdateRequest{Plan: tfPlan, State: tfState}
+	resp := &resource.UpdateResponse{State: tfsdk.State{Schema: schemaResp.Schema}}
+	r.Update(context.Background(), req, resp)
+	assert.True(t, resp.Diagnostics.HasError())
+}

@@ -13,7 +13,9 @@ import (
 	"github.com/SAP/terraform-provider-scc/scc/provider/model"
 	"github.com/hashicorp/terraform-plugin-framework/action"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-go/tftypes"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -247,4 +249,67 @@ func trustStorePlan(trustAll bool) model.BackendTrustStoreActionConfig {
 	return model.BackendTrustStoreActionConfig{
 		TrustAllBackends: types.BoolValue(trustAll),
 	}
+}
+
+// ---------------------------------------------------------------------------
+// Schema
+// ---------------------------------------------------------------------------
+
+func TestChangeTrustStoreAction_Schema(t *testing.T) {
+	a := actions.NewChangeTrustStoreAction().(*actions.ChangeTrustStoreAction)
+	resp := &action.SchemaResponse{}
+	a.Schema(context.Background(), action.SchemaRequest{}, resp)
+
+	assert.False(t, resp.Diagnostics.HasError())
+	assert.Contains(t, resp.Schema.Attributes, "trust_all_backends")
+}
+
+// ---------------------------------------------------------------------------
+// Invoke — top-level (Config.Get → InvokeWithPlan)
+// ---------------------------------------------------------------------------
+
+func TestChangeTrustStoreAction_Invoke_TopLevel(t *testing.T) {
+	a := actions.NewChangeTrustStoreAction().(*actions.ChangeTrustStoreAction)
+	a.Client = &api.RestApiClient{}
+
+	oldSend := helpers.SendRequestFunc
+	defer func() { helpers.SendRequestFunc = oldSend }()
+
+	helpers.SendRequestFunc = func(client *api.RestApiClient, body map[string]any, endpoint string, actionType string) (*http.Response, diag.Diagnostics) {
+		return &http.Response{
+			StatusCode: http.StatusNoContent,
+			Body:       io.NopCloser(strings.NewReader("")),
+		}, nil
+	}
+
+	schemaResp := &action.SchemaResponse{}
+	a.Schema(context.Background(), action.SchemaRequest{}, schemaResp)
+
+	raw := tftypes.NewValue(
+		tftypes.Object{AttributeTypes: map[string]tftypes.Type{"trust_all_backends": tftypes.Bool}},
+		map[string]tftypes.Value{
+			"trust_all_backends": tftypes.NewValue(tftypes.Bool, true),
+		},
+	)
+	req := action.InvokeRequest{Config: tfsdk.Config{Schema: schemaResp.Schema, Raw: raw}}
+	resp := newTestResp()
+	a.Invoke(context.Background(), req, resp)
+
+	assert.False(t, resp.Diagnostics.HasError())
+}
+
+func TestChangeTrustStoreAction_Invoke_ConfigGetError(t *testing.T) {
+	a := actions.NewChangeTrustStoreAction().(*actions.ChangeTrustStoreAction)
+	a.Client = &api.RestApiClient{}
+
+	schemaResp := &action.SchemaResponse{}
+	a.Schema(context.Background(), action.SchemaRequest{}, schemaResp)
+
+	// Wrong type — Config.Get will fail
+	raw := tftypes.NewValue(tftypes.String, "wrong")
+	req := action.InvokeRequest{Config: tfsdk.Config{Schema: schemaResp.Schema, Raw: raw}}
+	resp := newTestResp()
+	a.Invoke(context.Background(), req, resp)
+
+	assert.True(t, resp.Diagnostics.HasError())
 }

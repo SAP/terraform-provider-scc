@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/http/httptest"
 	"net/url"
 	"strings"
 	"testing"
@@ -17,6 +18,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	tfprovider "github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-go/tftypes"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -401,4 +404,308 @@ func TestSCCProvider_CreateClient_Failure_InvalidCert(t *testing.T) {
 	assert.Nil(t, client)
 	assert.True(t, resp.Diagnostics.HasError())
 	assert.Contains(t, resp.Diagnostics.Errors()[0].Summary(), "Client Creation Failed")
+}
+
+// ---------------------------------------------------------------------------
+// Metadata
+// ---------------------------------------------------------------------------
+
+func TestSCCProvider_Metadata(t *testing.T) {
+	p := provider.New()
+	req := tfprovider.MetadataRequest{}
+	resp := &tfprovider.MetadataResponse{}
+	p.Metadata(context.Background(), req, resp)
+	assert.Equal(t, "scc", resp.TypeName)
+}
+
+// ---------------------------------------------------------------------------
+// Schema
+// ---------------------------------------------------------------------------
+
+func TestSCCProvider_Schema(t *testing.T) {
+	p := provider.New()
+	resp := &tfprovider.SchemaResponse{}
+	p.Schema(context.Background(), tfprovider.SchemaRequest{}, resp)
+	assert.False(t, resp.Diagnostics.HasError())
+	assert.Contains(t, resp.Schema.Attributes, "instance_url")
+	assert.Contains(t, resp.Schema.Attributes, "username")
+	assert.Contains(t, resp.Schema.Attributes, "password")
+	assert.Contains(t, resp.Schema.Attributes, "ca_certificate")
+	assert.Contains(t, resp.Schema.Attributes, "client_certificate")
+	assert.Contains(t, resp.Schema.Attributes, "client_key")
+	assert.Contains(t, resp.Schema.Attributes, "skip_ssl_validation")
+}
+
+// ---------------------------------------------------------------------------
+// ValidateConfig — skipSSLValidation+caCertificate warning branch
+// ---------------------------------------------------------------------------
+
+func TestSCCProvider_ValidateConfig_SkipSSLWithCACertWarning(t *testing.T) {
+	var resp tfprovider.ConfigureResponse
+	ok := provider.ValidateConfig("https://example.com", "admin", "pass", "some-ca-cert", "", "", true, &resp)
+	// ValidatePEMBlock will fail for "some-ca-cert" before the warning, so use a valid PEM
+	dummyPEM := `-----BEGIN CERTIFICATE-----
+MIIBhTCCASugAwIBAgIJAIk+Cm3ekmKaMAoGCCqGSM49BAMCMBIxEDAOBgNVBAMM
+B1Rlc3QgQ0EwHhcNMjAwMTAxMDAwMDAwWhcNMzAwMTAxMDAwMDAwWjASMRAwDgYD
+VQQDDAdUZXN0IENBMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEFpJSyVnGE8Ow
+K8Bk7hrcn/ElMGyDx+0CgWl+oD+DFsVCtZnQaBFkgVctbWOrYDWJjvPUK+iPY35x
+ph6V/9bDNqNQME4wHQYDVR0OBBYEFENZqO6v+u1eZzZTVDNj0uUCkN8gMB8GA1Ud
+IwQYMBaAFENZqO6v+u1eZzZTVDNj0uUCkN8gMAwGA1UdEwQFMAMBAf8wCgYIKoZI
+zj0EAwIDSAAwRQIgTTb7LtqRQon2OHxMOyuvl+e8FQZXzSH14Yc7u9s9n9ICIQDE
+CEGH5OML6z7C7oCSys7ce4GkTbtJ4rNZoxVOxFwPvA==
+-----END CERTIFICATE-----`
+	resp = tfprovider.ConfigureResponse{}
+	ok = provider.ValidateConfig("https://example.com", "admin", "pass", dummyPEM, "", "", true, &resp)
+
+	assert.True(t, ok)
+	assert.False(t, resp.Diagnostics.HasError())
+	// A warning should be present about the ignored CA cert
+	assert.True(t, resp.Diagnostics.WarningsCount() > 0, "expected a warning about ignored ca_certificate")
+}
+
+// ---------------------------------------------------------------------------
+// TestProviderConnection — Forbidden branch
+// ---------------------------------------------------------------------------
+
+func Test_ProviderConnection_Forbidden(t *testing.T) {
+	req, _ := http.NewRequest("GET", "https://example.com/api/v1/connector/version", nil)
+	client := &api.RestApiClient{
+		Client: &http.Client{
+			Transport: roundTripFunc(func(_ *http.Request) *http.Response {
+				return &http.Response{
+					StatusCode: http.StatusForbidden,
+					Status:     "403 Forbidden",
+					Body:       io.NopCloser(strings.NewReader("forbidden")),
+					Request:    req,
+				}
+			}),
+		},
+		BaseURL:  mustParseURL(t, "https://example.com"),
+		Username: "user",
+		Password: "pass",
+	}
+
+	diags := provider.TestProviderConnection(client)
+
+	// 403 is caught by the client's validateResponse as a generic API Error
+	assert.True(t, diags.HasError())
+}
+
+// ---------------------------------------------------------------------------
+// ValidateConfig — invalid clientCertificate PEM (return false branch)
+// ---------------------------------------------------------------------------
+
+func TestSCCProvider_ValidateConfig_InvalidClientCertificate(t *testing.T) {
+	var resp tfprovider.ConfigureResponse
+	ok := provider.ValidateConfig("https://example.com", "", "", "", "not-a-pem", "not-a-key", false, &resp)
+	assert.False(t, ok)
+	assert.True(t, resp.Diagnostics.HasError())
+}
+
+func TestSCCProvider_ValidateConfig_InvalidClientKey(t *testing.T) {
+	dummyPEM := `-----BEGIN CERTIFICATE-----
+MIIBhTCCASugAwIBAgIJAIk+Cm3ekmKaMAoGCCqGSM49BAMCMBIxEDAOBgNVBAMM
+B1Rlc3QgQ0EwHhcNMjAwMTAxMDAwMDAwWhcNMzAwMTAxMDAwMDAwWjASMRAwDgYD
+VQQDDAdUZXN0IENBMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEFpJSyVnGE8Ow
+K8Bk7hrcn/ElMGyDx+0CgWl+oD+DFsVCtZnQaBFkgVctbWOrYDWJjvPUK+iPY35x
+ph6V/9bDNqNQME4wHQYDVR0OBBYEFENZqO6v+u1eZzZTVDNj0uUCkN8gMB8GA1Ud
+IwQYMBaAFENZqO6v+u1eZzZTVDNj0uUCkN8gMAwGA1UdEwQFMAMBAf8wCgYIKoZI
+zj0EAwIDSAAwRQIgTTb7LtqRQon2OHxMOyuvl+e8FQZXzSH14Yc7u9s9n9ICIQDE
+CEGH5OML6z7C7oCSys7ce4GkTbtJ4rNZoxVOxFwPvA==
+-----END CERTIFICATE-----`
+	var resp tfprovider.ConfigureResponse
+	// Valid clientCertificate but invalid clientKey → ValidatePEMBlock on key fails
+	ok := provider.ValidateConfig("https://example.com", "", "", "", dummyPEM, "not-a-pem-key", false, &resp)
+	assert.False(t, ok)
+	assert.True(t, resp.Diagnostics.HasError())
+}
+
+func TestSCCProvider_ValidateConfig_InvalidCACertificate(t *testing.T) {
+	var resp tfprovider.ConfigureResponse
+	ok := provider.ValidateConfig("https://example.com", "user", "pass", "not-a-pem", "", "", false, &resp)
+	assert.False(t, ok)
+	assert.True(t, resp.Diagnostics.HasError())
+}
+
+// ---------------------------------------------------------------------------
+// Configure — full provider configure with mocked HTTP server
+// ---------------------------------------------------------------------------
+
+func TestSCCProvider_Configure_Success(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		_, _ = io.WriteString(w, `{"version":"2.16.0"}`)
+	}))
+	defer srv.Close()
+
+	p := provider.NewWithClient(srv.Client())
+	schemaResp := &tfprovider.SchemaResponse{}
+	p.Schema(context.Background(), tfprovider.SchemaRequest{}, schemaResp)
+
+	raw := tftypes.NewValue(
+		tftypes.Object{
+			AttributeTypes: map[string]tftypes.Type{
+				"instance_url":       tftypes.String,
+				"username":           tftypes.String,
+				"password":           tftypes.String,
+				"ca_certificate":     tftypes.String,
+				"client_certificate": tftypes.String,
+				"client_key":         tftypes.String,
+				"skip_ssl_validation": tftypes.Bool,
+			},
+		},
+		map[string]tftypes.Value{
+			"instance_url":        tftypes.NewValue(tftypes.String, srv.URL),
+			"username":            tftypes.NewValue(tftypes.String, "admin"),
+			"password":            tftypes.NewValue(tftypes.String, "pass"),
+			"ca_certificate":      tftypes.NewValue(tftypes.String, nil),
+			"client_certificate":  tftypes.NewValue(tftypes.String, nil),
+			"client_key":          tftypes.NewValue(tftypes.String, nil),
+			"skip_ssl_validation": tftypes.NewValue(tftypes.Bool, nil),
+		},
+	)
+
+	req := tfprovider.ConfigureRequest{
+		Config: tfsdk.Config{Schema: schemaResp.Schema, Raw: raw},
+	}
+	resp := &tfprovider.ConfigureResponse{}
+	p.Configure(context.Background(), req, resp)
+
+	assert.False(t, resp.Diagnostics.HasError())
+	assert.NotNil(t, resp.ResourceData)
+}
+
+func TestSCCProvider_Configure_AuthError(t *testing.T) {
+	p := provider.New()
+	schemaResp := &tfprovider.SchemaResponse{}
+	p.Schema(context.Background(), tfprovider.SchemaRequest{}, schemaResp)
+
+	raw := tftypes.NewValue(
+		tftypes.Object{
+			AttributeTypes: map[string]tftypes.Type{
+				"instance_url":        tftypes.String,
+				"username":            tftypes.String,
+				"password":            tftypes.String,
+				"ca_certificate":      tftypes.String,
+				"client_certificate":  tftypes.String,
+				"client_key":          tftypes.String,
+				"skip_ssl_validation": tftypes.Bool,
+			},
+		},
+		map[string]tftypes.Value{
+			"instance_url":        tftypes.NewValue(tftypes.String, nil),
+			"username":            tftypes.NewValue(tftypes.String, nil),
+			"password":            tftypes.NewValue(tftypes.String, nil),
+			"ca_certificate":      tftypes.NewValue(tftypes.String, nil),
+			"client_certificate":  tftypes.NewValue(tftypes.String, nil),
+			"client_key":          tftypes.NewValue(tftypes.String, nil),
+			"skip_ssl_validation": tftypes.NewValue(tftypes.Bool, nil),
+		},
+	)
+
+	req := tfprovider.ConfigureRequest{
+		Config: tfsdk.Config{Schema: schemaResp.Schema, Raw: raw},
+	}
+	resp := &tfprovider.ConfigureResponse{}
+	p.Configure(context.Background(), req, resp)
+
+	assert.True(t, resp.Diagnostics.HasError())
+}
+
+func TestSCCProvider_Configure_ConfigGetError(t *testing.T) {
+	p := provider.New()
+	schemaResp := &tfprovider.SchemaResponse{}
+	p.Schema(context.Background(), tfprovider.SchemaRequest{}, schemaResp)
+
+	// Wrong raw type causes Config.Get to fail
+	raw := tftypes.NewValue(tftypes.String, "wrong-type")
+	req := tfprovider.ConfigureRequest{
+		Config: tfsdk.Config{Schema: schemaResp.Schema, Raw: raw},
+	}
+	resp := &tfprovider.ConfigureResponse{}
+	p.Configure(context.Background(), req, resp)
+
+	assert.True(t, resp.Diagnostics.HasError())
+}
+
+func TestSCCProvider_Configure_CreateClientFails(t *testing.T) {
+	p := provider.New()
+	schemaResp := &tfprovider.SchemaResponse{}
+	p.Schema(context.Background(), tfprovider.SchemaRequest{}, schemaResp)
+
+	// Valid URL + credentials + invalid certs → CreateClient fails
+	raw := tftypes.NewValue(
+		tftypes.Object{
+			AttributeTypes: map[string]tftypes.Type{
+				"instance_url":        tftypes.String,
+				"username":            tftypes.String,
+				"password":            tftypes.String,
+				"ca_certificate":      tftypes.String,
+				"client_certificate":  tftypes.String,
+				"client_key":          tftypes.String,
+				"skip_ssl_validation": tftypes.Bool,
+			},
+		},
+		map[string]tftypes.Value{
+			"instance_url":        tftypes.NewValue(tftypes.String, "https://example.com"),
+			"username":            tftypes.NewValue(tftypes.String, nil),
+			"password":            tftypes.NewValue(tftypes.String, nil),
+			"ca_certificate":      tftypes.NewValue(tftypes.String, nil),
+			"client_certificate":  tftypes.NewValue(tftypes.String, "-----BEGIN CERTIFICATE-----\nbad\n-----END CERTIFICATE-----"),
+			"client_key":          tftypes.NewValue(tftypes.String, "-----BEGIN RSA PRIVATE KEY-----\nbad\n-----END RSA PRIVATE KEY-----"),
+			"skip_ssl_validation": tftypes.NewValue(tftypes.Bool, nil),
+		},
+	)
+
+	req := tfprovider.ConfigureRequest{
+		Config: tfsdk.Config{Schema: schemaResp.Schema, Raw: raw},
+	}
+	resp := &tfprovider.ConfigureResponse{}
+	p.Configure(context.Background(), req, resp)
+
+	assert.True(t, resp.Diagnostics.HasError())
+}
+
+func TestSCCProvider_Configure_ConnectionFails(t *testing.T) {
+	// Server returns 401 → TestProviderConnection error branch
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusUnauthorized)
+		_, _ = io.WriteString(w, "unauthorized")
+	}))
+	defer srv.Close()
+
+	p := provider.NewWithClient(srv.Client())
+	schemaResp := &tfprovider.SchemaResponse{}
+	p.Schema(context.Background(), tfprovider.SchemaRequest{}, schemaResp)
+
+	raw := tftypes.NewValue(
+		tftypes.Object{
+			AttributeTypes: map[string]tftypes.Type{
+				"instance_url":        tftypes.String,
+				"username":            tftypes.String,
+				"password":            tftypes.String,
+				"ca_certificate":      tftypes.String,
+				"client_certificate":  tftypes.String,
+				"client_key":          tftypes.String,
+				"skip_ssl_validation": tftypes.Bool,
+			},
+		},
+		map[string]tftypes.Value{
+			"instance_url":        tftypes.NewValue(tftypes.String, srv.URL),
+			"username":            tftypes.NewValue(tftypes.String, "baduser"),
+			"password":            tftypes.NewValue(tftypes.String, "badpass"),
+			"ca_certificate":      tftypes.NewValue(tftypes.String, nil),
+			"client_certificate":  tftypes.NewValue(tftypes.String, nil),
+			"client_key":          tftypes.NewValue(tftypes.String, nil),
+			"skip_ssl_validation": tftypes.NewValue(tftypes.Bool, nil),
+		},
+	)
+
+	req := tfprovider.ConfigureRequest{
+		Config: tfsdk.Config{Schema: schemaResp.Schema, Raw: raw},
+	}
+	resp := &tfprovider.ConfigureResponse{}
+	p.Configure(context.Background(), req, resp)
+
+	assert.True(t, resp.Diagnostics.HasError())
 }

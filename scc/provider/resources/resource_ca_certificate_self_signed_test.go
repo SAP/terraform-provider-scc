@@ -13,6 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/attr"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -329,6 +330,276 @@ func TestCACertificateSelfSigned_Delete_Success(t *testing.T) {
 	r.Delete(context.Background(), req, resp)
 
 	assert.False(t, resp.Diagnostics.HasError())
+}
+
+func TestCACertificateSelfSigned_Delete_APIError(t *testing.T) {
+	r := &resources.CACertificateSelfSignedResource{
+		Client: &api.RestApiClient{},
+	}
+
+	oldReq := helpers.RequestAndUnmarshalCertificateFunc
+	defer func() { helpers.RequestAndUnmarshalCertificateFunc = oldReq }()
+
+	helpers.RequestAndUnmarshalCertificateFunc = func(*api.RestApiClient, *apiobjects.Certificate, string, string, map[string]any, bool) diag.Diagnostics {
+		var d diag.Diagnostics
+		d.AddError("delete failed", "api error")
+		return d
+	}
+
+	schemaResp := &resource.SchemaResponse{}
+	r.Schema(context.Background(), resource.SchemaRequest{}, schemaResp)
+
+	tfState := tfsdk.State{Schema: schemaResp.Schema}
+	state := testValidSelfSignedCAPlan()
+	diags := tfState.Set(context.Background(), &state)
+	assert.False(t, diags.HasError())
+
+	req := resource.DeleteRequest{State: tfState}
+	resp := &resource.DeleteResponse{}
+
+	r.Delete(context.Background(), req, resp)
+
+	assert.True(t, resp.Diagnostics.HasError())
+}
+
+func TestCACertificateSelfSigned_Read_APIError(t *testing.T) {
+	r := &resources.CACertificateSelfSignedResource{
+		Client: &api.RestApiClient{},
+	}
+
+	oldReq := helpers.RequestAndUnmarshalCertificateFunc
+	defer func() { helpers.RequestAndUnmarshalCertificateFunc = oldReq }()
+
+	helpers.RequestAndUnmarshalCertificateFunc = func(*api.RestApiClient, *apiobjects.Certificate, string, string, map[string]any, bool) diag.Diagnostics {
+		var d diag.Diagnostics
+		d.AddError("get failed", "api error")
+		return d
+	}
+
+	schemaResp := &resource.SchemaResponse{}
+	r.Schema(context.Background(), resource.SchemaRequest{}, schemaResp)
+
+	tfState := tfsdk.State{Schema: schemaResp.Schema}
+	state := testValidSelfSignedCAPlan()
+	diags := tfState.Set(context.Background(), &state)
+	assert.False(t, diags.HasError())
+
+	req := resource.ReadRequest{State: tfState}
+	resp := &resource.ReadResponse{}
+
+	r.Read(context.Background(), req, resp)
+
+	assert.True(t, resp.Diagnostics.HasError())
+}
+
+func TestCACertificateSelfSigned_Read_BinaryError(t *testing.T) {
+	r := &resources.CACertificateSelfSignedResource{
+		Client: &api.RestApiClient{},
+	}
+
+	oldReq := helpers.RequestAndUnmarshalCertificateFunc
+	oldBin := helpers.GetCertificateBinaryFunc
+	defer func() {
+		helpers.RequestAndUnmarshalCertificateFunc = oldReq
+		helpers.GetCertificateBinaryFunc = oldBin
+	}()
+
+	helpers.RequestAndUnmarshalCertificateFunc = func(*api.RestApiClient, *apiobjects.Certificate, string, string, map[string]any, bool) diag.Diagnostics {
+		return nil
+	}
+	helpers.GetCertificateBinaryFunc = func(*api.RestApiClient, string) ([]byte, diag.Diagnostics) {
+		var d diag.Diagnostics
+		d.AddError("binary failed", "cert binary error")
+		return nil, d
+	}
+
+	schemaResp := &resource.SchemaResponse{}
+	r.Schema(context.Background(), resource.SchemaRequest{}, schemaResp)
+
+	tfState := tfsdk.State{Schema: schemaResp.Schema}
+	state := testValidSelfSignedCAPlan()
+	diags := tfState.Set(context.Background(), &state)
+	assert.False(t, diags.HasError())
+
+	req := resource.ReadRequest{State: tfState}
+	resp := &resource.ReadResponse{}
+
+	r.Read(context.Background(), req, resp)
+
+	assert.True(t, resp.Diagnostics.HasError())
+}
+
+func TestCACertificateSelfSigned_Read_PEMError(t *testing.T) {
+	r := &resources.CACertificateSelfSignedResource{
+		Client: &api.RestApiClient{},
+	}
+
+	oldReq := helpers.RequestAndUnmarshalCertificateFunc
+	oldBin := helpers.GetCertificateBinaryFunc
+	oldValidate := helpers.ValidatePEMDataFunc
+	defer func() {
+		helpers.RequestAndUnmarshalCertificateFunc = oldReq
+		helpers.GetCertificateBinaryFunc = oldBin
+		helpers.ValidatePEMDataFunc = oldValidate
+	}()
+
+	helpers.RequestAndUnmarshalCertificateFunc = func(*api.RestApiClient, *apiobjects.Certificate, string, string, map[string]any, bool) diag.Diagnostics {
+		return nil
+	}
+	helpers.GetCertificateBinaryFunc = func(*api.RestApiClient, string) ([]byte, diag.Diagnostics) {
+		return []byte("notcert"), nil
+	}
+	helpers.ValidatePEMDataFunc = func(string) diag.Diagnostics {
+		var d diag.Diagnostics
+		d.AddError("Invalid PEM", "pem validation failed")
+		return d
+	}
+
+	schemaResp := &resource.SchemaResponse{}
+	r.Schema(context.Background(), resource.SchemaRequest{}, schemaResp)
+
+	tfState := tfsdk.State{Schema: schemaResp.Schema}
+	state := testValidSelfSignedCAPlan()
+	diags := tfState.Set(context.Background(), &state)
+	assert.False(t, diags.HasError())
+
+	req := resource.ReadRequest{State: tfState}
+	resp := &resource.ReadResponse{}
+
+	r.Read(context.Background(), req, resp)
+
+	assert.True(t, resp.Diagnostics.HasError())
+}
+
+func TestCACertificateSelfSigned_Read_ModelError(t *testing.T) {
+	r := &resources.CACertificateSelfSignedResource{
+		Client: &api.RestApiClient{},
+	}
+
+	oldReq := helpers.RequestAndUnmarshalCertificateFunc
+	oldBin := helpers.GetCertificateBinaryFunc
+	oldValue := model.SelfSignedCACertificateResourceValueFromFunc
+	defer func() {
+		helpers.RequestAndUnmarshalCertificateFunc = oldReq
+		helpers.GetCertificateBinaryFunc = oldBin
+		model.SelfSignedCACertificateResourceValueFromFunc = oldValue
+	}()
+
+	helpers.RequestAndUnmarshalCertificateFunc = func(*api.RestApiClient, *apiobjects.Certificate, string, string, map[string]any, bool) diag.Diagnostics {
+		return nil
+	}
+	helpers.GetCertificateBinaryFunc = func(*api.RestApiClient, string) ([]byte, diag.Diagnostics) {
+		return tfutils.GenerateValidDERCert(t), nil
+	}
+	model.SelfSignedCACertificateResourceValueFromFunc = func(ctx context.Context, obj apiobjects.Certificate, dn *helpers.CertificateSubjectDNConfig) (model.SelfSignedCACertificateResourceConfig, diag.Diagnostics) {
+		var d diag.Diagnostics
+		d.AddError("model error", "conversion failed")
+		return model.SelfSignedCACertificateResourceConfig{}, d
+	}
+
+	schemaResp := &resource.SchemaResponse{}
+	r.Schema(context.Background(), resource.SchemaRequest{}, schemaResp)
+
+	tfState := tfsdk.State{Schema: schemaResp.Schema}
+	state := testValidSelfSignedCAPlan()
+	diags := tfState.Set(context.Background(), &state)
+	assert.False(t, diags.HasError())
+
+	req := resource.ReadRequest{State: tfState}
+	resp := &resource.ReadResponse{}
+
+	r.Read(context.Background(), req, resp)
+
+	assert.True(t, resp.Diagnostics.HasError())
+}
+
+func TestCACertificateSelfSigned_Update_ShouldUpdateFalse(t *testing.T) {
+	// When ShouldUpdateSelfSignedCertificateFunc returns false, Update is a no-op.
+	r := &resources.CACertificateSelfSignedResource{
+		Client: &api.RestApiClient{},
+	}
+
+	oldShould := helpers.ShouldUpdateSelfSignedCertificateFunc
+	defer func() { helpers.ShouldUpdateSelfSignedCertificateFunc = oldShould }()
+
+	helpers.ShouldUpdateSelfSignedCertificateFunc = func(
+		planKeySize, stateKeySize types.Int64,
+		planSubjectDN, stateSubjectDN types.Object,
+		planSubjectAltNames, stateSubjectAltNames types.List,
+	) bool {
+		return false
+	}
+
+	schemaResp := &resource.SchemaResponse{}
+	r.Schema(context.Background(), resource.SchemaRequest{}, schemaResp)
+
+	plan := testValidSelfSignedCAPlan()
+	state := testValidSelfSignedCAPlan()
+
+	tfPlan := tfsdk.Plan{Schema: schemaResp.Schema}
+	tfState := tfsdk.State{Schema: schemaResp.Schema}
+
+	diags := tfPlan.Set(context.Background(), &plan)
+	assert.False(t, diags.HasError())
+	diags = tfState.Set(context.Background(), &state)
+	assert.False(t, diags.HasError())
+
+	req := resource.UpdateRequest{Plan: tfPlan, State: tfState}
+	resp := &resource.UpdateResponse{State: tfsdk.State{Schema: schemaResp.Schema}}
+
+	r.Update(context.Background(), req, resp)
+
+	assert.False(t, resp.Diagnostics.HasError())
+}
+
+func TestCACertificateSelfSigned_Update_CreateFails(t *testing.T) {
+	r := &resources.CACertificateSelfSignedResource{
+		Client: &api.RestApiClient{},
+	}
+
+	oldShould := helpers.ShouldUpdateSelfSignedCertificateFunc
+	oldCreate := resources.CreateSelfSignedCACertificateFunc
+	defer func() {
+		helpers.ShouldUpdateSelfSignedCertificateFunc = oldShould
+		resources.CreateSelfSignedCACertificateFunc = oldCreate
+	}()
+
+	helpers.ShouldUpdateSelfSignedCertificateFunc = func(
+		planKeySize, stateKeySize types.Int64,
+		planSubjectDN, stateSubjectDN types.Object,
+		planSubjectAltNames, stateSubjectAltNames types.List,
+	) bool {
+		return true
+	}
+
+	resources.CreateSelfSignedCACertificateFunc = func(r *resources.CACertificateSelfSignedResource, ctx context.Context, plan model.SelfSignedCACertificateResourceConfig) (*model.SelfSignedCACertificateResourceConfig, diag.Diagnostics) {
+		var d diag.Diagnostics
+		d.AddError("create failed", "error")
+		return nil, d
+	}
+
+	schemaResp := &resource.SchemaResponse{}
+	r.Schema(context.Background(), resource.SchemaRequest{}, schemaResp)
+
+	// Use different KeySize so the early equality check doesn't short-circuit
+	plan := testValidSelfSignedCAPlan()
+	plan.KeySize = types.Int64Value(2048)
+	state := testValidSelfSignedCAPlan()
+
+	tfPlan := tfsdk.Plan{Schema: schemaResp.Schema}
+	tfState := tfsdk.State{Schema: schemaResp.Schema}
+
+	diags := tfPlan.Set(context.Background(), &plan)
+	assert.False(t, diags.HasError())
+	diags = tfState.Set(context.Background(), &state)
+	assert.False(t, diags.HasError())
+
+	req := resource.UpdateRequest{Plan: tfPlan, State: tfState}
+	resp := &resource.UpdateResponse{State: tfsdk.State{Schema: schemaResp.Schema}}
+
+	r.Update(context.Background(), req, resp)
+
+	assert.True(t, resp.Diagnostics.HasError())
 }
 
 func TestCACertificateSelfSigned_Read_Success(t *testing.T) {

@@ -1,12 +1,21 @@
 package datasources_test
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"regexp"
 	"testing"
 
+	"github.com/SAP/terraform-provider-scc/scc/provider/datasources"
 	"github.com/SAP/terraform-provider-scc/scc/provider/tfutils"
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-go/tftypes"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestDataSourceCACertificate(t *testing.T) {
@@ -39,4 +48,61 @@ func TestDataSourceCACertificate(t *testing.T) {
 
 func DataSourceCACertificate(datasourceName string) string {
 	return fmt.Sprintf(`data "scc_ca_certificate" "%s" {}`, datasourceName)
+}
+
+func TestDataSourceCACertificate_Read_MetadataAPIError(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	}))
+	defer srv.Close()
+
+	ds := &datasources.CACertificateDataSource{Client: tfutils.NewTestClient(t, srv)}
+
+	schemaResp := &datasource.SchemaResponse{}
+	ds.Schema(context.Background(), datasource.SchemaRequest{}, schemaResp)
+
+	schemaType := schemaResp.Schema.Type().TerraformType(context.Background())
+	raw := tftypes.NewValue(schemaType, nil)
+
+	req := datasource.ReadRequest{Config: tfsdk.Config{Schema: schemaResp.Schema, Raw: raw}}
+	resp := &datasource.ReadResponse{}
+	ds.Read(context.Background(), req, resp)
+
+	assert.True(t, resp.Diagnostics.HasError())
+}
+
+func TestDataSourceCACertificate_Read_BinaryAPIError(t *testing.T) {
+	// Metadata succeeds but binary download fails.
+	metadataResponse := map[string]any{
+		"subjectDN":    "CN=test-ca",
+		"issuer":       "CN=test-ca",
+		"notAfter":     0,
+		"notBefore":    0,
+		"serialNumber": "aa:bb:cc",
+	}
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		accept := r.Header.Get("Accept")
+		if accept == "application/pkix-cert" {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(metadataResponse)
+	}))
+	defer srv.Close()
+
+	ds := &datasources.CACertificateDataSource{Client: tfutils.NewTestClient(t, srv)}
+
+	schemaResp := &datasource.SchemaResponse{}
+	ds.Schema(context.Background(), datasource.SchemaRequest{}, schemaResp)
+
+	schemaType := schemaResp.Schema.Type().TerraformType(context.Background())
+	raw := tftypes.NewValue(schemaType, nil)
+
+	req := datasource.ReadRequest{Config: tfsdk.Config{Schema: schemaResp.Schema, Raw: raw}}
+	resp := &datasource.ReadResponse{}
+	ds.Read(context.Background(), req, resp)
+
+	assert.True(t, resp.Diagnostics.HasError())
 }
