@@ -572,6 +572,13 @@ func TestSCCProvider_Configure_Success(t *testing.T) {
 }
 
 func TestSCCProvider_Configure_AuthError(t *testing.T) {
+	t.Setenv("SCC_INSTANCE_URL", "")
+	t.Setenv("SCC_USERNAME", "")
+	t.Setenv("SCC_PASSWORD", "")
+	t.Setenv("SCC_CA_CERTIFICATE", "")
+	t.Setenv("SCC_CLIENT_CERTIFICATE", "")
+	t.Setenv("SCC_CLIENT_KEY", "")
+
 	p := provider.New()
 	schemaResp := &tfprovider.SchemaResponse{}
 	p.Schema(context.Background(), tfprovider.SchemaRequest{}, schemaResp)
