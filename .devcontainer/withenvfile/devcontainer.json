@@ -8,7 +8,7 @@
 			"terragrunt": "none"
 		},
 		"ghcr.io/robbert229/devcontainer-features/opentofu:1": {
-			"version": "1.12.1"
+			"version": "1.12.6"
 		}
 	},
 	"customizations": {
