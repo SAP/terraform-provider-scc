@@ -95,17 +95,17 @@ To recover, set connected = false, apply, and then set it back to true to retry 
 
 ### Read-Only
 
-- `tunnel` (Attributes) Details of connection tunnel used by the subaccount. (see [below for nested schema](#nestedatt--tunnel))
+- `tunnel` (Attributes) Details of connection tunnel used by the subaccount.
+
+**Note (schema version 1):** `application_connections` and `service_channels` were removed from this attribute. Use the `scc_subaccount_configuration` data source to read those fields. (see [below for nested schema](#nestedatt--tunnel))
 
 <a id="nestedatt--tunnel"></a>
 ### Nested Schema for `tunnel`
 
 Read-Only:
 
-- `application_connections` (Attributes List) Array of connections to application instances. Each connection provides information about a specific application instance accessible through the cloud connector. (see [below for nested schema](#nestedatt--tunnel--application_connections))
 - `connected_since` (String) Timestamp of the start of the connection.
 - `connections` (Number) Number of subaccount connections.
-- `service_channels` (Attributes List) Type and state of the service channels used (types: HANA database, Virtual Machine or RFC) (see [below for nested schema](#nestedatt--tunnel--service_channels))
 - `state` (String) State of the tunnel. Possible values are: 
 
   | state | description | 
@@ -115,27 +115,6 @@ Read-Only:
   | `Disconnected` | The tunnel was previously connected but is now intentionally or unintentionally disconnected. |
 - `subaccount_certificate` (Attributes) Information on the subaccount certificate such as validity period, issuer and subject DN. (see [below for nested schema](#nestedatt--tunnel--subaccount_certificate))
 - `user` (String) User for the specified region host and subaccount.
-
-<a id="nestedatt--tunnel--application_connections"></a>
-### Nested Schema for `tunnel.application_connections`
-
-Read-Only:
-
-- `connection_count` (Number) Number of active connections to the specified application instance.
-- `name` (String) Name of the connected application instance.
-- `type` (String) Type of the connected application instance.
-
-
-<a id="nestedatt--tunnel--service_channels"></a>
-### Nested Schema for `tunnel.service_channels`
-
-Read-Only:
-
-- `comment` (String) Optional user-provided comment or annotation regarding the service channel.
-- `details` (String) Technical details about the service channel.
-- `state` (String) Current operational state of the service channel.
-- `type` (String) Type of the service channel (e.g., HANA, VM, or RFC).
-
 
 <a id="nestedatt--tunnel--subaccount_certificate"></a>
 ### Nested Schema for `tunnel.subaccount_certificate`

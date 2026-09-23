@@ -163,8 +163,11 @@ To recover, set connected = false, apply, and then set it back to true to retry 
 				Default:  booldefault.StaticBool(false),
 			},
 			"tunnel": schema.SingleNestedAttribute{
-				MarkdownDescription: "Details of connection tunnel used by the subaccount.",
-				Computed:            true,
+				MarkdownDescription: "Details of connection tunnel used by the subaccount.\n\n" +
+					"**Note (schema version 1):** `application_connections` and `service_channels` " +
+					"were removed from this attribute. Use the `scc_subaccount_configuration` " +
+					"data source to read those fields.",
+				Computed: true,
 				Attributes: map[string]schema.Attribute{
 					"state": schema.StringAttribute{
 						MarkdownDescription: "State of the tunnel. Possible values are: \n" +
@@ -209,50 +212,6 @@ To recover, set connected = false, apply, and then set it back to true to retry 
 							},
 						},
 					},
-					"application_connections": schema.ListNestedAttribute{
-						MarkdownDescription: "Array of connections to application instances. Each connection provides information about a specific application instance accessible through the cloud connector.",
-						Computed:            true,
-						NestedObject: schema.NestedAttributeObject{
-							Attributes: map[string]schema.Attribute{
-								"connection_count": schema.Int64Attribute{
-									MarkdownDescription: "Number of active connections to the specified application instance.",
-									Computed:            true,
-								},
-								"name": schema.StringAttribute{
-									MarkdownDescription: "Name of the connected application instance.",
-									Computed:            true,
-								},
-								"type": schema.StringAttribute{
-									MarkdownDescription: "Type of the connected application instance.",
-									Computed:            true,
-								},
-							},
-						},
-					},
-					"service_channels": schema.ListNestedAttribute{
-						MarkdownDescription: "Type and state of the service channels used (types: HANA database, Virtual Machine or RFC)",
-						Computed:            true,
-						NestedObject: schema.NestedAttributeObject{
-							Attributes: map[string]schema.Attribute{
-								"type": schema.StringAttribute{
-									MarkdownDescription: "Type of the service channel (e.g., HANA, VM, or RFC).",
-									Computed:            true,
-								},
-								"state": schema.StringAttribute{
-									MarkdownDescription: "Current operational state of the service channel.",
-									Computed:            true,
-								},
-								"details": schema.StringAttribute{
-									MarkdownDescription: "Technical details about the service channel.",
-									Computed:            true,
-								},
-								"comment": schema.StringAttribute{
-									MarkdownDescription: "Optional user-provided comment or annotation regarding the service channel.",
-									Computed:            true,
-								},
-							},
-						},
-					},
 					"user": schema.StringAttribute{
 						MarkdownDescription: "User for the specified region host and subaccount.",
 						Computed:            true,
@@ -260,6 +219,7 @@ To recover, set connected = false, apply, and then set it back to true to retry 
 				},
 			},
 		},
+		Version: 1,
 	}
 }
 
@@ -732,4 +692,280 @@ func (rs *SubaccountResource) ImportState(ctx context.Context, req resource.Impo
 
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("subaccount"), identity.Subaccount)...)
 	resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("region_host"), identity.RegionHost)...)
+}
+
+func (rs *SubaccountResource) UpgradeState(ctx context.Context) map[int64]resource.StateUpgrader {
+	return map[int64]resource.StateUpgrader{
+		// State upgrade implementation from 0 (prior state version) to 1 (Schema.Version)
+		0: {
+			PriorSchema: &schema.Schema{
+				Attributes: map[string]schema.Attribute{
+					"region_host": schema.StringAttribute{
+						MarkdownDescription: "Region Host Name.",
+						Required:            true,
+					},
+					"subaccount": schema.StringAttribute{
+						MarkdownDescription: "The ID of the subaccount.",
+						Required:            true,
+						Validators: []validator.String{
+							uuidvalidator.ValidUUID(),
+						},
+					},
+					"cloud_user": schema.StringAttribute{
+						MarkdownDescription: "User for the specified subaccount and region host.\n\n" +
+							"**Required when creating the resource.**\n\n" +
+							"This attribute is optional in the schema to support `terraform import`, " +
+							"but must be provided during creation and certificate renewal operations.",
+						Computed: true,
+						Optional: true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
+					},
+					"cloud_password": schema.StringAttribute{
+						MarkdownDescription: "Password for the cloud user.\n\n" +
+							"**Required when creating the resource.**\n\n" +
+							"This attribute is optional in the schema to support `terraform import`, " +
+							"but must be provided during creation and certificate renewal operations.",
+						Sensitive: true,
+						Computed:  true,
+						Optional:  true,
+						PlanModifiers: []planmodifier.String{
+							stringplanmodifier.UseStateForUnknown(),
+						},
+					},
+					"location_id": schema.StringAttribute{
+						MarkdownDescription: "Location identifier for the Cloud Connector instance.",
+						Computed:            true,
+						Optional:            true,
+					},
+					"display_name": schema.StringAttribute{
+						MarkdownDescription: "Display name of the subaccount.",
+						Computed:            true,
+						Optional:            true,
+					},
+					"description": schema.StringAttribute{
+						MarkdownDescription: "Description of the subaccount.",
+						Computed:            true,
+						Optional:            true,
+					},
+					"connected": schema.BoolAttribute{
+						MarkdownDescription: `Specifies whether the subaccount should be connected to the Cloud Connector.
+
+- **true** → attempts to establish a tunnel connection.
+- **false** → disconnects the subaccount from the Cloud Connector.
+
+The value is persisted in state based on what you configure (not overwritten by runtime status).
+The actual tunnel status is reported by the Cloud Connector and may differ:
+
+- *Connected* → tunnel established successfully.
+- *Disconnected* → tunnel was intentionally or unintentionally closed.
+- *ConnectFailure* → tunnel could not be established (e.g., invalid credentials, network issues).
+
+**Important:**
+In case of *ConnectFailure*, the provider will issue a warning but will **not reset** the value of connected.
+To recover, set connected = false, apply, and then set it back to true to retry the connection.`,
+						Optional: true,
+						Computed: true,
+						Default:  booldefault.StaticBool(true),
+					},
+					"auto_renew_before_days": schema.Int64Attribute{
+						MarkdownDescription: "Number of days before certificate expiration when the provider should renew the certificate automatically. Minimum is 7 days, maximum is 45 days.\n\n" +
+							"This check is skipped when `auto_certificate_renewal` is `true`, because the Cloud Connector handles renewal natively in that case.",
+						Optional: true,
+						Computed: true,
+						Default:  int64default.StaticInt64(14),
+						Validators: []validator.Int64{
+							int64validator.Between(7, 45),
+						},
+					},
+					"is_managed": schema.BoolAttribute{
+						MarkdownDescription: "Indicates whether the subaccount to be created should be a managed subaccount (as of version 2.19). Cannot be changed after creation.",
+						Optional:            true,
+						Computed:            true,
+					},
+					"auto_certificate_renewal": schema.BoolAttribute{
+						MarkdownDescription: "Indicates whether auto-renewal of the subaccount certificate should be enabled (as of version 2.19). " +
+							"When set to `true`, the Cloud Connector handles certificate renewal natively and the provider-side `auto_renew_before_days` threshold check is skipped.\n\n" +
+							"**How native auto-renewal works:**\n" +
+							"- Renewal is triggered `n + 7` days before certificate expiry, where `n` is the alert threshold configured under *Observation Configuration → Alerting*.\n" +
+							"- If the renewal attempt fails, it is retried every 12 hours. If not successful within 7 days, the automatic renewal is cancelled.\n" +
+							"- No user credentials are required. Authentication is handled by the currently valid subaccount certificate, provided that an administrator has also enabled auto-renewal for the subaccount in the SAP BTP Cockpit.",
+						Optional: true,
+						Computed: true,
+					},
+					"auto_trust_sync": schema.BoolAttribute{
+						MarkdownDescription: "Indicates whether automatic trust configuration synchronization is enabled for this subaccount. When `false` (default), performs a one-time manual trust sync on every connect. " +
+							"When `true`, also enables server-side automatic re-sync after the initial manual sync; " +
+							"requires the Cloud Connector version to support `Automatic Trust Synchronization`.",
+						Optional: true,
+						Computed: true,
+						Default:  booldefault.StaticBool(false),
+					},
+					"tunnel": schema.SingleNestedAttribute{
+						MarkdownDescription: "Details of connection tunnel used by the subaccount.",
+						Computed:            true,
+						Attributes: map[string]schema.Attribute{
+							"state": schema.StringAttribute{
+								MarkdownDescription: "State of the tunnel. Possible values are: \n" +
+									helpers.GetFormattedValueAsTableRow("state", "description") +
+									helpers.GetFormattedValueAsTableRow("---", "---") +
+									helpers.GetFormattedValueAsTableRow("`Connected`", "The tunnel is active and functioning properly.") +
+									helpers.GetFormattedValueAsTableRow("`ConnectFailure`", "The tunnel failed to establish a connection due to an issue.") +
+									helpers.GetFormattedValueAsTableRow("`Disconnected`", "The tunnel was previously connected but is now intentionally or unintentionally disconnected."),
+								Computed: true,
+							},
+							"connected_since": schema.StringAttribute{
+								MarkdownDescription: "Timestamp of the start of the connection.",
+								Computed:            true,
+							},
+							"connections": schema.Int64Attribute{
+								MarkdownDescription: "Number of subaccount connections.",
+								Computed:            true,
+							},
+							"subaccount_certificate": schema.SingleNestedAttribute{
+								MarkdownDescription: "Information on the subaccount certificate such as validity period, issuer and subject DN.",
+								Computed:            true,
+								Attributes: map[string]schema.Attribute{
+									"valid_to": schema.StringAttribute{
+										MarkdownDescription: "Timestamp of the end of the validity period.",
+										Computed:            true,
+									},
+									"valid_from": schema.StringAttribute{
+										MarkdownDescription: "Timestamp of the beginning of the validity period.",
+										Computed:            true,
+									},
+									"subject_dn": schema.StringAttribute{
+										MarkdownDescription: "The subject distinguished name.",
+										Computed:            true,
+									},
+									"issuer": schema.StringAttribute{
+										MarkdownDescription: "Certificate authority (CA) that issued this certificate.",
+										Computed:            true,
+									},
+									"serial_number": schema.StringAttribute{
+										MarkdownDescription: "Unique identifier for the certificate, typically assigned by the CA.",
+										Computed:            true,
+									},
+								},
+							},
+							"application_connections": schema.ListNestedAttribute{
+								MarkdownDescription: "Array of connections to application instances. Each connection provides information about a specific application instance accessible through the cloud connector.",
+								Computed:            true,
+								NestedObject: schema.NestedAttributeObject{
+									Attributes: map[string]schema.Attribute{
+										"connection_count": schema.Int64Attribute{
+											MarkdownDescription: "Number of active connections to the specified application instance.",
+											Computed:            true,
+										},
+										"name": schema.StringAttribute{
+											MarkdownDescription: "Name of the connected application instance.",
+											Computed:            true,
+										},
+										"type": schema.StringAttribute{
+											MarkdownDescription: "Type of the connected application instance.",
+											Computed:            true,
+										},
+									},
+								},
+							},
+							"service_channels": schema.ListNestedAttribute{
+								MarkdownDescription: "Type and state of the service channels used (types: HANA database, Virtual Machine or RFC)",
+								Computed:            true,
+								NestedObject: schema.NestedAttributeObject{
+									Attributes: map[string]schema.Attribute{
+										"type": schema.StringAttribute{
+											MarkdownDescription: "Type of the service channel (e.g., HANA, VM, or RFC).",
+											Computed:            true,
+										},
+										"state": schema.StringAttribute{
+											MarkdownDescription: "Current operational state of the service channel.",
+											Computed:            true,
+										},
+										"details": schema.StringAttribute{
+											MarkdownDescription: "Technical details about the service channel.",
+											Computed:            true,
+										},
+										"comment": schema.StringAttribute{
+											MarkdownDescription: "Optional user-provided comment or annotation regarding the service channel.",
+											Computed:            true,
+										},
+									},
+								},
+							},
+							"user": schema.StringAttribute{
+								MarkdownDescription: "User for the specified region host and subaccount.",
+								Computed:            true,
+							},
+						},
+					},
+				},
+			},
+			StateUpgrader: func(ctx context.Context, req resource.UpgradeStateRequest, resp *resource.UpgradeStateResponse) {
+				// Define typed structs that match the v0 schema exactly so the framework can
+				// decode the prior state, including the two tunnel lists that no longer exist in v1.
+				type priorTunnelState struct {
+					State                  types.String `tfsdk:"state"`
+					ConnectedSince         types.String `tfsdk:"connected_since"`
+					Connections            types.Int64  `tfsdk:"connections"`
+					SubaccountCertificate  types.Object `tfsdk:"subaccount_certificate"`
+					User                   types.String `tfsdk:"user"`
+					ApplicationConnections types.List   `tfsdk:"application_connections"`
+					ServiceChannels        types.List   `tfsdk:"service_channels"`
+				}
+				type priorSubaccountState struct {
+					RegionHost             types.String     `tfsdk:"region_host"`
+					Subaccount             types.String     `tfsdk:"subaccount"`
+					CloudUser              types.String     `tfsdk:"cloud_user"`
+					CloudPassword          types.String     `tfsdk:"cloud_password"`
+					LocationID             types.String     `tfsdk:"location_id"`
+					DisplayName            types.String     `tfsdk:"display_name"`
+					Description            types.String     `tfsdk:"description"`
+					Tunnel                 priorTunnelState `tfsdk:"tunnel"`
+					Connected              types.Bool       `tfsdk:"connected"`
+					AutoRenewBeforeDays    types.Int64      `tfsdk:"auto_renew_before_days"`
+					IsManaged              types.Bool       `tfsdk:"is_managed"`
+					AutoCertificateRenewal types.Bool       `tfsdk:"auto_certificate_renewal"`
+					AutoTrustSync          types.Bool       `tfsdk:"auto_trust_sync"`
+				}
+
+				var priorStateData priorSubaccountState
+				resp.Diagnostics.Append(req.State.Get(ctx, &priorStateData)...)
+				if resp.Diagnostics.HasError() {
+					return
+				}
+
+				// Rebuild the tunnel using only the v1 fields; application_connections and
+				// service_channels are intentionally dropped.
+				newTunnel, diags := types.ObjectValueFrom(ctx, model.SubaccountResourceTunnelType, model.SubaccountResourceTunnelData{
+					State:                 priorStateData.Tunnel.State,
+					ConnectedSince:        priorStateData.Tunnel.ConnectedSince,
+					Connections:           priorStateData.Tunnel.Connections,
+					SubaccountCertificate: priorStateData.Tunnel.SubaccountCertificate,
+					User:                  priorStateData.Tunnel.User,
+				})
+				resp.Diagnostics.Append(diags...)
+				if resp.Diagnostics.HasError() {
+					return
+				}
+
+				upgradedStateData := model.SubaccountConfig{
+					RegionHost:             priorStateData.RegionHost,
+					Subaccount:             priorStateData.Subaccount,
+					CloudUser:              priorStateData.CloudUser,
+					CloudPassword:          priorStateData.CloudPassword,
+					LocationID:             priorStateData.LocationID,
+					DisplayName:            priorStateData.DisplayName,
+					Description:            priorStateData.Description,
+					Tunnel:                 newTunnel,
+					Connected:              priorStateData.Connected,
+					AutoRenewBeforeDays:    priorStateData.AutoRenewBeforeDays,
+					IsManaged:              priorStateData.IsManaged,
+					AutoCertificateRenewal: priorStateData.AutoCertificateRenewal,
+					AutoTrustSync:          priorStateData.AutoTrustSync,
+				}
+				resp.Diagnostics.Append(resp.State.Set(ctx, &upgradedStateData)...)
+			},
+		},
+	}
 }
