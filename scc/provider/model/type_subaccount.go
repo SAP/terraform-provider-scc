@@ -93,6 +93,27 @@ var SubaccountServiceChannelsType = types.ObjectType{
 	},
 }
 
+// SubaccountResourceTunnelData and SubaccountResourceTunnelType are the v1 resource-schema
+// tunnel types. They omit application_connections and service_channels, which were removed
+// from the resource schema in version 1.
+type SubaccountResourceTunnelData struct {
+	State                 types.String `tfsdk:"state"`
+	ConnectedSince        types.String `tfsdk:"connected_since"`
+	Connections           types.Int64  `tfsdk:"connections"`
+	SubaccountCertificate types.Object `tfsdk:"subaccount_certificate"`
+	User                  types.String `tfsdk:"user"`
+}
+
+var SubaccountResourceTunnelType = map[string]attr.Type{
+	"state":           types.StringType,
+	"connected_since": types.StringType,
+	"connections":     types.Int64Type,
+	"user":            types.StringType,
+	"subaccount_certificate": types.ObjectType{
+		AttrTypes: SubaccountCertificateType,
+	},
+}
+
 type SubaccountsData struct {
 	RegionHost types.String `tfsdk:"region_host"`
 	Subaccount types.String `tfsdk:"subaccount"`
@@ -252,50 +273,15 @@ func SubaccountResourceValueFrom(ctx context.Context, plan SubaccountConfig, val
 		return SubaccountConfig{}, diags
 	}
 
-	applicationConnectionsValues := []SubaccountApplicationConnectionsData{}
-	for _, connection := range value.Tunnel.ApplicationConnections {
-		ac := SubaccountApplicationConnectionsData{
-			ConnectionCount: types.Int64Value(connection.ConnectionCount),
-			Name:            types.StringValue(connection.Name),
-			Type:            types.StringValue(connection.Type),
-		}
-
-		applicationConnectionsValues = append(applicationConnectionsValues, ac)
+	tunnelObj := SubaccountResourceTunnelData{
+		State:                 types.StringValue(value.Tunnel.State),
+		ConnectedSince:        helpers.ConvertMillisToTimes(value.Tunnel.ConnectedSinceTimeStamp).WithTimezone,
+		Connections:           types.Int64Value(value.Tunnel.Connections),
+		User:                  types.StringValue(value.Tunnel.User),
+		SubaccountCertificate: certificate,
 	}
 
-	applicationConnections, diags := types.ListValueFrom(ctx, SubaccountApplicationConnectionsType, applicationConnectionsValues)
-	if diags.HasError() {
-		return SubaccountConfig{}, diags
-	}
-
-	serviceChannelsValues := []SubaccountServiceChannelsData{}
-	for _, channel := range value.Tunnel.ServiceChannels {
-		sc := SubaccountServiceChannelsData{
-			Type:    types.StringValue(channel.Type),
-			State:   types.StringValue(channel.State),
-			Details: types.StringValue(channel.Details),
-			Comment: types.StringValue(channel.Comment),
-		}
-
-		serviceChannelsValues = append(serviceChannelsValues, sc)
-	}
-
-	serviceChannels, diags := types.ListValueFrom(ctx, SubaccountServiceChannelsType, serviceChannelsValues)
-	if diags.HasError() {
-		return SubaccountConfig{}, diags
-	}
-
-	tunnelObj := SubaccountTunnelData{
-		State:                  types.StringValue(value.Tunnel.State),
-		ConnectedSince:         helpers.ConvertMillisToTimes(value.Tunnel.ConnectedSinceTimeStamp).WithTimezone,
-		Connections:            types.Int64Value(value.Tunnel.Connections),
-		User:                   types.StringValue(value.Tunnel.User),
-		SubaccountCertificate:  certificate,
-		ApplicationConnections: applicationConnections,
-		ServiceChannels:        serviceChannels,
-	}
-
-	tunnel, diags := types.ObjectValueFrom(ctx, SubaccountTunnelType, tunnelObj)
+	tunnel, diags := types.ObjectValueFrom(ctx, SubaccountResourceTunnelType, tunnelObj)
 	if diags.HasError() {
 		return SubaccountConfig{}, diags
 	}
@@ -314,6 +300,13 @@ func SubaccountResourceValueFrom(ctx context.Context, plan SubaccountConfig, val
 		isManaged = plan.IsManaged
 	}
 
+	// Derive connected from API state, but preserve the plan value on ConnectFailure so that
+	// the documented "will not reset connected" behaviour holds for both Read and Create/Update.
+	connected := types.BoolValue(value.Tunnel.State == "Connected")
+	if value.Tunnel.State == "ConnectFailure" && !plan.Connected.IsNull() && !plan.Connected.IsUnknown() {
+		connected = plan.Connected
+	}
+
 	model := &SubaccountConfig{
 		RegionHost:             types.StringValue(value.RegionHost),
 		Subaccount:             types.StringValue(value.Subaccount),
@@ -321,7 +314,7 @@ func SubaccountResourceValueFrom(ctx context.Context, plan SubaccountConfig, val
 		DisplayName:            types.StringValue(value.DisplayName),
 		Description:            types.StringValue(value.Description),
 		Tunnel:                 tunnel,
-		Connected:              types.BoolValue(value.Tunnel.State == "Connected"),
+		Connected:              connected,
 		IsManaged:              isManaged,
 		AutoCertificateRenewal: autoCertRenewal,
 	}
@@ -342,50 +335,15 @@ func SubaccountUsingAuthResourceValueFrom(ctx context.Context, plan SubaccountUs
 		return SubaccountUsingAuthConfig{}, diags
 	}
 
-	applicationConnectionsValues := []SubaccountApplicationConnectionsData{}
-	for _, connection := range value.Tunnel.ApplicationConnections {
-		ac := SubaccountApplicationConnectionsData{
-			ConnectionCount: types.Int64Value(connection.ConnectionCount),
-			Name:            types.StringValue(connection.Name),
-			Type:            types.StringValue(connection.Type),
-		}
-
-		applicationConnectionsValues = append(applicationConnectionsValues, ac)
+	tunnelObj := SubaccountResourceTunnelData{
+		State:                 types.StringValue(value.Tunnel.State),
+		ConnectedSince:        helpers.ConvertMillisToTimes(value.Tunnel.ConnectedSinceTimeStamp).WithTimezone,
+		Connections:           types.Int64Value(value.Tunnel.Connections),
+		User:                  types.StringValue(value.Tunnel.User),
+		SubaccountCertificate: certificate,
 	}
 
-	applicationConnections, diags := types.ListValueFrom(ctx, SubaccountApplicationConnectionsType, applicationConnectionsValues)
-	if diags.HasError() {
-		return SubaccountUsingAuthConfig{}, diags
-	}
-
-	serviceChannelsValues := []SubaccountServiceChannelsData{}
-	for _, channel := range value.Tunnel.ServiceChannels {
-		sc := SubaccountServiceChannelsData{
-			Type:    types.StringValue(channel.Type),
-			State:   types.StringValue(channel.State),
-			Details: types.StringValue(channel.Details),
-			Comment: types.StringValue(channel.Comment),
-		}
-
-		serviceChannelsValues = append(serviceChannelsValues, sc)
-	}
-
-	serviceChannels, diags := types.ListValueFrom(ctx, SubaccountServiceChannelsType, serviceChannelsValues)
-	if diags.HasError() {
-		return SubaccountUsingAuthConfig{}, diags
-	}
-
-	tunnelObj := SubaccountTunnelData{
-		State:                  types.StringValue(value.Tunnel.State),
-		ConnectedSince:         helpers.ConvertMillisToTimes(value.Tunnel.ConnectedSinceTimeStamp).WithTimezone,
-		Connections:            types.Int64Value(value.Tunnel.Connections),
-		User:                   types.StringValue(value.Tunnel.User),
-		SubaccountCertificate:  certificate,
-		ApplicationConnections: applicationConnections,
-		ServiceChannels:        serviceChannels,
-	}
-
-	tunnel, diags := types.ObjectValueFrom(ctx, SubaccountTunnelType, tunnelObj)
+	tunnel, diags := types.ObjectValueFrom(ctx, SubaccountResourceTunnelType, tunnelObj)
 	if diags.HasError() {
 		return SubaccountUsingAuthConfig{}, diags
 	}
@@ -404,6 +362,11 @@ func SubaccountUsingAuthResourceValueFrom(ctx context.Context, plan SubaccountUs
 		isManaged = plan.IsManaged
 	}
 
+	connected := types.BoolValue(value.Tunnel.State == "Connected")
+	if value.Tunnel.State == "ConnectFailure" && !plan.Connected.IsNull() && !plan.Connected.IsUnknown() {
+		connected = plan.Connected
+	}
+
 	model := &SubaccountUsingAuthConfig{
 		RegionHost:             types.StringValue(value.RegionHost),
 		Subaccount:             types.StringValue(value.Subaccount),
@@ -411,7 +374,7 @@ func SubaccountUsingAuthResourceValueFrom(ctx context.Context, plan SubaccountUs
 		DisplayName:            types.StringValue(value.DisplayName),
 		Description:            types.StringValue(value.Description),
 		Tunnel:                 tunnel,
-		Connected:              types.BoolValue(value.Tunnel.State == "Connected"),
+		Connected:              connected,
 		IsManaged:              isManaged,
 		AutoCertificateRenewal: autoCertRenewal,
 	}
