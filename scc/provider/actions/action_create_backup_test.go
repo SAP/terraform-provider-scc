@@ -107,8 +107,10 @@ func TestCreateBackupAction_Invoke_MissingPassword(t *testing.T) {
 
 	resp := newTestResp()
 
-	plan := testBackupPlan()
-	plan.Password = types.StringValue("")
+	plan := model.BackupActionConfig{
+		Password:   types.StringValue(""),
+		PasswordWO: types.StringValue(""),
+	}
 
 	a.InvokeWithPlan(context.Background(), plan, resp)
 
@@ -203,7 +205,8 @@ func TestCreateBackupAction_Invoke_InvalidContentType(t *testing.T) {
 
 func testBackupPlan() model.BackupActionConfig {
 	return model.BackupActionConfig{
-		Password: types.StringValue("test-password"),
+		Password:   types.StringValue("test-password"),
+		PasswordWO: types.StringNull(),
 	}
 }
 
@@ -218,6 +221,7 @@ func TestCreateBackupAction_Schema(t *testing.T) {
 
 	assert.False(t, resp.Diagnostics.HasError())
 	assert.Contains(t, resp.Schema.Attributes, "password")
+	assert.Contains(t, resp.Schema.Attributes, "password_wo")
 }
 
 // ---------------------------------------------------------------------------
@@ -255,8 +259,14 @@ func TestCreateBackupAction_Invoke_TopLevel(t *testing.T) {
 	a.Schema(context.Background(), action.SchemaRequest{}, schemaResp)
 
 	raw := tftypes.NewValue(
-		tftypes.Object{AttributeTypes: map[string]tftypes.Type{"password": tftypes.String}},
-		map[string]tftypes.Value{"password": tftypes.NewValue(tftypes.String, "mypassword")},
+		tftypes.Object{AttributeTypes: map[string]tftypes.Type{
+			"password":    tftypes.String,
+			"password_wo": tftypes.String,
+		}},
+		map[string]tftypes.Value{
+			"password":    tftypes.NewValue(tftypes.String, "mypassword"),
+			"password_wo": tftypes.NewValue(tftypes.String, nil),
+		},
 	)
 	req := action.InvokeRequest{Config: tfsdk.Config{Schema: schemaResp.Schema, Raw: raw}}
 	resp := newTestResp()
@@ -283,4 +293,43 @@ func TestCreateBackupAction_Invoke_ConfigGetError(t *testing.T) {
 	a.Invoke(context.Background(), req, resp)
 
 	assert.True(t, resp.Diagnostics.HasError())
+}
+
+func TestCreateBackupAction_Invoke_PasswordWO_Used(t *testing.T) {
+	a := &actions.CreateBackupAction{
+		Client: &api.RestApiClient{},
+	}
+
+	oldSend := helpers.SendRequestFunc
+	defer func() { helpers.SendRequestFunc = oldSend }()
+
+	helpers.SendRequestFunc = func(
+		client *api.RestApiClient,
+		body map[string]any,
+		endpoint string,
+		actionType string,
+	) (*http.Response, diag.Diagnostics) {
+		return &http.Response{
+			StatusCode: 200,
+			Header: http.Header{
+				"Content-Type": []string{"application/zip"},
+			},
+			Body: io.NopCloser(strings.NewReader("PK\x03\x04zip-content")),
+		}, nil
+	}
+
+	resp := newTestResp()
+
+	plan := model.BackupActionConfig{
+		Password:   types.StringNull(),
+		PasswordWO: types.StringValue("wo-password"),
+	}
+	a.InvokeWithPlan(context.Background(), plan, resp)
+
+	assert.False(t, resp.Diagnostics.HasError())
+
+	files, _ := filepath.Glob("scc_backup_*.zip")
+	for _, f := range files {
+		_ = os.Remove(f)
+	}
 }
