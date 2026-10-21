@@ -12,8 +12,11 @@ import (
 	"github.com/SAP/terraform-provider-scc/internal/api/endpoints"
 	"github.com/SAP/terraform-provider-scc/scc/provider/helpers"
 	"github.com/SAP/terraform-provider-scc/scc/provider/model"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/action"
 	"github.com/hashicorp/terraform-plugin-framework/action/schema"
+	"github.com/hashicorp/terraform-plugin-framework/path"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 )
 
 type CreateBackupAction struct {
@@ -35,8 +38,27 @@ func (a *CreateBackupAction) Schema(ctx context.Context, req action.SchemaReques
 		MarkdownDescription: "Creates a backup of the cloud connector instance.",
 		Attributes: map[string]schema.Attribute{
 			"password": schema.StringAttribute{
-				MarkdownDescription: "The password used to protect the backup file. Action schema attributes cannot be marked as sensitive, so this value may be visible in Terraform configuration and logs. Use a strong password and handle it securely.",
-				Required:            true,
+				MarkdownDescription: "The password used to protect the backup file. " +
+					"For backward compatibility, you may continue to use this attribute. " +
+					"Going forward, prefer `password_wo`, which is write-only and will not appear in plan output. " +
+					"Exactly one of `password` or `password_wo` must be provided.",
+				Optional: true,
+				Validators: []validator.String{
+					stringvalidator.AtLeastOneOf(path.MatchRoot("password_wo")),
+					stringvalidator.ConflictsWith(path.MatchRoot("password_wo")),
+				},
+			},
+			"password_wo": schema.StringAttribute{
+				MarkdownDescription: "The password used to protect the backup file. " +
+					"This is the preferred write-only form: the value will not appear in plan output or state files. " +
+					"Source it from a secure secret store. " +
+					"Exactly one of `password` or `password_wo` must be provided.",
+				Optional:  true,
+				WriteOnly: true,
+				Validators: []validator.String{
+					stringvalidator.AtLeastOneOf(path.MatchRoot("password")),
+					stringvalidator.ConflictsWith(path.MatchRoot("password")),
+				},
 			},
 		},
 	}
@@ -62,17 +84,21 @@ func (a *CreateBackupAction) Configure(ctx context.Context, req action.Configure
 }
 
 func (a *CreateBackupAction) InvokeWithPlan(ctx context.Context, plan model.BackupActionConfig, resp *action.InvokeResponse) {
-	if plan.Password.ValueString() == "" {
+	password := plan.Password.ValueString()
+	if password == "" {
+		password = plan.PasswordWO.ValueString()
+	}
+	if password == "" {
 		resp.Diagnostics.AddError(
 			"Missing Password",
-			"A non-empty password is required to create a backup.",
+			"A non-empty password is required to create a backup. Provide either `password` or `password_wo`.",
 		)
 		return
 	}
 
 	endpoint := endpoints.GetBackupEndpoint()
 	planBody := map[string]any{
-		"password": plan.Password.ValueString(),
+		"password": password,
 	}
 
 	helpers.SafeProgress(resp, "Initiating backup creation...")
@@ -127,7 +153,7 @@ func (a *CreateBackupAction) InvokeWithPlan(ctx context.Context, plan model.Back
 
 	filePath := filepath.Join(".", fileName)
 
-	err = os.WriteFile(filePath, backupBytes, 0644)
+	err = os.WriteFile(filePath, backupBytes, 0600)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Failed to Write Backup to File",

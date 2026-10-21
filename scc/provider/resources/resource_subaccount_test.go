@@ -2,6 +2,9 @@ package resources_test
 
 import (
 	"fmt"
+	"io"
+	"net/http"
+	"net/http/httptest"
 	"regexp"
 	"testing"
 
@@ -279,6 +282,41 @@ func TestResourceSubaccount(t *testing.T) {
 					ExpectError: regexp.MustCompile(
 						`Missing required credentials`,
 					),
+				},
+			},
+		})
+	})
+
+	t.Run("error path - invalid import id", func(t *testing.T) {
+		srv := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+			_, _ = io.WriteString(w, `{"version":"2.16.0"}`)
+		}))
+		defer srv.Close()
+		providerConfig := fmt.Sprintf(`
+		provider "scc" {
+		  instance_url        = "%s"
+		  username            = "testuser"
+		  password            = "testpassword"
+		  skip_ssl_validation = true
+		}
+		resource "scc_subaccount" "scc_sa" {
+		  region_host    = "cf.eu12.hana.ondemand.com"
+		  subaccount     = "9f7390c8-f201-4b2d-b751-04c0a63c2671"
+		  cloud_user     = "testuser"
+		  cloud_password = "testpassword"
+		  description    = "test"
+		}`, srv.URL)
+		resource.Test(t, resource.TestCase{
+			IsUnitTest:               true,
+			ProtoV6ProviderFactories: tfutils.GetTestProviders(srv.Client()),
+			Steps: []resource.TestStep{
+				{
+					ResourceName:  "scc_subaccount.scc_sa",
+					ImportState:   true,
+					ImportStateId: "cf.eu12.hana.ondemand.com,not-a-uuid",
+					Config:        providerConfig,
+					ExpectError:   regexp.MustCompile(`(?is)subaccount must be a valid UUID`),
 				},
 			},
 		})

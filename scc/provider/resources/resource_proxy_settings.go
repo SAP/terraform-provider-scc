@@ -178,7 +178,11 @@ func (r *ProxySettingsResource) createOrUpdate(ctx context.Context, requestPlan 
 		planBody["user"] = plan.User.ValueString()
 	}
 
-	if !plan.Password.IsNull() && !plan.Password.IsUnknown() {
+	// Never send the server's masked sentinel back as a password.
+	// The SCC API returns "***" when a password is set; sending that literal
+	// string on PUT would silently replace the real password with "***".
+	const maskedSentinel = "***"
+	if !plan.Password.IsNull() && !plan.Password.IsUnknown() && plan.Password.ValueString() != maskedSentinel {
 		planBody["password"] = plan.Password.ValueString()
 	}
 

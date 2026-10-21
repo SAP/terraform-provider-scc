@@ -3,16 +3,20 @@ package listresources
 import (
 	"context"
 	"fmt"
+	"regexp"
 
 	"github.com/SAP/terraform-provider-scc/internal/api"
 	apiobjects "github.com/SAP/terraform-provider-scc/internal/api/apiObjects"
 	"github.com/SAP/terraform-provider-scc/internal/api/endpoints"
 	"github.com/SAP/terraform-provider-scc/scc/provider/helpers"
 	"github.com/SAP/terraform-provider-scc/scc/provider/model"
+	"github.com/SAP/terraform-provider-scc/validation/uuidvalidator"
+	"github.com/hashicorp/terraform-plugin-framework-validators/stringvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/list"
 	"github.com/hashicorp/terraform-plugin-framework/list/schema"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -70,14 +74,32 @@ This list resource retrieves system mappings resource for a specific region host
 			"subaccount": schema.StringAttribute{
 				MarkdownDescription: "The GUID of the SAP subaccount.",
 				Required:            true,
+				Validators: []validator.String{
+					uuidvalidator.ValidUUID(),
+				},
 			},
 			"virtual_host": schema.StringAttribute{
 				MarkdownDescription: "The virtual host name used in the system mapping.",
 				Required:            true,
+				Validators: []validator.String{
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(`^[a-z0-9.-]+$`),
+						"must contain only lowercase letters, numbers, dots, and dashes",
+					),
+				},
 			},
 			"virtual_port": schema.StringAttribute{
 				MarkdownDescription: "The virtual port used in the system mapping.",
 				Required:            true,
+				Validators: []validator.String{
+					// Validate port format without requiring a "protocol" context.
+					// The protocol-aware PortValidator reads protocol from config, which
+					// list resource configs do not have.
+					stringvalidator.RegexMatches(
+						regexp.MustCompile(`^\d{1,5}$|^sapms[A-Z0-9]{3}$|^sapgw\d{2}s?$`),
+						"virtual_port must be a numeric port (1-65535), sapmsSID, sapgwXX, or sapgwXXs",
+					),
+				},
 			},
 		},
 	}

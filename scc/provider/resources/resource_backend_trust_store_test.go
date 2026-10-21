@@ -388,8 +388,9 @@ func jsonHandler(t *testing.T, v any) http.Handler {
 	})
 }
 
-// buildMatchingTrustedBackend creates a TrustedBackends whose fields exactly
-// match the certificate encoded in certPEM, so MatchesBackendCertificate returns true.
+// buildMatchingTrustedBackend creates a TrustedBackends entry with a ValidTo
+// that matches the certificate, so FindUploadedBackendCertificate can pre-filter
+// by timestamp and then confirm the match via SHA-256 fingerprint.
 func buildMatchingTrustedBackend(t *testing.T, certPEM string) apiobjects.TrustedBackends {
 	t.Helper()
 	parsed := parsePEMCert(t, certPEM)

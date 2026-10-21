@@ -30,6 +30,15 @@ const (
 	actionUpdate = "Update"
 )
 
+// importVirtualHostRegexp and importVirtualPortRegexp validate identity fields
+// in ImportState without a "protocol" attribute in scope.
+// systemMapping.ValidatePort() reads protocol from config, which does not
+// exist at import time, so a standalone regex is used instead.
+var (
+	importVirtualHostRegexp = regexp.MustCompile(`^[a-z0-9.-]+$`)
+	importVirtualPortRegexp = regexp.MustCompile(`^\d{1,5}$|^sapms[A-Z0-9]{3}$|^sapgw\d{2}s?$`)
+)
+
 var _ resource.Resource = &SystemMappingResource{}
 
 func NewSystemMappingResource() resource.Resource {
@@ -620,6 +629,27 @@ func (rs *SystemMappingResource) ImportState(ctx context.Context, req resource.I
 			return
 		}
 
+		if !uuidvalidator.UuidRegexp.MatchString(idParts[1]) {
+			resp.Diagnostics.AddAttributeError(path.Root("subaccount"),
+				"Invalid Import Identifier",
+				fmt.Sprintf("subaccount must be a valid UUID. Got: %q", idParts[1]))
+			return
+		}
+
+		if !importVirtualHostRegexp.MatchString(idParts[2]) {
+			resp.Diagnostics.AddAttributeError(path.Root("virtual_host"),
+				"Invalid Import Identifier",
+				fmt.Sprintf("virtual_host must contain only lowercase letters, numbers, dots, and dashes. Got: %q", idParts[2]))
+			return
+		}
+
+		if !importVirtualPortRegexp.MatchString(idParts[3]) {
+			resp.Diagnostics.AddAttributeError(path.Root("virtual_port"),
+				"Invalid Import Identifier",
+				fmt.Sprintf("virtual_port must be a numeric port (1-65535), sapmsSID, sapgwXX, or sapgwXXs. Got: %q", idParts[3]))
+			return
+		}
+
 		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("region_host"), idParts[0])...)
 		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("subaccount"), idParts[1])...)
 		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("virtual_host"), idParts[2])...)
@@ -632,6 +662,27 @@ func (rs *SystemMappingResource) ImportState(ctx context.Context, req resource.I
 	diags := resp.Identity.Get(ctx, &identity)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if !uuidvalidator.UuidRegexp.MatchString(identity.Subaccount.ValueString()) {
+		resp.Diagnostics.AddAttributeError(path.Root("subaccount"),
+			"Invalid Import Identifier",
+			fmt.Sprintf("subaccount must be a valid UUID. Got: %q", identity.Subaccount.ValueString()))
+		return
+	}
+
+	if !importVirtualHostRegexp.MatchString(identity.VirtualHost.ValueString()) {
+		resp.Diagnostics.AddAttributeError(path.Root("virtual_host"),
+			"Invalid Import Identifier",
+			fmt.Sprintf("virtual_host must contain only lowercase letters, numbers, dots, and dashes. Got: %q", identity.VirtualHost.ValueString()))
+		return
+	}
+
+	if !importVirtualPortRegexp.MatchString(identity.VirtualPort.ValueString()) {
+		resp.Diagnostics.AddAttributeError(path.Root("virtual_port"),
+			"Invalid Import Identifier",
+			fmt.Sprintf("virtual_port must be a numeric port (1-65535), sapmsSID, sapgwXX, or sapgwXXs. Got: %q", identity.VirtualPort.ValueString()))
 		return
 	}
 

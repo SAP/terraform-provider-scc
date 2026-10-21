@@ -3,6 +3,7 @@ package helpers
 import (
 	"bytes"
 	"context"
+	"crypto/sha256"
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/pem"
@@ -10,6 +11,7 @@ import (
 	"io"
 	"mime/multipart"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/SAP/terraform-provider-scc/internal/api"
@@ -366,7 +368,11 @@ func getCertificateBinary(client *api.RestApiClient, endpoint string) ([]byte, d
 		}
 	}()
 
-	body, err := io.ReadAll(response.Body)
+	// Cap the read to 8 MiB — real DER certificates are at most a few
+	// kilobytes; anything larger is unexpected and could exhaust provider memory.
+	const maxCertBytes = 8 << 20
+	limited := io.LimitReader(response.Body, maxCertBytes)
+	body, err := io.ReadAll(limited)
 	if err != nil {
 		diags.AddError("Failed to Read Response Body", fmt.Sprintf("failed to read response body: %v", err))
 		return nil, diags
@@ -568,54 +574,38 @@ func shouldUpdateSelfSignedCertificate(planKeySize, stateKeySize types.Int64, pl
 		!planSubjectAltNames.Equal(stateSubjectAltNames)
 }
 
-func MatchesBackendCertificate(
-	backend apiobjects.TrustedBackends,
-	cert *x509.Certificate,
-) bool {
+// FindUploadedBackendCertificate locates the trust-store entry that corresponds to
+// uploadedCert by comparing SHA-256 fingerprints of the raw DER bytes returned by
+// the server. This is immune to server-side SubjectDN formatting differences that
+// previously caused hard failures when the DN string could not be parsed back into
+// the expected field structure.
+//
+// To minimise API round-trips, only entries whose ValidTo timestamp matches the
+// certificate's NotAfter (in milliseconds) are fetched. In practice this filter
+// narrows the candidates to exactly one entry.
+func FindUploadedBackendCertificate(
+	client *api.RestApiClient,
+	backends []apiobjects.TrustedBackends,
+	uploadedCert *x509.Certificate,
+	certBaseEndpoint string,
+) (apiobjects.TrustedBackends, bool, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	target := sha256.Sum256(uploadedCert.Raw)
+	validTo := uploadedCert.NotAfter.UnixMilli()
 
-	apiDN := ParseSubjectDNFunc(backend.SubjectDN)
-
-	if apiDN.CommonName.ValueString() != cert.Subject.CommonName {
-		return false
-	}
-
-	if len(cert.Subject.Organization) > 0 &&
-		apiDN.Organization.ValueString() != cert.Subject.Organization[0] {
-		return false
-	}
-
-	if len(cert.Subject.OrganizationalUnit) > 0 &&
-		apiDN.OrganizationalUnit.ValueString() != cert.Subject.OrganizationalUnit[0] {
-		return false
-	}
-
-	if len(cert.Subject.Locality) > 0 &&
-		apiDN.Locality.ValueString() != cert.Subject.Locality[0] {
-		return false
-	}
-
-	if len(cert.Subject.Province) > 0 &&
-		apiDN.State.ValueString() != cert.Subject.Province[0] {
-		return false
-	}
-
-	if len(cert.Subject.Country) > 0 &&
-		apiDN.Country.ValueString() != cert.Subject.Country[0] {
-		return false
-	}
-
-	if !apiDN.Email.IsNull() {
-		if len(cert.EmailAddresses) == 0 {
-			return false
+	for _, b := range backends {
+		if b.ValidTo != validTo {
+			continue
 		}
-		if apiDN.Email.ValueString() != cert.EmailAddresses[0] {
-			return false
+		endpoint := certBaseEndpoint + "/" + url.PathEscape(b.Alias)
+		derBytes, d := GetCertificateBinaryFunc(client, endpoint)
+		if d.HasError() {
+			diags.Append(d...)
+			continue
+		}
+		if sha256.Sum256(derBytes) == target {
+			return b, true, diags
 		}
 	}
-
-	if backend.ValidTo != cert.NotAfter.UnixMilli() {
-		return false
-	}
-
-	return true
+	return apiobjects.TrustedBackends{}, false, diags
 }

@@ -399,13 +399,22 @@ func (r *SystemMappingResourceResource) Delete(ctx context.Context, req resource
 
 func (rs *SystemMappingResourceResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	if req.ID != "" {
-		idParts := strings.Split(req.ID, ",")
+		// SplitN with n=5 so that url_path values containing commas are preserved
+		// as a single element rather than being split into extra parts.
+		idParts := strings.SplitN(req.ID, ",", 5)
 
 		if len(idParts) != 5 || idParts[0] == "" || idParts[1] == "" || idParts[2] == "" || idParts[3] == "" || idParts[4] == "" {
 			resp.Diagnostics.AddError(
 				"Unexpected Import Identifier",
 				fmt.Sprintf("Expected import identifier with format: region_host, subaccount, virtual_host, virtual_port, url_path. Got: %q", req.ID),
 			)
+			return
+		}
+
+		if !uuidvalidator.UuidRegexp.MatchString(idParts[1]) {
+			resp.Diagnostics.AddAttributeError(path.Root("subaccount"),
+				"Invalid Import Identifier",
+				fmt.Sprintf("subaccount must be a valid UUID. Got: %q", idParts[1]))
 			return
 		}
 
@@ -423,6 +432,13 @@ func (rs *SystemMappingResourceResource) ImportState(ctx context.Context, req re
 	diags := resp.Identity.Get(ctx, &identity)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if !uuidvalidator.UuidRegexp.MatchString(identity.Subaccount.ValueString()) {
+		resp.Diagnostics.AddAttributeError(path.Root("subaccount"),
+			"Invalid Import Identifier",
+			fmt.Sprintf("subaccount must be a valid UUID. Got: %q", identity.Subaccount.ValueString()))
 		return
 	}
 

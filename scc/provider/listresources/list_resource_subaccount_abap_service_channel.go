@@ -9,10 +9,12 @@ import (
 	"github.com/SAP/terraform-provider-scc/internal/api/endpoints"
 	"github.com/SAP/terraform-provider-scc/scc/provider/helpers"
 	"github.com/SAP/terraform-provider-scc/scc/provider/model"
+	"github.com/SAP/terraform-provider-scc/validation/uuidvalidator"
 	"github.com/hashicorp/terraform-plugin-framework/list"
 	"github.com/hashicorp/terraform-plugin-framework/list/schema"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
@@ -70,6 +72,9 @@ This list resource retrieves Subaccount ABAP service channel for a specific regi
 			"subaccount": schema.StringAttribute{
 				MarkdownDescription: "The GUID of the SAP subaccount.",
 				Required:            true,
+				Validators: []validator.String{
+					uuidvalidator.ValidUUID(),
+				},
 			},
 			"snc_encrypted": schema.BoolAttribute{
 				MarkdownDescription: "Boolean flag indicating whether the channels are encrypted using SNC (Secure Network Connection).",
