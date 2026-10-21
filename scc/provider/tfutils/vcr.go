@@ -79,15 +79,20 @@ func SetupVCR(t *testing.T, cassetteName string) (*recorder.Recorder, User) {
 
 	user := redactedTestUser
 
+	// InsecureSkipVerify is never safe by default.  Opt in explicitly by
+	// setting SCC_TEST_SKIP_TLS_VERIFY=true, and only when actively recording.
+	skipTLS, _ := strconv.ParseBool(os.Getenv("SCC_TEST_SKIP_TLS_VERIFY"))
+	realTransport := &http.Transport{}
+	if skipTLS {
+		realTransport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true} //nolint:gosec // explicit opt-in
+		t.Log("WARNING: SCC_TEST_SKIP_TLS_VERIFY=true — TLS certificate validation is disabled. Only use this on a trusted network.")
+	}
+
 	rec, err := recorder.NewWithOptions(&recorder.Options{
 		CassetteName:       cassetteName,
 		Mode:               mode,
 		SkipRequestLatency: true,
-		RealTransport: &http.Transport{
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: true,
-			},
-		},
+		RealTransport:      realTransport,
 	})
 
 	if rec.IsRecording() {

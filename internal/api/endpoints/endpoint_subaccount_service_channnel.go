@@ -1,9 +1,15 @@
 package endpoints
 
-import "fmt"
+import (
+	"fmt"
+	"net/url"
+)
 
 func GetSubaccountServiceChannelBaseEndpoint(regionHost, subaccount, serviceChannelType string) string {
-	return fmt.Sprintf("/api/v1/configuration/subaccounts/%s/%s/channels/%s", regionHost, subaccount, serviceChannelType)
+	return "/api/v1/configuration/subaccounts/" +
+		url.PathEscape(regionHost) + "/" +
+		url.PathEscape(subaccount) + "/channels/" +
+		url.PathEscape(serviceChannelType)
 }
 
 func GetSubaccountServiceChannelEndpoint(regionHost, subaccount, serviceChannelType string, id int64) string {

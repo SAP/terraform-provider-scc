@@ -2,6 +2,7 @@ package helpers_test
 
 import (
 	"context"
+	"crypto/x509"
 	"encoding/base64"
 	"io"
 	"net/http"
@@ -751,4 +752,117 @@ func TestBuildCertificateModelWithSAN_NoSAN(t *testing.T) {
 
 	assert.False(t, diags.HasError())
 	assert.True(t, model.SubjectAltNames.IsNull())
+}
+
+// Tests for FindUploadedBackendCertificate function
+
+func TestFindUploadedBackendCertificate_MatchFound(t *testing.T) {
+	derBytes := tfutils.GenerateValidDERCert(t)
+	cert, err := x509.ParseCertificate(derBytes)
+	require.NoError(t, err)
+
+	entry := apiobjects.TrustedBackends{Alias: "my-alias", ValidTo: cert.NotAfter.UnixMilli()}
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write(derBytes)
+	}))
+	defer srv.Close()
+
+	found, ok, diags := helpers.FindUploadedBackendCertificate(tfutils.NewTestClient(t, srv), []apiobjects.TrustedBackends{entry}, cert, "")
+	assert.False(t, diags.HasError())
+	assert.True(t, ok)
+	assert.Equal(t, "my-alias", found.Alias)
+}
+
+// TestFindUploadedBackendCertificate_MalformedSubjectDN is the key regression test for
+// the row-45 security finding: an entry whose SubjectDN contains embedded commas (which
+// break the old parseSubjectDN splitter) must still be matched via SHA-256 fingerprint.
+func TestFindUploadedBackendCertificate_MalformedSubjectDN(t *testing.T) {
+	derBytes := tfutils.GenerateValidDERCert(t)
+	cert, err := x509.ParseCertificate(derBytes)
+	require.NoError(t, err)
+
+	entry := apiobjects.TrustedBackends{
+		Alias:     "tricky-alias",
+		SubjectDN: "CN=Corp, Ltd,O=Acme Inc.", // embedded comma breaks the old comma-split parser
+		ValidTo:   cert.NotAfter.UnixMilli(),
+	}
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write(derBytes)
+	}))
+	defer srv.Close()
+
+	found, ok, diags := helpers.FindUploadedBackendCertificate(tfutils.NewTestClient(t, srv), []apiobjects.TrustedBackends{entry}, cert, "")
+	assert.False(t, diags.HasError())
+	assert.True(t, ok)
+	assert.Equal(t, "tricky-alias", found.Alias)
+}
+
+func TestFindUploadedBackendCertificate_FingerprintMismatch(t *testing.T) {
+	derA := tfutils.GenerateValidDERCert(t)
+	derB := tfutils.GenerateValidDERCert(t)
+
+	certA, err := x509.ParseCertificate(derA)
+	require.NoError(t, err)
+
+	entry := apiobjects.TrustedBackends{Alias: "alias", ValidTo: certA.NotAfter.UnixMilli()}
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write(derB) // server returns a different cert's DER
+	}))
+	defer srv.Close()
+
+	_, ok, diags := helpers.FindUploadedBackendCertificate(tfutils.NewTestClient(t, srv), []apiobjects.TrustedBackends{entry}, certA, "")
+	assert.False(t, diags.HasError())
+	assert.False(t, ok)
+}
+
+func TestFindUploadedBackendCertificate_ValidToMismatch(t *testing.T) {
+	// An entry whose ValidTo does not match is skipped without any DER fetch.
+	derBytes := tfutils.GenerateValidDERCert(t)
+	cert, err := x509.ParseCertificate(derBytes)
+	require.NoError(t, err)
+
+	fetchCount := 0
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fetchCount++
+		_, _ = w.Write(derBytes)
+	}))
+	defer srv.Close()
+
+	entry := apiobjects.TrustedBackends{Alias: "alias", ValidTo: cert.NotAfter.UnixMilli() + 1000}
+
+	_, ok, diags := helpers.FindUploadedBackendCertificate(tfutils.NewTestClient(t, srv), []apiobjects.TrustedBackends{entry}, cert, "")
+	assert.False(t, diags.HasError())
+	assert.False(t, ok)
+	assert.Equal(t, 0, fetchCount, "DER fetch must not occur for a ValidTo-mismatched entry")
+}
+
+func TestFindUploadedBackendCertificate_DERFetchError(t *testing.T) {
+	// A DER fetch failure accumulates an error and the function returns not-found.
+	derBytes := tfutils.GenerateValidDERCert(t)
+	cert, err := x509.ParseCertificate(derBytes)
+	require.NoError(t, err)
+
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	}))
+	defer srv.Close()
+
+	entry := apiobjects.TrustedBackends{Alias: "alias", ValidTo: cert.NotAfter.UnixMilli()}
+
+	_, ok, diags := helpers.FindUploadedBackendCertificate(tfutils.NewTestClient(t, srv), []apiobjects.TrustedBackends{entry}, cert, "")
+	assert.True(t, diags.HasError())
+	assert.False(t, ok)
+}
+
+func TestFindUploadedBackendCertificate_EmptyBackends(t *testing.T) {
+	derBytes := tfutils.GenerateValidDERCert(t)
+	cert, err := x509.ParseCertificate(derBytes)
+	require.NoError(t, err)
+
+	_, ok, diags := helpers.FindUploadedBackendCertificate(&api.RestApiClient{}, []apiobjects.TrustedBackends{}, cert, "")
+	assert.False(t, diags.HasError())
+	assert.False(t, ok)
 }

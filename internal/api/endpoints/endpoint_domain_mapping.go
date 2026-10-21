@@ -1,11 +1,11 @@
 package endpoints
 
-import "fmt"
+import "net/url"
 
 func GetDomainMappingEndpoint(regionHost, subaccount, internalDomain string) string {
-	return fmt.Sprintf(GetDomainMappingBaseEndpoint(regionHost, subaccount)+"/%s", internalDomain)
+	return GetDomainMappingBaseEndpoint(regionHost, subaccount) + "/" + url.PathEscape(internalDomain)
 }
 
 func GetDomainMappingBaseEndpoint(regionHost, subaccount string) string {
-	return fmt.Sprintf(GetSubaccountBaseEndpoint()+"/%s/%s/domainMappings", regionHost, subaccount)
+	return GetSubaccountBaseEndpoint() + "/" + url.PathEscape(regionHost) + "/" + url.PathEscape(subaccount) + "/domainMappings"
 }

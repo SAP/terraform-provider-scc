@@ -5,6 +5,7 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
+	"net/url"
 	"strings"
 
 	"github.com/SAP/terraform-provider-scc/internal/api"
@@ -287,7 +288,7 @@ func (r *BackendTrustStoreResource) Delete(ctx context.Context, req resource.Del
 		return
 	}
 
-	endpoint := endpoints.GetBackendTrustStoreCertificateEndpoint() + "/" + state.Alias.ValueString()
+	endpoint := endpoints.GetBackendTrustStoreCertificateEndpoint() + "/" + url.PathEscape(state.Alias.ValueString())
 
 	diags = helpers.RequestAndUnmarshal(
 		r.Client,
@@ -345,17 +346,19 @@ var UploadBackendCertificateFunc = func(r *BackendTrustStoreResource, ctx contex
 		return nil, diags
 	}
 
-	for _, trustedBackend := range trustStore.TrustedBackends {
-		if !helpers.MatchesBackendCertificate(trustedBackend, uploadedCert) {
-			continue
-		}
+	certBaseEndpoint := endpoints.GetBackendTrustStoreCertificateEndpoint()
+	trustedBackend, found, d := helpers.FindUploadedBackendCertificate(r.Client, trustStore.TrustedBackends, uploadedCert, certBaseEndpoint)
+	diags.Append(d...)
+	if diags.HasError() {
+		return nil, diags
+	}
 
+	if found {
 		resourceModel, d := r.buildBackendTrustStoreModel(trustedBackend)
 		diags.Append(d...)
 		if diags.HasError() {
 			return nil, diags
 		}
-
 		return &resourceModel, diags
 	}
 
@@ -396,7 +399,7 @@ func (rs *BackendTrustStoreResource) ImportState(ctx context.Context, req resour
 
 func (r *BackendTrustStoreResource) buildBackendTrustStoreModel(trustedBackend apiobjects.TrustedBackends) (model.BackendTrustStoreResourceConfig, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	certEndpoint := endpoints.GetBackendTrustStoreCertificateEndpoint() + "/" + trustedBackend.Alias
+	certEndpoint := endpoints.GetBackendTrustStoreCertificateEndpoint() + "/" + url.PathEscape(trustedBackend.Alias)
 
 	certBytes, d := helpers.GetCertificateBinaryFunc(r.Client, certEndpoint)
 	diags.Append(d...)

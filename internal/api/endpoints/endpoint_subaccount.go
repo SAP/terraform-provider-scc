@@ -1,9 +1,9 @@
 package endpoints
 
-import "fmt"
+import "net/url"
 
 func GetSubaccountEndpoint(regionHost, subaccount string) string {
-	return fmt.Sprintf(GetSubaccountBaseEndpoint()+"/%s/%s", regionHost, subaccount)
+	return GetSubaccountBaseEndpoint() + "/" + url.PathEscape(regionHost) + "/" + url.PathEscape(subaccount)
 }
 
 func GetSubaccountBaseEndpoint() string {

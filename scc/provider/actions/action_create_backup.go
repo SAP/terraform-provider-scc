@@ -35,8 +35,9 @@ func (a *CreateBackupAction) Schema(ctx context.Context, req action.SchemaReques
 		MarkdownDescription: "Creates a backup of the cloud connector instance.",
 		Attributes: map[string]schema.Attribute{
 			"password": schema.StringAttribute{
-				MarkdownDescription: "The password used to protect the backup file. Action schema attributes cannot be marked as sensitive, so this value may be visible in Terraform configuration and logs. Use a strong password and handle it securely.",
+				MarkdownDescription: "The password used to protect the backup file. The value is write-only and will not appear in plan output or state files. Source it from a secure secret store.",
 				Required:            true,
+				WriteOnly:           true,
 			},
 		},
 	}
@@ -127,7 +128,7 @@ func (a *CreateBackupAction) InvokeWithPlan(ctx context.Context, plan model.Back
 
 	filePath := filepath.Join(".", fileName)
 
-	err = os.WriteFile(filePath, backupBytes, 0644)
+	err = os.WriteFile(filePath, backupBytes, 0600)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Failed to Write Backup to File",

@@ -36,10 +36,10 @@ func TestRestApiClient_BasicAuth(t *testing.T) {
 		_, _ = w.Write([]byte(`{"message": "success"}`))
 	})
 
-	server := httptest.NewServer(handler)
+	server := httptest.NewTLSServer(handler)
 	defer server.Close()
 
-	client, diags := createBasicAuthClient(server.URL)
+	client, diags := createBasicAuthClient(server.URL, server.Client())
 	if diags.HasError() {
 		t.Fatalf("failed to create basic auth client: %v", diags)
 	}
@@ -273,12 +273,12 @@ func TestValidateResponse_ErrorWithInvalidJSON(t *testing.T) {
 		t.Errorf("expected summary %q, got %q", expectedSummary, gotSummary)
 	}
 
-	if !strings.Contains(diags[0].Detail(), "Raw response: <<<garbage>>>") {
+	if !strings.Contains(diags[0].Detail(), "<<<garbage>>>") {
 		t.Errorf("expected raw response detail, got %q", diags[0].Detail())
 	}
 }
 
-func createBasicAuthClient(serverURL string) (*RestApiClient, diag.Diagnostics) {
+func createBasicAuthClient(serverURL string, httpClient *http.Client) (*RestApiClient, diag.Diagnostics) {
 	var diags diag.Diagnostics
 	baseURL, err := url.Parse(serverURL)
 	if err != nil {
@@ -286,7 +286,7 @@ func createBasicAuthClient(serverURL string) (*RestApiClient, diag.Diagnostics) 
 		return nil, diags
 	}
 
-	return NewRestApiClient(nil, baseURL, "testuser", "testpassword", nil, nil, nil, false)
+	return NewRestApiClient(httpClient, baseURL, "testuser", "testpassword", nil, nil, nil, false)
 }
 
 func createCertAuthClient(serverURL string, serverCACert, clientCert, clientKey []byte) (*RestApiClient, diag.Diagnostics) {
@@ -308,10 +308,10 @@ func TestRestApiClient_DoRequest_BinaryResponse(t *testing.T) {
 		_, _ = w.Write([]byte{0x01, 0x02, 0x03})
 	})
 
-	server := httptest.NewServer(handler)
+	server := httptest.NewTLSServer(handler)
 	defer server.Close()
 
-	client, diags := createBasicAuthClient(server.URL)
+	client, diags := createBasicAuthClient(server.URL, server.Client())
 	require.False(t, diags.HasError())
 
 	resp, diags := client.DoRequest(http.MethodGet, "/cert", nil, "application/pkix-cert", "")
@@ -520,13 +520,13 @@ func TestDoRequest_BaseQueryPreserved(t *testing.T) {
 func TestRestApiClient_PostRequest(t *testing.T) {
 	var receivedMethod string
 
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		receivedMethod = r.Method
 		w.WriteHeader(http.StatusOK)
 	}))
 	defer server.Close()
 
-	client, diags := createBasicAuthClient(server.URL)
+	client, diags := createBasicAuthClient(server.URL, server.Client())
 	require.False(t, diags.HasError())
 
 	resp, diags := client.PostRequest("/resource", []byte(`{"key":"value"}`))
@@ -541,13 +541,13 @@ func TestRestApiClient_PostRequest(t *testing.T) {
 func TestRestApiClient_PutRequest(t *testing.T) {
 	var receivedMethod string
 
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		receivedMethod = r.Method
 		w.WriteHeader(http.StatusOK)
 	}))
 	defer server.Close()
 
-	client, diags := createBasicAuthClient(server.URL)
+	client, diags := createBasicAuthClient(server.URL, server.Client())
 	require.False(t, diags.HasError())
 
 	resp, diags := client.PutRequest("/resource", []byte(`{"key":"value"}`))
@@ -562,13 +562,13 @@ func TestRestApiClient_PutRequest(t *testing.T) {
 func TestRestApiClient_DeleteRequest(t *testing.T) {
 	var receivedMethod string
 
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		receivedMethod = r.Method
 		w.WriteHeader(http.StatusNoContent)
 	}))
 	defer server.Close()
 
-	client, diags := createBasicAuthClient(server.URL)
+	client, diags := createBasicAuthClient(server.URL, server.Client())
 	require.False(t, diags.HasError())
 
 	resp, diags := client.DeleteRequest("/resource")
@@ -583,13 +583,13 @@ func TestRestApiClient_DeleteRequest(t *testing.T) {
 func TestRestApiClient_PatchRequest(t *testing.T) {
 	var receivedMethod string
 
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		receivedMethod = r.Method
 		w.WriteHeader(http.StatusOK)
 	}))
 	defer server.Close()
 
-	client, diags := createBasicAuthClient(server.URL)
+	client, diags := createBasicAuthClient(server.URL, server.Client())
 	require.False(t, diags.HasError())
 
 	resp, diags := client.PatchRequest("/resource", []byte(`{"key":"value"}`))

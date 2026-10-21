@@ -2,6 +2,9 @@ package resources_test
 
 import (
 	"fmt"
+	"io"
+	"net/http"
+	"net/http/httptest"
 	"regexp"
 	"testing"
 
@@ -213,6 +216,60 @@ func TestResourceSystemMapping(t *testing.T) {
 				{
 					Config:      ResourceSystemMappingWoBackendType("scc_sm", regionHost, subaccount, virtualHost, virtualPort, internalHost, internalPort, "HTTP", "VIRTUAL", "KERBEROS"),
 					ExpectError: regexp.MustCompile(`The argument "backend_type" is required, but no definition was found.`),
+				},
+			},
+		})
+	})
+
+	t.Run("error path - invalid import id", func(t *testing.T) {
+		srv := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+			_, _ = io.WriteString(w, `{"version":"2.16.0"}`)
+		}))
+		defer srv.Close()
+		providerConfig := fmt.Sprintf(`
+		provider "scc" {
+		  instance_url        = "%s"
+		  username            = "testuser"
+		  password            = "testpassword"
+		  skip_ssl_validation = true
+		}
+		resource "scc_system_mapping" "scc_sm" {
+		  region_host         = "cf.eu12.hana.ondemand.com"
+		  subaccount          = "9f7390c8-f201-4b2d-b751-04c0a63c2671"
+		  virtual_host        = "testtfvirtual"
+		  virtual_port        = "900"
+		  internal_host       = "testtfvirtual"
+		  internal_port       = "900"
+		  protocol            = "HTTP"
+		  backend_type        = "abapSys"
+		  host_in_header      = "VIRTUAL"
+		  authentication_mode = "KERBEROS"
+		}`, srv.URL)
+		resource.Test(t, resource.TestCase{
+			IsUnitTest:               true,
+			ProtoV6ProviderFactories: tfutils.GetTestProviders(srv.Client()),
+			Steps: []resource.TestStep{
+				{
+					ResourceName:  "scc_system_mapping.scc_sm",
+					ImportState:   true,
+					ImportStateId: "cf.eu12.hana.ondemand.com,not-a-uuid,testtfvirtual,900",
+					Config:        providerConfig,
+					ExpectError:   regexp.MustCompile(`(?is)subaccount must be a valid UUID`),
+				},
+				{
+					ResourceName:  "scc_system_mapping.scc_sm",
+					ImportState:   true,
+					ImportStateId: "cf.eu12.hana.ondemand.com,9f7390c8-f201-4b2d-b751-04c0a63c2671,INVALID HOST!,900",
+					Config:        providerConfig,
+					ExpectError:   regexp.MustCompile(`(?is)virtual_host must contain only lowercase letters`),
+				},
+				{
+					ResourceName:  "scc_system_mapping.scc_sm",
+					ImportState:   true,
+					ImportStateId: "cf.eu12.hana.ondemand.com,9f7390c8-f201-4b2d-b751-04c0a63c2671,testtfvirtual,not-a-port",
+					Config:        providerConfig,
+					ExpectError:   regexp.MustCompile(`(?is)virtual_port must be a numeric port`),
 				},
 			},
 		})

@@ -677,6 +677,13 @@ func (rs *SubaccountResource) ImportState(ctx context.Context, req resource.Impo
 			return
 		}
 
+		if !uuidvalidator.UuidRegexp.MatchString(idParts[1]) {
+			resp.Diagnostics.AddAttributeError(path.Root("subaccount"),
+				"Invalid Import Identifier",
+				fmt.Sprintf("subaccount must be a valid UUID. Got: %q", idParts[1]))
+			return
+		}
+
 		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("region_host"), idParts[0])...)
 		resp.Diagnostics.Append(resp.State.SetAttribute(ctx, path.Root("subaccount"), idParts[1])...)
 
@@ -687,6 +694,13 @@ func (rs *SubaccountResource) ImportState(ctx context.Context, req resource.Impo
 	diags := resp.Identity.Get(ctx, &identity)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	if !uuidvalidator.UuidRegexp.MatchString(identity.Subaccount.ValueString()) {
+		resp.Diagnostics.AddAttributeError(path.Root("subaccount"),
+			"Invalid Import Identifier",
+			fmt.Sprintf("subaccount must be a valid UUID. Got: %q", identity.Subaccount.ValueString()))
 		return
 	}
 

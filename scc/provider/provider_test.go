@@ -528,6 +528,55 @@ func TestSCCProvider_ValidateConfig_InvalidCACertificate(t *testing.T) {
 // ---------------------------------------------------------------------------
 
 func TestSCCProvider_Configure_Success(t *testing.T) {
+	// Basic Auth must use HTTPS. Use a TLS test server with
+	// skip_ssl_validation so the self-signed cert is accepted in tests.
+	srv := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		_, _ = io.WriteString(w, `{"version":"2.16.0"}`)
+	}))
+	defer srv.Close()
+
+	p := provider.NewWithClient(srv.Client())
+	schemaResp := &tfprovider.SchemaResponse{}
+	p.Schema(context.Background(), tfprovider.SchemaRequest{}, schemaResp)
+
+	raw := tftypes.NewValue(
+		tftypes.Object{
+			AttributeTypes: map[string]tftypes.Type{
+				"instance_url":        tftypes.String,
+				"username":            tftypes.String,
+				"password":            tftypes.String,
+				"ca_certificate":      tftypes.String,
+				"client_certificate":  tftypes.String,
+				"client_key":          tftypes.String,
+				"skip_ssl_validation": tftypes.Bool,
+			},
+		},
+		map[string]tftypes.Value{
+			"instance_url":        tftypes.NewValue(tftypes.String, srv.URL),
+			"username":            tftypes.NewValue(tftypes.String, "admin"),
+			"password":            tftypes.NewValue(tftypes.String, "pass"),
+			"ca_certificate":      tftypes.NewValue(tftypes.String, nil),
+			"client_certificate":  tftypes.NewValue(tftypes.String, nil),
+			"client_key":          tftypes.NewValue(tftypes.String, nil),
+			"skip_ssl_validation": tftypes.NewValue(tftypes.Bool, true),
+		},
+	)
+
+	req := tfprovider.ConfigureRequest{
+		Config: tfsdk.Config{Schema: schemaResp.Schema, Raw: raw},
+	}
+	resp := &tfprovider.ConfigureResponse{}
+	p.Configure(context.Background(), req, resp)
+
+	assert.False(t, resp.Diagnostics.HasError())
+	assert.NotNil(t, resp.ResourceData)
+}
+
+// TestSCCProvider_Configure_HTTPWithBasicAuth_Rejected verifies that the
+// provider must refuse to connect over plain HTTP when Basic Auth credentials
+// are supplied, to prevent credential disclosure.
+func TestSCCProvider_Configure_HTTPWithBasicAuth_Rejected(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		_, _ = io.WriteString(w, `{"version":"2.16.0"}`)
@@ -567,8 +616,7 @@ func TestSCCProvider_Configure_Success(t *testing.T) {
 	resp := &tfprovider.ConfigureResponse{}
 	p.Configure(context.Background(), req, resp)
 
-	assert.False(t, resp.Diagnostics.HasError())
-	assert.NotNil(t, resp.ResourceData)
+	assert.True(t, resp.Diagnostics.HasError(), "expected an error when using Basic Auth over HTTP")
 }
 
 func TestSCCProvider_Configure_AuthError(t *testing.T) {

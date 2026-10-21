@@ -2,6 +2,9 @@ package resources_test
 
 import (
 	"fmt"
+	"io"
+	"net/http"
+	"net/http/httptest"
 	"regexp"
 	"testing"
 
@@ -180,6 +183,38 @@ func TestResourceSubaccountUsingAuth(t *testing.T) {
 							},
 						),
 					},
+				},
+			},
+		})
+	})
+
+	t.Run("error path - invalid import id", func(t *testing.T) {
+		srv := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+			_, _ = io.WriteString(w, `{"version":"2.16.0"}`)
+		}))
+		defer srv.Close()
+		providerConfig := fmt.Sprintf(`
+		provider "scc" {
+		  instance_url        = "%s"
+		  username            = "testuser"
+		  password            = "testpassword"
+		  skip_ssl_validation = true
+		}
+		resource "scc_subaccount_using_auth" "scc_sa_auth" {
+		  authentication_data = "REDACTED_SUBACCOUNT_AUTHENTICATION_DATA"
+		  description         = "test"
+		}`, srv.URL)
+		resource.Test(t, resource.TestCase{
+			IsUnitTest:               true,
+			ProtoV6ProviderFactories: tfutils.GetTestProviders(srv.Client()),
+			Steps: []resource.TestStep{
+				{
+					ResourceName:  "scc_subaccount_using_auth.scc_sa_auth",
+					ImportState:   true,
+					ImportStateId: "cf.eu12.hana.ondemand.com,not-a-uuid",
+					Config:        providerConfig,
+					ExpectError:   regexp.MustCompile(`(?is)subaccount must be a valid UUID`),
 				},
 			},
 		})

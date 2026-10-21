@@ -6,13 +6,24 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"encoding/pem"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+)
+
+// maxErrorBodyBytes caps how many bytes of a non-2xx response body are read.
+const maxErrorBodyBytes = 1 << 20 // 1 MiB
+
+// credentialPattern scrubs JSON fields that commonly carry secrets.
+var credentialPattern = regexp.MustCompile(
+	`(?i)"(password|cloudPassword|cloudUser|authorizationData|user|keyPassword|passphrase)"\s*:\s*"[^"]*"`,
 )
 
 type RestApiClient struct {
@@ -35,15 +46,37 @@ func NewRestApiClient(client *http.Client, baseURL *url.URL, username, password 
 		return nil, diags
 	}
 
-	tlsConfig, diags := buildTLSConfig(caCertBytes, clientCertBytes, clientCertKey, useCertAuth, skipSSLValidation)
+	// Reject plaintext HTTP when Basic Auth credentials are present — they
+	// would be transmitted base64-encoded (trivially reversible) over the wire.
+	if useBasicAuth && baseURL != nil && baseURL.Scheme == "http" {
+		diags.AddError(
+			"Insecure instance_url",
+			"Basic Auth credentials must not be sent over a plain HTTP connection. Use an https:// URL or switch to certificate-based authentication.",
+		)
+		return nil, diags
+	}
+
+	tlsConfig, tlsDiags := buildTLSConfig(caCertBytes, clientCertBytes, clientCertKey, useCertAuth, skipSSLValidation)
+	diags = append(diags, tlsDiags...)
 	if diags.HasError() {
 		return nil, diags
 	}
 
+	// Always work on a fresh copy of the caller's http.Client so that
+	// multiple provider aliases never share (and mutate) the same transport.
+	client = cloneHTTPClient(client)
 	if tlsConfig != nil {
 		client = withTLSClient(client, tlsConfig)
-	} else if client == nil {
-		client = &http.Client{}
+	}
+
+	// Refuse redirects that downgrade from HTTPS to HTTP or change the
+	// target host — either could hand Basic Auth to an unintended party.
+	client.CheckRedirect = safeRedirectPolicy
+
+	// An explicit timeout prevents terraform plan/apply from hanging
+	// indefinitely when the SCC endpoint is slow or unresponsive.
+	if client.Timeout == 0 {
+		client.Timeout = 5 * time.Minute
 	}
 
 	return &RestApiClient{
@@ -52,6 +85,40 @@ func NewRestApiClient(client *http.Client, baseURL *url.URL, username, password 
 		Username: username,
 		Password: password,
 	}, diags
+}
+
+// cloneHTTPClient returns a shallow copy of c (or a new client when c is nil).
+// The Transport is cloned separately so that each provider instance gets its
+// own independent TLS configuration.
+func cloneHTTPClient(c *http.Client) *http.Client {
+	if c == nil {
+		return &http.Client{}
+	}
+	clone := *c // copy value fields (Timeout, Jar, CheckRedirect)
+	if t, ok := c.Transport.(*http.Transport); ok {
+		clone.Transport = t.Clone()
+	} else if c.Transport != nil {
+		// Unknown transport type — keep reference; withTLSClient will wrap it.
+		clone.Transport = c.Transport
+	}
+	return &clone
+}
+
+// safeRedirectPolicy rejects any redirect that downgrades the scheme from
+// https to http or changes the destination host.  SCC is a direct REST API
+// so redirects are unexpected anyway; blocking them is the safest default.
+func safeRedirectPolicy(req *http.Request, via []*http.Request) error {
+	if len(via) == 0 {
+		return nil
+	}
+	prev := via[len(via)-1]
+	if prev.URL.Scheme == "https" && req.URL.Scheme != "https" {
+		return errors.New("redirect blocked: HTTPS→HTTP scheme downgrade would expose credentials")
+	}
+	if req.URL.Host != prev.URL.Host {
+		return errors.New("redirect blocked: cross-host redirect would expose credentials")
+	}
+	return nil
 }
 
 func isBasicAuthProvided(username, password string) bool {
@@ -86,8 +153,17 @@ func buildTLSConfig(caCert, clientCert, clientKey []byte, useCertAuth bool, skip
 		return nil, diags
 	}
 
+	// No TLS customization needed — return nil so the caller's transport is
+	// preserved unchanged.  Default Go TLS behaviour (system CAs, verify = true)
+	// is identical to &tls.Config{InsecureSkipVerify: false}, so there is no
+	// behavioural difference in production; but returning nil avoids overwriting
+	// the RootCAs pool carried by a test-server client.
+	if !skipSSLValidation && len(caCert) == 0 && !useCertAuth {
+		return nil, diags
+	}
+
 	tlsConfig := &tls.Config{
-		InsecureSkipVerify: skipSSLValidation,
+		InsecureSkipVerify: skipSSLValidation, //nolint:gosec // controlled by explicit user opt-in
 	}
 
 	if !skipSSLValidation && len(caCert) > 0 {
@@ -217,7 +293,10 @@ func validateResponse(response *http.Response) diag.Diagnostics {
 		return diags
 	}
 
-	bodyBytes, _ := io.ReadAll(response.Body)
+	// Cap the body read to prevent memory exhaustion from a hostile
+	// or misconfigured server returning a huge response.
+	limited := io.LimitReader(response.Body, maxErrorBodyBytes)
+	bodyBytes, _ := io.ReadAll(limited)
 	if err := response.Body.Close(); err != nil {
 		diags.AddWarning("Response Body Close Failed", fmt.Sprintf("Failed to close response body: %v", err))
 	}
@@ -226,24 +305,42 @@ func validateResponse(response *http.Response) diag.Diagnostics {
 	// Handle 401 Unauthorized explicitly
 	if response.StatusCode == http.StatusUnauthorized {
 		diags.AddError("Authentication Failed",
-			fmt.Sprintf("Authentication rejected: HTTP %d for %s %s. Response: %s",
-				response.StatusCode, response.Request.Method, response.Request.URL, string(bodyBytes)))
+			fmt.Sprintf("Authentication rejected: HTTP %d for %s %s.",
+				response.StatusCode, response.Request.Method, response.Request.URL))
 		return diags
 	}
 
-	// Attempt to decode a structured error message
+	// Attempt to decode a structured error message.
+	// Prefer the server's structured message field; never echo the
+	// raw body which may contain reflected credentials.
 	var errorResp ErrorResponse
 	if err := json.Unmarshal(bodyBytes, &errorResp); err == nil && errorResp.Message != "" {
 		diags.AddError("API Error", fmt.Sprintf("HTTP %s %s failed with status %d: %s",
-			response.Request.Method, response.Request.URL, response.StatusCode, errorResp.Message))
+			response.Request.Method, response.Request.URL, response.StatusCode,
+			redactCredentials(errorResp.Message)))
 		return diags
 	}
 
-	// Fallback to raw body
-	diags.AddError("API Error", fmt.Sprintf("HTTP %s %s failed with status %d. Raw response: %s",
-		response.Request.Method, response.Request.URL, response.StatusCode, string(bodyBytes)))
+	// Fallback: scrub the raw body before emitting it.
+	safeBody := redactCredentials(string(bodyBytes))
+	diags.AddError("API Error", fmt.Sprintf("HTTP %s %s failed with status %d. Response: %s",
+		response.Request.Method, response.Request.URL, response.StatusCode, safeBody))
 
 	return diags
+}
+
+// redactCredentials replaces the values of known credential JSON fields with
+// "[REDACTED]" so that secrets are never stored in Terraform diagnostics or CI
+// logs even when a hostile server reflects them back in an error body.
+func redactCredentials(s string) string {
+	return credentialPattern.ReplaceAllStringFunc(s, func(match string) string {
+		// Keep the field name, replace only the value.
+		colonIdx := strings.Index(match, ":")
+		if colonIdx < 0 {
+			return match
+		}
+		return match[:colonIdx+1] + `"[REDACTED]"`
+	})
 }
 
 func (c *RestApiClient) GetRequest(endpoint string) (*http.Response, diag.Diagnostics) {

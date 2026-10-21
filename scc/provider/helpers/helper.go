@@ -15,6 +15,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
+// maxResponseBodyBytes caps how many bytes of a 2xx response body are read to
+// prevent memory exhaustion when the server returns a pathologically large body.
+const maxResponseBodyBytes = 64 << 20 // 64 MiB
+
 const (
 	ActionGetRequest    = "Read"
 	ActionCreateRequest = "Create"
@@ -109,7 +113,9 @@ func RequestAndUnmarshal[T any](client *api.RestApiClient, respObj *T, requestTy
 	}()
 
 	if marshalResponse {
-		body, err := io.ReadAll(response.Body)
+		// Cap the read to prevent OOM from pathologically large responses.
+		limited := io.LimitReader(response.Body, maxResponseBodyBytes)
+		body, err := io.ReadAll(limited)
 		if err != nil {
 			diags.AddError("Failed to Read Response Body", fmt.Sprintf("failed to read API response body: %v", err))
 			return diags

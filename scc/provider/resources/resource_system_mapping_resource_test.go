@@ -99,8 +99,11 @@ func TestResourceSystemMappingResource(t *testing.T) {
 				{
 					ResourceName:  "scc_system_mapping_resource.scc_smr",
 					ImportState:   true,
-					ImportStateId: "cf.eu12.hana.ondemand.com,9f7390c8-f201-4b2d-b751-04c0a63c2671,testtfvirtualtesting,90,/,extra",
-					ExpectError:   regexp.MustCompile(`(?is)Expected import identifier with format:.*url_path.*Got:`),
+					ImportStateId: "cf.eu12.hana.ondemand.com,not-a-uuid,testtfvirtualtesting,90,/,extra",
+					// url_path "/,extra" contains a comma; SplitN(5) correctly captures it
+					// as the 5th segment.  The import fails on UUID validation (not on
+					// "too many parts"), proving both the split limit and UUID check work.
+					ExpectError: regexp.MustCompile(`(?is)subaccount must be a valid UUID`),
 				},
 			},
 		})

@@ -25,4 +25,6 @@ action "scc_generate_csr" "system_cert" {
 
 ### Required
 
-- `password` (String) The password used to protect the backup file. Action schema attributes cannot be marked as sensitive, so this value may be visible in Terraform configuration and logs. Use a strong password and handle it securely.
+> **NOTE**: [Write-only arguments](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments) are supported in Terraform 1.11 and later.
+
+- `password` (String, [Write-only](https://developer.hashicorp.com/terraform/language/resources/ephemeral#write-only-arguments)) The password used to protect the backup file. The value is write-only and will not appear in plan output or state files. Source it from a secure secret store.
