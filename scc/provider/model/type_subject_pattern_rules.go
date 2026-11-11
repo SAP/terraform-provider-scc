@@ -84,12 +84,10 @@ func SubjectPatternRuleValueFrom(ctx context.Context, plan SubjectPatternRuleCon
 	}
 
 	sprModel := SubjectPatternRuleConfig{
-		Index: plan.Index,
-		SubjectPatternRule: SubjectPatternRule{
-			Description:    types.StringValue(value.Description),
-			SubjectPattern: subjectPattern,
-			Condition:      condition,
-		},
+		Index:          plan.Index,
+		Description:    types.StringValue(value.Description),
+		SubjectPattern: subjectPattern,
+		Condition:      condition,
 	}
 
 	return sprModel, nil

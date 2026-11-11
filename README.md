@@ -1,4 +1,4 @@
-![Golang](https://img.shields.io/badge/Go-1.26-informational)
+![Golang](https://img.shields.io/badge/Go-1.27-informational)
 [![CodeQL](https://github.com/SAP/terraform-provider-scc/actions/workflows/codeql.yml/badge.svg)](https://github.com/SAP/terraform-provider-scc/actions/workflows/codeql.yml)
 [![REUSE status](https://api.reuse.software/badge/github.com/SAP/terraform-provider-scc)](https://api.reuse.software/info/github.com/SAP/terraform-provider-scc)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/10659/badge)](https://www.bestpractices.dev/projects/10659)

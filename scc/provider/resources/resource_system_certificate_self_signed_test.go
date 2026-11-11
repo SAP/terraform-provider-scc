@@ -70,9 +70,7 @@ func TestSystemCertificateSelfSigned_Create_MissingSubjectDN(t *testing.T) {
 	r := &resources.SystemCertificateSelfSignedResource{}
 
 	plan := model.SelfSignedSystemCertificateResourceConfig{
-		CertificateConfig: helpers.CertificateConfig{
-			SubjectDN: types.ObjectNull(helpers.SubjectDNAttrTypes.AttrTypes),
-		},
+		SubjectDN: types.ObjectNull(helpers.SubjectDNAttrTypes.AttrTypes),
 	}
 
 	_, diags := resources.CreateSelfSignedSystemCertificateFunc(r, context.Background(), plan)
@@ -397,20 +395,18 @@ func testValidSelfSignedSystemPlan() model.SelfSignedSystemCertificateResourceCo
 	return model.SelfSignedSystemCertificateResourceConfig{
 		KeySize: types.Int64Value(4096),
 
-		CertificateConfig: helpers.CertificateConfig{
-			SubjectDN: types.ObjectValueMust(
-				helpers.SubjectDNAttrTypes.AttrTypes,
-				map[string]attr.Value{
-					"cn":    types.StringValue("example.com"),
-					"email": types.StringNull(),
-					"l":     types.StringNull(),
-					"ou":    types.StringNull(),
-					"o":     types.StringNull(),
-					"st":    types.StringNull(),
-					"c":     types.StringNull(),
-				},
-			),
-		},
+		SubjectDN: types.ObjectValueMust(
+			helpers.SubjectDNAttrTypes.AttrTypes,
+			map[string]attr.Value{
+				"cn":    types.StringValue("example.com"),
+				"email": types.StringNull(),
+				"l":     types.StringNull(),
+				"ou":    types.StringNull(),
+				"o":     types.StringNull(),
+				"st":    types.StringNull(),
+				"c":     types.StringNull(),
+			},
+		),
 	}
 }
 

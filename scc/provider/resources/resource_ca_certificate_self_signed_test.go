@@ -71,11 +71,7 @@ func TestCACertificateSelfSigned_Create_MissingSubjectDN(t *testing.T) {
 	r := &resources.CACertificateSelfSignedResource{}
 
 	plan := model.SelfSignedCACertificateResourceConfig{
-		CertificateWithSANConfig: helpers.CertificateWithSANConfig{
-			CertificateConfig: helpers.CertificateConfig{
-				SubjectDN: types.ObjectNull(helpers.SubjectDNAttrTypes.AttrTypes),
-			},
-		},
+		SubjectDN: types.ObjectNull(helpers.SubjectDNAttrTypes.AttrTypes),
 	}
 
 	_, diags := resources.CreateSelfSignedCACertificateFunc(r, context.Background(), plan)
@@ -669,22 +665,18 @@ func testValidSelfSignedCAPlan() model.SelfSignedCACertificateResourceConfig {
 	return model.SelfSignedCACertificateResourceConfig{
 		KeySize: types.Int64Value(4096),
 
-		CertificateWithSANConfig: helpers.CertificateWithSANConfig{
-			CertificateConfig: helpers.CertificateConfig{
-				SubjectDN: types.ObjectValueMust(
-					helpers.SubjectDNAttrTypes.AttrTypes,
-					map[string]attr.Value{
-						"cn":    types.StringValue("example.com"),
-						"email": types.StringNull(),
-						"l":     types.StringNull(),
-						"ou":    types.StringNull(),
-						"o":     types.StringNull(),
-						"st":    types.StringNull(),
-						"c":     types.StringNull(),
-					},
-				),
+		SubjectDN: types.ObjectValueMust(
+			helpers.SubjectDNAttrTypes.AttrTypes,
+			map[string]attr.Value{
+				"cn":    types.StringValue("example.com"),
+				"email": types.StringNull(),
+				"l":     types.StringNull(),
+				"ou":    types.StringNull(),
+				"o":     types.StringNull(),
+				"st":    types.StringNull(),
+				"c":     types.StringNull(),
 			},
-			SubjectAltNames: types.ListNull(helpers.SubjectAlternativeNamesType),
-		},
+		),
+		SubjectAltNames: types.ListNull(helpers.SubjectAlternativeNamesType),
 	}
 }

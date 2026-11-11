@@ -1,6 +1,6 @@
 {
 	"name": "Terraform Provider for SAP Cloud Connector (with env file)",
-	"image": "mcr.microsoft.com/devcontainers/go:dev-1.26",
+	"image": "mcr.microsoft.com/devcontainers/go:dev-1.27",
 	"features": {
 		"ghcr.io/devcontainers/features/github-cli:1": {},
 		"ghcr.io/devcontainers/features/terraform:1": {
@@ -8,7 +8,7 @@
 			"terragrunt": "none"
 		},
 		"ghcr.io/robbert229/devcontainer-features/opentofu:1": {
-			"version": "1.12.6"
+			"version": "1.13.9"
 		}
 	},
 	"customizations": {
