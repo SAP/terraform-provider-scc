@@ -182,24 +182,20 @@ func TestUICertificateSignedChain_Update_WithChange(t *testing.T) {
 		return model.SignedChainUICertificateResourceConfig{
 			SignedChain: types.StringValue("new-cert"),
 
-			CertificateWithSANConfig: helpers.CertificateWithSANConfig{
-				CertificateConfig: helpers.CertificateConfig{
-					SubjectDN:    subjectDNValue,
-					Issuer:       types.StringNull(),
-					SerialNumber: types.StringNull(),
-					ValidFrom:    types.StringNull(),
-					ValidTo:      types.StringNull(),
-				},
+			SubjectDN:    subjectDNValue,
+			Issuer:       types.StringNull(),
+			SerialNumber: types.StringNull(),
+			ValidFrom:    types.StringNull(),
+			ValidTo:      types.StringNull(),
 
-				SubjectAltNames: types.ListNull(
-					types.ObjectType{
-						AttrTypes: map[string]attr.Type{
-							"type":  types.StringType,
-							"value": types.StringType,
-						},
+			SubjectAltNames: types.ListNull(
+				types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"type":  types.StringType,
+						"value": types.StringType,
 					},
-				),
-			},
+				},
+			),
 		}, nil
 	}
 

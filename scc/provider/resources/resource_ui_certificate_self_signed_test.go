@@ -363,23 +363,19 @@ func testValidSelfSignedUIPlan() model.SelfSignedUICertificateResourceConfig {
 	return model.SelfSignedUICertificateResourceConfig{
 		KeySize: types.Int64Value(4096),
 
-		CertificateWithSANConfig: helpers.CertificateWithSANConfig{
-			CertificateConfig: helpers.CertificateConfig{
-				SubjectDN: types.ObjectValueMust(
-					helpers.SubjectDNAttrTypes.AttrTypes,
-					map[string]attr.Value{
-						"cn":    types.StringValue("example.com"),
-						"email": types.StringNull(),
-						"l":     types.StringNull(),
-						"ou":    types.StringNull(),
-						"o":     types.StringNull(),
-						"st":    types.StringNull(),
-						"c":     types.StringNull(),
-					},
-				),
+		SubjectDN: types.ObjectValueMust(
+			helpers.SubjectDNAttrTypes.AttrTypes,
+			map[string]attr.Value{
+				"cn":    types.StringValue("example.com"),
+				"email": types.StringNull(),
+				"l":     types.StringNull(),
+				"ou":    types.StringNull(),
+				"o":     types.StringNull(),
+				"st":    types.StringNull(),
+				"c":     types.StringNull(),
 			},
-			SubjectAltNames: types.ListNull(helpers.SubjectAlternativeNamesType),
-		},
+		),
+		SubjectAltNames: types.ListNull(helpers.SubjectAlternativeNamesType),
 	}
 }
 

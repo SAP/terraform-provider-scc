@@ -134,12 +134,10 @@ func (r *SubjectPatternRuleListResource) List(
 
 				if !result.Diagnostics.HasError() {
 					resSpr := &model.SubjectPatternRuleConfig{
-						Index: types.Int64Value(int64(i)),
-						SubjectPatternRule: model.SubjectPatternRule{
-							Description:    types.StringValue(spr.Description),
-							SubjectPattern: subjectPattern,
-							Condition:      condition,
-						},
+						Index:          types.Int64Value(int64(i)),
+						Description:    types.StringValue(spr.Description),
+						SubjectPattern: subjectPattern,
+						Condition:      condition,
 					}
 					result.Diagnostics.Append(result.Resource.Set(ctx, resSpr)...)
 				}

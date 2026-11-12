@@ -190,24 +190,20 @@ func TestCACertificateSignedChain_Update_WithChange(t *testing.T) {
 			SignedChain:    types.StringValue("new-cert"),
 			CertificatePEM: types.StringValue("pem"),
 
-			CertificateWithSANConfig: helpers.CertificateWithSANConfig{
-				CertificateConfig: helpers.CertificateConfig{
-					SubjectDN:    subjectDNValue,
-					Issuer:       types.StringNull(),
-					SerialNumber: types.StringNull(),
-					ValidFrom:    types.StringNull(),
-					ValidTo:      types.StringNull(),
-				},
+			SubjectDN:    subjectDNValue,
+			Issuer:       types.StringNull(),
+			SerialNumber: types.StringNull(),
+			ValidFrom:    types.StringNull(),
+			ValidTo:      types.StringNull(),
 
-				SubjectAltNames: types.ListNull(
-					types.ObjectType{
-						AttrTypes: map[string]attr.Type{
-							"type":  types.StringType,
-							"value": types.StringType,
-						},
+			SubjectAltNames: types.ListNull(
+				types.ObjectType{
+					AttrTypes: map[string]attr.Type{
+						"type":  types.StringType,
+						"value": types.StringType,
 					},
-				),
-			},
+				},
+			),
 		}, nil
 	}
 
