@@ -32,7 +32,7 @@ var (
 )
 
 func New() provider.Provider {
-	return NewWithClient(http.DefaultClient)
+	return NewWithClient(nil)
 }
 
 func NewWithClient(httpClient *http.Client) provider.Provider {
