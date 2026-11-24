@@ -678,3 +678,72 @@ func TestWithTLSClient_CustomTransport(t *testing.T) {
 	require.NotNil(t, result)
 	assert.Equal(t, custom, result.Transport)
 }
+
+// --- cloneHTTPClient ---
+
+func TestCloneHTTPClient_NilInput(t *testing.T) {
+	clone := cloneHTTPClient(nil)
+	require.NotNil(t, clone)
+}
+
+func TestCloneHTTPClient_CreatesIndependentPointer(t *testing.T) {
+	original := &http.Client{}
+
+	clone := cloneHTTPClient(original)
+
+	require.NotSame(t, original, clone)
+	// Mutating clone must not affect original.
+	clone.Transport = &http.Transport{}
+	assert.Nil(t, original.Transport)
+}
+
+func TestCloneHTTPClient_ClonesHTTPTransport(t *testing.T) {
+	originalTransport := &http.Transport{}
+	original := &http.Client{Transport: originalTransport}
+
+	clone := cloneHTTPClient(original)
+
+	require.NotSame(t, originalTransport, clone.Transport)
+}
+
+// --- Aliased provider TLS isolation (regression for HASI2026375-4788) ---
+//
+// Two NewRestApiClient calls that share the same base *http.Client must each
+// get an independent transport.  Before the fix, withTLSClient wrote the new
+// transport back to the shared pointer, so a second alias silently overwrote
+// the first alias's TLS configuration.
+
+func TestNewRestApiClient_DoesNotMutateSharedBaseClient(t *testing.T) {
+	base := &http.Client{} // stand-in for http.DefaultClient
+	baseURL, _ := url.Parse("https://example.com")
+
+	_, diags := NewRestApiClient(base, baseURL, "user1", "pass1", nil, nil, nil, true)
+	require.False(t, diags.HasError())
+
+	_, diags = NewRestApiClient(base, baseURL, "user2", "pass2", nil, nil, nil, true)
+	require.False(t, diags.HasError())
+
+	// The shared base client must not have been touched.
+	assert.Nil(t, base.Transport, "NewRestApiClient must not mutate the caller-supplied http.Client")
+}
+
+func TestNewRestApiClient_AliasedClientsHaveIndependentTransports(t *testing.T) {
+	base := &http.Client{}
+	baseURL, _ := url.Parse("https://example.com")
+
+	client1, diags := NewRestApiClient(base, baseURL, "user1", "pass1", nil, nil, nil, true)
+	require.False(t, diags.HasError())
+
+	client2, diags := NewRestApiClient(base, baseURL, "user2", "pass2", nil, nil, nil, true)
+	require.False(t, diags.HasError())
+
+	require.NotSame(t, client1.Client, client2.Client)
+	require.NotSame(t, client1.Client, base)
+	require.NotSame(t, client2.Client, base)
+
+	t1, ok1 := client1.Client.Transport.(*http.Transport)
+	t2, ok2 := client2.Client.Transport.(*http.Transport)
+	require.True(t, ok1)
+	require.True(t, ok2)
+	assert.NotSame(t, t1, t2, "each aliased provider must have its own transport")
+}
