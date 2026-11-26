@@ -188,6 +188,37 @@ func TestResourceSubaccountUsingAuth(t *testing.T) {
 		})
 	})
 
+	t.Run("update path - update display_name without re-supplying authentication_data", func(t *testing.T) {
+		rec, user := tfutils.SetupVCR(t, "fixtures/resource_subaccount_using_auth_update_no_auth")
+		if len(user.CloudAuthenticationData) == 0 {
+			t.Fatalf("Missing TF_VAR_authentication_data for recording test fixtures")
+		}
+		defer tfutils.StopQuietly(rec)
+
+		resource.Test(t, resource.TestCase{
+			IsUnitTest:               true,
+			ProtoV6ProviderFactories: tfutils.GetTestProviders(rec.GetDefaultClient()),
+			Steps: []resource.TestStep{
+				{
+					Config: tfutils.ProviderConfig(user) + ResourceSubaccountUsingAuthUpdateWithDisplayName("scc_sa_auth", user.CloudAuthenticationData, "Lab description", "Lab Before"),
+					Check: resource.ComposeAggregateTestCheckFunc(
+						resource.TestCheckResourceAttr("scc_subaccount_using_auth.scc_sa_auth", "display_name", "Lab Before"),
+						resource.TestCheckResourceAttrSet("scc_subaccount_using_auth.scc_sa_auth", "authentication_data"),
+					),
+				},
+				{
+					// Omit authentication_data — the provider must preserve the stored value and
+					// not reject the update with a "mismatched configuration values" error.
+					Config: tfutils.ProviderConfig(user) + ResourceSubaccountUsingAuthNoAuthData("scc_sa_auth", "Lab description", "Lab After"),
+					Check: resource.ComposeAggregateTestCheckFunc(
+						resource.TestCheckResourceAttr("scc_subaccount_using_auth.scc_sa_auth", "display_name", "Lab After"),
+						resource.TestCheckResourceAttrSet("scc_subaccount_using_auth.scc_sa_auth", "authentication_data"),
+					),
+				},
+			},
+		})
+	})
+
 	t.Run("error path - invalid import id", func(t *testing.T) {
 		srv := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
@@ -239,6 +270,15 @@ func ResourceSubaccountUsingAuthWoAuthenticationData(datasourceName, description
     description= "%s"
 	}
 	`, datasourceName, description)
+}
+
+func ResourceSubaccountUsingAuthNoAuthData(datasourceName, description, displayName string) string {
+	return fmt.Sprintf(`
+resource "scc_subaccount_using_auth" "%s" {
+  description  = "%s"
+  display_name = "%s"
+}
+`, datasourceName, description, displayName)
 }
 
 func ResourceSubaccountUsingAuthUpdateWithDisplayName(datasourceName, authenticationData, description, displayName string) string {

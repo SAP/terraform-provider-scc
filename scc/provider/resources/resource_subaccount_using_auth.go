@@ -454,7 +454,11 @@ func (r *SubaccountUsingAuthResource) Update(ctx context.Context, req resource.U
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	responseModel.AuthenticationData = plan.AuthenticationData
+	if plan.AuthenticationData.IsNull() || plan.AuthenticationData.IsUnknown() {
+		responseModel.AuthenticationData = state.AuthenticationData
+	} else {
+		responseModel.AuthenticationData = plan.AuthenticationData
+	}
 	responseModel.AutoTrustSync = plan.AutoTrustSync
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, responseModel)...)
@@ -549,7 +553,11 @@ func (r *SubaccountUsingAuthResource) updateTunnelState(plan model.SubaccountUsi
 
 func validateAuthDataInputs(plan, state model.SubaccountUsingAuthConfig) diag.Diagnostics {
 	var diags diag.Diagnostics
-	if plan.AuthenticationData.ValueString() != state.AuthenticationData.ValueString() {
+	// Only reject an explicit change: when the user supplies a concrete value that differs
+	// from what is in state. Null or unknown means "not provided this run" — that is valid
+	// for updates and must not be treated as a mismatch.
+	if !plan.AuthenticationData.IsNull() && !plan.AuthenticationData.IsUnknown() &&
+		plan.AuthenticationData.ValueString() != state.AuthenticationData.ValueString() {
 		diags.AddError(
 			"Update Failed",
 			"failed to update the cloud connector subaccount due to mismatched configuration values",
